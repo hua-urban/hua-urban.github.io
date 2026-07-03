@@ -1,0 +1,2967 @@
+<!-- STATIC_K7M2PX4N — 靜態化版本，2026-06-25 -->
+<!-- CALGRID_B9FX3W7K — 月曆 Grid 版本，2026-06-25 -->
+<!-- DYNCAL_7RP2MK4E — 月曆動態讀 Sheet，2026-06-25 -->
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BNI 華都更分會 — 夥伴資訊入口</title>
+<meta name="description" content="BNI 華都更分會夥伴資訊入口——活動行事曆、培訓快訊、Power Team 組聚資訊">
+<meta name="robots" content="noindex">
+<meta property="og:title" content="BNI 華都更分會 — 夥伴資訊入口">
+<meta property="og:description" content="BNI 華都更分會夥伴資訊入口——活動行事曆、培訓快訊、Power Team 組聚資訊">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://wuohome.github.io/bni-hua-urban/">
+<meta property="og:image" content="https://wuohome.github.io/bni-hua-urban/assets/dual-track-collab.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#CF2030;--red-dark:#A8192A;--red-light:#E8404F;
+  --gold:#B8963E;
+  --white:#FFFFFF;--off-white:#F8F9FA;
+  --gray-50:#F2F3F5;--gray-100:#E4E6EA;--gray-200:#C8CDD6;--gray-300:#AEB4BF;
+  --gray-400:#8E96A3;--gray-500:#717985;--gray-600:#5A6472;--gray-800:#2D3440;--gray-900:#1A1F29;
+  --nav-h:64px;
+  --shadow-sm:0 1px 3px rgba(26,31,41,.08);
+  --shadow-md:0 4px 12px rgba(26,31,41,.10),0 2px 4px rgba(26,31,41,.06);
+  --r-sm:4px;--r-md:8px;--r-lg:12px;
+  /* calendar chip colours */
+  --chip-evt:#CF2030; --chip-evt-bg:rgba(207,32,48,.08);
+  --chip-msp:#1E6FBF; --chip-msp-bg:rgba(30,111,191,.09);
+  --chip-guest:#0A8A5B; --chip-guest-bg:rgba(10,138,91,.09);
+  --chip-grp:#B8963E;  --chip-grp-bg:rgba(184,150,62,.10);
+}
+html{scroll-behavior:smooth}
+body{font-family:"Noto Sans TC",sans-serif;background:var(--white);color:var(--gray-800);line-height:1.6;-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+.container{width:100%;max-width:1240px;margin:0 auto;padding:0 24px}
+
+/* ── NAV ── */
+.navbar{position:sticky;top:0;z-index:100;height:var(--nav-h);background:var(--white);border-bottom:1px solid var(--gray-100);box-shadow:0 1px 8px rgba(26,31,41,.06)}
+.navbar>.container{height:100%}
+.navbar-inner{height:100%;display:flex;align-items:center;justify-content:space-between}
+.navbar-brand{display:flex;align-items:center;gap:10px;line-height:1}
+.nav-list{margin:0}
+.brand-logo{display:block;flex-shrink:0}
+.brand-divider{width:1px;height:22px;background:var(--gray-300, #d4d8de)}
+.brand-name{font-size:15px;font-weight:700;color:var(--gray-900);letter-spacing:-.01em;white-space:nowrap}
+.brand-name span{color:var(--red)}
+@media(max-width:420px){.brand-name{font-size:13px}.brand-divider{display:none}}
+.nav-list{display:flex;align-items:center;gap:4px;list-style:none}
+.nav-list a{display:block;padding:8px 14px;font-size:14px;font-weight:500;color:var(--gray-600);border-radius:var(--r-sm);transition:background .15s,color .15s}
+.nav-list a:hover,.nav-list a.act{color:var(--red)}
+.nav-cta{background:var(--red)!important;color:#fff!important;font-weight:600!important;border-radius:var(--r-sm)!important;padding:8px 18px!important}
+.nav-cta:hover{background:var(--red-dark)!important;color:#fff!important}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px;background:none;border:none}
+.hamburger span{display:block;width:22px;height:2px;background:var(--gray-800);border-radius:2px}
+.mobile-nav{display:none;position:fixed;top:var(--nav-h);left:0;right:0;background:var(--white);border-bottom:1px solid var(--gray-100);z-index:99;padding:16px 24px 24px;box-shadow:var(--shadow-md)}
+.mobile-nav.open{display:block}
+.mobile-nav ul{list-style:none;display:flex;flex-direction:column;gap:2px}
+.mobile-nav ul a{display:block;padding:12px 0;font-size:16px;font-weight:500;color:var(--gray-600);border-bottom:1px solid var(--gray-100)}
+.m-cta{display:block;margin-top:16px;text-align:center;background:var(--red);color:#fff;font-size:15px;font-weight:600;padding:12px;border-radius:var(--r-sm)}
+
+/* ── HERO ── */
+.hero{background:var(--white);padding:48px 0 0;overflow:hidden}
+.hero-strip{text-align:center;margin-bottom:32px}
+.chapter-label{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.18em;color:var(--red);text-transform:uppercase;margin-bottom:12px}
+.hero-title{font-family:"Noto Serif TC",serif;font-size:clamp(28px,5vw,48px);font-weight:700;color:var(--gray-900);line-height:1.2;letter-spacing:-.02em;margin-bottom:6px}
+.hero-sub{font-size:15px;color:var(--gray-400);letter-spacing:.04em;margin-bottom:10px}
+.hero-slogan{font-size:14px;color:var(--gray-600)}
+.photo-wrap{position:relative;max-width:1100px;margin:0 auto;aspect-ratio:16/9;background:var(--gray-50);border:2px dashed var(--gray-200);border-radius:var(--r-lg) var(--r-lg) 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;overflow:hidden}
+/* 影片 slide：封面模式 + 點擊載入 iframe（VIDCOVER_KQ8F3T2M）*/
+.hero-slide-video{position:absolute;inset:0;background:#000;}
+.hero-slide-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+/* 自訂影片封面卡 */
+.yt-cover{
+  position:absolute;inset:0;
+  background:linear-gradient(145deg,#CF2030 0%,#A8192A 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;user-select:none;
+  gap:0;
+}
+.yt-cover::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 30% 40%,rgba(255,255,255,.08) 0%,transparent 60%),
+             radial-gradient(ellipse at 80% 70%,rgba(0,0,0,.15) 0%,transparent 50%);
+  pointer-events:none;
+}
+/* 播放鍵 */
+.yt-play-btn{
+  width:80px;height:80px;border-radius:50%;
+  background:rgba(255,255,255,.95);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 32px rgba(0,0,0,.35);
+  transition:transform .2s ease,box-shadow .2s ease;
+  flex-shrink:0;
+  margin-bottom:24px;
+  position:relative;z-index:1;
+}
+.yt-play-btn::after{
+  content:'';
+  display:block;
+  width:0;height:0;
+  border-top:20px solid transparent;
+  border-bottom:20px solid transparent;
+  border-left:34px solid #CF2030;
+  margin-left:6px;
+}
+.yt-cover:hover .yt-play-btn{
+  transform:scale(1.1);
+  box-shadow:0 10px 40px rgba(0,0,0,.45);
+}
+/* 標題 */
+.yt-cover-title{
+  font-family:"Noto Serif TC",serif;
+  font-size:clamp(16px,2.4vw,26px);
+  font-weight:700;color:#fff;
+  letter-spacing:-.01em;
+  text-shadow:0 2px 8px rgba(0,0,0,.3);
+  text-align:center;
+  line-height:1.3;
+  margin-bottom:10px;
+  position:relative;z-index:1;
+  padding:0 24px;
+}
+.yt-cover-hint{
+  font-size:clamp(11px,1.2vw,13px);
+  color:rgba(255,255,255,.7);
+  letter-spacing:.08em;
+  position:relative;z-index:1;
+}
+.photo-banner{position:absolute;top:0;left:0;right:0;background:var(--red);color:#fff;font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;text-align:center;padding:7px 0}
+.photo-icon{width:56px;height:56px;border-radius:50%;background:var(--gray-100);display:flex;align-items:center;justify-content:center}
+.photo-icon svg{width:28px;height:28px;stroke:var(--gray-400);fill:none;stroke-width:1.5}
+.photo-text h3{font-size:16px;font-weight:600;color:var(--gray-600);margin-bottom:4px;text-align:center}
+.photo-text p{font-size:13px;color:var(--gray-400);text-align:center}
+.size-badge{display:inline-flex;align-items:center;gap:6px;background:var(--white);border:1px solid var(--gray-200);border-radius:100px;padding:5px 14px;font-size:12px;font-weight:500;color:var(--gray-600)}
+
+/* ── STAT BAR ── */
+/* 第 2 項：overflow:hidden 裁掉裝飾圓圈半截 */
+.stat-bar{background:var(--red);overflow:hidden;position:relative}
+.stat-inner{display:grid;grid-template-columns:repeat(4,1fr)}
+.stat-item{padding:24px 20px;text-align:center;border-right:1px solid rgba(255,255,255,.15)}
+.stat-item:last-child{border-right:none}
+.stat-num{font-family:"Noto Serif TC",serif;font-size:clamp(24px,4vw,36px);font-weight:700;line-height:1;margin-bottom:4px;letter-spacing:-.02em;color:#fff}
+.stat-num .u{font-size:.6em;font-weight:400;font-family:"Noto Sans TC",sans-serif;opacity:.85}
+.stat-lbl{font-size:12px;opacity:.85;letter-spacing:.05em;color:#fff}
+
+/* ── CALENDAR SECTION ── */
+.calendar-sec{background:var(--white);padding:64px 0;border-bottom:2px solid var(--gray-100)}
+.sec-head{margin-bottom:40px}
+.sec-head h2{font-family:"Noto Serif TC",serif;font-size:clamp(20px,3vw,26px);font-weight:700;color:var(--gray-900);line-height:1.2;letter-spacing:-.01em;margin-bottom:6px}
+.sec-head p{font-size:14px;color:var(--gray-400)}
+.red-bar{display:block;width:36px;height:3px;background:var(--red);border-radius:2px;margin-bottom:14px}
+.gold-bar{display:block;width:36px;height:3px;background:var(--gold);border-radius:2px;margin-bottom:14px}
+
+/* timeline rows */
+.cal-list{display:flex;flex-direction:column;gap:0}
+.cal-row{
+  display:grid;
+  grid-template-columns:100px 1fr auto;
+  align-items:center;
+  gap:24px;
+  padding:18px 20px;
+  border-radius:var(--r-md);
+  transition:background .15s,box-shadow .15s;
+  border-bottom:1px solid var(--gray-100);
+  cursor:default;
+}
+.cal-row:last-child{border-bottom:none}
+.cal-row:hover{background:var(--gray-50);box-shadow:var(--shadow-sm)}
+.cal-date-col{display:flex;flex-direction:column;align-items:flex-start;gap:1px}
+.cal-date-m{font-family:"Noto Serif TC",serif;font-size:22px;font-weight:700;color:var(--gray-900);line-height:1}
+.cal-date-d{font-size:11px;font-weight:500;color:var(--gray-400);letter-spacing:.05em}
+.cal-body{display:flex;flex-direction:column;gap:6px}
+.cal-title{font-size:15px;font-weight:600;color:var(--gray-900);line-height:1.3}
+.cal-chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;letter-spacing:.04em;white-space:nowrap}
+.chip-evt{background:var(--chip-evt-bg);color:var(--chip-evt);border:1px solid rgba(207,32,48,.18)}
+.chip-msp{background:var(--chip-msp-bg);color:var(--chip-msp);border:1px solid rgba(30,111,191,.2)}
+.chip-guest{background:var(--chip-guest-bg);color:var(--chip-guest);border:1px solid rgba(10,138,91,.2)}
+.chip-grp{background:var(--chip-grp-bg);color:var(--chip-grp);border:1px solid rgba(184,150,62,.22)}
+.cal-action{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--red);white-space:nowrap;transition:opacity .15s}
+.cal-action:hover{opacity:.75}
+.cal-action svg{width:14px;height:14px;stroke:var(--red);fill:none;stroke-width:2.5;flex-shrink:0}
+/* left accent line */
+.cal-wrap{position:relative;border:1px solid var(--gray-100);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-sm)}
+.cal-wrap::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--red)}
+
+/* loading / error state */
+.data-loading{padding:32px 20px;text-align:center;font-size:14px;color:var(--gray-400)}
+.data-error{padding:24px 20px;text-align:center;font-size:13px;color:var(--gray-400);background:var(--gray-50);border-radius:var(--r-md)}
+
+/* ── GRID CALENDAR ── */
+.cal-grid-wrap{background:var(--white);border:1px solid var(--gray-100);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-sm)}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--gray-100);background:var(--gray-50)}
+.cal-nav-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border:1px solid var(--gray-200);border-radius:var(--r-sm);background:var(--white);cursor:pointer;transition:all .15s;flex-shrink:0}
+.cal-nav-btn:hover{border-color:var(--red);color:var(--red)}
+.cal-nav-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.5}
+.cal-month-title{font-family:"Noto Serif TC",serif;font-size:18px;font-weight:700;color:var(--gray-900);letter-spacing:-.01em}
+.cal-dow-header{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--gray-100)}
+.cal-dow-cell{padding:10px 0;text-align:center;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--gray-400)}
+.cal-dow-cell:first-child{color:#CF2030}
+.cal-dow-cell:last-child{color:#1E6FBF}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-day{
+  min-height:80px;
+  border-right:1px solid var(--gray-100);
+  border-bottom:1px solid var(--gray-100);
+  padding:8px 8px 6px;
+  position:relative;
+  cursor:default;
+  transition:background .12s;
+}
+.cal-day:nth-child(7n){border-right:none}
+.cal-day.empty{background:var(--gray-50)}
+.cal-day.today{background:rgba(207,32,48,.04)}
+.cal-day.today .cal-day-num{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:24px;height:24px;border-radius:50%;
+  background:var(--red);color:#fff;font-weight:700;
+  margin:-2px 0 2px -2px;
+}
+.cal-day.has-event{cursor:pointer}
+.cal-day.has-event:hover{background:var(--gray-50)}
+.cal-day-num{font-size:13px;font-weight:600;color:var(--gray-600);line-height:1;display:block;margin-bottom:5px}
+.cal-day.empty .cal-day-num{color:var(--gray-200)}
+/* 星期日（第1欄）數字偏紅 */
+.cal-day:nth-child(7n+1) .cal-day-num{color:#CF2030}
+.cal-day.today:nth-child(7n+1) .cal-day-num{color:#fff}
+/* 星期六（第7欄）數字偏藍 */
+.cal-day:nth-child(7n) .cal-day-num{color:#1E6FBF}
+.cal-day.today:nth-child(7n) .cal-day-num{color:#fff}
+
+/* 活動點（手機版與桌面版共用，桌面版另加文字） */
+.cal-evt-list{display:flex;flex-direction:column;gap:3px}
+.cal-evt-item{
+  display:flex;align-items:center;gap:4px;
+  font-size:11px;font-weight:500;color:var(--gray-700);
+  line-height:1.3;
+  border-radius:3px;
+  padding:1px 3px;
+  overflow:hidden;
+}
+.cal-evt-dot{
+  flex-shrink:0;width:7px;height:7px;border-radius:50%;
+}
+.dot-evt{background:#CF2030}
+.dot-msp{background:#1E6FBF}
+.dot-guest{background:#0A8A5B}
+.dot-grp{background:#B8963E}
+.dot-meeting{background:#7B5EA7}
+.cal-evt-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+
+/* tooltip（點擊後顯示） */
+.cal-tooltip{
+  display:none;
+  position:absolute;
+  top:calc(100% + 6px);left:50%;transform:translateX(-50%);
+  background:var(--gray-900);color:#fff;
+  font-size:12px;font-weight:500;line-height:1.5;
+  padding:8px 12px;border-radius:var(--r-sm);
+  white-space:nowrap;
+  z-index:50;
+  box-shadow:0 4px 16px rgba(0,0,0,.2);
+  pointer-events:none;
+}
+.cal-tooltip::before{
+  content:"";position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
+  border:5px solid transparent;border-bottom-color:var(--gray-900);
+}
+.cal-day.tip-open .cal-tooltip{display:block}
+
+/* ── 新增活動「+」按鈕（CAL_ADDBTN_K2PX9W3M）── */
+.cal-add-btn{
+  position:absolute;top:4px;right:4px;
+  width:20px;height:20px;border-radius:50%;
+  background:rgba(0,0,0,.06);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--gray-400);font-size:14px;line-height:1;
+  font-family:sans-serif;
+  opacity:0;
+  transition:opacity .15s,background .15s,color .15s;
+  z-index:2;
+}
+/* 桌面：hover 整個格子時才讓 + 出現 */
+.cal-day:not(.empty):not(.has-event):hover .cal-add-btn{opacity:1}
+.cal-add-btn:hover{background:rgba(207,32,48,.12);color:var(--red);}
+/* 手機 max-600px：+ 常駐淡顯，不依賴 hover */
+@media(max-width:600px){
+  .cal-add-btn{opacity:.28;width:16px;height:16px;font-size:11px;top:2px;right:2px;}
+  .cal-add-btn:hover,.cal-day:not(.empty):not(.has-event):hover .cal-add-btn{opacity:.6}
+}
+
+/* 圖例 */
+.cal-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px;align-items:center}
+.cal-legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--gray-600)}
+.cal-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* RWD：手機版格子縮小，事件名隱藏 */
+@media(max-width:600px){
+  .cal-day{min-height:52px;padding:5px 4px 4px}
+  .cal-day-num{font-size:12px}
+  .cal-evt-name{display:none}
+  .cal-evt-item{padding:0}
+  .cal-evt-dot{width:6px;height:6px}
+  .cal-month-title{font-size:15px}
+  .cal-tooltip{
+    left:0;transform:translateX(0);
+    white-space:normal;max-width:180px;
+  }
+}
+
+/* ── ABOUT ── */
+.about{background:var(--white);padding:64px 0;border-bottom:1px solid var(--gray-100)}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+.sec-label{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.18em;color:var(--red);text-transform:uppercase;margin-bottom:14px}
+.sec-h2{font-family:"Noto Serif TC",serif;font-size:clamp(22px,3vw,30px);font-weight:700;color:var(--gray-900);line-height:1.3;margin-bottom:16px;letter-spacing:-.01em}
+.about-body{font-size:15px;color:var(--gray-600);line-height:1.8;max-width:480px}
+.about-body p+p{margin-top:12px}
+.stats-2x2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.mini-stat{background:var(--gray-50);border:1px solid var(--gray-100);border-radius:var(--r-md);padding:20px}
+.mini-num{font-family:"Noto Serif TC",serif;font-size:28px;font-weight:700;color:var(--red);line-height:1;margin-bottom:4px}
+.mini-num.gd{color:var(--gold)}
+.mini-desc{font-size:12px;color:var(--gray-600);font-weight:500}
+
+/* 第 3 項：關於分會圖片容器（雙軌協作機制圖，橫式 16:9） */
+.about-photo-wrap{
+  width:100%;
+}
+.about-photo-wrap img{
+  width:100%;
+  height:auto;
+  display:block;
+}
+
+/* ── 分會介紹影片 (INTRO_VIDEO_5KP3) ── */
+.about-video{margin-top:56px}
+.av-head{text-align:center;margin-bottom:24px}
+.av-label{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.18em;color:var(--red);text-transform:uppercase;margin-bottom:10px}
+.av-title{font-family:"Noto Serif TC",serif;font-size:clamp(20px,2.6vw,26px);font-weight:700;color:var(--gray-900);line-height:1.3;margin-bottom:6px}
+.av-sub{font-size:14px;color:var(--gray-500)}
+.av-frame{position:relative;width:100%;max-width:880px;margin:0 auto;aspect-ratio:16/9;border-radius:var(--r-lg);overflow:hidden;box-shadow:0 12px 40px -12px rgba(0,0,0,.28);background:#000}
+.av-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+
+/* ── ACTIVITIES ── */
+.activities{background:var(--off-white);padding:64px 0}
+.feat-event{background:var(--white);border-radius:var(--r-lg);box-shadow:var(--shadow-md);overflow:hidden;display:grid;grid-template-columns:1fr auto;margin-bottom:24px;border:1px solid var(--gray-100)}
+.feat-body{padding:28px}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:4px;padding:4px 10px;margin-bottom:14px}
+.badge-red{background:rgba(207,32,48,.08);color:var(--red)}
+.feat-body h3{font-family:"Noto Serif TC",serif;font-size:18px;font-weight:700;color:var(--gray-900);margin-bottom:6px;line-height:1.3}
+.evt-sub{font-size:14px;color:var(--gray-600);line-height:1.6;margin-bottom:12px;max-width:600px}
+.evt-meta{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:14px}
+.meta-item{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--gray-600)}
+.meta-item svg{width:14px;height:14px;stroke:var(--gray-400);fill:none;stroke-width:2;flex-shrink:0}
+.evt-desc{font-size:14px;color:var(--gray-600);line-height:1.7;margin-bottom:18px;max-width:560px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:var(--r-sm);font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;text-decoration:none}
+.btn-primary{background:var(--red);color:#fff}
+.btn-primary:hover{background:var(--red-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(207,32,48,.25)}
+.btn-outline{background:transparent;color:var(--gray-800);border:1.5px solid var(--gray-200)}
+.btn-outline:hover{border-color:var(--gray-400);background:var(--gray-50);transform:translateY(-1px)}
+.feat-side{min-width:180px;background:linear-gradient(135deg,#CF2030 0%,#A8192A 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:28px;text-align:center;color:#fff}
+.date-big{font-family:"Noto Serif TC",serif;font-size:42px;font-weight:700;line-height:1}
+.date-month{font-size:13px;font-weight:500;opacity:.85;letter-spacing:.1em;text-transform:uppercase}
+.date-wd{font-size:12px;opacity:.7;margin-top:4px}
+.hist-btn{display:flex;align-items:center;gap:8px;background:none;border:none;cursor:pointer;font-size:14px;font-weight:600;color:var(--gray-600);margin-bottom:16px;padding:8px 0;transition:color .15s;font-family:"Noto Sans TC",sans-serif}
+.hist-btn:hover{color:var(--red)}
+.hist-arrow{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;transition:transform .2s}
+.hist-btn.open .hist-arrow{transform:rotate(180deg)}
+.hist-list{display:none;flex-direction:column;gap:12px}
+.hist-list.open{display:flex}
+.hist-item{background:var(--white);border:1px solid var(--gray-100);border-radius:var(--r-md);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;transition:box-shadow .15s}
+.hist-item:hover{box-shadow:var(--shadow-sm)}
+.hist-item h4{font-size:14px;font-weight:600;color:var(--gray-800);margin-bottom:2px}
+.hist-item .hdate{font-size:12px;color:var(--gray-400)}
+.hist-tag{flex-shrink:0;font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;background:var(--gray-50);color:var(--gray-600);border:1px solid var(--gray-100)}
+
+/* activities 弱化標籤 */
+
+/* ── MSP ── */
+.msp{background:var(--white);padding:64px 0}
+.timeline{position:relative;display:flex;flex-direction:column}
+.timeline::before{content:"";position:absolute;left:20px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,#CF2030 0%,#E4E6EA 100%)}
+.tl-item{display:flex;gap:24px;padding:20px 0;position:relative}
+.tl-dot{flex-shrink:0;width:42px;height:42px;border-radius:50%;background:var(--white);border:2px solid var(--gray-200);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--gray-400);position:relative;z-index:1;transition:all .2s}
+.tl-item:hover .tl-dot{border-color:var(--red);color:var(--red)}
+.tl-item.done .tl-dot{background:var(--red);border-color:var(--red);color:#fff}
+.tl-content{flex:1;padding:8px 0;border-bottom:1px solid var(--gray-100)}
+.tl-item:last-child .tl-content{border-bottom:none}
+.tl-title{font-size:15px;font-weight:600;color:var(--gray-900);margin-bottom:4px}
+.tl-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.tl-date{font-size:13px;color:var(--gray-400)}
+.status{display:inline-block;font-size:11px;font-weight:600;padding:2px 10px;border-radius:100px;letter-spacing:.05em}
+.s-done{background:rgba(16,185,129,.1);color:#059669}
+.s-up{background:rgba(207,32,48,.08);color:#CF2030}
+.s-pend{background:var(--gray-50);color:var(--gray-400)}
+
+/* ── POWER TEAM ── */
+.powerteam{background:var(--gray-900);padding:64px 0}
+.powerteam .sec-head h2{color:#fff}
+.powerteam .sec-head p{color:rgba(255,255,255,.5)}
+.chains{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+.chain{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:var(--r-lg);padding:24px;transition:all .2s;cursor:pointer}
+.chain:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.chain-badge{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--r-sm);font-size:13px;font-weight:800;margin-bottom:14px}
+.ca .chain-badge{background:rgba(207,32,48,.2);color:#E8404F}
+.cb .chain-badge{background:rgba(184,150,62,.2);color:#D4AF5A}
+.cc .chain-badge{background:rgba(99,179,237,.15);color:#63B3ED}
+.cd .chain-badge{background:rgba(104,211,145,.15);color:#68D391}
+.ce .chain-badge{background:rgba(214,158,46,.15);color:#ECC94B}
+.chain-name{font-size:15px;font-weight:700;color:#fff;margin-bottom:6px;line-height:1.3}
+.chain-desc{font-size:13px;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:16px}
+.chain-meta{font-size:12px;color:rgba(255,255,255,.45);line-height:1.5}
+.chain-meta strong{color:rgba(255,255,255,.75);font-weight:600}
+
+/* ── ZOOM SECTION ── */
+.zoom-sec{background:linear-gradient(135deg,var(--red-dark) 0%,var(--red) 55%,#E0303F 100%);padding:64px 0;position:relative;overflow:hidden}
+.zoom-sec::before{
+  content:"";position:absolute;top:-60px;right:-60px;
+  width:320px;height:320px;border-radius:50%;
+  background:rgba(255,255,255,.04);pointer-events:none
+}
+.zoom-sec::after{
+  content:"";position:absolute;bottom:-80px;left:-40px;
+  width:240px;height:240px;border-radius:50%;
+  background:rgba(255,255,255,.03);pointer-events:none
+}
+.zoom-panels{
+  display:grid;grid-template-columns:1fr 1fr;gap:24px;
+  position:relative;z-index:1;margin-top:0
+}
+.zoom-panel{
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
+  border-radius:var(--r-lg);padding:28px 28px 24px;
+}
+.zoom-panel-label{
+  font-size:11px;font-weight:700;letter-spacing:.18em;
+  text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:10px
+}
+.zoom-panel-title{
+  font-family:"Noto Serif TC",serif;font-size:20px;font-weight:700;
+  color:#fff;line-height:1.25;margin-bottom:12px
+}
+.zoom-info{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+.zoom-info-row{display:flex;align-items:center;gap:10px;font-size:14px;color:rgba(255,255,255,.75)}
+.zoom-info-row svg{width:15px;height:15px;stroke:rgba(255,255,255,.6);fill:none;stroke-width:2;flex-shrink:0}
+.zoom-info-row strong{color:#fff}
+.zoom-note{font-size:12px;color:rgba(255,255,255,.5);font-style:italic;margin-top:12px;margin-bottom:0}
+.zoom-btn{
+  display:inline-flex;align-items:center;gap:10px;
+  background:#fff;color:var(--red);
+  padding:16px 32px;border-radius:var(--r-md);
+  font-size:16px;font-weight:700;letter-spacing:.02em;
+  box-shadow:0 4px 20px rgba(0,0,0,.18);
+  transition:all .18s;white-space:nowrap;
+  border:none;cursor:pointer;font-family:"Noto Sans TC",sans-serif
+}
+.zoom-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.24);color:var(--red-dark)}
+.zoom-btn svg{width:20px;height:20px;fill:none;stroke:var(--red);stroke-width:2;flex-shrink:0}
+.deadline-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(212,175,90,.18);color:#E4C77A;border:1px solid rgba(212,175,90,.4);
+  font-size:12px;font-weight:700;padding:6px 14px;
+  border-radius:100px;margin-bottom:16px;letter-spacing:.03em;
+}
+.slides-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.15);color:#fff;
+  padding:11px 22px;border-radius:var(--r-md);
+  font-size:14px;font-weight:600;
+  border:1px solid rgba(255,255,255,.25);
+  transition:all .18s;cursor:pointer;
+  font-family:"Noto Sans TC",sans-serif
+}
+.slides-btn:hover{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.4)}
+.slides-btn svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2;flex-shrink:0}
+.zoom-label{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:10px}
+.zoom-title{font-family:"Noto Serif TC",serif;font-size:clamp(22px,3vw,32px);font-weight:700;color:#fff;line-height:1.2;margin-bottom:10px}
+.zoom-subtitle{font-size:15px;color:rgba(255,255,255,.8);margin-bottom:0;line-height:1.6}
+
+/* ── ROSTER ── */
+.roster{background:var(--off-white);padding:64px 0}
+.search-wrap{margin-bottom:28px}
+.search-bar{position:relative;max-width:440px}
+.search-bar input{width:100%;padding:11px 16px 11px 42px;border:1.5px solid var(--gray-200);border-radius:var(--r-md);font-family:"Noto Sans TC",sans-serif;font-size:14px;color:var(--gray-800);background:var(--white);outline:none;transition:border-color .15s,box-shadow .15s}
+.search-bar input:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(207,32,48,.1)}
+.search-bar input::placeholder{color:var(--gray-400)}
+.srch-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--gray-400);fill:none;stroke-width:2}
+.roster-ct{font-size:13px;color:var(--gray-400);margin-top:8px}
+.roster-ct span{color:var(--red);font-weight:600}
+.tbl-wrap{background:var(--white);border:1px solid var(--gray-100);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-sm)}
+table{width:100%;border-collapse:collapse}
+th{background:var(--gray-50);padding:12px 18px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-400);border-bottom:1px solid var(--gray-100)}
+td{padding:14px 18px;font-size:14px;color:var(--gray-800);border-bottom:1px solid var(--gray-50);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--gray-50)}
+tr.hidden{display:none}
+.m-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:var(--r-sm);background:var(--gray-50);border:1px solid var(--gray-100);font-size:11px;font-weight:700;color:var(--gray-400)}
+.m-name{font-weight:600;color:var(--gray-900)}
+.m-prof{font-size:13px;color:var(--gray-600)}
+.m-grp{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px}
+.g-a{background:rgba(207,32,48,.07);color:#CF2030;border:1px solid rgba(207,32,48,.15)}
+.g-b{background:rgba(99,130,200,.08);color:#4A63C8;border:1px solid rgba(99,130,200,.2)}
+.g-c{background:rgba(16,150,90,.08);color:#10965A;border:1px solid rgba(16,150,90,.2)}
+.g-d{background:rgba(99,130,200,.07);color:#4A63C8;border:1px solid rgba(99,130,200,.2)}
+.g-e{background:rgba(214,158,46,.1);color:#C49A17;border:1px solid rgba(214,158,46,.2)}
+.no-result{text-align:center;padding:40px;color:var(--gray-400);font-size:14px;display:none}
+/* 第 7 項：幹部職務標籤 pill */
+.m-role{
+  display:inline-block;
+  font-size:10px;font-weight:700;
+  padding:2px 8px;border-radius:100px;
+  margin-left:6px;vertical-align:middle;
+  white-space:nowrap;
+}
+.m-role-chief{background:var(--red);color:#fff}
+.m-role-gold{background:#B8963E;color:#fff}
+
+/* ── FOOTER ── */
+.footer{background:var(--gray-900);color:rgba(255,255,255,.7);padding:48px 0 24px;border-top:3px solid var(--red)}
+.footer-inner{display:grid;grid-template-columns:2fr 1fr 1fr;gap:48px;margin-bottom:40px}
+.f-brand{font-family:"Noto Serif TC",serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:8px}
+.f-tag{font-size:13px;opacity:.55;margin-bottom:16px;line-height:1.6}
+.f-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:var(--r-sm);padding:8px 14px;font-size:12px;font-weight:600;color:rgba(255,255,255,.8);letter-spacing:.05em}
+.f-dot{width:8px;height:8px;border-radius:50%;background:var(--red)}
+.f-col-title{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:16px}
+.f-links{list-style:none;display:flex;flex-direction:column;gap:10px}
+.f-links a{font-size:14px;color:rgba(255,255,255,.6);transition:color .15s}
+.f-links a:hover{color:#fff}
+.f-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.f-copy{font-size:12px;color:rgba(255,255,255,.35)}
+.f-legal{display:flex;gap:16px;font-size:12px;color:rgba(255,255,255,.35)}
+.f-legal a:hover{color:rgba(255,255,255,.7)}
+
+/* ── ADMIN EDIT LINK ── */
+.admin-edit{
+  display:flex;align-items:center;justify-content:flex-end;
+  gap:5px;margin-top:20px;padding-top:14px;
+  border-top:1px dashed var(--gray-100);
+}
+.admin-edit a{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:12px;font-weight:500;color:var(--gray-400);
+  transition:color .15s;
+}
+.admin-edit a:hover{color:var(--red);text-decoration:underline;}
+.admin-edit a svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
+
+/* ── RWD ── */
+@media(max-width:1024px){
+  .chains{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:768px){
+  .nav-list{display:none}.hamburger{display:flex}
+  .hero{padding:32px 0 0}
+  .stat-inner{grid-template-columns:repeat(2,1fr)}
+  .stat-item{border-bottom:1px solid rgba(255,255,255,.1)}
+  .stat-item:nth-child(2){border-right:none}
+  .stat-item:nth-child(3){border-bottom:none}
+  .stat-item:nth-child(4){border-right:none;border-bottom:none}
+  .about-grid{grid-template-columns:1fr;gap:32px}
+  .cal-row{grid-template-columns:72px 1fr;gap:12px}
+  .cal-action{display:none}
+  .cal-date-m{font-size:18px}
+  .zoom-panels{grid-template-columns:1fr}
+  .feat-event{grid-template-columns:1fr}
+  .feat-side{min-width:unset;padding:20px;flex-direction:row;gap:16px}
+  .date-big{font-size:32px}
+  .chains{grid-template-columns:1fr 1fr!important}
+  th:nth-child(1),td:nth-child(1){display:none}
+  td{padding:12px 14px}
+  .footer-inner{grid-template-columns:1fr;gap:32px}
+  .f-bottom{flex-direction:column;align-items:flex-start}
+}
+@media(max-width:480px){
+  .hero-title{font-size:24px}
+  .chains{grid-template-columns:1fr!important}
+  .stat-num{font-size:22px}
+  .cal-row{grid-template-columns:1fr;gap:8px}
+  .cal-date-col{flex-direction:row;align-items:baseline;gap:6px}
+  .cal-date-m{font-size:15px}
+  .zoom-btn{width:100%;justify-content:center}
+
+  /* FIX-1: footer 版權列，word-break:keep-all 讓中文詞不在中間斷行 */
+  .f-copy{word-break:keep-all;overflow-wrap:break-word}
+
+  /* FIX-2/3/4: 已移至後置斷點，確保覆蓋 tf-tabs/zoom-btn 的桌機版定義 */
+
+  /* FIX-5: 培訓副標（tf-intro）縮字級，減少孤行 */
+  .tf-intro{font-size:13px}
+
+  /* FIX-7: About 生態圖放大以提升圖內文字可讀性 */
+  .about-photo-wrap{margin-top:8px}
+  .about-photo-wrap img{width:100%;min-height:200px;object-fit:contain}
+}
+
+/* FIX-6: sticky nav 遮住 section 頂部，全站 section 加 scroll-margin-top */
+section[id]{scroll-margin-top:68px}
+
+/* ── CAROUSEL（CAROUSEL_XQ47W9LB）── */
+/* photo-wrap 已有 position:relative; overflow:hidden */
+.hero-slides-track{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+}
+.hero-slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  background:var(--gray-50);
+  opacity:0;
+  transition:opacity .6s ease;
+  pointer-events:none;
+  background-size:cover;background-position:center;background-repeat:no-repeat;
+}
+.hero-slide.active{opacity:1;pointer-events:auto}
+/* 當有真照片時，佔位內容自動隱藏 */
+.hero-slide[data-img]:not([data-img=""]) .photo-icon,
+.hero-slide[data-img]:not([data-img=""]) .photo-text,
+.hero-slide[data-img]:not([data-img=""]) .size-badge{display:none}
+/* 完整介紹卡（16:9 設計圖）：用 contain 完整顯示不裁切，深色底襯 */
+.hero-slide.has-photo-contain{background-size:contain;background-color:#1a1a1a}
+
+/* ── 董顧介紹卡（網頁重刻，取代跑版簡報圖）DC_CARD_8H2Q ── */
+.dc-card{
+  position:absolute;inset:0;
+  display:grid;
+  grid-template-columns:1fr 0.82fr;
+  background:#111418;
+  overflow:hidden;
+}
+/* 左：黑底紅字介紹（字級放大以撐滿全寬 hero） */
+.dc-info{
+  padding:34px 36px 32px 52px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  color:#fff;
+  min-width:0;
+}
+.dc-brandrow{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:20px;
+}
+.dc-brandrow .dc-bni{
+  font-family:Arial, sans-serif;
+  font-weight:900;
+  font-size:34px;
+  letter-spacing:-.02em;
+  color:var(--red);
+  line-height:1;
+}
+.dc-brandrow .dc-role{
+  font-size:16px;
+  font-weight:700;
+  letter-spacing:.06em;
+  color:#fff;
+  border-left:2px solid var(--red);
+  padding-left:12px;
+  line-height:1.35;
+}
+.dc-brandrow .dc-role small{
+  display:block;
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:.18em;
+  color:rgba(255,255,255,.55);
+}
+.dc-name{
+  font-size:32px;
+  font-weight:800;
+  color:#fff;
+  margin-bottom:20px;
+  line-height:1.15;
+}
+.dc-name span{
+  font-size:18px;
+  font-weight:500;
+  color:rgba(255,255,255,.6);
+  margin-left:8px;
+}
+.dc-creds{
+  list-style:none;
+  margin:0 0 18px;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+}
+.dc-creds li{
+  position:relative;
+  padding-left:19px;
+  font-size:16px;
+  line-height:1.5;
+  color:rgba(255,255,255,.85);
+}
+.dc-creds li::before{
+  content:'';
+  position:absolute;
+  left:0;top:9px;
+  width:6px;height:6px;
+  border-radius:50%;
+  background:var(--red);
+}
+.dc-creds li strong{color:#fff;font-weight:700}
+.dc-creds .dc-award{color:#F2C84B;font-weight:600}
+.dc-motto{
+  border-top:1px solid rgba(255,255,255,.12);
+  padding-top:16px;
+  font-size:14px;
+  line-height:1.75;
+  color:rgba(255,255,255,.72);
+}
+.dc-motto b{color:var(--red);font-weight:700;letter-spacing:.04em}
+/* 右：人像（照片完整顯示，不羽化淡化） */
+.dc-photo{
+  position:relative;
+  background:#1a1d22;
+  overflow:hidden;
+}
+.dc-photo img{
+  position:absolute;
+  inset:0;
+  width:100%;height:100%;
+  object-fit:cover;
+  object-position:center 22%;
+}
+/* 左右分隔邊條：純金邊條，乾淨利落取代羽化 */
+.dc-photo::before{
+  content:'';
+  position:absolute;
+  left:0;top:0;bottom:0;
+  width:4px;
+  z-index:2;
+  background:#D4AF5A;
+}
+/* 邊條右側一道極淡陰影，讓照片與文字區有層次但不糊照片 */
+.dc-photo::after{
+  content:'';
+  position:absolute;
+  left:4px;top:0;bottom:0;
+  width:24px;
+  z-index:1;
+  background:linear-gradient(to right, rgba(0,0,0,.28), rgba(0,0,0,0));
+  pointer-events:none;
+}
+.dc-photo .dc-photo-name{
+  position:absolute;
+  left:0;right:0;bottom:0;
+  z-index:2;
+  background:linear-gradient(to top, rgba(0,0,0,.78), transparent);
+  color:#fff;
+  font-size:14px;
+  font-weight:700;
+  padding:24px 18px 12px;
+  text-align:right;
+}
+.dc-photo .dc-photo-name span{
+  display:block;
+  font-size:11px;
+  font-weight:500;
+  color:rgba(255,255,255,.7);
+}
+/* 手機：上圖下文直排 */
+@media(max-width:680px){
+  /* 董顧卡所在的 hero 容器：手機解除 16:9，給足固定高度容兩張 slide（董顧卡上圖下文最高） */
+  .photo-wrap{aspect-ratio:auto;min-height:540px}
+  .dc-card{grid-template-columns:1fr;grid-template-rows:190px 1fr}
+  .dc-photo{order:-1}
+  .dc-photo img{object-position:center 15%}
+  /* 手機：邊條改成底部橫向紅→金線（照片在上、文字在下） */
+  .dc-photo::before{left:0;right:0;top:auto;bottom:0;width:auto;height:4px;background:#D4AF5A}
+  .dc-photo::after{display:none}
+  .dc-info{padding:18px 20px 22px}
+  .dc-brandrow .dc-bni{font-size:21px}
+  .dc-name{font-size:19px}
+  .dc-creds li{font-size:11.5px}
+  .dc-motto{font-size:11px;line-height:1.65}
+}
+/* 箭頭按鈕 */
+.carousel-btn{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:40px;height:40px;border-radius:50%;
+  background:rgba(255,255,255,.85);border:none;
+  font-size:22px;line-height:1;color:var(--gray-800);
+  cursor:pointer;z-index:10;
+  transition:background .15s,transform .15s;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow-md);
+  -webkit-tap-highlight-color:transparent;
+}
+.carousel-btn:hover{background:#fff;transform:translateY(-50%) scale(1.08)}
+.carousel-prev{left:14px}
+.carousel-next{right:14px}
+/* 底部圓點 */
+.carousel-dots{
+  position:absolute;bottom:14px;left:50%;transform:translateX(-50%);
+  display:flex;gap:8px;z-index:10;
+}
+.carousel-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:rgba(255,255,255,.5);border:none;padding:0;cursor:pointer;
+  transition:background .2s,transform .2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.carousel-dot.active{background:#fff;transform:scale(1.25)}
+@media(max-width:375px){
+  .carousel-btn{width:32px;height:32px;font-size:18px}
+  .carousel-prev{left:8px}
+  .carousel-next{right:8px}
+}
+
+/* ── SIDE NAV v4 — 極簡文字錨點 (SIDENAV4_MNQ7VK) ── */
+/*
+  改版理由（取代 v3 雙軌道+進度軌+雙層 dot）：
+  · 砍掉 JS 動態量 offsetTop 算進度條高度的那段（最易在改板塊順序時算錯）
+  · 結構降到「一條細灰線 + 小圓點 + 文字」三件
+  · active 全靠 CSS：圓點變紅、文字變紅變粗、左側一條紅短線(::before) 滑入
+  · 整體更克制，貼近正式分會官網側欄調性
+*/
+
+/* 桌面：主內容只留收合態側欄寬度（展開時側欄浮在內容上、不推擠版面） */
+@media(min-width:1100px){
+  body{padding-left:72px}
+}
+
+/* ── 側欄容器：平常收合成細條（只露圓點），hover 展開露文字 SIDENAV4_MNQ7VK ── */
+.side-nav{
+  position:fixed;
+  left:0;
+  top:0;
+  bottom:0;
+  width:64px;                 /* 收合態：細條 */
+  z-index:90;
+  display:none;
+  flex-direction:column;
+  justify-content:center;
+  padding:80px 0 40px 30px;
+  background:linear-gradient(to right, var(--white) 78%, rgba(255,255,255,0));
+  transition:width .32s cubic-bezier(.4,0,.2,1), background .32s ease;
+}
+@media(min-width:1100px){
+  .side-nav{display:flex}
+}
+/* hover：展開成完整側欄 */
+.side-nav:hover{
+  width:220px;
+  background:linear-gradient(to right, var(--white) 90%, rgba(255,255,255,.96) 96%, rgba(255,255,255,0));
+  box-shadow:14px 0 30px -22px rgba(0,0,0,.18);
+}
+
+/* 側欄標題區：收合時隱藏 */
+.sn-heading{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:18px;
+  padding-left:6px;
+  opacity:0;
+  transform:translateX(-4px);
+  transition:opacity .22s ease, transform .26s ease;
+  pointer-events:none;
+}
+.side-nav:hover .sn-heading{opacity:1;transform:none}
+.sn-heading-label{
+  font-size:10px;
+  font-weight:600;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--gray-400);
+  white-space:nowrap;
+}
+.sn-heading-line{
+  flex:1;
+  height:1px;
+  background:linear-gradient(to right, var(--gray-200), transparent);
+  max-width:30px;
+}
+
+/* 一條貫穿的細灰導引線（靠圓點左緣對齊） */
+.side-nav-list{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+}
+.side-nav-list::before{
+  content:'';
+  position:absolute;
+  left:3px;            /* 對齊圓點中心 */
+  top:14px;
+  bottom:14px;
+  width:1px;
+  background:var(--gray-100);
+}
+
+/* 每個節點連結 */
+.side-nav-item{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:9px 0 9px 0;
+  cursor:pointer;
+  text-decoration:none;
+  color:var(--gray-400);
+  transition:color .2s ease;
+}
+.side-nav-item:hover{
+  color:var(--gray-700, #3d4555);
+}
+
+/* active 左側紅色短直線 */
+.side-nav-item::before{
+  content:'';
+  position:absolute;
+  left:-30px;          /* 貼到側欄最左緣 */
+  top:50%;
+  transform:translateY(-50%) scaleY(0);
+  width:3px;
+  height:18px;
+  border-radius:0 3px 3px 0;
+  background:var(--red);
+  transition:transform .25s cubic-bezier(.4,0,.2,1);
+}
+.side-nav-item.sn-active::before{
+  transform:translateY(-50%) scaleY(1);
+}
+
+/* 小圓點（收合態主角，hover 仍在） */
+.sn-dot{
+  flex-shrink:0;
+  position:relative;
+  z-index:1;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--gray-200);
+  box-shadow:0 0 0 3px var(--white);  /* 白圈讓圓點蓋過導引線 */
+  transition:background .2s ease, transform .2s ease;
+}
+.side-nav-item:hover .sn-dot{
+  background:var(--gray-400);
+}
+.side-nav-item.sn-active .sn-dot{
+  background:var(--red);
+  transform:scale(1.3);
+}
+
+/* 文字標籤：收合時隱藏、hover 淡入 */
+.sn-label{
+  font-size:14px;
+  font-weight:400;
+  letter-spacing:.02em;
+  white-space:nowrap;
+  line-height:1.3;
+  opacity:0;
+  transform:translateX(-6px);
+  transition:opacity .22s ease, transform .26s ease, font-weight .2s ease, color .2s ease;
+  pointer-events:none;
+}
+.side-nav:hover .sn-label{
+  opacity:1;
+  transform:none;
+  pointer-events:auto;
+}
+.side-nav-item.sn-active .sn-label{
+  color:var(--red);
+  font-weight:600;
+}
+/* 收合態：active 圓點旁加一個小紅標暗示「你在這」（不靠文字也看得出位置） */
+.side-nav-item.sn-active .sn-dot::after{
+  content:'';
+  position:absolute;
+  inset:-3px;
+  border-radius:50%;
+  border:1.5px solid rgba(207,32,48,.35);
+  opacity:1;
+  transition:opacity .2s ease;
+}
+.side-nav:hover .side-nav-item.sn-active .sn-dot::after{opacity:0}
+
+/* RWD：手機隱藏側欄 */
+@media(max-width:1099px){
+  .side-nav{display:none}
+  body{padding-left:0!important}
+}
+
+/* ── 培訓快訊 (TRAINING_FEED_7XK2) ── */
+.tf-intro{
+  max-width:1180px;
+  font-size:14px;
+  color:var(--gray-600);
+  line-height:1.8;
+  margin-bottom:18px;
+}
+.tf-alllink{
+  display:inline-block;
+  margin-left:6px;
+  color:var(--red);
+  font-weight:600;
+  white-space:nowrap;
+}
+.tf-alllink:hover{text-decoration:underline}
+.tf-autonote{
+  display:block;
+  font-size:12px;
+  color:var(--gray-400);
+  margin-top:10px;
+}
+
+/* 線上/線下 分頁標籤 */
+.tf-tabs{
+  display:flex;
+  gap:8px;
+  margin-bottom:18px;
+  flex-wrap:wrap;
+}
+.tf-tab{
+  font-family:inherit;
+  font-size:13.5px;
+  font-weight:600;
+  color:var(--gray-500);
+  background:var(--gray-50);
+  border:1px solid var(--gray-100);
+  border-radius:100px;
+  padding:8px 18px;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  transition:all .18s ease;
+}
+.tf-tab:hover{
+  color:var(--gray-800);
+  border-color:var(--gray-200);
+}
+.tf-tab.active{
+  color:#fff;
+  background:var(--red);
+  border-color:var(--red);
+}
+.tf-tab-count{
+  font-size:11px;
+  font-weight:700;
+  min-width:18px;
+  height:18px;
+  padding:0 5px;
+  border-radius:100px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.06);
+  color:var(--gray-500);
+}
+.tf-tab.active .tf-tab-count{
+  background:rgba(255,255,255,.25);
+  color:#fff;
+}
+
+/* 卡片清單：兩欄網格填滿版面（取代原單欄 720px） */
+.tf-list{
+  display:grid;
+  grid-template-columns:repeat(2, 1fr);
+  gap:14px;
+  max-width:1180px;
+}
+.tf-loading{
+  grid-column:1 / -1;
+  font-size:14px;
+  color:var(--gray-400);
+  padding:18px 0;
+}
+.tf-card{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  background:var(--white);
+  border:1px solid var(--gray-100);
+  border-radius:var(--r-md);
+  padding:14px 18px;
+  text-decoration:none;
+  transition:border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.tf-card:hover{
+  border-color:rgba(207,32,48,.35);
+  box-shadow:0 4px 16px rgba(0,0,0,.06);
+  transform:translateY(-2px);
+}
+/* 左側日期方塊 */
+.tf-date{
+  flex-shrink:0;
+  width:54px;
+  text-align:center;
+  border-right:1px solid var(--gray-100);
+  padding-right:14px;
+}
+.tf-date .m{
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:.04em;
+  color:var(--red);
+}
+.tf-date .d{
+  font-size:22px;
+  font-weight:800;
+  color:var(--gray-900);
+  line-height:1.05;
+}
+.tf-date .y{
+  font-size:10px;
+  color:var(--gray-400);
+}
+/* 中間標題 */
+.tf-body{flex:1;min-width:0}
+.tf-title{
+  font-size:15px;
+  font-weight:700;
+  color:var(--gray-900);
+  line-height:1.4;
+  margin-bottom:6px;
+}
+.tf-meta{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  flex-wrap:wrap;
+}
+.tf-tag{
+  display:inline-block;
+  font-size:11px;
+  font-weight:600;
+  color:var(--red);
+  background:rgba(207,32,48,.07);
+  padding:2px 9px;
+  border-radius:100px;
+}
+/* 上課方式徽章 */
+.tf-mode{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  font-size:11px;
+  font-weight:600;
+  padding:2px 9px;
+  border-radius:100px;
+}
+.tf-mode svg{flex-shrink:0}
+.tf-mode-on{
+  color:#0E7C5A;
+  background:rgba(14,124,90,.09);
+}
+.tf-mode-off{
+  color:#B26A00;
+  background:rgba(178,106,0,.10);
+}
+/* 右側箭頭 */
+.tf-go{
+  flex-shrink:0;
+  color:var(--gray-300);
+  transition:color .18s ease, transform .18s ease;
+}
+.tf-card:hover .tf-go{color:var(--red);transform:translateX(3px)}
+/* 第 5 項：培訓類型篩選排（動態生成） */
+.tf-type-tabs{
+  display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;
+}
+.tf-type-tab{
+  font-family:inherit;font-size:12px;font-weight:600;
+  color:var(--gray-500);background:var(--white);
+  border:1px solid var(--gray-200);border-radius:100px;
+  padding:5px 14px;cursor:pointer;transition:all .15s ease;
+}
+.tf-type-tab:hover{color:var(--gray-800);border-color:var(--gray-300)}
+.tf-type-tab.active{color:var(--red);border-color:rgba(207,32,48,.5);background:rgba(207,32,48,.05)}
+/* 第 5 項：學分標籤 */
+.tf-credit{
+  display:inline-block;font-size:10px;font-weight:700;
+  padding:1px 8px;border-radius:100px;
+  background:rgba(184,150,62,.12);color:#8c6e00;
+  border:1px solid rgba(184,150,62,.3);
+}
+.tf-note{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  margin-top:22px;
+  max-width:1180px;
+  font-size:13px;
+  color:var(--gray-500);
+  line-height:1.7;
+}
+.tf-note svg{flex-shrink:0;margin-top:2px;color:var(--gray-400)}
+.tf-note a{color:var(--red);font-weight:600}
+.tf-note a:hover{text-decoration:underline}
+/* 平板以下改單欄 */
+@media(max-width:760px){
+  .tf-list{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .tf-date{width:46px;padding-right:10px}
+  .tf-date .d{font-size:19px}
+  .tf-title{font-size:14px}
+}
+
+/* ── RECRUIT BANNER (RECRUIT_4K9MZ2WX) ── */
+.recruit-banner{
+  background:var(--red);
+  position:relative;
+  overflow:hidden;
+  padding:52px 0 48px;
+}
+/* 幾何裝飾圓（右上、左下） */
+.recruit-banner::before{
+  content:"";position:absolute;top:-70px;right:-70px;
+  width:260px;height:260px;border-radius:50%;
+  background:rgba(255,255,255,.06);pointer-events:none;
+}
+.recruit-banner::after{
+  content:"";position:absolute;bottom:-60px;left:-40px;
+  width:200px;height:200px;border-radius:50%;
+  background:rgba(255,255,255,.04);pointer-events:none;
+}
+.recruit-inner{
+  position:relative;z-index:1;
+  display:flex;align-items:center;justify-content:space-between;gap:32px;
+}
+.recruit-copy{flex:1}
+.recruit-eyebrow{
+  display:inline-block;font-size:11px;font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(255,255,255,.7);margin-bottom:10px;
+}
+.recruit-title{
+  font-family:"Noto Serif TC",serif;
+  font-size:clamp(22px,3.5vw,34px);font-weight:700;
+  color:#fff;line-height:1.25;margin-bottom:10px;letter-spacing:-.01em;
+}
+.recruit-sub{
+  font-size:15px;color:rgba(255,255,255,.82);
+  line-height:1.7;max-width:560px;
+}
+.recruit-action{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  flex-shrink:0;
+}
+/* CTA 按鈕：白底紅字，大型易點 */
+.recruit-btn{
+  display:inline-flex;align-items:center;gap:10px;
+  background:#fff;color:var(--red);
+  padding:18px 40px;border-radius:var(--r-md);
+  font-size:16px;font-weight:700;letter-spacing:.02em;
+  border:none;cursor:pointer;
+  box-shadow:0 4px 20px rgba(0,0,0,.18);
+  transition:all .18s;
+  white-space:nowrap;
+  font-family:"Noto Sans TC",sans-serif;
+}
+.recruit-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 28px rgba(0,0,0,.24);
+  color:var(--red-dark);
+}
+.recruit-btn svg{width:18px;height:18px;stroke:var(--red);fill:none;stroke-width:2.5;flex-shrink:0;transition:stroke .18s}
+.recruit-btn:hover svg{stroke:var(--red-dark)}
+.recruit-note{
+  font-size:12px;color:rgba(255,255,255,.65);text-align:center;line-height:1.5;
+}
+
+/* RWD：手機版垂直排列 */
+@media(max-width:700px){
+  .recruit-inner{flex-direction:column;align-items:flex-start}
+  .recruit-action{width:100%;align-items:stretch}
+  .recruit-btn{width:100%;justify-content:center;padding:18px 24px}
+  .recruit-note{text-align:left}
+}
+@media(max-width:375px){
+  .recruit-banner{padding:40px 0 36px}
+  .recruit-btn{font-size:15px}
+}
+
+/* ── ADD EVENT MODAL（ADDEVT_MODAL_R7MN4KX2）── */
+.addevt-modal-overlay{
+  display:none;
+  position:fixed;inset:0;
+  background:rgba(26,31,41,.6);
+  z-index:500;
+  align-items:center;justify-content:center;
+  padding:24px;
+  backdrop-filter:blur(2px);
+  -webkit-backdrop-filter:blur(2px);
+}
+.addevt-modal-overlay.open{display:flex}
+.addevt-modal{
+  background:#fff;border-radius:var(--r-lg);
+  max-width:460px;width:100%;
+  box-shadow:0 20px 60px rgba(0,0,0,.22);
+  overflow:hidden;
+  animation:modalIn .22s cubic-bezier(.34,1.3,.64,1);
+}
+.addevt-modal-head{
+  background:var(--red);padding:20px 24px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.addevt-modal-head-title{
+  font-family:"Noto Serif TC",serif;
+  font-size:17px;font-weight:700;color:#fff;
+}
+.addevt-modal-close{
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(255,255,255,.2);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:18px;line-height:1;
+  transition:background .15s;flex-shrink:0;
+  font-family:sans-serif;
+}
+.addevt-modal-close:hover{background:rgba(255,255,255,.35)}
+.addevt-modal-body{padding:28px 24px 20px}
+.addevt-modal-icon{
+  display:flex;align-items:center;justify-content:center;
+  width:52px;height:52px;border-radius:50%;
+  background:rgba(207,32,48,.08);margin:0 auto 16px;
+}
+.addevt-modal-icon svg{width:26px;height:26px;stroke:var(--red);fill:none;stroke-width:2}
+.addevt-modal-msg{
+  text-align:center;
+  font-size:15px;color:var(--gray-700,#3d4555);
+  line-height:1.75;
+  margin-bottom:20px;
+}
+.addevt-checklist{
+  list-style:none;
+  background:var(--gray-50);border-radius:var(--r-md);
+  padding:14px 16px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.addevt-checklist li{
+  display:flex;align-items:flex-start;gap:10px;
+  font-size:14px;color:var(--gray-800);line-height:1.5;
+}
+.addevt-checklist-icon{
+  font-size:18px;line-height:1;flex-shrink:0;margin-top:1px;
+}
+.addevt-checklist-text strong{
+  display:block;font-weight:600;color:var(--gray-900);font-size:13px;
+}
+.addevt-checklist-text span{
+  font-size:12px;color:var(--gray-500);
+}
+.addevt-modal-footer{
+  padding:20px 24px 24px;display:flex;justify-content:center;
+}
+.addevt-modal-ok{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--red);color:#fff;
+  padding:12px 28px;border-radius:var(--r-sm);
+  font-size:14px;font-weight:600;
+  border:none;cursor:pointer;font-family:"Noto Sans TC",sans-serif;
+  transition:background .15s;text-decoration:none;
+}
+.addevt-modal-ok:hover{background:var(--red-dark)}
+
+/* ── RECRUIT MODAL ── */
+.recruit-modal-overlay{
+  display:none;
+  position:fixed;inset:0;
+  background:rgba(26,31,41,.6);
+  z-index:500;
+  align-items:center;justify-content:center;
+  padding:24px;
+  backdrop-filter:blur(2px);
+  -webkit-backdrop-filter:blur(2px);
+}
+.recruit-modal-overlay.open{display:flex}
+.recruit-modal{
+  background:#fff;border-radius:var(--r-lg);
+  max-width:440px;width:100%;
+  box-shadow:0 20px 60px rgba(0,0,0,.22);
+  overflow:hidden;
+  animation:modalIn .22s cubic-bezier(.34,1.3,.64,1);
+}
+@keyframes modalIn{
+  from{opacity:0;transform:scale(.94) translateY(8px)}
+  to{opacity:1;transform:scale(1) translateY(0)}
+}
+.recruit-modal-head{
+  background:var(--red);padding:20px 24px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.recruit-modal-head-title{
+  font-family:"Noto Serif TC",serif;
+  font-size:17px;font-weight:700;color:#fff;
+}
+.recruit-modal-close{
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(255,255,255,.2);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:18px;line-height:1;
+  transition:background .15s;flex-shrink:0;
+  font-family:sans-serif;
+}
+.recruit-modal-close:hover{background:rgba(255,255,255,.35)}
+.recruit-modal-body{padding:28px 24px 32px}
+.recruit-modal-icon{
+  display:flex;align-items:center;justify-content:center;
+  width:56px;height:56px;border-radius:50%;
+  background:rgba(207,32,48,.08);margin:0 auto 16px;
+}
+.recruit-modal-icon svg{width:28px;height:28px;stroke:var(--red);fill:none;stroke-width:2}
+.recruit-modal-msg{
+  text-align:center;
+  font-size:15px;color:var(--gray-700,#3d4555);
+  line-height:1.75;
+}
+.recruit-modal-msg strong{color:var(--gray-900);font-weight:600}
+.recruit-modal-hint{
+  margin-top:16px;padding:12px 16px;
+  background:var(--gray-50);border-radius:var(--r-sm);
+  font-size:13px;color:var(--gray-600);line-height:1.6;text-align:center;
+}
+.recruit-modal-footer{
+  padding:0 24px 24px;display:flex;justify-content:center;
+}
+.recruit-modal-ok{
+  display:inline-flex;align-items:center;
+  background:var(--red);color:#fff;
+  padding:11px 32px;border-radius:var(--r-sm);
+  font-size:14px;font-weight:600;
+  border:none;cursor:pointer;font-family:"Noto Sans TC",sans-serif;
+  transition:background .15s;
+}
+.recruit-modal-ok:hover{background:var(--red-dark)}
+
+/* ── 手機修正補丁（後置，確保覆蓋前面所有桌機版定義）── */
+@media(max-width:480px){
+  /* FIX-2b: zoom-sec 裝飾圓縮到不超右邊界 */
+  .zoom-sec::before{right:0;width:140px;height:140px;top:-30px}
+  .zoom-sec::after{left:0;width:120px;height:120px;bottom:-40px}
+
+  /* FIX-2c: zoom-btn 禁 nowrap，全寬顯示，不讓文字撐出容器 */
+  .zoom-btn{white-space:normal;width:100%;justify-content:center;padding:14px 20px;font-size:14px;box-sizing:border-box}
+
+  /* FIX-2d: deadline-badge 允許換行，不讓長文字撐出 */
+  .deadline-badge{white-space:normal;word-break:keep-all}
+
+  /* FIX-3: 第一層 tab 橫向捲動（後置才能覆蓋 .tf-tabs flex-wrap:wrap） */
+  .tf-tabs{flex-wrap:nowrap!important;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+  .tf-tab{flex-shrink:0;font-size:12.5px;padding:7px 13px}
+
+  /* FIX-4: 第二層 tab 橫向捲動（後置才能覆蓋 .tf-type-tabs flex-wrap:wrap） */
+  .tf-type-tabs{flex-wrap:nowrap!important;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+  .tf-type-tab{flex-shrink:0}
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav class="navbar">
+  <div class="container">
+    <div class="navbar-inner">
+      <div class="navbar-brand">
+        <svg class="brand-logo" width="58" height="30" viewBox="0 0 116 60" xmlns="http://www.w3.org/2000/svg" aria-label="BNI">
+          <text x="0" y="46" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="48" fill="#CF2030" letter-spacing="-1">BNI</text>
+          <text x="104" y="20" font-family="Arial, sans-serif" font-size="13" fill="#CF2030">&#174;</text>
+        </svg>
+        <span class="brand-divider"></span>
+        <span class="brand-name">華都更 <span>Hua Urban+</span></span>
+      </div>
+      <ul class="nav-list">
+        <li><a href="#calendar">行事曆</a></li>
+        <li><a href="#activities">活動</a></li>
+        <li><a href="#msp">培訓快訊</a></li>
+        <li><a href="#powerteam">組聚</a></li>
+        <li><a href="#zoom">Zoom 例會</a></li>
+        <li><a href="#roster">名冊</a></li>
+        <li><a href="#" class="nav-cta">加入詢問</a></li>
+      </ul>
+      <button class="hamburger" onclick="toggleMNav()" aria-label="選單">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+<div class="mobile-nav" id="mNav">
+  <ul>
+    <li><a href="#calendar" onclick="closeMNav()">分會行事曆</a></li>
+    <li><a href="#activities" onclick="closeMNav()">活動詳情</a></li>
+    <li><a href="#msp" onclick="closeMNav()">培訓快訊</a></li>
+    <li><a href="#powerteam" onclick="closeMNav()">Power Team 組聚</a></li>
+    <li><a href="#zoom" onclick="closeMNav()">Zoom 例會</a></li>
+    <li><a href="#roster" onclick="closeMNav()">夥伴名冊</a></li>
+  </ul>
+  <a href="#" class="m-cta">加入詢問</a>
+</div>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-strip">
+      <div class="chapter-label">第一屆 · 2026 正式成會</div>
+      <h1 class="hero-title">BNI 華都更分會</h1>
+      <div class="hero-sub">Hua Urban+</div>
+      <div class="hero-slogan">都市更新 · 產業整合 · 夥伴共榮</div>
+    </div>
+    <!-- CAROUSEL_XQ47W9LB — 影片 + 董顧 + 九長三張輪播 -->
+    <div class="photo-wrap" id="heroCarousel">
+
+      <div class="hero-slides-track">
+
+        <!-- 第 1 張：YouTube 影片封面（VIDCOVER_KQ8F3T2M）
+             預設顯示自訂品牌封面，點擊後才注入 iframe autoplay，避免首屏糊縮圖 -->
+        <div class="hero-slide active">
+          <div class="hero-slide-video" id="ytSlideWrap">
+            <!-- 自訂封面：點擊載入影片 -->
+            <div class="yt-cover" id="ytCover" onclick="ytCoverPlay()">
+              <div class="yt-play-btn" aria-label="播放影片"></div>
+              <p class="yt-cover-title">華都更 — 要讓都更真正動起來</p>
+              <p class="yt-cover-hint">點擊播放分會形象影片</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 第 2 張：董事顧問 邱碩鈺 Ellie（網頁重刻，取代跑版簡報圖 DC_CARD_8H2Q）-->
+        <div class="hero-slide">
+          <div class="dc-card">
+            <div class="dc-info">
+              <div class="dc-brandrow">
+                <span class="dc-bni">BNI</span>
+                <span class="dc-role">董事顧問 DC<small>DIRECTOR CONSULTANT</small></span>
+              </div>
+              <div class="dc-name">邱碩鈺<span>Ellie Chiu</span></div>
+              <ul class="dc-creds">
+                <li><strong>華地產鑽石分會</strong>｜新北市西B區會員 2025–迄今</li>
+                <li>2025 年新北市西B區 <strong>區域年度引薦金額第一名</strong></li>
+                <li>華地產 創會秘書財務 ・ 第二屆主席</li>
+                <li><strong>House123</strong> 創辦人暨執行長（2012–迄今）</li>
+                <li class="dc-award">★ 一金質獎章</li>
+              </ul>
+              <div class="dc-motto">
+                <b>核心理念</b>　篩選大於說服；事先說明，別事後解釋。付出者收穫，收穫者再付出，大付出者要有大收穫。順流創造，只要出發就能到達 ── 利他，才是真利己；人生積極主動最快樂。
+              </div>
+            </div>
+            <div class="dc-photo">
+              <img src="assets/ellie-portrait.jpg" alt="董事顧問 邱碩鈺 Ellie Chiu" loading="lazy" width="680" height="785">
+              <div class="dc-photo-name">邱碩鈺 Ellie Chiu<span>BNI 華都更分會 董事顧問</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 第 3 張：第一屆九長領導團隊 -->
+        <!-- 放照片：把 data-img="" 改成 data-img="assets/九長合照.jpg" -->
+        <div class="hero-slide" data-img="">
+          <div class="photo-banner">第一屆九長領導團隊（請置入照片）</div>
+          <div class="photo-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+          </div>
+          <div class="photo-text">
+            <h3>第一屆九長領導團隊</h3>
+            <p>請置入照片</p>
+          </div>
+          <div class="size-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            建議尺寸 1600 × 900 px（16:9）
+          </div>
+        </div>
+
+      </div><!-- /hero-slides-track -->
+
+      <!-- 左右箭頭 -->
+      <button class="carousel-btn carousel-prev" aria-label="上一張" onclick="heroCarouselMove(-1)">&#8249;</button>
+      <button class="carousel-btn carousel-next" aria-label="下一張" onclick="heroCarouselMove(1)">&#8250;</button>
+
+      <!-- 底部圓點 -->
+      <div class="carousel-dots">
+        <button class="carousel-dot active" aria-label="第 1 張" onclick="heroCarouselGo(0)"></button>
+        <button class="carousel-dot" aria-label="第 2 張" onclick="heroCarouselGo(1)"></button>
+        <button class="carousel-dot" aria-label="第 3 張" onclick="heroCarouselGo(2)"></button>
+      </div>
+
+    </div><!-- /photo-wrap -->
+  </div>
+</section>
+
+<!-- ── STAT BAR ── -->
+<!-- 第 2 項：overflow:hidden 已在下方 stat-bar 容器補上，見 CSS 修改 -->
+<div class="stat-bar">
+  <div class="container">
+    <div class="stat-inner">
+      <div class="stat-item"><div class="stat-num">56 <span class="u">位</span></div><div class="stat-lbl">現任夥伴</div></div>
+      <div class="stat-item"><div class="stat-num">白金</div><div class="stat-lbl">分會等級</div></div>
+      <div class="stat-item"><div class="stat-num">2026</div><div class="stat-lbl">成會年份</div></div>
+      <div class="stat-item"><div class="stat-num">5 <span class="u">條</span></div><div class="stat-lbl">產業鏈</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── RECRUIT BANNER (RECRUIT_4K9MZ2WX) ──
+     招募區塊：不加 section id，不納入左側 scrollspy 導覽，
+     是行動呼籲橫幅而非內容區塊。
+     ─────────────────────────────────────────────────────────
+     【之後接真實報名頁方式】
+     把下方 <button> 整個換成：
+       <a href="https://YOUR_GUEST_SIGNUP_URL" target="_blank" rel="noopener" class="recruit-btn">
+         <svg ...>...</svg>立即報名來賓
+       </a>
+     同時移除 onclick="openRecruitModal()" 及整個 #recruitModal div，
+     即可完成串接，無需改動其他地方。
+     ─────────────────────────────────────────────────────────
+-->
+<div class="recruit-banner">
+  <div class="container">
+    <div class="recruit-inner">
+      <div class="recruit-copy">
+        <div class="recruit-eyebrow">Join Hua Urban+</div>
+        <h2 class="recruit-title">對華都更有興趣嗎？<br>一起把人脈變成共同把事情做成的力量</h2>
+        <p class="recruit-sub">華都更聚焦都市更新與老屋改建產業鏈，整合地主、設計、建材、法律、金融等跨業夥伴，透過互相推薦創造真實商機。如果你也在這條產業鏈上，歡迎了解如何以來賓身份參與我們的線上例會。</p>
+      </div>
+      <div class="recruit-action">
+        <!-- TODO: 之後把這顆 <button> 換成 <a href="官方來賓報名頁網址" target="_blank" class="recruit-btn"> 並移除彈窗 -->
+        <button class="recruit-btn" onclick="openRecruitModal()">
+          <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+          我要報名來賓
+        </button>
+        <p class="recruit-note">歡迎推薦優質夥伴，一同參與線上例會</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── RECRUIT MODAL ── -->
+<div class="recruit-modal-overlay" id="recruitModal" onclick="closeRecruitModal(event)">
+  <div class="recruit-modal" role="dialog" aria-modal="true" aria-labelledby="recruitModalTitle">
+    <div class="recruit-modal-head">
+      <span class="recruit-modal-head-title" id="recruitModalTitle">來賓報名</span>
+      <button class="recruit-modal-close" onclick="closeRecruitModal()" aria-label="關閉">&#x2715;</button>
+    </div>
+    <div class="recruit-modal-body">
+      <div class="recruit-modal-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div class="recruit-modal-msg">
+        <strong>哎呀，你太快了！🏃‍♂️💨</strong><br>
+        這顆按鈕比瓊安的進度還快一步。
+      </div>
+      <div class="recruit-modal-hint">
+        報名系統還在施工中，資訊長正在熬夜趕工（咖啡已續第三杯 ☕）。<br>
+        手刀想加入的話，先到分會 <strong>LINE 群</strong>敲一聲、或找你的引薦人卡位，<br>不用等系統，人脈先連起來再說！
+      </div>
+    </div>
+    <div class="recruit-modal-footer">
+      <button class="recruit-modal-ok" onclick="closeRecruitModal()">好，我先去敲 LINE 👌</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ADD EVENT MODAL（ADDEVT_MODAL_R7MN4KX2）── -->
+<div class="addevt-modal-overlay" id="addevtModal" onclick="closeAddEvtModal(event)">
+  <div class="addevt-modal" role="dialog" aria-modal="true" aria-labelledby="addevtModalTitle">
+    <div class="addevt-modal-head">
+      <span class="addevt-modal-head-title" id="addevtModalTitle">想新增活動？</span>
+      <button class="addevt-modal-close" onclick="closeAddEvtModal()" aria-label="關閉">&#x2715;</button>
+    </div>
+    <div class="addevt-modal-body">
+      <div class="addevt-modal-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+          <line x1="12" y1="14" x2="12" y2="18"/>
+          <line x1="10" y1="16" x2="14" y2="16"/>
+        </svg>
+      </div>
+      <p class="addevt-modal-msg">夥伴們辦活動時，準備好以下素材，填進共用試算表，行事曆和活動牆就會自動更新 ✨</p>
+      <ul class="addevt-checklist">
+        <li>
+          <span class="addevt-checklist-icon">📷</span>
+          <div class="addevt-checklist-text">
+            <strong>活動照片</strong>
+            <span>夥伴自製的活動宣傳圖</span>
+          </div>
+        </li>
+        <li>
+          <span class="addevt-checklist-icon">📅</span>
+          <div class="addevt-checklist-text">
+            <strong>活動日期時間</strong>
+            <span>包含開始與結束時間</span>
+          </div>
+        </li>
+        <li>
+          <span class="addevt-checklist-icon">📝</span>
+          <div class="addevt-checklist-text">
+            <strong>報名方式</strong>
+            <span>報名連結或聯絡窗口</span>
+          </div>
+        </li>
+        <li>
+          <span class="addevt-checklist-icon">📍</span>
+          <div class="addevt-checklist-text">
+            <strong>活動地點</strong>
+            <span>線下地址或線上會議連結</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div class="addevt-modal-footer">
+      <a class="addevt-modal-ok"
+         href="https://docs.google.com/spreadsheets/d/1XcSJ_U6i6kIHruHObblZEVQEd7d4M0X8LNGG9Oftgd0/edit"
+         target="_blank" rel="noopener">
+        前往共用試算表新增 →
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ── ABOUT ── -->
+<section class="about" id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div>
+        <span class="sec-label">關於分會</span>
+        <h2 class="sec-h2">台灣第一個聚焦<br>都市更新產業鏈的 BNI 分會</h2>
+        <div class="about-body">
+          <p>BNI 華都更分會是以「都市更新 × 老屋改建」為核心產業鏈的線上 BNI 分會，整合地主、設計、建材、法律、金融等跨業夥伴，透過互相推薦創造共同商機。</p>
+          <p>我們相信，當對的人聚在一起，每一棟老屋都有機會成為下一個精彩的故事。</p>
+        </div>
+      </div>
+      <!-- 雙軌協作機制圖 -->
+      <div class="about-photo-wrap">
+        <img src="assets/dual-track-collab.jpg"
+             alt="華都更雙軌協作機制圖：供給端專業人士 × 華都更 × 需求端地主召集人"
+             loading="lazy">
+      </div>
+    </div>
+
+    <!-- 影片已移至首屏主視覺，此處不再重複 -->
+  </div>
+</section>
+
+
+<!-- ── Zoom 例會專區（靜態，不需 fetch）── -->
+<section class="zoom-sec" id="zoom">
+  <div class="container">
+    <div style="position:relative;z-index:1;margin-bottom:28px">
+      <div class="zoom-label">每週固定 · Online Meeting Hub</div>
+      <div class="zoom-title">線上例會專區</div>
+      <div class="zoom-subtitle">華都更為線上分會，週三例會相關的所有入口與截止提醒都在這裡。</div>
+    </div>
+    <div class="zoom-panels">
+      <!-- 左：加入 Zoom 例會 -->
+      <div class="zoom-panel">
+        <div class="zoom-panel-label">
+          <svg style="width:13px;height:13px;stroke:rgba(255,255,255,.55);fill:none;stroke-width:2;vertical-align:middle;margin-right:4px" viewBox="0 0 24 24"><path d="M15 10l4.553-2.069A1 1 0 0121 8.853v6.294a1 1 0 01-1.447.894L15 14M3 8h12a2 2 0 012 2v4a2 2 0 01-2 2H3a2 2 0 01-2-2V10a2 2 0 012-2z"/></svg>
+          Zoom 視訊例會
+        </div>
+        <div class="zoom-panel-title">加入 Zoom 例會</div>
+        <div class="zoom-info">
+          <div class="zoom-info-row">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+            <span>每週三 <strong>06:30 — 08:45</strong></span>
+          </div>
+        </div>
+        <div class="zoom-info-row" style="margin-top:4px">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          <span>首次加入需輸入會議密碼，密碼請見分會 LINE 群公告</span>
+        </div>
+        <a href="https://us06web.zoom.us/j/87453536034?openExternalBrowser=1" target="_blank" rel="noopener" class="zoom-btn" style="font-size:15px">
+          <svg viewBox="0 0 24 24"><path d="M15 10l4.553-2.069A1 1 0 0121 8.853v6.294a1 1 0 01-1.447.894L15 14M3 8h12a2 2 0 012 2v4a2 2 0 01-2 2H3a2 2 0 01-2-2V10a2 2 0 012-2z"/></svg>
+          加入 Zoom 例會
+        </a>
+        <div class="zoom-note">例會前 15 分鐘開放進入，請提早準備音視訊。</div>
+      </div>
+      <!-- 右：30 秒簡報 -->
+      <div class="zoom-panel">
+        <div class="zoom-panel-label">
+          <svg style="width:13px;height:13px;stroke:rgba(255,255,255,.55);fill:none;stroke-width:2;vertical-align:middle;margin-right:4px" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          Google Slides · 每週更新
+        </div>
+        <div class="zoom-panel-title">本週 30 秒簡報</div>
+        <div class="deadline-badge">&#x23F0; 截止：每週二 23:59 前更新完成（系統鎖稿）</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:20px">
+          每週三例會輪播的個人 30 秒介紹簡報。<br>
+          請在<strong style="color:#fff">週二晚上 23:59</strong>前更新完畢，系統鎖稿後統一整合，週三例會使用。
+        </div>
+        <a href="https://docs.google.com/presentation/d/1azcS-3wmDD087CM6vSymBeqTJuXHfN-SrY1iE2wLrY4/edit?openExternalBrowser=1" target="_blank" rel="noopener" class="slides-btn">
+          <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          更新我的簡報
+        </a>
+        <div class="zoom-note">點擊後開啟 Google Slides 個人頁面（需 Google 帳號）。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ── 分會行事曆（月曆 Grid，2026-06-25）── -->
+<section class="calendar-sec" id="calendar">
+  <div class="container">
+    <div class="sec-head">
+      <span class="red-bar"></span>
+      <h2>分會行事曆</h2>
+      <p>點擊有標記的日期查看活動詳情</p>
+    </div>
+
+    <div class="cal-grid-wrap">
+      <!-- 月份導航列 -->
+      <div class="cal-nav">
+        <button class="cal-nav-btn" id="calPrev" aria-label="上一個月">
+          <svg viewBox="0 0 24 24"><polyline points="15,18 9,12 15,6"/></svg>
+        </button>
+        <div class="cal-month-title" id="calMonthTitle"></div>
+        <button class="cal-nav-btn" id="calNext" aria-label="下一個月">
+          <svg viewBox="0 0 24 24"><polyline points="9,18 15,12 9,6"/></svg>
+        </button>
+      </div>
+      <!-- 星期表頭 -->
+      <div class="cal-dow-header">
+        <div class="cal-dow-cell">日</div>
+        <div class="cal-dow-cell">一</div>
+        <div class="cal-dow-cell">二</div>
+        <div class="cal-dow-cell">三</div>
+        <div class="cal-dow-cell">四</div>
+        <div class="cal-dow-cell">五</div>
+        <div class="cal-dow-cell">六</div>
+      </div>
+      <!-- 日期格（由 JS renderCalGrid() 填入） -->
+      <div class="cal-days" id="calDays"></div>
+    </div>
+
+    <!-- 圖例 -->
+    <div class="cal-legend">
+      <span style="font-size:12px;color:var(--gray-400)">類型：</span>
+      <span class="cal-legend-item"><span class="cal-legend-dot dot-evt"></span>活動</span>
+      <span class="cal-legend-item"><span class="cal-legend-dot dot-msp"></span>MSP 課程</span>
+      <span class="cal-legend-item"><span class="cal-legend-dot dot-guest"></span>來賓日</span>
+      <span class="cal-legend-item"><span class="cal-legend-dot dot-grp"></span>組聚</span>
+      <span class="cal-legend-item"><span class="cal-legend-dot dot-meeting"></span>例會</span>
+      <span style="font-size:12px;color:var(--gray-400);margin-left:4px">· 手機版點日期查看活動名稱</span>
+    </div>
+
+    <!-- 新增活動按鈕 -->
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-top:20px">
+      <a href="https://docs.google.com/spreadsheets/d/1XcSJ_U6i6kIHruHObblZEVQEd7d4M0X8LNGG9Oftgd0/edit?openExternalBrowser=1" target="_blank" rel="noopener" class="btn btn-outline" style="font-size:13px;padding:9px 18px;display:inline-flex;align-items:center;gap:6px;border-color:var(--red);color:var(--red)" data-open-external-browser="1">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        新增 / 編輯活動
+      </a>
+      <span style="font-size:12px;color:var(--gray-400);line-height:1.5">點此在共用試算表新增活動，新增後行事曆會自動更新</span>
+    </div>
+
+    <!-- fetch 失敗提示（預設隱藏，fetch 失敗時顯示） -->
+    <div id="calFetchErr" style="display:none;margin-top:10px;font-size:12px;color:var(--gray-400)">活動資料載入失敗，請稍後重整</div>
+
+  </div>
+</section>
+
+
+<!-- ── 活動詳情（靜態真資料，2026-06-25 更新）── -->
+<section class="activities" id="activities">
+  <div class="container">
+    <div class="sec-head">
+      <span class="red-bar"></span>
+      <h2>活動詳情</h2>
+      <p>近期場次說明 · 報名連結</p>
+    </div>
+    <!-- 動態讀後台 Sheet「活動」分頁（ACTIVITIES_FEED_9X）；fetch 失敗回退寫死那筆 -->
+    <div id="activitiesContent">
+      <div class="ac-loading" style="font-size:14px;color:var(--gray-400);padding:18px 0">活動資料載入中…</div>
+    </div>
+    <p style="font-size:13px;color:var(--gray-400);margin-top:12px;text-align:center">更多活動請見上方行事曆</p>
+    <!-- 第 4c 項：修正編輯按鈕連結，target="_blank" -->
+    <div class="admin-edit">
+      <a href="https://docs.google.com/spreadsheets/d/1XcSJ_U6i6kIHruHObblZEVQEd7d4M0X8LNGG9Oftgd0/edit" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        編輯活動資料（活動組）
+      </a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ── MSP 課程（靜態說明卡，2026-06-25 更新）── -->
+<!-- ── 培訓快訊（TRAINING_FEED_7XK2）：自動同步 BNI 官方培訓頁 ──
+     資料源：https://bntw.niiice-design.com/news-category/training/
+     更新方式：Mac Mini 每日爬蟲 → 寫入 Google Sheet「培訓快訊」分頁 → 前端 fetch GAS API
+     接 GAS 前：先用真資料寫死預覽（trainingFallback），給值後改 fetch。 -->
+<section class="msp" id="msp">
+  <div class="container">
+    <div class="sec-head">
+      <span class="red-bar"></span>
+      <h2>培訓快訊</h2>
+      <p>MSP / PSW / 引薦工作坊等地區培訓 — 自動同步官方排程</p>
+    </div>
+
+    <div class="tf-intro">
+      MSP、簡報技巧（PSW）、引薦工作坊、LTnA 等培訓由 <strong>BNI 地區辦公室統一排課</strong>、跨分會共同上課。點任一場可前往官方頁面看詳情與報名。
+      <a href="https://bntw.niiice-design.com/news-category/training/?openExternalBrowser=1" target="_blank" rel="noopener" class="tf-alllink">看全部培訓 →</a>
+    </div>
+    <!-- 線上 / 線下 分頁標籤（第 5 項：形式篩選） -->
+    <div class="tf-tabs" role="tablist">
+      <button class="tf-tab active" data-mode="all" type="button">全部 <span class="tf-tab-count">0</span></button>
+      <button class="tf-tab" data-mode="online" type="button">線上 Zoom <span class="tf-tab-count">0</span></button>
+      <button class="tf-tab" data-mode="offline" type="button">線下實體 <span class="tf-tab-count">0</span></button>
+    </div>
+    <!-- 第 5 項：培訓類型篩選（動態生成，由 JS 掃卡片標題後產生按鈕） -->
+    <div class="tf-type-tabs" id="tfTypeTabs" role="tablist" aria-label="培訓類型篩選"></div>
+
+    <div id="trainingList" class="tf-list">
+      <div class="tf-loading">培訓資訊載入中…</div>
+    </div>
+
+    <div class="tf-note">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      <span>另可登入 <a href="https://www.mybni.com?openExternalBrowser=1" target="_blank" rel="noopener">www.mybni.com</a>（BNI Connect 帳密）進 BNI Academy 自學線上版 MSP，完成後自動同步培訓記錄。</span>
+    </div>
+    <div class="tf-autonote">系統每日自動同步 BNI 官方培訓頁，無需手動維護</div>
+  </div>
+</section>
+
+
+<!-- ── Power Team 組聚（靜態真資料，2026-06-25 更新）── -->
+<section class="powerteam" id="powerteam">
+  <div class="container">
+    <div class="sec-head">
+      <span class="gold-bar"></span>
+      <h2>Power Team 產業鏈組聚</h2>
+      <p>五條核心鏈 · 跨業整合 · 推薦共同發展</p>
+    </div>
+    <div class="chains" id="chainsContainer">
+      <!-- A 地主改建整合鏈 -->
+      <div class="chain ca">
+        <div class="chain-badge">A</div>
+        <div class="chain-name">A 地主改建整合鏈</div>
+        <!-- 第 6 項：移除「地點：Zoom」重複行，下次組聚那行已含 Zoom -->
+        <div class="chain-meta">
+          <div><strong>召集人：</strong>柳慧燕</div>
+          <div><strong>下次組聚：</strong><span class="chain-next" data-chain="A">（時間待定）</span></div>
+        </div>
+      </div>
+      <!-- B 老屋現金流升級鏈 -->
+      <div class="chain cb">
+        <div class="chain-badge">B</div>
+        <div class="chain-name">B 老屋現金流升級鏈</div>
+        <div class="chain-meta">
+          <div><strong>召集人：</strong>陳靖薇</div>
+          <div><strong>下次組聚：</strong><span class="chain-next" data-chain="B">（時間待定）</span></div>
+        </div>
+      </div>
+      <!-- C 高齡安居 × 資產傳承產業鏈 -->
+      <div class="chain cc">
+        <div class="chain-badge">C</div>
+        <div class="chain-name">C 高齡安居 × 資產傳承產業鏈</div>
+        <div class="chain-meta">
+          <div><strong>召集人：</strong>王春雄 Jayson</div>
+          <div><strong>下次組聚：</strong><span class="chain-next" data-chain="C">（時間待定）</span></div>
+        </div>
+      </div>
+      <!-- D 商用不動產升級鏈 -->
+      <div class="chain cd">
+        <div class="chain-badge">D</div>
+        <div class="chain-name">D 商用不動產升級鏈</div>
+        <div class="chain-meta">
+          <div><strong>召集人：</strong>陳向柔 Naomi</div>
+          <div><strong>下次組聚：</strong><span class="chain-next" data-chain="D">（時間待定）</span></div>
+        </div>
+      </div>
+      <!-- E 房產客戶成長鏈 -->
+      <div class="chain ce">
+        <div class="chain-badge">E</div>
+        <div class="chain-name">E 房產客戶成長鏈</div>
+        <div class="chain-meta">
+          <div><strong>召集人：</strong>張瓊安</div>
+          <div><strong>下次組聚：</strong><span class="chain-next" data-chain="E">（時間待定）</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="admin-edit" style="margin-top:24px">
+      <a href="#" style="color:rgba(255,255,255,.35)" onmouseover="this.style.color='rgba(255,255,255,.75)'" onmouseout="this.style.color='rgba(255,255,255,.35)'">
+        <svg viewBox="0 0 24 24" style="stroke:currentColor"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        編輯組聚時間（各鏈組長）
+      </a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ── 夥伴名冊（真資料 56 人，ROSTER_4ZQ8TY2M，2026-06-25）── -->
+<section class="roster" id="roster">
+  <div class="container">
+    <div class="sec-head">
+      <span class="red-bar"></span>
+      <h2>夥伴名冊</h2>
+      <p>現任正式會員一覽</p>
+    </div>
+    <div class="search-wrap">
+      <div class="search-bar">
+        <svg class="srch-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="rSearch" placeholder="搜尋姓名或專業..." oninput="filterR()">
+      </div>
+      <div class="roster-ct">顯示 <span id="rv">56</span> / 56 位夥伴</div>
+    </div>
+    <div class="tbl-wrap">
+      <table id="rTbl">
+        <!-- 第 7 項：加職務欄顯示位置（資料從後台 Sheet 名冊分頁「職務」欄讀取，有值才顯示標籤） -->
+        <thead><tr><th>編號</th><th>姓名</th><th>專業別</th></tr></thead>
+        <tbody>
+          <!-- 職務標籤：data-role="職務" 有值則 JS 自動渲染彩色 pill；後台補職務後不用改 HTML -->
+          <tr data-n="王常殷Hubert" data-p="都更危老建設-新竹地區" data-role="創會主席"><td><span class="m-num">01</span></td><td><span class="m-name">王常殷 Hubert</span></td><td><span class="m-prof">都更危老建設－新竹地區</span></td></tr>
+          <tr data-n="藍堂嘉" data-p="包租代管平台" data-role="副主席"><td><span class="m-num">02</span></td><td><span class="m-name">藍堂嘉</span></td><td><span class="m-prof">包租代管平台</span></td></tr>
+          <tr data-n="劉羿岑" data-p="節能減碳顧問" data-role=""><td><span class="m-num">03</span></td><td><span class="m-name">劉羿岑</span></td><td><span class="m-prof">節能減碳顧問</span></td></tr>
+          <tr data-n="陳向柔Naomi" data-p="商業空間室內設計-新竹以北" data-role="活動協調"><td><span class="m-num">04</span></td><td><span class="m-name">陳向柔 Naomi</span></td><td><span class="m-prof">商業空間室內設計－新竹以北</span></td></tr>
+          <tr data-n="劉恩秀Joan" data-p="人力派遣" data-role=""><td><span class="m-num">05</span></td><td><span class="m-name">劉恩秀 Joan</span></td><td><span class="m-prof">人力派遣</span></td></tr>
+          <tr data-n="周以仁" data-p="仲介經紀人-台北市大安區" data-role=""><td><span class="m-num">06</span></td><td><span class="m-name">周以仁</span></td><td><span class="m-prof">仲介經紀人－台北市大安區</span></td></tr>
+          <tr data-n="張瓊安" data-p="仲介經紀人-新北市三重蘆洲新莊" data-role="資訊長"><td><span class="m-num">07</span></td><td><span class="m-name">張瓊安</span></td><td><span class="m-prof">仲介經紀人－新北市三重、蘆洲、新莊</span></td></tr>
+          <tr data-n="高翊書Eason" data-p="都更危老建設-台北市信義區" data-role=""><td><span class="m-num">08</span></td><td><span class="m-name">高翊書 Eason</span></td><td><span class="m-prof">都更危老建設－台北市信義區</span></td></tr>
+          <tr data-n="王寶佳Renee" data-p="置產投資客-台北市萬華區" data-role=""><td><span class="m-num">09</span></td><td><span class="m-name">王寶佳 Renee</span></td><td><span class="m-prof">置產投資客－台北市萬華區</span></td></tr>
+          <tr data-n="王春雄Jayson" data-p="理財規劃顧問-雙北" data-role="秘書財務"><td><span class="m-num">10</span></td><td><span class="m-name">王春雄 Jayson</span></td><td><span class="m-prof">理財規劃顧問－雙北</span></td></tr>
+          <tr data-n="陳靖薇" data-p="包租代管-台北市內湖松山區" data-role="教育協調"><td><span class="m-num">11</span></td><td><span class="m-name">陳靖薇</span></td><td><span class="m-prof">包租代管－台北市內湖、松山區</span></td></tr>
+          <tr data-n="蘇瓜雅" data-p="財務管理-不動產聯合開發-台北市" data-role=""><td><span class="m-num">12</span></td><td><span class="m-name">蘇瓜雅</span></td><td><span class="m-prof">財務管理－不動產聯合開發－台北市</span></td></tr>
+          <tr data-n="施宜妏" data-p="金融業-法務顧問" data-role=""><td><span class="m-num">13</span></td><td><span class="m-name">施宜妏</span></td><td><span class="m-prof">金融業－法務顧問</span></td></tr>
+          <tr data-n="莊大永" data-p="地主召集人-台東市-自主更新" data-role=""><td><span class="m-num">14</span></td><td><span class="m-name">莊大永</span></td><td><span class="m-prof">地主召集人－台東市－自主更新</span></td></tr>
+          <tr data-n="莊涵勝" data-p="仲介經紀人-台北市信義區" data-role=""><td><span class="m-num">15</span></td><td><span class="m-name">莊涵勝</span></td><td><span class="m-prof">仲介經紀人－台北市信義區</span></td></tr>
+          <tr data-n="黃冠霖" data-p="證券交易系統-軟體工程師" data-role=""><td><span class="m-num">16</span></td><td><span class="m-name">黃冠霖</span></td><td><span class="m-prof">證券交易系統－軟體工程師</span></td></tr>
+          <tr data-n="諸紀平" data-p="住宅室內設計裝修-台北市" data-role=""><td><span class="m-num">17</span></td><td><span class="m-name">諸紀平</span></td><td><span class="m-prof">住宅室內設計裝修－台北市</span></td></tr>
+          <tr data-n="陳秒螢Emma" data-p="房屋貸款-新竹以北" data-role=""><td><span class="m-num">18</span></td><td><span class="m-name">陳秒螢 Emma</span></td><td><span class="m-prof">房屋貸款－新竹以北</span></td></tr>
+          <tr data-n="李艾莉Aili" data-p="工業蒸氣熱能系統" data-role=""><td><span class="m-num">19</span></td><td><span class="m-name">李艾莉 Aili</span></td><td><span class="m-prof">工業蒸氣熱能系統</span></td></tr>
+          <tr data-n="莊慧劍" data-p="置產投資客-台北市信義南港區" data-role=""><td><span class="m-num">20</span></td><td><span class="m-name">莊慧劍</span></td><td><span class="m-prof">置產投資客－台北市信義、南港區</span></td></tr>
+          <tr data-n="吳翊辰" data-p="地政士-中彰投雲嘉南" data-role="導師協調"><td><span class="m-num">21</span></td><td><span class="m-name">吳翊辰</span></td><td><span class="m-prof">地政士－中彰投雲嘉南</span></td></tr>
+          <tr data-n="黃郁婷" data-p="金融業-財務" data-role=""><td><span class="m-num">22</span></td><td><span class="m-name">黃郁婷</span></td><td><span class="m-prof">金融業－財務</span></td></tr>
+          <tr data-n="林必涵" data-p="農地廠房收租-台中" data-role=""><td><span class="m-num">23</span></td><td><span class="m-name">林必涵</span></td><td><span class="m-prof">農地廠房收租－台中</span></td></tr>
+          <tr data-n="蔡明璋" data-p="合法隔套置產投資-台北市大安中正區" data-role=""><td><span class="m-num">24</span></td><td><span class="m-name">蔡明璋</span></td><td><span class="m-prof">合法隔套置產投資－台北市大安、中正區</span></td></tr>
+          <tr data-n="王佳筠" data-p="建案代銷專案管理-北部" data-role=""><td><span class="m-num">25</span></td><td><span class="m-name">王佳筠</span></td><td><span class="m-prof">建案代銷專案管理－北部</span></td></tr>
+          <tr data-n="楊之慧" data-p="金融業-後台交割" data-role=""><td><span class="m-num">26</span></td><td><span class="m-name">楊之慧</span></td><td><span class="m-prof">金融業－後台交割</span></td></tr>
+          <tr data-n="陳黎玲Jossie" data-p="會展空間裝修設計-新竹以北" data-role=""><td><span class="m-num">27</span></td><td><span class="m-name">陳黎玲 Jossie</span></td><td><span class="m-prof">會展空間裝修設計－新竹以北</span></td></tr>
+          <tr data-n="林佩君" data-p="仲介經紀人-台北市中山區" data-role=""><td><span class="m-num">28</span></td><td><span class="m-name">林佩君</span></td><td><span class="m-prof">仲介經紀人－台北市中山區</span></td></tr>
+          <tr data-n="林媜媁Wei" data-p="資通訊業-財務分析師" data-role=""><td><span class="m-num">29</span></td><td><span class="m-name">林媜媁 Wei</span></td><td><span class="m-prof">資通訊業－財務分析師</span></td></tr>
+          <tr data-n="李慧如Eva" data-p="再造回收過濾鐵網太空包" data-role=""><td><span class="m-num">30</span></td><td><span class="m-name">李慧如 Eva</span></td><td><span class="m-prof">再造回收過濾鐵網、太空包</span></td></tr>
+          <tr data-n="凃馨文Wen" data-p="家電B2B" data-role=""><td><span class="m-num">31</span></td><td><span class="m-name">凃馨文 Wen</span></td><td><span class="m-prof">家電 B2B</span></td></tr>
+          <tr data-n="柳慧燕" data-p="危老都更推動建築師-台北市" data-role=""><td><span class="m-num">32</span></td><td><span class="m-name">柳慧燕</span></td><td><span class="m-prof">危老都更推動建築師－台北市</span></td></tr>
+          <tr data-n="宋馨巧" data-p="韓語線上家教" data-role=""><td><span class="m-num">33</span></td><td><span class="m-name">宋馨巧</span></td><td><span class="m-prof">韓語線上家教</span></td></tr>
+          <tr data-n="張瑜晏" data-p="不動產估價與鑑定-雙北桃園" data-role=""><td><span class="m-num">34</span></td><td><span class="m-name">張瑜晏</span></td><td><span class="m-prof">不動產估價與鑑定－雙北、桃園</span></td></tr>
+          <tr data-n="陳昭男Johnny" data-p="都更土地開發-台北市" data-role="成長協調"><td><span class="m-num">35</span></td><td><span class="m-name">陳昭男 Johnny</span></td><td><span class="m-prof">都更土地開發－台北市</span></td></tr>
+          <tr data-n="包育翎" data-p="地主召集人-高雄市鳳山區" data-role=""><td><span class="m-num">36</span></td><td><span class="m-name">包育翎</span></td><td><span class="m-prof">地主召集人－高雄市鳳山區</span></td></tr>
+          <tr data-n="蔡岱達" data-p="磁磚經銷商-台中以北" data-role=""><td><span class="m-num">37</span></td><td><span class="m-name">蔡岱達</span></td><td><span class="m-prof">磁磚經銷商－台中以北</span></td></tr>
+          <tr data-n="蔡淯思Mina" data-p="ERP專案管理" data-role=""><td><span class="m-num">38</span></td><td><span class="m-name">蔡淯思 Mina</span></td><td><span class="m-prof">ERP 專案管理</span></td></tr>
+          <tr data-n="詹媛婷" data-p="房貸減壓-台北市" data-role=""><td><span class="m-num">39</span></td><td><span class="m-name">詹媛婷</span></td><td><span class="m-prof">房貸減壓－台北市</span></td></tr>
+          <tr data-n="王雅慧Peggy" data-p="置產投資客-台北市中山大同區" data-role=""><td><span class="m-num">40</span></td><td><span class="m-name">王雅慧 Peggy</span></td><td><span class="m-prof">置產投資客－台北市中山、大同區</span></td></tr>
+          <tr data-n="何俊彥" data-p="老屋翻新包租代管-台北市" data-role=""><td><span class="m-num">41</span></td><td><span class="m-name">何俊彥</span></td><td><span class="m-prof">老屋翻新包租代管－台北市</span></td></tr>
+          <tr data-n="周育慈Anna" data-p="包租代管-台北市大安區" data-role=""><td><span class="m-num">42</span></td><td><span class="m-name">周育慈 Anna</span></td><td><span class="m-prof">包租代管－台北市大安區</span></td></tr>
+          <tr data-n="洪嘉璿左左" data-p="MMT天賦諮詢師" data-role=""><td><span class="m-num">43</span></td><td><span class="m-name">洪嘉璿左左</span></td><td><span class="m-prof">MMT 天賦諮詢師</span></td></tr>
+          <tr data-n="鍾智媛Fiona" data-p="商務中心-台北市大安中山區" data-role=""><td><span class="m-num">44</span></td><td><span class="m-name">鍾智媛 Fiona</span></td><td><span class="m-prof">商務中心－台北市大安、中山區</span></td></tr>
+          <tr data-n="黃建嘉" data-p="仲介經紀人-台北市大同區" data-role=""><td><span class="m-num">45</span></td><td><span class="m-name">黃建嘉</span></td><td><span class="m-prof">仲介經紀人－台北市大同區</span></td></tr>
+          <tr data-n="林中群" data-p="鋼結構防蝕工程" data-role=""><td><span class="m-num">46</span></td><td><span class="m-name">林中群</span></td><td><span class="m-prof">鋼結構防蝕工程</span></td></tr>
+          <tr data-n="蔡馨葳Mandy" data-p="人壽財務規劃-桃園" data-role="來賓接待"><td><span class="m-num">47</span></td><td><span class="m-name">蔡馨葳 Mandy</span></td><td><span class="m-prof">人壽財務規劃－桃園</span></td></tr>
+          <tr data-n="林晏伃" data-p="都更長照建築師-台北市" data-role=""><td><span class="m-num">48</span></td><td><span class="m-name">林晏伃</span></td><td><span class="m-prof">都更長照建築師－台北市</span></td></tr>
+          <tr data-n="李瑞雲Grace" data-p="置產投資客-台北市松山區" data-role=""><td><span class="m-num">49</span></td><td><span class="m-name">李瑞雲 Grace</span></td><td><span class="m-prof">置產投資客－台北市松山區</span></td></tr>
+          <tr data-n="謝夢瑰Dian" data-p="高資產房地產顧問-台北" data-role=""><td><span class="m-num">50</span></td><td><span class="m-name">謝夢瑰 Dian</span></td><td><span class="m-prof">高資產房地產顧問－台北</span></td></tr>
+          <tr data-n="楊淑媛" data-p="地主召集人-台北市士林區" data-role=""><td><span class="m-num">51</span></td><td><span class="m-name">楊淑媛</span></td><td><span class="m-prof">地主召集人－台北市士林區</span></td></tr>
+          <tr data-n="張怡蘋April" data-p="工程顧問" data-role=""><td><span class="m-num">52</span></td><td><span class="m-name">張怡蘋 April</span></td><td><span class="m-prof">工程顧問</span></td></tr>
+          <tr data-n="張耕豪" data-p="大板磚工程-連工帶料" data-role=""><td><span class="m-num">53</span></td><td><span class="m-name">張耕豪</span></td><td><span class="m-prof">大板磚工程－連工帶料</span></td></tr>
+          <tr data-n="陳品攸" data-p="商業法律顧問" data-role=""><td><span class="m-num">54</span></td><td><span class="m-name">陳品攸</span></td><td><span class="m-prof">商業法律顧問</span></td></tr>
+          <tr data-n="吳念鎧" data-p="仲介經紀人-大新竹區" data-role=""><td><span class="m-num">55</span></td><td><span class="m-name">吳念鎧</span></td><td><span class="m-prof">仲介經紀人－大新竹區</span></td></tr>
+          <tr data-n="沈瑞婷" data-p="智慧物流導入顧問" data-role=""><td><span class="m-num">56</span></td><td><span class="m-name">沈瑞婷</span></td><td><span class="m-prof">智慧物流導入顧問</span></td></tr>
+        </tbody>
+      </table>
+      <div class="no-result" id="noRes">找不到符合的夥伴，請試試其他關鍵字。</div>
+    </div>
+    <!-- 第 4c 項：名冊編輯按鈕同步修正 -->
+    <div class="admin-edit">
+      <a href="https://docs.google.com/spreadsheets/d/1XcSJ_U6i6kIHruHObblZEVQEd7d4M0X8LNGG9Oftgd0/edit" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        編輯名冊（資訊組）
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="f-brand">BNI 華都更分會</div>
+        <div class="f-tag">台灣第一個以都市更新為核心的 BNI 線上分會。<br>整合地主、設計、法律、金融，共創都更新機會。</div>
+        <div class="f-badge"><span class="f-dot"></span>BNI Taiwan 認證分會 · Hua Urban+ Chapter</div>
+      </div>
+      <div>
+        <div class="f-col-title">快速連結</div>
+        <ul class="f-links">
+          <li><a href="#calendar">分會行事曆</a></li>
+          <li><a href="#activities">活動詳情</a></li>
+          <li><a href="#msp">培訓快訊</a></li>
+          <li><a href="#powerteam">Power Team</a></li>
+          <li><a href="#zoom">Zoom 例會</a></li>
+          <li><a href="#roster">夥伴名冊</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="f-col-title">聯絡資訊</div>
+        <ul class="f-links">
+          <li><a href="https://bni.tw?openExternalBrowser=1" target="_blank" rel="noopener">BNI Taiwan 官網</a></li>
+          <li><a href="https://www.bniconnectglobal.com?openExternalBrowser=1" target="_blank" rel="noopener">BNI Connect 登入</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="f-bottom">
+      <div class="f-copy">&copy; 2026 BNI 華都更分會 · Hua Urban+ Chapter · 夥伴資訊入口</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ─────────────────────────────────────────────
+// 四個動態 fetch 區塊已改為靜態 HTML（2026-06-25）
+// GAS fetch 函式全部移除，不再有 loadCalendar /
+// loadActivities / loadMSP / loadPowerTeam。
+// ─────────────────────────────────────────────
+
+// ─────────────────────────────────────────────
+// fetchJSON — 共用 fetch helper（FETCHJSON_HELPER_9QW3）
+// sessionStorage 快取（TTL 預設 10 分鐘）+ AbortController 10 秒逾時。
+// 快取 key 帶版本前綴，未來若欄位格式變動只要改前綴即可讓舊快取失效。
+// ─────────────────────────────────────────────
+var FETCHJSON_CACHE_PREFIX = 'huv1:';
+function fetchJSON(url, cacheKey, ttlMs){
+  ttlMs = ttlMs || 10 * 60 * 1000; // 預設 10 分鐘
+  var fullKey = FETCHJSON_CACHE_PREFIX + cacheKey;
+  // 讀快取：sessionStorage 可能滿或被停用（無痕模式），try/catch 包住，失敗當沒快取
+  try{
+    var cached = sessionStorage.getItem(fullKey);
+    if(cached){
+      var parsed = JSON.parse(cached);
+      if(parsed && typeof parsed.t === 'number' && (Date.now() - parsed.t) < ttlMs){
+        return Promise.resolve(parsed.d);
+      }
+    }
+  }catch(e){ /* sessionStorage 不可用，忽略，照常 fetch */ }
+
+  var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  var timer = controller ? setTimeout(function(){ controller.abort(); }, 10000) : null;
+
+  return fetch(url, controller ? { signal: controller.signal } : undefined)
+    .then(function(res){
+      if(timer) clearTimeout(timer);
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    })
+    .then(function(data){
+      try{
+        sessionStorage.setItem(fullKey, JSON.stringify({ t: Date.now(), d: data }));
+      }catch(e){ /* 存快取失敗（額滿/停用）不影響本次資料回傳 */ }
+      return data;
+    })
+    .catch(function(err){
+      if(timer) clearTimeout(timer);
+      throw err;
+    });
+}
+
+// ─────────────────────────────────────────────
+// 月曆 Grid — 動態讀 Google Sheet（DYNCAL_7RP2MK4E）
+// ─────────────────────────────────────────────
+var DOT_CLASS = { '活動':'dot-evt', 'MSP':'dot-msp', '來賓日':'dot-guest', '組聚':'dot-grp', '例會':'dot-meeting' };
+// 每週三例會常數（不進 Sheet）
+var WED_MEETING = { type:'例會', name:'線上例會 · 週三 06:30–08:45 · Zoom', link:'#zoom' };
+var ZH_MONTHS = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+var GAS_CAL_URL = 'https://script.google.com/macros/s/AKfycbyCL7tHMfIkHHAhL0WDX-TMdMfmxNdWkVkGRhdaAjESgmUZ3-eJKJ7YsOi1IS-RMxW4/exec';
+
+// 全域活動陣列，fetch 後填入，格式：[{ date:'YYYY-MM-DD', type, name, link }]
+var CAL_EVENTS = [];
+
+// 預設今天所在月份
+var _now = new Date();
+var calCur = { y: _now.getFullYear(), m: _now.getMonth() }; // m=0-indexed
+
+function calEventsForDate(y, m, d) {
+  var key = y + '-' + (m+1<10?'0':'') + (m+1) + '-' + (d<10?'0':'') + d;
+  return CAL_EVENTS.filter(function(e){ return e.date === key; });
+}
+
+function renderCalGrid() {
+  var y = calCur.y, m = calCur.m;
+  var today = new Date();
+  var todayKey = today.getFullYear() + '-' +
+    (today.getMonth()+1<10?'0':'') + (today.getMonth()+1) + '-' +
+    (today.getDate()<10?'0':'') + today.getDate();
+
+  document.getElementById('calMonthTitle').textContent = y + ' 年 ' + ZH_MONTHS[m];
+
+  var firstDow = new Date(y, m, 1).getDay();
+  var daysInMonth = new Date(y, m+1, 0).getDate();
+  var container = document.getElementById('calDays');
+
+  document.querySelectorAll('.cal-day.tip-open').forEach(function(el){
+    el.classList.remove('tip-open');
+  });
+
+  var html = '';
+  for (var i = 0; i < firstDow; i++) {
+    html += '<div class="cal-day empty"><span class="cal-day-num"></span></div>';
+  }
+  for (var d = 1; d <= daysInMonth; d++) {
+    var dateKey = y + '-' + (m+1<10?'0':'') + (m+1) + '-' + (d<10?'0':'') + d;
+    var evts = calEventsForDate(y, m, d);
+    // 每週三自動插入例會（疊加在 Sheet 資料前，Sheet 資料不被覆蓋）
+    var dow = new Date(y, m, d).getDay();
+    if (dow === 3) evts = [WED_MEETING].concat(evts);
+    var isToday = (dateKey === todayKey);
+    var hasEvt = evts.length > 0;
+
+    var cls = 'cal-day';
+    if (isToday) cls += ' today';
+    if (hasEvt)  cls += ' has-event';
+
+    var evtHtml = '';
+    var tipLines = [];
+    if (hasEvt) {
+      evtHtml = '<div class="cal-evt-list">';
+      evts.forEach(function(e) {
+        var dc = DOT_CLASS[e.type] || 'dot-evt';
+        var safeName = String(e.name).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        evtHtml += '<div class="cal-evt-item">' +
+          '<span class="cal-evt-dot ' + dc + '"></span>' +
+          '<span class="cal-evt-name">' + safeName + '</span>' +
+          '</div>';
+        tipLines.push(safeName);
+      });
+      evtHtml += '</div>';
+    }
+    var tipHtml = hasEvt ? '<div class="cal-tooltip">' + tipLines.join('<br>') + '</div>' : '';
+
+    var addBtnHtml = (!hasEvt) ?
+      '<button class="cal-add-btn" aria-label="新增活動" title="新增活動">+</button>' : '';
+
+    html += '<div class="' + cls + '" data-date="' + dateKey + '">' +
+      '<span class="cal-day-num">' + d + '</span>' +
+      evtHtml + tipHtml + addBtnHtml + '</div>';
+  }
+
+  container.innerHTML = html;
+
+  container.querySelectorAll('.cal-day.has-event').forEach(function(el) {
+    el.addEventListener('click', function(ev) {
+      ev.stopPropagation();
+      var dateKey = el.getAttribute('data-date');
+      var sheetEvts = CAL_EVENTS.filter(function(e){ return e.date === dateKey; });
+      var dow = new Date(dateKey).getDay();
+      // 純例會格（週三且 Sheet 無其他資料）→ 直接滑到例會專區
+      if (dow === 3 && sheetEvts.length === 0) {
+        var zoomSec = document.getElementById('zoom');
+        if (zoomSec) zoomSec.scrollIntoView({ behavior:'smooth', block:'start' });
+        return;
+      }
+      // 其他情況（有 Sheet 活動、或週三同時有 Sheet 資料）→ 顯示 tooltip
+      var isOpen = el.classList.contains('tip-open');
+      container.querySelectorAll('.cal-day.tip-open').forEach(function(x){ x.classList.remove('tip-open'); });
+      if (!isOpen) el.classList.add('tip-open');
+    });
+  });
+
+  document.addEventListener('click', function() {
+    container.querySelectorAll('.cal-day.tip-open').forEach(function(x){ x.classList.remove('tip-open'); });
+  });
+}
+
+// fetch GAS，回來後重繪月曆
+function fetchCalEvents() {
+  var url = GAS_CAL_URL + '?sheet=' + encodeURIComponent('行事曆');
+  fetchJSON(url, 'calendar-行事曆', 10 * 60 * 1000)
+    .then(function(json) {
+      if (!json.ok || !Array.isArray(json.data)) throw new Error('bad payload');
+      CAL_EVENTS = json.data.map(function(row) {
+        return {
+          date: (row['日期'] || '').substring(0, 10),
+          type: (row['類型'] || '').trim(),
+          name: row['名稱'] || '',
+          link: row['連結'] || ''
+        };
+      }).filter(function(e){ return e.date.length === 10; });
+      renderCalGrid(); // 資料到了重繪，點補上彩色點
+    })
+    .catch(function() {
+      // 月曆保持當月空格，顯示提示
+      document.getElementById('calFetchErr').style.display = 'block';
+    });
+}
+
+// 切月按鈕 + 初始化
+document.addEventListener('DOMContentLoaded', function() {
+  renderCalGrid(); // 先畫空月曆（不等 fetch）
+  fetchCalEvents(); // 非同步 fetch，回來自動重繪
+
+  document.getElementById('calPrev').addEventListener('click', function() {
+    calCur.m--;
+    if (calCur.m < 0) { calCur.m = 11; calCur.y--; }
+    renderCalGrid();
+  });
+  document.getElementById('calNext').addEventListener('click', function() {
+    calCur.m++;
+    if (calCur.m > 11) { calCur.m = 0; calCur.y++; }
+    renderCalGrid();
+  });
+
+  // 事件委派：點「+」按鈕開啟新增活動彈窗（CAL_ADDBTN_K2PX9W3M）
+  // 綁在 calDays 上，只綁一次，渲染切月都不需重綁
+  document.getElementById('calDays').addEventListener('click', function(ev) {
+    var btn = ev.target.closest('.cal-add-btn');
+    if (btn) {
+      ev.stopPropagation();
+      openAddEvtModal();
+    }
+  });
+});
+
+// ─────────────────────────────────────────────
+// Hero Carousel（CAROUSEL_XQ47W9LB）
+// 三張輪播：影片 / 董顧 / 九長
+// 影片 slide（index 0）停留 8 秒，其餘 4.5 秒
+// 播放中暫停輪播（VIDPAUSE_YT_API）：
+//   YouTube IFrame Player API 監聽 onStateChange
+//   PLAYING → clearInterval + videoPlaying=true
+//   PAUSED/ENDED → videoPlaying=false + 重啟計時器
+// ─────────────────────────────────────────────
+(function(){
+  var slides = document.querySelectorAll('#heroCarousel .hero-slide');
+  var dots   = document.querySelectorAll('#heroCarousel .carousel-dot');
+  var cur = 0, total = slides.length, timer = null;
+  var videoPlaying = false; // 旗標：影片是否正在播放
+
+  // 若 data-img 有值，設 background-image
+  slides.forEach(function(s){
+    var img = s.getAttribute('data-img');
+    if(img){ s.style.backgroundImage = 'url("' + img + '")'; }
+  });
+
+  function go(n){
+    // 雙保險：影片播放中不強制推進
+    if(videoPlaying){ return; }
+    slides[cur].classList.remove('active');
+    dots[cur].classList.remove('active');
+    cur = (n + total) % total;
+    slides[cur].classList.add('active');
+    dots[cur].classList.add('active');
+    resetTimer();
+  }
+
+  function resetTimer(){
+    clearInterval(timer);
+    if(videoPlaying){ return; } // 播放中不啟動計時器
+    // 影片 slide（index 0）停留 8 秒，讓使用者有時間點播
+    var delay = (cur === 0) ? 8000 : 4500;
+    timer = setInterval(function(){ go(cur + 1); }, delay);
+  }
+
+  window.heroCarouselMove = function(dir){ go(cur + dir); };
+  window.heroCarouselGo   = function(n){ go(n); };
+
+  resetTimer();
+
+  // ── 影片封面點擊載入（VIDCOVER_KQ8F3T2M）──
+  // 策略：點擊封面 → 注入 iframe(autoplay) → 動態 new YT.Player 監聽狀態
+  // 若 YT API 尚未就緒，先 clearInterval 停輪播（保底：使用者點了就是要看影片）
+  window.ytCoverPlay = function(){
+    var wrap = document.getElementById('ytSlideWrap');
+    var cover = document.getElementById('ytCover');
+    if(!wrap || !cover){ return; }
+
+    // 立即停輪播（保底：不等 YT.Player 回調）
+    videoPlaying = true;
+    clearInterval(timer);
+
+    // 移除封面，注入 iframe
+    cover.remove();
+    var iframe = document.createElement('iframe');
+    iframe.id = 'ytHeroPlayer';
+    iframe.src = 'https://www.youtube.com/embed/h_OW0u4A59k?rel=0&autoplay=1&enablejsapi=1&origin=https://wuohome.github.io';
+    iframe.title = '華都更 - 要讓都更真正動起來';
+    iframe.setAttribute('frameborder','0');
+    iframe.setAttribute('allow','accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+    iframe.setAttribute('allowfullscreen','');
+    wrap.appendChild(iframe);
+
+    // 嘗試用 YT.Player API 精細監聽（暫停/結束時重啟輪播）
+    // 若 API 已載好直接用；未載好等 onYouTubeIframeAPIReady 補呼叫
+    function initYtPlayer(){
+      if(typeof YT === 'undefined' || typeof YT.Player === 'undefined'){ return false; }
+      new YT.Player('ytHeroPlayer', {
+        events:{
+          onStateChange: function(e){
+            if(e.data === YT.PlayerState.PLAYING){
+              videoPlaying = true;
+              clearInterval(timer);
+            } else if(e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED){
+              videoPlaying = false;
+              resetTimer();
+            }
+          }
+        }
+      });
+      return true;
+    }
+
+    if(!initYtPlayer()){
+      // API 尚未載好，先載入 script；ready 後初始化
+      if(!document.getElementById('yt-api-script')){
+        var s = document.createElement('script');
+        s.id = 'yt-api-script';
+        s.src = 'https://www.youtube.com/iframe_api';
+        document.head.appendChild(s);
+      }
+      window.onYouTubeIframeAPIReady = function(){ initYtPlayer(); };
+    }
+  };
+})();
+
+// ─────────────────────────────────────────────
+// Mobile nav
+// ─────────────────────────────────────────────
+function toggleMNav(){document.getElementById('mNav').classList.toggle('open')}
+function closeMNav(){document.getElementById('mNav').classList.remove('open')}
+
+// ─────────────────────────────────────────────
+// Roster search（假資料，不 fetch）
+// ─────────────────────────────────────────────
+function filterR(){
+  var q=document.getElementById('rSearch').value.trim().toLowerCase();
+  var rows=document.querySelectorAll('#rTbl tbody tr');
+  var v=0;
+  rows.forEach(function(r){
+    var n=(r.dataset.n||'').toLowerCase();
+    var p=(r.dataset.p||'').toLowerCase();
+    var g=(r.querySelector('.m-grp')||{textContent:''}).textContent.toLowerCase();
+    if(!q||n.includes(q)||p.includes(q)||g.includes(q)){r.classList.remove('hidden');v++}
+    else{r.classList.add('hidden')}
+  });
+  document.getElementById('rv').textContent=v;
+  document.getElementById('noRes').style.display=v===0?'block':'none';
+}
+
+// ─────────────────────────────────────────────
+// Side Nav scrollspy v4 — 極簡文字錨點 (SIDENAV4_MNQ7VK)
+// 砍掉 v3 的 updateProgress（量 offsetTop 算進度條高度），active 全交給 CSS
+// ⚠️ 包 DOMContentLoaded：side-nav HTML 在本 script 之後才出現，
+//    直接 query 會抓到 0 個 item 而靜默失效（v3 舊 bug，v4 修正）
+// ─────────────────────────────────────────────
+function initSideNav(){
+  var snItems = document.querySelectorAll('.side-nav-item[data-target]');
+  if(!snItems.length) return;
+
+  function snActivate(id){
+    snItems.forEach(function(a){
+      a.classList.toggle('sn-active', a.dataset.target === id);
+    });
+  }
+
+  var snSections = Array.from(snItems).map(function(a){
+    return document.getElementById(a.dataset.target);
+  }).filter(Boolean);
+
+  // IntersectionObserver: 偵測哪個 section 進入視窗上半部
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        snActivate(entry.target.id);
+      }
+    });
+  },{rootMargin:'-10% 0px -60% 0px', threshold:0});
+
+  snSections.forEach(function(s){ observer.observe(s); });
+
+  // 初始化（頁面剛載入時，第一個 section 預設 active）
+  if(snSections.length) snActivate(snSections[0].id);
+
+  // 點擊平滑捲動
+  snItems.forEach(function(a){
+    a.addEventListener('click', function(e){
+      e.preventDefault();
+      var el = document.getElementById(a.dataset.target);
+      if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  });
+}
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', initSideNav);
+}else{
+  initSideNav();
+}
+
+// ─────────────────────────────────────────────
+// 培訓快訊 (TRAINING_FEED_7XK2)
+// 資料源 BNI 官方培訓頁，由 Mac Mini 每日爬蟲寫進 Google Sheet「培訓快訊」。
+// 接 GAS 後：把 TRAINING_API 填上 GAS web app URL，會自動改 fetch；
+// 失敗或未填則用 trainingFallback（2026-06-25 抓的真資料）。
+// ─────────────────────────────────────────────
+var TRAINING_API = 'https://script.google.com/macros/s/AKfycbyCL7tHMfIkHHAhL0WDX-TMdMfmxNdWkVkGRhdaAjESgmUZ3-eJKJ7YsOi1IS-RMxW4/exec?sheet=培訓快訊';
+// mode：'online'=線上 Zoom / 'offline'=線下實體（爬蟲依官方內頁「培訓地址」自動判斷）
+var trainingFallback = [
+  {title:'新北市西B區成功會員培訓初階MSP', link:'https://bntw.niiice-design.com/news/msp-4/', date:'2026-06-29', mode:'online'},
+  {title:'跨分會組聚培訓', link:'https://bntw.niiice-design.com/news/group-training-14/', date:'2026-07-06', mode:'online'},
+  {title:'簡報技巧工作坊PSW培訓', link:'https://bntw.niiice-design.com/news/psw-2/', date:'2026-07-08', mode:'offline'},
+  {title:'引薦工作坊', link:'https://bntw.niiice-design.com/news/recommend-3/', date:'2026-07-13', mode:'online'},
+  {title:'LTnA培訓', link:'https://bntw.niiice-design.com/news/ltna-4-2/', date:'2026-07-14', mode:'online'},
+  {title:'跨分會組聚培訓', link:'https://bntw.niiice-design.com/news/group-training-15/', date:'2026-07-20', mode:'online'},
+  {title:'一對一工作坊', link:'https://bntw.niiice-design.com/news/one-to-one-3/', date:'2026-08-03', mode:'online'},
+  {title:'簡報技巧工作坊PSW培訓', link:'https://bntw.niiice-design.com/news/psw-3/', date:'2026-08-05', mode:'online'},
+  {title:'新北市西B區成功會員培訓初階MSP', link:'https://bntw.niiice-design.com/news/msp-5/', date:'2026-08-10', mode:'online'},
+  {title:'LTnA培訓', link:'https://bntw.niiice-design.com/news/ltna-5/', date:'2026-08-11', mode:'online'},
+  {title:'跨分會組聚培訓', link:'https://bntw.niiice-design.com/news/group-training-16/', date:'2026-08-12', mode:'online'},
+  {title:'PT工作坊', link:'https://bntw.niiice-design.com/news/pt-4/', date:'2026-08-17', mode:'online'}
+];
+var trainingData = [];      // 載入後的全量資料（已濾過期、已排序）
+var trainingFilter = 'all'; // 當前 Tab：all | online | offline
+
+// FIX4: 培訓類型 key（用於篩選比對）→ 中文 label（用於顯示）
+// PT工作坊 = Power Team，不叫「工作坊」
+var TF_TYPE_LABEL = {
+  'MSP':       'MSP',
+  'PSW':       '簡報',
+  'LTnA':      '領導團隊',
+  '引薦':      '引薦',
+  '組聚':      '組聚',
+  '一對一':    '一對一',
+  'PowerTeam': 'Power Team',
+  '培訓':      '培訓'
+};
+// 回傳 key（篩選用）
+function tfTag(title){
+  if(/MSP/i.test(title)) return 'MSP';
+  if(/PSW|簡報/.test(title)) return 'PSW';
+  if(/LTnA|領導/.test(title)) return 'LTnA';
+  if(/引薦/.test(title)) return '引薦';
+  if(/組聚/.test(title)) return '組聚';
+  if(/一對一|121/.test(title)) return '一對一';
+  if(/PT工作坊/.test(title)) return 'PowerTeam'; // PT = Power Team，不叫工作坊
+  if(/PT/.test(title)) return 'PowerTeam';
+  return '培訓';
+}
+// 回傳顯示用中文 label
+function tfTagLabel(key){ return TF_TYPE_LABEL[key] || key; }
+// 上課方式徽章
+function tfModeBadge(mode){
+  if(mode==='offline') return '<span class="tf-mode tf-mode-off"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>線下實體</span>';
+  return '<span class="tf-mode tf-mode-on"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="2" y="4" width="15" height="14" rx="2"/><path d="M17 9l5-3v12l-5-3"/></svg>線上 Zoom</span>';
+}
+
+function tfCardHTML(x){
+  var mNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  var dt = x.date ? new Date(x.date) : null;
+  var dateBlock = (dt && !isNaN(dt))
+    ? '<div class="tf-date"><div class="m">'+mNames[dt.getMonth()]+'</div><div class="d">'+dt.getDate()+'</div><div class="y">'+dt.getFullYear()+'</div></div>'
+    : '<div class="tf-date"><div class="m">近期</div><div class="d">·</div></div>';
+  // 第 5 項：學分標籤 — 有 credit 欄才顯示
+  var _typeKey = tfTag(x.title);
+  var _typeDisp = tfTagLabel(_typeKey); // FIX4: 顯示中文 label
+  var creditBadge = (x.credit || x['學分']) ?
+    '<span class="tf-credit">' + (x.credit||x['學分']) + ' 學分</span>' : '';
+  return '<a class="tf-card" href="'+(x.link||'#')+(x.link?'?openExternalBrowser=1':'')+'" target="_blank" rel="noopener">'
+    + dateBlock
+    + '<div class="tf-body"><div class="tf-title">'+x.title+'</div>'
+    + '<div class="tf-meta"><span class="tf-tag">'+_typeDisp+'</span>'+tfModeBadge(x.mode)+(creditBadge?creditBadge:'')+'</div></div>'
+    + '<svg class="tf-go" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>'
+    + '</a>';
+}
+
+// 第 5 項：目前的培訓類型篩選 filter（all 或某類型字串）
+var trainingTypeFilter = 'all';
+
+// 依當前 Tab 渲染卡片（mode + type 雙篩選）
+function tfPaint(){
+  var box = document.getElementById('trainingList');
+  if(!box) return;
+  var rows = trainingData.filter(function(x){
+    var modeOk = (trainingFilter==='all') || ((x.mode||'online') === trainingFilter);
+    var typeOk  = (trainingTypeFilter==='all') || (tfTag(x.title) === trainingTypeFilter);
+    return modeOk && typeOk;
+  });
+  if(!rows.length){
+    box.innerHTML = '<div class="tf-loading">此分類近期暫無場次，請切換「全部」或見<a href="https://bntw.niiice-design.com/news-category/training/?openExternalBrowser=1" target="_blank" rel="noopener" style="color:var(--red)">官方培訓頁</a>。</div>';
+    return;
+  }
+  box.innerHTML = rows.map(tfCardHTML).join('');
+}
+
+// Tab 切換綁定 + 計數（形式篩選）
+function tfBindTabs(){
+  var tabs = document.querySelectorAll('.tf-tab');
+  var nAll = trainingData.length;
+  var nOn  = trainingData.filter(function(x){ return (x.mode||'online')==='online'; }).length;
+  var nOff = trainingData.filter(function(x){ return x.mode==='offline'; }).length;
+  var counts = {all:nAll, online:nOn, offline:nOff};
+  tabs.forEach(function(t){
+    var k = t.dataset.mode;
+    var c = t.querySelector('.tf-tab-count');
+    if(c) c.textContent = counts[k];
+    t.addEventListener('click', function(){
+      trainingFilter = k;
+      tabs.forEach(function(x){ x.classList.toggle('active', x===t); });
+      tfPaint();
+    });
+  });
+}
+
+// 第 5 項：動態生成培訓類型篩選按鈕（掃全部卡片標題，抽出現有類型）
+function tfBuildTypeTabs(){
+  var container = document.getElementById('tfTypeTabs');
+  if(!container) return;
+  // 收集所有類型（去重）
+  var seen = {};
+  var types = [];
+  trainingData.forEach(function(x){
+    var t = tfTag(x.title);
+    if(!seen[t]){ seen[t]=true; types.push(t); }
+  });
+  if(!types.length){ container.style.display='none'; return; }
+  // 生成按鈕：「全部類型」+ 各類型
+  var html = '<button class="tf-type-tab active" data-type="all" type="button">全部類型</button>';
+  types.forEach(function(t){
+    // FIX4: 篩選按鈕顯示中文 label，data-type 保留 key 供篩選邏輯使用
+    html += '<button class="tf-type-tab" data-type="'+t+'" type="button">'+tfTagLabel(t)+'</button>';
+  });
+  container.innerHTML = html;
+  // 綁定事件
+  container.querySelectorAll('.tf-type-tab').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      trainingTypeFilter = btn.dataset.type;
+      container.querySelectorAll('.tf-type-tab').forEach(function(b){ b.classList.toggle('active', b===btn); });
+      tfPaint();
+    });
+  });
+}
+
+function tfInit(list){
+  // 濾過期 + 排序（全量，不在此切 6 筆，讓 Tab 各自完整）
+  var today = new Date(); today.setHours(0,0,0,0);
+  trainingData = (list||[]).filter(function(x){
+    if(!x.date) return true;
+    var d = new Date(x.date); return isNaN(d) ? true : d >= today;
+  }).sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
+  tfBindTabs();
+  tfBuildTypeTabs(); // 第 5 項：動態生成類型篩選按鈕
+  tfPaint();
+}
+
+// GAS 回的中文欄位（標題/日期/連結/上課方式/學分）→ 前端英文 key
+// 第 5 項：加入「學分」欄映射（後台有值才帶入，空或無欄不顯示）
+function tfMap(rows){
+  return (rows||[]).map(function(r){
+    if(r.title || r.link) return r; // 已是英文 key（fallback）直接用
+    return {
+      title:  r['標題'] || r['名稱'] || '',
+      date:   r['日期'] || '',
+      link:   r['連結'] || '',
+      mode:   (r['上課方式'] || r['mode'] || 'online'),
+      credit: r['學分'] || ''  // 第 5 項：學分欄，後台補後自動顯示
+    };
+  }).filter(function(x){ return x.title; });
+}
+(function loadTraining(){
+  if(TRAINING_API){
+    fetchJSON(TRAINING_API, 'training-培訓快訊', 10 * 60 * 1000)
+      .then(function(data){
+        var rows = Array.isArray(data) ? data : (data.data || data.rows || []);
+        var mapped = tfMap(rows);
+        tfInit(mapped.length ? mapped : trainingFallback);
+      })
+      .catch(function(){ tfInit(trainingFallback); });
+  }else{
+    tfInit(trainingFallback);
+  }
+})();
+
+// ─────────────────────────────────────────────
+// 活動詳情 (ACTIVITIES_FEED_9X) — 動態讀後台「活動」分頁
+// ─────────────────────────────────────────────
+function acEsc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function acRender(list){
+  var box=document.getElementById('activitiesContent');
+  if(!box) return;
+  // 第 4b 項：活動卡右側日期塊改中文月份（原英文 JAN/JUN 等）
+  var mN=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  var wd=['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+  // 依日期排序：未結束的在前、最近的在上
+  var rows=(list||[]).filter(function(x){return x['活動名稱'];});
+  rows.sort(function(a,b){return String(a['日期時間']||'').localeCompare(String(b['日期時間']||''));});
+  if(!rows.length){ box.innerHTML='<div class="ac-loading" style="font-size:14px;color:var(--gray-400);padding:18px 0">目前暫無活動，請見上方行事曆。</div>'; return; }
+  box.innerHTML=rows.map(function(x){
+    var dt=x['日期時間']?new Date(String(x['日期時間']).replace(' ','T')):null;
+    var done=/已結束|結束/.test(x['狀態']||'');
+    var statusHTML = x['狀態'] ? '<span class="status '+(done?'s-done':'s-open')+'" style="'+(done?'background:rgba(90,100,114,.07);color:#5A6472':'background:rgba(207,32,48,.08);color:var(--red)')+'">'+acEsc(x['狀態'])+'</span>' : '';
+    var meta='';
+    // 時間顯示邏輯：
+    // 優先讀 acMapFromCalendar 組好的「時間顯示」欄（含開始–結束區間或「XX 起」）
+    // fallback：從日期時間欄用 regex 抓 HH:mm（相容舊資料格式）
+    // 都沒有：顯示淡字「時間待補」
+    var tm = x['時間顯示'] || (function(){
+      var hasTime = /\d{1,2}:\d{2}/.test(String(x['日期時間']||''));
+      return hasTime ? (String(x['日期時間']).match(/(\d{1,2}:\d{2})/)||[])[1] : '';
+    }());
+    if(x['日期時間']){
+      var dstr = dt&&!isNaN(dt) ? (dt.getFullYear()+' 年 '+String(dt.getMonth()+1).padStart(2,'0')+' 月 '+String(dt.getDate()).padStart(2,'0')+' 日'+(isNaN(dt.getDay())?'':'（'+wd[dt.getDay()]+'）')) : acEsc(x['日期時間']);
+      meta+='<div class="meta-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'+dstr+'</div>';
+      // 時間：有則顯示；無則顯示「時間待補」淡字提示（不假造時間）
+      if(tm){
+        meta+='<div class="meta-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>'+tm+'</div>';
+      }else{
+        meta+='<div class="meta-item" style="color:var(--gray-300)"><svg viewBox="0 0 24 24" style="stroke:var(--gray-300)"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg><span style="font-style:italic">時間待補</span></div>';
+      }
+    }
+    if(x['地點']) meta+='<div class="meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>'+acEsc(x['地點'])+'</div>';
+    if(x['費用']) meta+='<div class="meta-item"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>'+acEsc(x['費用'])+'</div>';
+    // FIX3: 壞連結防呆 — 連結欄非 http/https 開頭（中文或其他）→ 顯示說明文字，不產生壞 href
+    var rawLink = x['報名連結'] || '';
+    var isUrl = /^https?:\/\//i.test(rawLink);
+    var btn = '';
+    if(rawLink && isUrl && !done){
+      btn = '<div style="display:flex;gap:12px;flex-wrap:wrap"><a href="'+acEsc(rawLink)+'?openExternalBrowser=1" target="_blank" rel="noopener" class="btn btn-primary">立即報名</a></div>';
+    } else if(rawLink && isUrl && done){
+      btn = '<div style="display:flex;gap:12px;flex-wrap:wrap"><a href="'+acEsc(rawLink)+'?openExternalBrowser=1" target="_blank" rel="noopener" class="btn btn-outline" style="border-color:var(--gray-200);color:var(--gray-500)">查看報名表單</a></div>';
+    } else if(rawLink && !isUrl && !done){
+      btn = '<div style="display:flex;gap:12px;flex-wrap:wrap"><span class="btn btn-outline" style="border-color:var(--gray-200);color:var(--gray-600);cursor:default;pointer-events:none">報名方式：'+acEsc(rawLink)+'</span></div>';
+    }
+    // 第 4b 項：日期塊格式「日期數字大字 + 中文年月」
+    // FIX2: 日期紅塊只留「大數字日期 + 月份 + 年」，移除「星期X」那行
+    var side = dt&&!isNaN(dt) ? '<div class="feat-side"><div><div class="date-month">'+mN[dt.getMonth()]+'</div><div class="date-big">'+dt.getDate()+'</div><div class="date-month" style="font-size:11px;opacity:.7;margin-top:2px">'+dt.getFullYear()+'</div></div></div>' : '';
+    var typeLabel = x['類型'] || '分會活動';
+    return '<div class="feat-event" style="margin-bottom:16px"><div class="feat-body">'
+      +'<div class="badge badge-red">'+acEsc(typeLabel)+'</div>'
+      +(statusHTML?'<div style="margin-bottom:10px">'+statusHTML+'</div>':'')
+      +'<h3>'+acEsc(x['活動名稱'])+'</h3>'
+      +(x['活動副標']?'<p class="evt-sub">'+acEsc(x['活動副標'])+'</p>':'')
+      +'<div class="evt-meta">'+meta+'</div>'+btn
+      +'</div>'+side+'</div>';
+  }).join('');
+}
+// 活動詳情改讀「行事曆」分頁，過濾類型=活動（單一資料源，與月曆同步，不再讀獨立「活動」分頁）
+// 只顯示「本月 + 下月」的活動（前端自動算，過期/太遠的自動不顯示，後台不用加欄/不用觸發器）
+// 行事曆欄位（日期/類型/名稱/連結/備註）→ acRender 要的欄位（活動名稱/日期時間/…）
+// Helper: 從欄位值用 regex 抓 HH:mm，容錯兩種格式：
+//   純時間 "14:00"、舊格式 "1899-12-30 14:00"、日期時間 "2026-07-03 14:00"
+function extractTime(v){ var m = String(v||'').match(/(\d{1,2}:\d{2})/); return m ? m[1] : ''; }
+
+function acMapFromCalendar(rows){
+  var now = new Date();
+  var curY = now.getFullYear(), curM = now.getMonth();
+  // 本月 1 號 00:00 ~ 下月底 23:59（含本月與下月，共 2 個月窗口）
+  var winStart = new Date(curY, curM, 1, 0, 0, 0);
+  var winEnd   = new Date(curY, curM + 2, 0, 23, 59, 59); // curM+2 的第 0 天 = 下月最後一天
+  return (rows||[]).filter(function(r){
+    // 過濾條件：類型含活動/聚會/例會/來賓，或活動標題含這些詞（相容新舊欄名）
+    var title = r['活動標題'] || r['名稱'] || '';
+    var isAct = /活動|聚會|例會|來賓/.test(r['類型']||'') || /聚會|例會|來賓日|活動/.test(title);
+    if(!isAct) return false;
+    var d = r['日期'] ? new Date(String(r['日期']).substring(0,10)+'T00:00:00') : null;
+    if(!d || isNaN(d)) return false;
+    return d >= winStart && d <= winEnd;   // 只留本月+下月
+  }).map(function(r){
+    // 活動標題：讀新欄名，fallback 舊欄名
+    var title = r['活動標題'] || r['名稱'] || '';
+    // 副標：直接讀後台正式副標欄（後台已有專欄，不再從備註猜）
+    var sub = r['副標'] || '';
+    // 地點：讀地點欄，換行符轉空格讓卡片 meta 列整齊
+    var loc = String(r['地點']||'').replace(/\n+/g,' ').trim();
+    // 時間：從開始/結束欄用 extractTime 抓 HH:mm，容錯新舊格式
+    var start = extractTime(r['開始時間(未定可不填)']);
+    var end   = extractTime(r['結束時間(選填)']);
+    // 組合時間字串：有開始有結束→區間；有開始無結束→「XX 起」；都無→空字串
+    var timeStr = start ? (end ? start + '–' + end : start + ' 起') : '';
+    return {
+      '活動名稱': title,
+      '活動副標': sub,
+      '類型': r['類型']||'活動',
+      '日期時間': r['日期']||'',
+      '地點': loc,
+      '費用': '',
+      '報名連結': r['連結']||'',
+      '報名截止': '',
+      '時間顯示': timeStr,               // 新增：前端時間顯示字串（acRender 優先讀這個）
+      '狀態': (function(){
+        var today = new Date(); today.setHours(0,0,0,0);
+        var actDate = r['日期'] ? new Date(String(r['日期']).substring(0,10)+'T00:00:00') : null;
+        if(!actDate || isNaN(actDate)) return '即將舉行';
+        if(actDate < today) return '已結束';
+        if(actDate.getTime() === today.getTime()) return '今日舉行';
+        return '即將舉行';
+      }()),
+      '備註': ''
+    };
+  });
+}
+(function loadActivities(){
+  // 讀行事曆分頁（與月曆同一份，快取 key 共用故通常命中 sessionStorage、不重打 API）
+  var url = GAS_CAL_URL + '?sheet=' + encodeURIComponent('行事曆');
+  fetchJSON(url, 'calendar-行事曆', 10 * 60 * 1000)
+    .then(function(data){
+      var rows = Array.isArray(data) ? data : (data.data || data.rows || []);
+      var acts = acMapFromCalendar(rows);
+      acRender(acts);
+    })
+    .catch(function(){
+      var box=document.getElementById('activitiesContent');
+      if(box) box.innerHTML='<div class="ac-loading" style="font-size:14px;color:var(--gray-400);padding:18px 0">活動資料載入失敗，請下拉重新整理。</div>';
+    });
+})();
+
+// ─────────────────────────────────────────────
+// Power Team 組聚下次時間（GROUP_NEXT_3J）— 讀「組聚」分頁的「首次日期」，
+// 依「頻率」（雙週/每週/每月）自動算「從今天起的下一次」，前端永遠顯示最新、組長不用改。
+// ─────────────────────────────────────────────
+function gnNextDate(firstStr, freq){
+  if(!firstStr) return null;
+  var first = new Date(String(firstStr).substring(0,10)+'T00:00:00');
+  if(isNaN(first)) return null;
+  var today = new Date(); today.setHours(0,0,0,0);
+  var stepDays = 14; // 預設雙週
+  if(/每週|每周|weekly/i.test(freq||'')) stepDays = 7;
+  else if(/每月|monthly/i.test(freq||'')) stepDays = 0; // 每月用月份遞增
+  var d = new Date(first);
+  if(stepDays===0){ // 每月：同日往後推月
+    while(d < today){ d.setMonth(d.getMonth()+1); }
+  }else{
+    while(d < today){ d.setDate(d.getDate()+stepDays); }
+  }
+  return d;
+}
+function gnFmt(d){
+  if(!d) return null;
+  var wd=['日','一','二','三','四','五','六'];
+  return (d.getMonth()+1)+'/'+d.getDate()+'（'+wd[d.getDay()]+'）';
+}
+(function loadGroupMeetings(){
+  var url = GAS_CAL_URL + '?sheet=' + encodeURIComponent('組聚');
+  fetchJSON(url, 'calendar-組聚', 10 * 60 * 1000)
+    .then(function(data){
+      var rows = Array.isArray(data) ? data : (data.data || data.rows || []);
+      rows.forEach(function(r){
+        // 從「產業鏈」抓開頭字母 A-E 當 key
+        var m = String(r['產業鏈']||'').match(/^([A-E])/);
+        if(!m) return;
+        var key = m[1];
+        var span = document.querySelector('.chain-next[data-chain="'+key+'"]');
+        if(!span) return;
+        var nxt = gnNextDate(r['首次日期']||r['首次組聚']||r['下次組聚時間'], r['頻率']);
+        if(nxt){
+          span.textContent = gnFmt(nxt) + ' Zoom';
+          span.style.color = 'rgba(255,255,255,.85)';
+        }
+      });
+    })
+    .catch(function(){ /* 失敗保留「時間待定」 */ });
+})();
+
+// ─────────────────────────────────────────────
+// ADD EVENT MODAL（ADDEVT_MODAL_R7MN4KX2）
+// ─────────────────────────────────────────────
+function openAddEvtModal(){
+  var m=document.getElementById('addevtModal');
+  if(m){m.classList.add('open');document.body.style.overflow='hidden';}
+}
+function closeAddEvtModal(e){
+  if(e && e.target!==document.getElementById('addevtModal')) return;
+  var m=document.getElementById('addevtModal');
+  if(m){m.classList.remove('open');document.body.style.overflow='';}
+}
+
+// ─────────────────────────────────────────────
+// RECRUIT MODAL (RECRUIT_4K9MZ2WX)
+// 未來接真實報名頁時：移除 openRecruitModal/closeRecruitModal 兩函式
+// 並把 HTML 裡的 <button onclick="openRecruitModal()"> 換成 <a href="...">
+// ─────────────────────────────────────────────
+function openRecruitModal(){
+  var m=document.getElementById('recruitModal');
+  if(m){m.classList.add('open');document.body.style.overflow='hidden';}
+}
+function closeRecruitModal(e){
+  // 若傳了事件，只在點背景（overlay 本身）時關閉，點 modal 內部不關
+  if(e && e.target!==document.getElementById('recruitModal')) return;
+  var m=document.getElementById('recruitModal');
+  if(m){m.classList.remove('open');document.body.style.overflow='';}
+}
+// ESC 鍵關閉（recruit + addevt 兩個 modal）
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){
+    closeRecruitModal();
+    closeAddEvtModal();
+  }
+});
+
+// ─────────────────────────────────────────────
+// Nav active highlight on scroll
+// ─────────────────────────────────────────────
+var navAs=document.querySelectorAll('.nav-list a:not(.nav-cta)');
+var sids=['calendar','activities','msp','powerteam','zoom','roster'];
+window.addEventListener('scroll',function(){
+  var cur='';
+  sids.forEach(function(id){
+    var el=document.getElementById(id);
+    if(el&&window.scrollY>=el.offsetTop-100)cur=id;
+  });
+  navAs.forEach(function(a){
+    a.classList.remove('act');
+    if(a.getAttribute('href')==='#'+cur)a.classList.add('act');
+  });
+});
+
+// ─────────────────────────────────────────────
+// 第 7 項：名冊幹部職務標籤渲染（ROSTER_ROLE_7ZK3）
+// 掃 tbody 每列 data-role，有值就在姓名 <td> 插入彩色 pill
+// data-role 目前全為空，需求方在 Sheet 名冊分頁補職務欄後，
+// 可改成 fetch API 並寫入 data-role，此函式自動上色。
+// 目前機制：直接讀 HTML 上的 data-role=""，有值才顯示，空值靜默。
+// ─────────────────────────────────────────────
+// FIX5: 名冊九長職務 pill — 主席/副主席用金色(m-role-gold)，其餘幹部用紅色(m-role-chief)
+(function renderRosterRoles(){
+  var goldRoles = /主席|副主席/; // 最高職階：金底
+  document.querySelectorAll('#rTbl tbody tr[data-role]').forEach(function(tr){
+    var role = (tr.getAttribute('data-role')||'').trim();
+    if(!role) return;
+    var nameTd = tr.querySelectorAll('td')[1];
+    if(!nameTd) return;
+    var cls = goldRoles.test(role) ? 'm-role m-role-gold' : 'm-role m-role-chief';
+    var pill = '<span class="'+cls+'">'+role+'</span>';
+    nameTd.innerHTML += pill;
+  });
+})();
+</script>
+
+<!-- ── SIDE NAV HTML v4 — 極簡文字錨點 (SIDENAV4_MNQ7VK) ── -->
+<nav class="side-nav" aria-label="頁面導覽">
+  <div class="sn-heading">
+    <span class="sn-heading-label">本頁目錄</span>
+    <span class="sn-heading-line"></span>
+  </div>
+  <div class="side-nav-list">
+    <a class="side-nav-item" data-target="about" href="#about">
+      <span class="sn-dot"></span><span class="sn-label">分會簡介</span>
+    </a>
+    <a class="side-nav-item" data-target="zoom" href="#zoom">
+      <span class="sn-dot"></span><span class="sn-label">線上例會</span>
+    </a>
+    <a class="side-nav-item" data-target="calendar" href="#calendar">
+      <span class="sn-dot"></span><span class="sn-label">行事曆</span>
+    </a>
+    <a class="side-nav-item" data-target="activities" href="#activities">
+      <span class="sn-dot"></span><span class="sn-label">活動詳情</span>
+    </a>
+    <a class="side-nav-item" data-target="msp" href="#msp">
+      <span class="sn-dot"></span><span class="sn-label">培訓快訊</span>
+    </a>
+    <a class="side-nav-item" data-target="powerteam" href="#powerteam">
+      <span class="sn-dot"></span><span class="sn-label">Power Team</span>
+    </a>
+    <a class="side-nav-item" data-target="roster" href="#roster">
+      <span class="sn-dot"></span><span class="sn-label">夥伴名冊</span>
+    </a>
+  </div>
+</nav>
+</body>
+</html>
