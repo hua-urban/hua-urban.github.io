@@ -1402,8 +1402,7 @@ section[id]{scroll-margin-top:68px}
         <span class="brand-name">華都更 <span>Hua Urban+</span></span>
       </div>
       <ul class="nav-list">
-        <li><a href="#calendar">行事曆</a></li>
-        <li><a href="#activities">活動</a></li>
+        <li><a href="#calendar">例會與活動</a></li>
         <li><a href="#msp">培訓快訊</a></li>
         <li><a href="#powerteam">組聚</a></li>
         <li><a href="#zoom">Zoom 例會</a></li>
@@ -1418,8 +1417,7 @@ section[id]{scroll-margin-top:68px}
 </nav>
 <div class="mobile-nav" id="mNav">
   <ul>
-    <li><a href="#calendar" onclick="closeMNav()">分會行事曆</a></li>
-    <li><a href="#activities" onclick="closeMNav()">活動詳情</a></li>
+    <li><a href="#calendar" onclick="closeMNav()">例會與活動</a></li>
     <li><a href="#msp" onclick="closeMNav()">培訓快訊</a></li>
     <li><a href="#powerteam" onclick="closeMNav()">Power Team 組聚</a></li>
     <li><a href="#zoom" onclick="closeMNav()">Zoom 例會</a></li>
@@ -1482,8 +1480,12 @@ section[id]{scroll-margin-top:68px}
           </div>
         </div>
 
-        <!-- 第 3 張：第一屆九長領導團隊 -->
-        <!-- 放照片：把 data-img="" 改成 data-img="assets/九長合照.jpg" -->
+        <!-- 第 3 張：第一屆九長領導團隊（2026-07-03 隱藏，九長合照到位後恢復）
+             輪播 JS 用 querySelectorAll 動態抓 .hero-slide/.carousel-dot 數量，用 display:none
+             隱藏會讓 slides.length 仍算入此張造成輪播切到空白格。改用 HTML 註解整段拿掉，
+             DOM 查不到、輪播自動剩 2 張正常運作，程式碼與對應的第 3 顆 dot 都保留在下方註解內。
+             恢復方式：取消這行與對應 dot 的註解，並把 data-img="" 改成 data-img="assets/九長合照.jpg" -->
+        <!--
         <div class="hero-slide" data-img="">
           <div class="photo-banner">第一屆九長領導團隊（請置入照片）</div>
           <div class="photo-icon">
@@ -1498,6 +1500,7 @@ section[id]{scroll-margin-top:68px}
             建議尺寸 1600 × 900 px（16:9）
           </div>
         </div>
+        -->
 
       </div><!-- /hero-slides-track -->
 
@@ -1505,11 +1508,11 @@ section[id]{scroll-margin-top:68px}
       <button class="carousel-btn carousel-prev" aria-label="上一張" onclick="heroCarouselMove(-1)">&#8249;</button>
       <button class="carousel-btn carousel-next" aria-label="下一張" onclick="heroCarouselMove(1)">&#8250;</button>
 
-      <!-- 底部圓點 -->
+      <!-- 底部圓點：對應上方 slide 數量，第 3 顆隨第 3 張 slide 一併隱藏（九長合照到位後恢復） -->
       <div class="carousel-dots">
         <button class="carousel-dot active" aria-label="第 1 張" onclick="heroCarouselGo(0)"></button>
         <button class="carousel-dot" aria-label="第 2 張" onclick="heroCarouselGo(1)"></button>
-        <button class="carousel-dot" aria-label="第 3 張" onclick="heroCarouselGo(2)"></button>
+        <!-- <button class="carousel-dot" aria-label="第 3 張" onclick="heroCarouselGo(2)"></button> -->
       </div>
 
     </div><!-- /photo-wrap -->
@@ -1678,7 +1681,7 @@ section[id]{scroll-margin-top:68px}
   <div class="container">
     <a href="#calendar" class="zoom-back-link">
       <svg viewBox="0 0 24 24"><polyline points="15,18 9,12 15,6"/></svg>
-      返回行事曆
+      返回例會與活動
     </a>
     <div style="position:relative;z-index:1;margin-bottom:28px">
       <div class="zoom-label">每週固定 · Online Meeting Hub</div>
@@ -1994,8 +1997,7 @@ section[id]{scroll-margin-top:68px}
       <div>
         <div class="f-col-title">快速連結</div>
         <ul class="f-links">
-          <li><a href="#calendar">分會行事曆</a></li>
-          <li><a href="#activities">活動詳情</a></li>
+          <li><a href="#calendar">例會與活動</a></li>
           <li><a href="#msp">培訓快訊</a></li>
           <li><a href="#powerteam">Power Team</a></li>
           <li><a href="#zoom">Zoom 例會</a></li>
@@ -2785,10 +2787,7 @@ window.addEventListener('scroll',function(){
       <span class="sn-dot"></span><span class="sn-label">線上例會</span>
     </a>
     <a class="side-nav-item" data-target="calendar" href="#calendar">
-      <span class="sn-dot"></span><span class="sn-label">行事曆</span>
-    </a>
-    <a class="side-nav-item" data-target="activities" href="#activities">
-      <span class="sn-dot"></span><span class="sn-label">活動詳情</span>
+      <span class="sn-dot"></span><span class="sn-label">例會與活動</span>
     </a>
     <a class="side-nav-item" data-target="msp" href="#msp">
       <span class="sn-dot"></span><span class="sn-label">培訓快訊</span>
