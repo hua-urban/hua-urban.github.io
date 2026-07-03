@@ -329,8 +329,15 @@ a{text-decoration:none;color:inherit}
 /* 議程卡（活動，重用 feat-event 樣式）高亮態沿用同一機制 */
 .feat-event.agenda-highlight{box-shadow:0 0 0 3px rgba(207,32,48,.25),var(--shadow-md)}
 .feat-event{scroll-margin-top:90px;transition:box-shadow .5s}
-.agenda-standing-card{scroll-margin-top:90px;transition:box-shadow .5s}
-.agenda-standing-card.agenda-highlight{box-shadow:0 0 0 3px rgba(207,32,48,.25),var(--shadow-md)}
+.agenda-standing-card{scroll-margin-top:90px;transition:box-shadow .5s,background .5s}
+/* 2026-07-03 微修（tester Warning）：常態卡原沿用 feat-event 同款描邊，但常態卡基礎 box-shadow
+   只有 --shadow-sm（比 feat-event 的 --shadow-md 淺很多）、邊框又是極淺灰，同樣的描邊視覺對比
+   不夠、肉眼難察覺。改深紅外框加粗加不透明 + 淡紅背景閃爍，比照 .agenda-mini-card 高亮手法拉高對比。 */
+.agenda-standing-card.agenda-highlight{
+  box-shadow:0 0 0 4px rgba(207,32,48,.55),var(--shadow-md);
+  background:rgba(207,32,48,.08);
+  border-color:rgba(207,32,48,.4);
+}
 
 /* 迷你月曆（導航，可摺疊） */
 .cal-mini-wrap{margin-top:28px;border-top:1px solid var(--gray-100);padding-top:20px}
