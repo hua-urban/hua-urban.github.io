@@ -243,31 +243,19 @@ a{text-decoration:none;color:inherit}
 .cal-day:nth-child(7n) .cal-day-num{color:#1E6FBF}
 .cal-day.today:nth-child(7n) .cal-day-num{color:var(--gray-600)}
 
-/* 活動點（桌機格內文字、手機改迷你字標，見下方 RWD） */
-.cal-evt-list{display:flex;flex-direction:column;gap:3px}
-.cal-evt-item{
-  display:flex;align-items:center;gap:4px;
-  font-size:11px;font-weight:500;color:var(--gray-700);
-  line-height:1.3;
-  border-radius:3px;
-  padding:1px 3px;
-  overflow:hidden;
-}
-.cal-evt-dot{
-  flex-shrink:0;width:7px;height:7px;border-radius:50%;
-}
+/* 迷你字標（CAL_MOBILE_BADGE_9W3X，2026-07-03 大改版：桌機／手機統一用字標，
+   移除格內長文字——資訊已在上方議程列表，月曆純導航用途） */
+.cal-evt-list{display:flex;flex-wrap:wrap;gap:3px}
 .dot-evt{background:#CF2030}
 .dot-msp{background:#1E6FBF}
 .dot-guest{background:#0A8A5B}
 .dot-grp{background:#B8963E}
 .dot-meeting{background:#7B5EA7}
-.cal-evt-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-/* 手機迷你字標（CAL_MOBILE_BADGE_9W3X，2026-07-03）：色點太小看不出類型，改一字 badge */
 .cal-evt-badge{
-  display:none; /* 桌機隱藏，手機 RWD 開啟 */
-  flex-shrink:0;width:14px;height:14px;border-radius:3px;
+  display:flex;
+  flex-shrink:0;width:16px;height:16px;border-radius:3px;
   align-items:center;justify-content:center;
-  font-size:9px;font-weight:700;color:#fff;line-height:1;
+  font-size:10px;font-weight:700;color:#fff;line-height:1;
 }
 
 /* ── 新增活動「+」按鈕（CAL_ADDBTN_K2PX9W3M）── */
@@ -291,45 +279,10 @@ a{text-decoration:none;color:inherit}
   .cal-add-btn:hover,.cal-day:not(.empty):not(.has-event):hover .cal-add-btn{opacity:.6}
 }
 
-/* 圖例（搬到月曆上方，2026-07-03：margin-bottom 取代 margin-top） */
-.cal-legend{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:14px;align-items:center}
+/* 圖例（迷你月曆內，2026-07-03 大改版沿用位置在月曆格下方） */
+.cal-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px;align-items:center}
 .cal-legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--gray-600)}
 .cal-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-
-/* ── 當日資訊 inline 展開面板（CAL_DAYPANEL_7QX3，2026-07-03）── */
-.cal-day-panel{
-  margin-top:16px;
-  border:1px solid var(--gray-100);border-radius:var(--r-lg);
-  background:var(--gray-50);
-  padding:18px 20px;
-  animation:calPanelIn .18s ease-out;
-}
-@keyframes calPanelIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
-.cal-day-panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.cal-day-panel-date{font-family:"Noto Serif TC",serif;font-size:15px;font-weight:700;color:var(--gray-900)}
-.cal-day-panel-close{width:24px;height:24px;border-radius:50%;border:none;background:var(--gray-100);color:var(--gray-500);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;line-height:1;flex-shrink:0}
-.cal-day-panel-close:hover{background:var(--gray-200);color:var(--gray-700)}
-.cal-day-panel-item{background:var(--white);border:1px solid var(--gray-100);border-radius:var(--r-md);padding:14px 16px}
-.cal-day-panel-item+.cal-day-panel-item{margin-top:10px}
-.cal-day-panel-badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:3px;color:#fff;margin-bottom:6px}
-.cal-day-panel-title{font-size:14px;font-weight:700;color:var(--gray-900);margin-bottom:4px}
-.cal-day-panel-meta{font-size:12.5px;color:var(--gray-600);line-height:1.6}
-.cal-day-panel-meta+.cal-day-panel-meta{margin-top:2px}
-.cal-day-panel-link{display:inline-flex;align-items:center;gap:4px;margin-top:8px;font-size:12.5px;font-weight:600;color:var(--red)}
-.cal-day-panel-link:hover{text-decoration:underline}
-/* 週三例會卡：紫底呼應 dot-meeting/字標配色 */
-.cal-day-panel-item.is-meeting{background:rgba(123,94,167,.06);border-color:rgba(123,94,167,.2)}
-.cal-day-panel-item.is-meeting .cal-day-panel-badge{background:#7B5EA7}
-
-/* 例會固定提示（CAL_PINNED_MEETING_ROW，2026-07-03） */
-.ac-pinned-meeting{
-  display:flex;align-items:center;gap:8px;
-  background:rgba(123,94,167,.07);border:1px solid rgba(123,94,167,.18);
-  border-radius:var(--r-md);padding:11px 16px;margin-bottom:16px;
-  font-size:13.5px;font-weight:600;color:#7B5EA7;
-}
-.ac-pinned-meeting:hover{background:rgba(123,94,167,.12)}
-.ac-pinned-meeting svg{width:15px;height:15px;stroke:#7B5EA7;fill:none;stroke-width:2;flex-shrink:0}
 
 /* 返回行事曆連結（zoom 專區頂部，CAL_BACKLINK_5M2P，2026-07-03） */
 .zoom-back-link{
@@ -340,16 +293,78 @@ a{text-decoration:none;color:inherit}
 .zoom-back-link:hover{color:#fff}
 .zoom-back-link svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5}
 
-/* RWD：手機版格子縮小，格內事件名隱藏改迷你字標 */
+/* ── AGENDA LIST 大改版（2026-07-03）：月曆格為主體 → 議程列表為主體 ── */
+/* #activities 錨點不是 section，全站 section[id]{scroll-margin-top} 規則吃不到，單獨補 */
+.agenda-anchor{display:block;scroll-margin-top:68px}
+
+/* 常態卡①②：每週三例會／組聚輪替，比照 feat-event 卡片語彙但更輕量 */
+.agenda-standing-card{
+  display:flex;align-items:center;gap:14px;
+  background:var(--white);border:1px solid var(--gray-100);border-radius:var(--r-lg);
+  box-shadow:var(--shadow-sm);
+  padding:16px 20px;margin-bottom:12px;
+}
+.agenda-standing-card.is-alt{background:rgba(184,150,62,.05);border-color:rgba(184,150,62,.2)}
+.agenda-standing-icon{font-size:24px;flex-shrink:0;line-height:1}
+.agenda-standing-body{flex:1;min-width:0}
+.agenda-standing-title{font-size:14.5px;font-weight:700;color:var(--gray-900);margin-bottom:2px}
+.agenda-standing-sub{font-size:12.5px;color:var(--gray-600);line-height:1.5}
+.agenda-standing-link{flex-shrink:0;font-size:13px;font-weight:600;color:var(--red);white-space:nowrap}
+.agenda-standing-link:hover{text-decoration:underline}
+
+/* 議程列表容器 */
+#agendaList{margin-top:20px}
+/* 組聚場次卡（精簡一行式）：呼應例會紫色系 + 組聚金色系 */
+.agenda-mini-card{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(184,150,62,.05);border:1px solid rgba(184,150,62,.18);
+  border-radius:var(--r-md);padding:12px 16px;margin-bottom:12px;
+  font-size:13.5px;color:var(--gray-700);
+  scroll-margin-top:90px;
+  transition:background .5s,border-color .5s;
+}
+.agenda-mini-card-dot{flex-shrink:0;width:8px;height:8px;border-radius:50%;background:#B8963E}
+.agenda-mini-card b{color:var(--gray-900);font-weight:700}
+.agenda-mini-card.agenda-highlight{background:rgba(207,32,48,.08);border-color:rgba(207,32,48,.3)}
+/* 議程卡（活動，重用 feat-event 樣式）高亮態沿用同一機制 */
+.feat-event.agenda-highlight{box-shadow:0 0 0 3px rgba(207,32,48,.25),var(--shadow-md)}
+.feat-event{scroll-margin-top:90px;transition:box-shadow .5s}
+.agenda-standing-card{scroll-margin-top:90px;transition:box-shadow .5s}
+.agenda-standing-card.agenda-highlight{box-shadow:0 0 0 3px rgba(207,32,48,.25),var(--shadow-md)}
+
+/* 迷你月曆（導航，可摺疊） */
+.cal-mini-wrap{margin-top:28px;border-top:1px solid var(--gray-100);padding-top:20px}
+.cal-mini-toggle{
+  display:flex;align-items:center;gap:8px;
+  background:none;border:none;cursor:pointer;
+  font-size:14px;font-weight:700;color:var(--gray-700);
+  padding:6px 0;margin-bottom:12px;
+}
+.cal-mini-toggle-arrow{display:inline-block;transition:transform .18s;font-size:12px;color:var(--gray-400)}
+.cal-mini-toggle[aria-expanded="true"] .cal-mini-toggle-arrow{transform:rotate(90deg)}
+.cal-mini-body{display:none}
+.cal-mini-body.open{display:block}
+/* 桌機預設展開（JS 初始化時依寬度判斷，這裡只提供樣式；實際開合狀態由 JS 控制 class） */
+
+/* 迷你月曆「當日無安排」淡字提示（CAL_NO_EVENT_TIP_4M9） */
+.cal-no-evt-tip{
+  position:absolute;top:2px;right:2px;
+  font-size:10px;color:var(--gray-400);
+  background:var(--white);border:1px solid var(--gray-100);border-radius:3px;
+  padding:2px 5px;white-space:nowrap;z-index:5;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+  animation:calNoEvtFade 2s ease-out forwards;
+  pointer-events:none;
+}
+@keyframes calNoEvtFade{0%{opacity:1}70%{opacity:1}100%{opacity:0}}
+
+/* RWD：手機版格子縮小，格內只留迷你字標（桌機也移除長文字，資訊已在上方議程列表） */
 @media(max-width:600px){
-  .cal-day{min-height:52px;padding:5px 4px 4px}
+  .cal-day{min-height:44px;padding:4px 3px 3px}
   .cal-day-num{font-size:12px}
-  .cal-evt-name{display:none}
-  .cal-evt-item{padding:0}
-  .cal-evt-dot{display:none}
-  .cal-evt-badge{display:flex}
   .cal-month-title{font-size:15px}
-  .cal-day-panel{padding:14px 16px}
+  .agenda-standing-card{padding:13px 14px;gap:10px}
+  .agenda-standing-icon{font-size:20px}
 }
 
 /* ── ABOUT ── */
@@ -454,6 +469,8 @@ a{text-decoration:none;color:inherit}
 .chain-desc{font-size:13px;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:16px}
 .chain-meta{font-size:12px;color:rgba(255,255,255,.45);line-height:1.5}
 .chain-meta strong{color:rgba(255,255,255,.75);font-weight:600}
+/* 組聚週二輪替小字（GROUP_ROTATION_2026Q3，2026-07-03）：只用於 D/E 兩鏈 */
+.chain-rotation-note{font-size:11px;color:rgba(255,255,255,.35);margin-top:4px}
 
 /* ── ZOOM SECTION ── */
 .zoom-sec{background:linear-gradient(135deg,var(--red-dark) 0%,var(--red) 55%,#E0303F 100%);padding:64px 0;position:relative;overflow:hidden}
@@ -1840,95 +1857,106 @@ section[id]{scroll-margin-top:68px}
 </section>
 
 
-<!-- ── 分會行事曆（月曆 Grid，2026-06-25）── -->
+<!-- ── 分會行事曆（Agenda List 主體，2026-07-03 大改版）── -->
+<!-- 原「月曆格為主體」改「議程列表為主體」：行程稀疏(每週三例會+每月1-2活動+組聚)，
+     月曆格 90% 空格、週三重複五次文字。改走 Luma/Meetup/Eventbrite/扶輪社 agenda list 模式。
+     原獨立的「活動詳情」section 已併入本區（見下方 #activities 議程列表），nav 兩個錨點都保留。 -->
 <section class="calendar-sec" id="calendar">
   <div class="container">
     <div class="sec-head">
       <span class="red-bar"></span>
       <h2>分會行事曆</h2>
-      <p>點日期查看當日活動</p>
+      <p>近期場次一覽 · 點迷你月曆日期快速定位</p>
     </div>
 
-    <!-- 圖例（搬到月曆正上方，2026-07-03） -->
-    <div class="cal-legend">
-      <span style="font-size:12px;color:var(--gray-400)">類型：</span>
-      <span class="cal-legend-item"><span class="cal-legend-dot dot-evt"></span>活動</span>
-      <span class="cal-legend-item"><span class="cal-legend-dot dot-msp"></span>MSP 課程</span>
-      <span class="cal-legend-item"><span class="cal-legend-dot dot-guest"></span>來賓日</span>
-      <span class="cal-legend-item"><span class="cal-legend-dot dot-grp"></span>組聚</span>
-      <span class="cal-legend-item"><span class="cal-legend-dot dot-meeting"></span>例會</span>
-      <span style="font-size:12px;color:var(--gray-400);margin-left:4px">· 點日期查看當日活動</span>
-    </div>
-
-    <div class="cal-grid-wrap">
-      <!-- 月份導航列 -->
-      <div class="cal-nav">
-        <button class="cal-nav-btn" id="calPrev" aria-label="上一個月">
-          <svg viewBox="0 0 24 24"><polyline points="15,18 9,12 15,6"/></svg>
-        </button>
-        <div class="cal-month-title" id="calMonthTitle"></div>
-        <button class="cal-nav-btn" id="calNext" aria-label="下一個月">
-          <svg viewBox="0 0 24 24"><polyline points="9,18 15,12 9,6"/></svg>
-        </button>
+    <!-- 常態卡①：每週三線上例會 -->
+    <div class="agenda-standing-card">
+      <div class="agenda-standing-icon">📅</div>
+      <div class="agenda-standing-body">
+        <div class="agenda-standing-title">每週三 06:30–08:45　線上例會</div>
+        <div class="agenda-standing-sub">華都更為線上分會，每週固定 Zoom 例會</div>
       </div>
-      <!-- 星期表頭 -->
-      <div class="cal-dow-header">
-        <div class="cal-dow-cell">日</div>
-        <div class="cal-dow-cell">一</div>
-        <div class="cal-dow-cell">二</div>
-        <div class="cal-dow-cell">三</div>
-        <div class="cal-dow-cell">四</div>
-        <div class="cal-dow-cell">五</div>
-        <div class="cal-dow-cell">六</div>
+      <a href="#zoom" class="agenda-standing-link">例會專區 →</a>
+    </div>
+
+    <!-- 常態卡②：組聚週二輪替 -->
+    <div class="agenda-standing-card is-alt">
+      <div class="agenda-standing-icon">🤝</div>
+      <div class="agenda-standing-body">
+        <div class="agenda-standing-title">組聚（週二）</div>
+        <div class="agenda-standing-sub">E 組第 1、3 週｜D 組第 2、4 週｜第 5 週休・遇受訓課程當週取消（以群公告為準）</div>
       </div>
-      <!-- 日期格（由 JS renderCalGrid() 填入） -->
-      <div class="cal-days" id="calDays"></div>
+      <a href="#powerteam" class="agenda-standing-link">Power Team →</a>
     </div>
 
-    <!-- 當日資訊 inline 展開面板（CAL_DAYPANEL_7QX3，2026-07-03）：點有標記日期原地展開，不跳頁不彈窗 -->
-    <div id="calDayPanel" class="cal-day-panel" style="display:none"></div>
+    <!-- #activities 錨點（scrollspy + nav「活動」連結沿用，指向議程列表本身，掛在 section[id] 規則外要單獨補 scroll-margin-top） -->
+    <span id="activities" class="agenda-anchor"></span>
 
-    <!-- 新增活動按鈕 -->
-    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-top:20px">
-      <a href="https://docs.google.com/spreadsheets/d/1XcSJ_U6i6kIHruHObblZEVQEd7d4M0X8LNGG9Oftgd0/edit?openExternalBrowser=1" target="_blank" rel="noopener" class="btn btn-outline" style="font-size:13px;padding:9px 18px;display:inline-flex;align-items:center;gap:6px;border-color:var(--red);color:var(--red)" data-open-external-browser="1">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        新增 / 編輯活動
-      </a>
-      <span style="font-size:12px;color:var(--gray-400);line-height:1.5">點此在共用試算表新增活動，新增後行事曆會自動更新</span>
-    </div>
-
-    <!-- fetch 失敗提示（預設隱藏，fetch 失敗時顯示） -->
-    <div id="calFetchErr" style="display:none;margin-top:10px;font-size:12px;color:var(--gray-400)">活動資料載入失敗，請稍後重整</div>
-
-  </div>
-</section>
-
-
-<!-- ── 活動詳情（靜態真資料，2026-06-25 更新）── -->
-<section class="activities" id="activities">
-  <div class="container">
-    <div class="sec-head">
-      <span class="red-bar"></span>
-      <h2>活動詳情</h2>
-      <p>近期場次說明 · 報名連結</p>
-    </div>
-    <!-- 例會固定提示（CAL_PINNED_MEETING_ROW，2026-07-03）：例會不進 Sheet 也不進動態列表，靜態釘頂提醒 -->
-    <a href="#zoom" class="ac-pinned-meeting">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
-      本週線上例會（每週三 06:30–08:45）→
-    </a>
-    <!-- 動態讀後台 Sheet「活動」分頁（ACTIVITIES_FEED_9X）；fetch 失敗回退寫死那筆 -->
-    <div id="activitiesContent">
+    <!-- 議程列表（主體，AGENDA_LIST_7QK3）：合併 Sheet 活動 + 組聚輪替場次，依日期排序，本月+下月窗口 -->
+    <div id="agendaList">
       <div class="ac-loading" style="font-size:14px;color:var(--gray-400);padding:18px 0">活動資料載入中…</div>
     </div>
-    <p style="font-size:13px;color:var(--gray-400);margin-top:12px;text-align:center">更多活動請見上方行事曆</p>
-    <!-- 第 4c 項：修正編輯按鈕連結，target="_blank" -->
+    <!-- 第 4c 項留存：編輯活動資料入口 -->
     <div class="admin-edit">
       <a href="https://docs.google.com/spreadsheets/d/1XcSJ_U6i6kIHruHObblZEVQEd7d4M0X8LNGG9Oftgd0/edit" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         編輯活動資料（活動組）
       </a>
     </div>
+
+    <!-- 迷你月曆（導航用，可摺疊；桌機預設展開／手機預設摺疊，CAL_MINI_NAV_8XW2） -->
+    <div class="cal-mini-wrap">
+      <button class="cal-mini-toggle" id="calMiniToggle" aria-expanded="true">
+        <span class="cal-mini-toggle-arrow">▸</span> 月曆檢視
+      </button>
+      <div class="cal-mini-body" id="calMiniBody">
+        <div class="cal-grid-wrap">
+          <!-- 月份導航列 -->
+          <div class="cal-nav">
+            <button class="cal-nav-btn" id="calPrev" aria-label="上一個月">
+              <svg viewBox="0 0 24 24"><polyline points="15,18 9,12 15,6"/></svg>
+            </button>
+            <div class="cal-month-title" id="calMonthTitle"></div>
+            <button class="cal-nav-btn" id="calNext" aria-label="下一個月">
+              <svg viewBox="0 0 24 24"><polyline points="9,18 15,12 9,6"/></svg>
+            </button>
+          </div>
+          <!-- 星期表頭 -->
+          <div class="cal-dow-header">
+            <div class="cal-dow-cell">日</div>
+            <div class="cal-dow-cell">一</div>
+            <div class="cal-dow-cell">二</div>
+            <div class="cal-dow-cell">三</div>
+            <div class="cal-dow-cell">四</div>
+            <div class="cal-dow-cell">五</div>
+            <div class="cal-dow-cell">六</div>
+          </div>
+          <!-- 日期格（由 JS renderCalGrid() 填入） -->
+          <div class="cal-days" id="calDays"></div>
+        </div>
+        <!-- 圖例 -->
+        <div class="cal-legend">
+          <span style="font-size:12px;color:var(--gray-400)">類型：</span>
+          <span class="cal-legend-item"><span class="cal-legend-dot dot-evt"></span>活動</span>
+          <span class="cal-legend-item"><span class="cal-legend-dot dot-msp"></span>MSP 課程</span>
+          <span class="cal-legend-item"><span class="cal-legend-dot dot-guest"></span>來賓日</span>
+          <span class="cal-legend-item"><span class="cal-legend-dot dot-grp"></span>組聚</span>
+          <span class="cal-legend-item"><span class="cal-legend-dot dot-meeting"></span>例會</span>
+          <span style="font-size:12px;color:var(--gray-400);margin-left:4px">· 點日期定位到下方議程</span>
+        </div>
+        <!-- 新增活動按鈕 -->
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-top:20px">
+          <a href="https://docs.google.com/spreadsheets/d/1XcSJ_U6i6kIHruHObblZEVQEd7d4M0X8LNGG9Oftgd0/edit?openExternalBrowser=1" target="_blank" rel="noopener" class="btn btn-outline" style="font-size:13px;padding:9px 18px;display:inline-flex;align-items:center;gap:6px;border-color:var(--red);color:var(--red)" data-open-external-browser="1">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            新增 / 編輯活動
+          </a>
+          <span style="font-size:12px;color:var(--gray-400);line-height:1.5">點此在共用試算表新增活動，新增後行事曆會自動更新</span>
+        </div>
+        <!-- fetch 失敗提示（預設隱藏，fetch 失敗時顯示） -->
+        <div id="calFetchErr" style="display:none;margin-top:10px;font-size:12px;color:var(--gray-400)">活動資料載入失敗，請稍後重整</div>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -2009,22 +2037,24 @@ section[id]{scroll-margin-top:68px}
           <div><strong>下次組聚：</strong><span class="chain-next" data-chain="C">（時間待定）</span></div>
         </div>
       </div>
-      <!-- D 商用不動產升級鏈 -->
+      <!-- D 商用不動產升級鏈：2026-07-01 談定，每月第 2、4 週二輪替（GROUP_ROTATION_2026Q3） -->
       <div class="chain cd">
         <div class="chain-badge">D</div>
         <div class="chain-name">D 商用不動產升級鏈</div>
         <div class="chain-meta">
           <div><strong>召集人：</strong>陳向柔 Naomi</div>
           <div><strong>下次組聚：</strong><span class="chain-next" data-chain="D">（時間待定）</span></div>
+          <div class="chain-rotation-note">每月第 2、4 週二・第 5 週休</div>
         </div>
       </div>
-      <!-- E 房產客戶成長鏈 -->
+      <!-- E 房產客戶成長鏈：2026-07-01 談定，每月第 1、3 週二輪替（GROUP_ROTATION_2026Q3） -->
       <div class="chain ce">
         <div class="chain-badge">E</div>
         <div class="chain-name">E 房產客戶成長鏈</div>
         <div class="chain-meta">
           <div><strong>召集人：</strong>張瓊安</div>
           <div><strong>下次組聚：</strong><span class="chain-next" data-chain="E">（時間待定）</span></div>
+          <div class="chain-rotation-note">每月第 1、3 週二・第 5 週休</div>
         </div>
       </div>
     </div>
@@ -2222,6 +2252,75 @@ var WED_MEETING = { type:'例會', name:'線上例會 · 週三 06:30–08:45 ·
 var ZH_MONTHS = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
 var GAS_CAL_URL = 'https://script.google.com/macros/s/AKfycbyCL7tHMfIkHHAhL0WDX-TMdMfmxNdWkVkGRhdaAjESgmUZ3-eJKJ7YsOi1IS-RMxW4/exec';
 
+// ─────────────────────────────────────────────
+// GROUP_ROTATION — Power Team 組聚週二輪替常數（GROUP_ROTATION_2026Q3，2026-07-03）
+// 2026-07-01 兩位組長談定：E 組（房產客戶成長鏈，召集人張瓊安）每月第 1、3 個週二；
+// D 組（商用不動產升級鏈，召集人陳向柔 Naomi）每月第 2、4 個週二；該月第 5 個週二兩組都休。
+// 後台 Sheet「組聚」分頁的「雙週」頻率對 E/D 已不準（例如 9 月有 5 個週二會多算 9/29），
+// 故 E/D 改用本常數在前端計算；A/B/C 鏈維持 Sheet 驅動（gnNextDate）不受影響。
+// 未來規則若變（例如改三組輪替、改週別），只需要改這個物件，不必動計算邏輯。
+// ─────────────────────────────────────────────
+var GROUP_ROTATION = {
+  'E': { weeks:[1,3], chainName:'房產客戶成長鏈', leader:'張瓊安' },
+  'D': { weeks:[2,4], chainName:'商用不動產升級鏈', leader:'陳向柔 Naomi' }
+};
+// 遇受訓／課程當週可能整月取消，實際以分會 LINE 群公告為準；前端不計算此例外，只在文案註記。
+
+// 回傳指定 (y,m,0-indexed) 月份的所有週二日期（Date 物件陣列，第 1 個為每月第 1 個週二）
+function tuesdaysInMonth(y, m) {
+  var out = [];
+  var cur = new Date(y, m, 1);
+  while (cur.getMonth() === m) {
+    if (cur.getDay() === 2) out.push(new Date(cur));
+    cur.setDate(cur.getDate() + 1);
+  }
+  return out;
+}
+
+// 判斷 (y,m,d) 這天是否輪到 E 或 D 組組聚，回傳 { group:'E'|'D', weekNum } 或 null（含第 5 週兩組都休）
+function groupMeetingOnDate(y, m, d) {
+  var target = new Date(y, m, d);
+  if (target.getDay() !== 2) return null; // 非週二
+  var tues = tuesdaysInMonth(y, m);
+  var weekNum = -1;
+  for (var i = 0; i < tues.length; i++) {
+    if (tues[i].getDate() === d) { weekNum = i + 1; break; }
+  }
+  if (weekNum < 1 || weekNum > 4) return null; // 找不到或第 5 週（兩組都休）
+  var groupKeys = Object.keys(GROUP_ROTATION);
+  for (var k = 0; k < groupKeys.length; k++) {
+    var key = groupKeys[k];
+    if (GROUP_ROTATION[key].weeks.indexOf(weekNum) > -1) {
+      return { group: key, weekNum: weekNum };
+    }
+  }
+  return null;
+}
+
+// 回傳指定 (y,m,0-indexed) 月份「本月+下月窗口」內所有組聚場次，供議程列表合併用
+// 格式：[{ date:'YYYY-MM-DD', group:'E'|'D', weekNum }]，只含未來（含今天）場次，過去不顯示
+function groupMeetingsInWindow(winStart, winEnd) {
+  var out = [];
+  var cur = new Date(winStart.getFullYear(), winStart.getMonth(), 1);
+  var endMonth = new Date(winEnd.getFullYear(), winEnd.getMonth(), 1);
+  while (cur <= endMonth) {
+    var tues = tuesdaysInMonth(cur.getFullYear(), cur.getMonth());
+    tues.forEach(function(d, idx) {
+      var weekNum = idx + 1;
+      if (weekNum > 4) return; // 第 5 週兩組都休
+      if (d < winStart || d > winEnd) return;
+      Object.keys(GROUP_ROTATION).forEach(function(key) {
+        if (GROUP_ROTATION[key].weeks.indexOf(weekNum) > -1) {
+          var dateKey = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+          out.push({ date: dateKey, group: key, weekNum: weekNum });
+        }
+      });
+    });
+    cur.setMonth(cur.getMonth() + 1);
+  }
+  return out;
+}
+
 // 全域活動陣列，fetch 後填入，格式：[{ date:'YYYY-MM-DD', type, name, link }]
 var CAL_EVENTS = [];
 
@@ -2233,9 +2332,6 @@ function calEventsForDate(y, m, d) {
   var key = y + '-' + (m+1<10?'0':'') + (m+1) + '-' + (d<10?'0':'') + d;
   return CAL_EVENTS.filter(function(e){ return e.date === key; });
 }
-
-// 目前展開中的日期 key（null = 未展開）。切月/收合都會清空。
-var calOpenDate = null;
 
 function renderCalGrid() {
   var y = calCur.y, m = calCur.m;
@@ -2250,9 +2346,6 @@ function renderCalGrid() {
   var daysInMonth = new Date(y, m+1, 0).getDate();
   var container = document.getElementById('calDays');
 
-  // 切月＝原本展開的日期不在新月份裡了，收合面板
-  calCloseDayPanel();
-
   var html = '';
   for (var i = 0; i < firstDow; i++) {
     html += '<div class="cal-day empty"><span class="cal-day-num"></span></div>';
@@ -2263,6 +2356,9 @@ function renderCalGrid() {
     // 每週三自動插入例會（疊加在 Sheet 資料前，Sheet 資料不被覆蓋）
     var dow = new Date(y, m, d).getDay();
     if (dow === 3) evts = [WED_MEETING].concat(evts);
+    // 組聚週二輪替（2026-07-03 新增）：疊加該天是否輪到 E/D 組聚
+    var groupMeet = groupMeetingOnDate(y, m, d);
+    if (groupMeet) evts = evts.concat([{ type:'組聚', name: groupMeet.group + ' 組組聚' }]);
     var isToday = (dateKey === todayKey);
     var hasEvt = evts.length > 0;
 
@@ -2275,13 +2371,10 @@ function renderCalGrid() {
       evtHtml = '<div class="cal-evt-list">';
       evts.forEach(function(e) {
         var dc = DOT_CLASS[e.type] || 'dot-evt';
-        // 手機迷你字標文字：例會＝例、活動＝動（非首字「活」，spec 指定字樣），其餘類型比照圖例色系取首字
+        // 迷你字標文字：例會＝例、活動＝動（非首字「活」，spec 指定字樣），組聚＝組，其餘取首字
         var badgeChar = BADGE_CHAR[e.type] || (e.type && e.type.charAt(0)) || '動';
-        var safeName = String(e.name).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
         evtHtml += '<div class="cal-evt-item">' +
-          '<span class="cal-evt-dot ' + dc + '"></span>' +
           '<span class="cal-evt-badge ' + dc + '">' + badgeChar + '</span>' +
-          '<span class="cal-evt-name">' + safeName + '</span>' +
           '</div>';
       });
       evtHtml += '</div>';
@@ -2297,73 +2390,48 @@ function renderCalGrid() {
 
   container.innerHTML = html;
 
-  // 統一互動：點任何有標記的日期（活動或週三例會）→ 月曆正下方原地展開當日資訊小卡
-  // 不跳頁、不彈窗、不 tooltip；再點同一天收合；點別天替換內容（2026-07-03 取代原 tooltip/跳轉雙軌行為）
-  container.querySelectorAll('.cal-day.has-event').forEach(function(el) {
+  // 迷你月曆是導航用途（2026-07-03 大改版，calDayPanel 面板已退役）：
+  // 點有標記日期 → 平滑捲動到對應議程卡並短暫高亮；當日無安排 → 淡字提示「當日無安排」2 秒後消失
+  container.querySelectorAll('.cal-day').forEach(function(el) {
     el.addEventListener('click', function(ev) {
-      ev.stopPropagation();
+      if (ev.target.closest('.cal-add-btn')) return; // 交給下方 + 按鈕委派處理
       var dateKey = el.getAttribute('data-date');
-      if (calOpenDate === dateKey) {
-        calCloseDayPanel();
-      } else {
-        calShowDayPanel(dateKey, el);
-      }
+      if (!dateKey) return;
+      calJumpToAgenda(dateKey, el);
     });
   });
 }
 
-// 渲染當日資訊面板（活動重用精簡卡片樣式；週三另外顯示例會資訊 + 錨點連結）
-function calShowDayPanel(dateKey, dayEl) {
-  var panel = document.getElementById('calDayPanel');
-  if (!panel) return;
-
-  var d = new Date(dateKey + 'T00:00:00');
-  var wd = ['日','一','二','三','四','五','六'];
-  var dateLabel = isNaN(d) ? dateKey : (d.getMonth()+1) + ' 月 ' + d.getDate() + ' 日（' + wd[d.getDay()] + '）';
-
-  var sheetEvts = CAL_EVENTS.filter(function(e){ return e.date === dateKey; });
-  var dow = d.getDay();
-  var itemsHtml = '';
-
-  if (dow === 3) {
-    itemsHtml += '<div class="cal-day-panel-item is-meeting">' +
-      '<span class="cal-day-panel-badge">例會</span>' +
-      '<div class="cal-day-panel-title">線上例會</div>' +
-      '<div class="cal-day-panel-meta">每週三 06:30–08:45・線上 Zoom</div>' +
-      '<a href="#zoom" class="cal-day-panel-link">查看完整例會專區 →</a>' +
-      '</div>';
+// 點迷你月曆日期 → 找對應議程卡（活動或組聚精簡卡）捲動並高亮；
+// 週三沒有逐日議程卡（例會走常態卡①，不進列表）→ 改捲到常態卡①；當日無安排則淡字提示
+function calJumpToAgenda(dateKey, dayEl) {
+  var target = document.querySelector('#agendaList [data-agenda-date="' + dateKey + '"]');
+  if (target) {
+    target.scrollIntoView({ behavior:'smooth', block:'center' });
+    target.classList.add('agenda-highlight');
+    setTimeout(function(){ target.classList.remove('agenda-highlight'); }, 1600);
+    return;
   }
-
-  sheetEvts.forEach(function(e) {
-    var badgeColorMap = { '活動':'#CF2030','MSP':'#1E6FBF','來賓日':'#0A8A5B','組聚':'#B8963E','例會':'#7B5EA7' };
-    var badgeColor = badgeColorMap[e.type] || '#CF2030';
-    var timeStr = e.startTime ? (e.endTime ? e.startTime + '–' + e.endTime : e.startTime + ' 起') : '';
-    itemsHtml += '<div class="cal-day-panel-item">' +
-      '<span class="cal-day-panel-badge" style="background:' + badgeColor + '">' + acEsc(e.type || '活動') + '</span>' +
-      '<div class="cal-day-panel-title">' + acEsc(e.name || '（未命名活動）') + '</div>' +
-      (e.sub ? '<div class="cal-day-panel-meta">' + acEsc(e.sub) + '</div>' : '') +
-      (timeStr ? '<div class="cal-day-panel-meta">時間：' + acEsc(timeStr) + '</div>' : '') +
-      (e.loc ? '<div class="cal-day-panel-meta">地點：' + acEsc(e.loc) + '</div>' : '') +
-      '</div>';
-  });
-
-  panel.innerHTML =
-    '<div class="cal-day-panel-head">' +
-      '<span class="cal-day-panel-date">' + dateLabel + '</span>' +
-      '<button class="cal-day-panel-close" aria-label="收合" onclick="calCloseDayPanel()">✕</button>' +
-    '</div>' + itemsHtml;
-  panel.style.display = 'block';
-
-  document.querySelectorAll('#calDays .cal-day.selected').forEach(function(x){ x.classList.remove('selected'); });
-  if (dayEl) dayEl.classList.add('selected');
-  calOpenDate = dateKey;
-}
-
-function calCloseDayPanel() {
-  var panel = document.getElementById('calDayPanel');
-  if (panel) { panel.style.display = 'none'; panel.innerHTML = ''; }
-  document.querySelectorAll('#calDays .cal-day.selected').forEach(function(x){ x.classList.remove('selected'); });
-  calOpenDate = null;
+  var dow = new Date(dateKey + 'T00:00:00').getDay();
+  if (dow === 3) {
+    var standingCard = document.querySelector('.agenda-standing-card');
+    if (standingCard) {
+      standingCard.scrollIntoView({ behavior:'smooth', block:'center' });
+      standingCard.classList.add('agenda-highlight');
+      setTimeout(function(){ standingCard.classList.remove('agenda-highlight'); }, 1600);
+      return;
+    }
+  }
+  // 當日無安排
+  if (!dayEl) return;
+  var old = dayEl.querySelector('.cal-no-evt-tip');
+  if (old) old.remove();
+  var tip = document.createElement('span');
+  tip.className = 'cal-no-evt-tip';
+  tip.textContent = '當日無安排';
+  dayEl.style.position = 'relative';
+  dayEl.appendChild(tip);
+  setTimeout(function(){ if (tip.parentNode) tip.remove(); }, 2000);
 }
 
 // fetch GAS，回來後重繪月曆
@@ -2419,6 +2487,19 @@ document.addEventListener('DOMContentLoaded', function() {
       openAddEvtModal();
     }
   });
+
+  // 迷你月曆摺疊（CAL_MINI_NAV_8XW2，2026-07-03）：桌機（>600px）預設展開，手機預設摺疊
+  var miniToggle = document.getElementById('calMiniToggle');
+  var miniBody = document.getElementById('calMiniBody');
+  if (miniToggle && miniBody) {
+    var startOpen = window.innerWidth > 600;
+    miniBody.classList.toggle('open', startOpen);
+    miniToggle.setAttribute('aria-expanded', startOpen ? 'true' : 'false');
+    miniToggle.addEventListener('click', function() {
+      var nowOpen = miniBody.classList.toggle('open');
+      miniToggle.setAttribute('aria-expanded', nowOpen ? 'true' : 'false');
+    });
+  }
 });
 
 // ─────────────────────────────────────────────
@@ -2782,64 +2863,78 @@ function tfMap(rows){
 // 活動詳情 (ACTIVITIES_FEED_9X) — 動態讀後台「活動」分頁
 // ─────────────────────────────────────────────
 function acEsc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
-function acRender(list){
-  var box=document.getElementById('activitiesContent');
-  if(!box) return;
-  // 第 4b 項：活動卡右側日期塊改中文月份（原英文 JAN/JUN 等）
+
+// 單筆活動卡 HTML（沿用現行 feat-event 樣式與報名按鈕邏輯，不變）
+function acEventCardHtml(x){
   var mN=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
   var wd=['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
-  // 依日期排序：未結束的在前、最近的在上
-  var rows=(list||[]).filter(function(x){return x['活動名稱'];});
-  rows.sort(function(a,b){return String(a['日期時間']||'').localeCompare(String(b['日期時間']||''));});
-  if(!rows.length){ box.innerHTML='<div class="ac-loading" style="font-size:14px;color:var(--gray-400);padding:18px 0">目前暫無活動，請見上方行事曆。</div>'; return; }
-  box.innerHTML=rows.map(function(x){
-    var dt=x['日期時間']?new Date(String(x['日期時間']).replace(' ','T')):null;
-    var done=/已結束|結束/.test(x['狀態']||'');
-    var statusHTML = x['狀態'] ? '<span class="status '+(done?'s-done':'s-open')+'" style="'+(done?'background:rgba(90,100,114,.07);color:#5A6472':'background:rgba(207,32,48,.08);color:var(--red)')+'">'+acEsc(x['狀態'])+'</span>' : '';
-    var meta='';
-    // 時間顯示邏輯：
-    // 優先讀 acMapFromCalendar 組好的「時間顯示」欄（含開始–結束區間或「XX 起」）
-    // fallback：從日期時間欄用 regex 抓 HH:mm（相容舊資料格式）
-    // 都沒有：顯示淡字「時間待補」
-    var tm = x['時間顯示'] || (function(){
-      var hasTime = /\d{1,2}:\d{2}/.test(String(x['日期時間']||''));
-      return hasTime ? (String(x['日期時間']).match(/(\d{1,2}:\d{2})/)||[])[1] : '';
-    }());
-    if(x['日期時間']){
-      var dstr = dt&&!isNaN(dt) ? (dt.getFullYear()+' 年 '+String(dt.getMonth()+1).padStart(2,'0')+' 月 '+String(dt.getDate()).padStart(2,'0')+' 日'+(isNaN(dt.getDay())?'':'（'+wd[dt.getDay()]+'）')) : acEsc(x['日期時間']);
-      meta+='<div class="meta-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'+dstr+'</div>';
-      // 時間：有則顯示；無則顯示「時間待補」淡字提示（不假造時間）
-      if(tm){
-        meta+='<div class="meta-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>'+tm+'</div>';
-      }else{
-        meta+='<div class="meta-item" style="color:var(--gray-300)"><svg viewBox="0 0 24 24" style="stroke:var(--gray-300)"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg><span style="font-style:italic">時間待補</span></div>';
-      }
+  var dt=x['日期時間']?new Date(String(x['日期時間']).replace(' ','T')):null;
+  var dateKey = dt&&!isNaN(dt) ? (dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0')) : '';
+  var done=/已結束|結束/.test(x['狀態']||'');
+  var statusHTML = x['狀態'] ? '<span class="status '+(done?'s-done':'s-open')+'" style="'+(done?'background:rgba(90,100,114,.07);color:#5A6472':'background:rgba(207,32,48,.08);color:var(--red)')+'">'+acEsc(x['狀態'])+'</span>' : '';
+  var meta='';
+  // 時間顯示邏輯：優先讀 acMapFromCalendar 組好的「時間顯示」欄；fallback regex 抓 HH:mm；都沒有顯示「時間待補」
+  var tm = x['時間顯示'] || (function(){
+    var hasTime = /\d{1,2}:\d{2}/.test(String(x['日期時間']||''));
+    return hasTime ? (String(x['日期時間']).match(/(\d{1,2}:\d{2})/)||[])[1] : '';
+  }());
+  if(x['日期時間']){
+    var dstr = dt&&!isNaN(dt) ? (dt.getFullYear()+' 年 '+String(dt.getMonth()+1).padStart(2,'0')+' 月 '+String(dt.getDate()).padStart(2,'0')+' 日'+(isNaN(dt.getDay())?'':'（'+wd[dt.getDay()]+'）')) : acEsc(x['日期時間']);
+    meta+='<div class="meta-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'+dstr+'</div>';
+    if(tm){
+      meta+='<div class="meta-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>'+tm+'</div>';
+    }else{
+      meta+='<div class="meta-item" style="color:var(--gray-300)"><svg viewBox="0 0 24 24" style="stroke:var(--gray-300)"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg><span style="font-style:italic">時間待補</span></div>';
     }
-    if(x['地點']) meta+='<div class="meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>'+acEsc(x['地點'])+'</div>';
-    if(x['費用']) meta+='<div class="meta-item"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>'+acEsc(x['費用'])+'</div>';
-    // FIX3: 壞連結防呆 — 連結欄非 http/https 開頭（中文或其他）→ 顯示說明文字，不產生壞 href
-    var rawLink = x['報名連結'] || '';
-    var isUrl = /^https?:\/\//i.test(rawLink);
-    var btn = '';
-    if(rawLink && isUrl && !done){
-      btn = '<div style="display:flex;gap:12px;flex-wrap:wrap"><a href="'+acEsc(rawLink)+'?openExternalBrowser=1" target="_blank" rel="noopener" class="btn btn-primary">立即報名</a></div>';
-    } else if(rawLink && isUrl && done){
-      btn = '<div style="display:flex;gap:12px;flex-wrap:wrap"><a href="'+acEsc(rawLink)+'?openExternalBrowser=1" target="_blank" rel="noopener" class="btn btn-outline" style="border-color:var(--gray-200);color:var(--gray-500)">查看報名表單</a></div>';
-    } else if(rawLink && !isUrl && !done){
-      btn = '<div style="display:flex;gap:12px;flex-wrap:wrap"><span class="btn btn-outline" style="border-color:var(--gray-200);color:var(--gray-600);cursor:default;pointer-events:none">報名方式：'+acEsc(rawLink)+'</span></div>';
-    }
-    // 第 4b 項：日期塊格式「日期數字大字 + 中文年月」
-    // FIX2: 日期紅塊只留「大數字日期 + 月份 + 年」，移除「星期X」那行
-    var side = dt&&!isNaN(dt) ? '<div class="feat-side"><div><div class="date-month">'+mN[dt.getMonth()]+'</div><div class="date-big">'+dt.getDate()+'</div><div class="date-month" style="font-size:11px;opacity:.7;margin-top:2px">'+dt.getFullYear()+'</div></div></div>' : '';
-    var typeLabel = x['類型'] || '分會活動';
-    return '<div class="feat-event" style="margin-bottom:16px"><div class="feat-body">'
-      +'<div class="badge badge-red">'+acEsc(typeLabel)+'</div>'
-      +(statusHTML?'<div style="margin-bottom:10px">'+statusHTML+'</div>':'')
-      +'<h3>'+acEsc(x['活動名稱'])+'</h3>'
-      +(x['活動副標']?'<p class="evt-sub">'+acEsc(x['活動副標'])+'</p>':'')
-      +'<div class="evt-meta">'+meta+'</div>'+btn
-      +'</div>'+side+'</div>';
-  }).join('');
+  }
+  if(x['地點']) meta+='<div class="meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>'+acEsc(x['地點'])+'</div>';
+  if(x['費用']) meta+='<div class="meta-item"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>'+acEsc(x['費用'])+'</div>';
+  var rawLink = x['報名連結'] || '';
+  var isUrl = /^https?:\/\//i.test(rawLink);
+  var btn = '';
+  if(rawLink && isUrl && !done){
+    btn = '<div style="display:flex;gap:12px;flex-wrap:wrap"><a href="'+acEsc(rawLink)+'?openExternalBrowser=1" target="_blank" rel="noopener" class="btn btn-primary">立即報名</a></div>';
+  } else if(rawLink && isUrl && done){
+    btn = '<div style="display:flex;gap:12px;flex-wrap:wrap"><a href="'+acEsc(rawLink)+'?openExternalBrowser=1" target="_blank" rel="noopener" class="btn btn-outline" style="border-color:var(--gray-200);color:var(--gray-500)">查看報名表單</a></div>';
+  } else if(rawLink && !isUrl && !done){
+    btn = '<div style="display:flex;gap:12px;flex-wrap:wrap"><span class="btn btn-outline" style="border-color:var(--gray-200);color:var(--gray-600);cursor:default;pointer-events:none">報名方式：'+acEsc(rawLink)+'</span></div>';
+  }
+  var side = dt&&!isNaN(dt) ? '<div class="feat-side"><div><div class="date-month">'+mN[dt.getMonth()]+'</div><div class="date-big">'+dt.getDate()+'</div><div class="date-month" style="font-size:11px;opacity:.7;margin-top:2px">'+dt.getFullYear()+'</div></div></div>' : '';
+  var typeLabel = x['類型'] || '分會活動';
+  return '<div class="feat-event" style="margin-bottom:16px"'+(dateKey?' data-agenda-date="'+dateKey+'"':'')+'><div class="feat-body">'
+    +'<div class="badge badge-red">'+acEsc(typeLabel)+'</div>'
+    +(statusHTML?'<div style="margin-bottom:10px">'+statusHTML+'</div>':'')
+    +'<h3>'+acEsc(x['活動名稱'])+'</h3>'
+    +(x['活動副標']?'<p class="evt-sub">'+acEsc(x['活動副標'])+'</p>':'')
+    +'<div class="evt-meta">'+meta+'</div>'+btn
+    +'</div>'+side+'</div>';
+}
+
+// 單筆組聚場次精簡卡 HTML（一行式，例：「7/7（二）E 組組聚・房產客戶成長鏈・線上 Zoom」）
+function acGroupMeetingCardHtml(g){
+  var d = new Date(g.date + 'T00:00:00');
+  var wd=['日','一','二','三','四','五','六'];
+  var dLabel = isNaN(d) ? g.date : (d.getMonth()+1)+'/'+d.getDate()+'（'+wd[d.getDay()]+'）';
+  var info = GROUP_ROTATION[g.group] || {};
+  return '<div class="agenda-mini-card" data-agenda-date="'+acEsc(g.date)+'">'
+    +'<span class="agenda-mini-card-dot"></span>'
+    +'<span><b>'+dLabel+'</b> '+acEsc(g.group)+' 組組聚・'+acEsc(info.chainName||'')+'・線上 Zoom</span>'
+    +'</div>';
+}
+
+// 合併渲染：Sheet 活動 + 組聚輪替場次，依日期排序（AGENDA_MERGE_5KX8，2026-07-03 大改版取代 acRender）
+function renderAgendaList(activityRows, groupRows){
+  var box=document.getElementById('agendaList');
+  if(!box) return;
+  var acts=(activityRows||[]).filter(function(x){return x['活動名稱'];});
+  var merged = acts.map(function(x){
+    return { sortKey: String(x['日期時間']||''), html: acEventCardHtml(x) };
+  }).concat((groupRows||[]).map(function(g){
+    return { sortKey: g.date, html: acGroupMeetingCardHtml(g) };
+  }));
+  merged.sort(function(a,b){ return a.sortKey.localeCompare(b.sortKey); });
+  if(!merged.length){ box.innerHTML='<div class="ac-loading" style="font-size:14px;color:var(--gray-400);padding:18px 0">近期暫無場次，請留意分會 LINE 群公告。</div>'; return; }
+  box.innerHTML = merged.map(function(m){ return m.html; }).join('');
 }
 // 活動詳情改讀「行事曆」分頁，過濾類型=活動（單一資料源，與月曆同步，不再讀獨立「活動」分頁）
 // 只顯示「本月 + 下月」的活動（前端自動算，過期/太遠的自動不顯示，後台不用加欄/不用觸發器）
@@ -2899,15 +2994,22 @@ function acMapFromCalendar(rows){
 (function loadActivities(){
   // 讀行事曆分頁（與月曆同一份，快取 key 共用故通常命中 sessionStorage、不重打 API）
   var url = GAS_CAL_URL + '?sheet=' + encodeURIComponent('行事曆');
+  // 本月+下月窗口，Sheet 活動與組聚輪替場次共用同一個窗口（AGENDA_MERGE_5KX8）
+  var now = new Date();
+  var winStart = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
+  var winEnd   = new Date(now.getFullYear(), now.getMonth() + 2, 0, 23, 59, 59);
+  var groupRows = groupMeetingsInWindow(winStart, winEnd);
   fetchJSON(url, 'calendar-行事曆', 10 * 60 * 1000)
     .then(function(data){
       var rows = Array.isArray(data) ? data : (data.data || data.rows || []);
       var acts = acMapFromCalendar(rows);
-      acRender(acts);
+      renderAgendaList(acts, groupRows);
     })
     .catch(function(){
-      var box=document.getElementById('activitiesContent');
-      if(box) box.innerHTML='<div class="ac-loading" style="font-size:14px;color:var(--gray-400);padding:18px 0">活動資料載入失敗，請下拉重新整理。</div>';
+      // fetch 失敗仍顯示組聚場次（前端算的，不依賴 API），只有 Sheet 活動缺席
+      renderAgendaList([], groupRows);
+      var box=document.getElementById('agendaList');
+      if(box) box.insertAdjacentHTML('afterbegin', '<div class="ac-loading" style="font-size:13px;color:var(--gray-400);padding:8px 0">活動資料載入失敗，請下拉重新整理；下方組聚場次為前端試算不受影響。</div>');
     });
 })();
 
@@ -2936,7 +3038,32 @@ function gnFmt(d){
   var wd=['日','一','二','三','四','五','六'];
   return (d.getMonth()+1)+'/'+d.getDate()+'（'+wd[d.getDay()]+'）';
 }
+
+// E/D 組「從今天起的下一次」輪替場次（GROUP_ROTATION_NEXT，2026-07-03）：
+// 往後最多找 8 週（含跨月），第 5 週兩組都休會被 groupMeetingOnDate 自動跳過。
+function groupRotationNextDate(groupKey){
+  var d = new Date(); d.setHours(0,0,0,0);
+  for (var i = 0; i < 56; i++) { // 最多找 8 週
+    var m = groupMeetingOnDate(d.getFullYear(), d.getMonth(), d.getDate());
+    if (m && m.group === groupKey) return new Date(d);
+    d.setDate(d.getDate() + 1);
+  }
+  return null;
+}
+
 (function loadGroupMeetings(){
+  // E/D 兩組改用輪替常數計算，不依賴 Sheet（GROUP_ROTATION_2026Q3）
+  ['E','D'].forEach(function(key){
+    var span = document.querySelector('.chain-next[data-chain="'+key+'"]');
+    if(!span) return;
+    var nxt = groupRotationNextDate(key);
+    if(nxt){
+      span.textContent = gnFmt(nxt) + ' Zoom';
+      span.style.color = 'rgba(255,255,255,.85)';
+    }
+  });
+
+  // A/B/C 鏈維持 Sheet 頻率計算（現行邏輯不變）
   var url = GAS_CAL_URL + '?sheet=' + encodeURIComponent('組聚');
   fetchJSON(url, 'calendar-組聚', 10 * 60 * 1000)
     .then(function(data){
@@ -2946,6 +3073,7 @@ function gnFmt(d){
         var m = String(r['產業鏈']||'').match(/^([A-E])/);
         if(!m) return;
         var key = m[1];
+        if(key === 'E' || key === 'D') return; // E/D 已用輪替常數算過，Sheet 雙週頻率對它們不準
         var span = document.querySelector('.chain-next[data-chain="'+key+'"]');
         if(!span) return;
         var nxt = gnNextDate(r['首次日期']||r['首次組聚']||r['下次組聚時間'], r['頻率']);
@@ -2955,7 +3083,7 @@ function gnFmt(d){
         }
       });
     })
-    .catch(function(){ /* 失敗保留「時間待定」 */ });
+    .catch(function(){ /* 失敗保留「時間待定」（A/B/C），E/D 已由輪替常數算好不受影響 */ });
 })();
 
 // ─────────────────────────────────────────────
