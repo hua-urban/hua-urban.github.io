@@ -2025,10 +2025,30 @@ section[id]{scroll-margin-top:68px}
 
 // ─────────────────────────────────────────────
 // fetchJSON — 共用 fetch helper（FETCHJSON_HELPER_9QW3）
-// sessionStorage 快取（TTL 預設 10 分鐘）+ AbortController 10 秒逾時。
+// sessionStorage 快取（TTL 預設 10 分鐘）+ AbortController 10 秒逾時 + 失敗自動重試 1 次。
 // 快取 key 帶版本前綴，未來若欄位格式變動只要改前綴即可讓舊快取失效。
+// 2026-07-03 微修：GAS 冷啟動偶發 3-10 秒慢，撞上 10 秒 timeout 直接落 catch fallback，
+// 沒有重試導致偶發「載入失敗」。改失敗（逾時或網路錯）後間隔 1 秒自動重試 1 次，
+// 重試也失敗才 reject；邏輯放這個 helper 內，所有呼叫點（月曆/活動/培訓快訊/組聚）自動受惠。
 // ─────────────────────────────────────────────
 var FETCHJSON_CACHE_PREFIX = 'huv1:';
+
+function fetchJSONOnce(url){
+  var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  var timer = controller ? setTimeout(function(){ controller.abort(); }, 10000) : null;
+
+  return fetch(url, controller ? { signal: controller.signal } : undefined)
+    .then(function(res){
+      if(timer) clearTimeout(timer);
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    })
+    .catch(function(err){
+      if(timer) clearTimeout(timer);
+      throw err;
+    });
+}
+
 function fetchJSON(url, cacheKey, ttlMs){
   ttlMs = ttlMs || 10 * 60 * 1000; // 預設 10 分鐘
   var fullKey = FETCHJSON_CACHE_PREFIX + cacheKey;
@@ -2043,25 +2063,20 @@ function fetchJSON(url, cacheKey, ttlMs){
     }
   }catch(e){ /* sessionStorage 不可用，忽略，照常 fetch */ }
 
-  var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-  var timer = controller ? setTimeout(function(){ controller.abort(); }, 10000) : null;
-
-  return fetch(url, controller ? { signal: controller.signal } : undefined)
-    .then(function(res){
-      if(timer) clearTimeout(timer);
-      if(!res.ok) throw new Error('HTTP ' + res.status);
-      return res.json();
+  return fetchJSONOnce(url)
+    .catch(function(){
+      // 第一次失敗（逾時或網路錯）：間隔 1 秒重試 1 次，UI 不用改，重試期間維持原載入中文案
+      return new Promise(function(resolve){ setTimeout(resolve, 1000); })
+        .then(function(){ return fetchJSONOnce(url); });
     })
     .then(function(data){
       try{
         sessionStorage.setItem(fullKey, JSON.stringify({ t: Date.now(), d: data }));
       }catch(e){ /* 存快取失敗（額滿/停用）不影響本次資料回傳 */ }
       return data;
-    })
-    .catch(function(err){
-      if(timer) clearTimeout(timer);
-      throw err;
     });
+    // 重試也失敗：fetchJSONOnce 的 rejection 會沿 promise chain 往下傳，
+    // 不會進到上面 .then，直接讓呼叫端的 .catch 收到，各區塊維持現有失敗文案不變。
 }
 
 // ─────────────────────────────────────────────
