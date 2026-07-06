@@ -1835,35 +1835,38 @@ section[id]{scroll-margin-top:68px}
       <p>五條核心鏈 · 跨業整合 · 推薦共同發展</p>
     </div>
     <div class="chains" id="chainsContainer">
-      <!-- A 地主改建整合鏈 -->
+      <!-- A 地主改建整合鏈：2026-07-03 王春雄公告官方固定時段，每月第 1、3 個週四（GROUP_ROTATION_2026Q3） -->
       <div class="chain ca">
         <div class="chain-badge">A</div>
         <div class="chain-name">A 地主改建整合鏈</div>
-        <!-- 第 6 項：移除「地點：Zoom」重複行，下次組聚那行已含 Zoom -->
+        <!-- 第 6 項：移除「地點：Zoom」重複行，下次組聚那行已含時段 -->
         <div class="chain-meta">
           <div><strong>召集人：</strong>柳慧燕</div>
           <div><strong>下次組聚：</strong><span class="chain-next" data-chain="A">（時間待定）</span></div>
+          <div class="chain-rotation-note">每月第 1、3 週四・第 5 週休</div>
         </div>
       </div>
-      <!-- B 老屋現金流升級鏈 -->
+      <!-- B 老屋現金流升級鏈：每月第 2、4 個週五（GROUP_ROTATION_2026Q3） -->
       <div class="chain cb">
         <div class="chain-badge">B</div>
         <div class="chain-name">B 老屋現金流升級鏈</div>
         <div class="chain-meta">
           <div><strong>召集人：</strong>陳靖薇</div>
           <div><strong>下次組聚：</strong><span class="chain-next" data-chain="B">（時間待定）</span></div>
+          <div class="chain-rotation-note">每月第 2、4 週五・第 5 週休</div>
         </div>
       </div>
-      <!-- C 高齡安居 × 資產傳承產業鏈 -->
+      <!-- C 高齡安居 × 資產傳承產業鏈：每月第 2、4 個週四（GROUP_ROTATION_2026Q3） -->
       <div class="chain cc">
         <div class="chain-badge">C</div>
         <div class="chain-name">C 高齡安居 × 資產傳承產業鏈</div>
         <div class="chain-meta">
           <div><strong>召集人：</strong>王春雄 Jayson</div>
           <div><strong>下次組聚：</strong><span class="chain-next" data-chain="C">（時間待定）</span></div>
+          <div class="chain-rotation-note">每月第 2、4 週四・第 5 週休</div>
         </div>
       </div>
-      <!-- D 商用不動產升級鏈：2026-07-01 談定，每月第 2、4 週二輪替（GROUP_ROTATION_2026Q3） -->
+      <!-- D 商用不動產升級鏈：每月第 2、4 個週二（GROUP_ROTATION_2026Q3） -->
       <div class="chain cd">
         <div class="chain-badge">D</div>
         <div class="chain-name">D 商用不動產升級鏈</div>
@@ -1873,7 +1876,7 @@ section[id]{scroll-margin-top:68px}
           <div class="chain-rotation-note">每月第 2、4 週二・第 5 週休</div>
         </div>
       </div>
-      <!-- E 房產客戶成長鏈：2026-07-01 談定，每月第 1、3 週二輪替（GROUP_ROTATION_2026Q3） -->
+      <!-- E 房產客戶成長鏈：每月第 1、3 個週二（GROUP_ROTATION_2026Q3） -->
       <div class="chain ce">
         <div class="chain-badge">E</div>
         <div class="chain-name">E 房產客戶成長鏈</div>
@@ -2085,52 +2088,62 @@ function fetchJSON(url, cacheKey, ttlMs){
 // 行事曆共用設定（DYNCAL_7RP2MK4E）
 // 2026-07-03 瘦身：月曆格 render／月份切換／點日期跳轉高亮／字標／「月曆檢視」摺疊開關／
 // 「當日無安排」提示全數退役（Joan 拍板「行事曆裡的組聚拿掉，行事曆也不重要」）。
-// GAS_CAL_URL 仍保留：下方活動議程列表（loadActivities）與 Power Team A/B/C 鏈
-// （loadGroupMeetings）都還在用同一支 API。
+// GAS_CAL_URL 仍保留：下方活動議程列表（loadActivities）還在用同一支 API 讀「行事曆」分頁。
+// 2026-07-03 Power Team 五組全面更新：A/B/C 也改用前端 GROUP_ROTATION 常數計算（原本走
+// Sheet「組聚」分頁首次日期＋頻率推算），不再讀「組聚」分頁，該 fetch 呼叫點已移除
+// （省一次 API 呼叫）。「組聚」分頁本身仍存在於後台但前端已無任何讀取。
 // ─────────────────────────────────────────────
 var GAS_CAL_URL = 'https://script.google.com/macros/s/AKfycbyCL7tHMfIkHHAhL0WDX-TMdMfmxNdWkVkGRhdaAjESgmUZ3-eJKJ7YsOi1IS-RMxW4/exec';
 
 // ─────────────────────────────────────────────
-// GROUP_ROTATION — Power Team 組聚週二輪替常數（GROUP_ROTATION_2026Q3，2026-07-03）
-// 2026-07-01 兩位組長談定：E 組（房產客戶成長鏈，召集人張瓊安）每月第 1、3 個週二；
-// D 組（商用不動產升級鏈，召集人陳向柔 Naomi）每月第 2、4 個週二；該月第 5 個週二兩組都休。
-// 後台 Sheet「組聚」分頁的「雙週」頻率對 E/D 已不準（例如 9 月有 5 個週二會多算 9/29），
-// 故 E/D 改用本常數在前端計算；A/B/C 鏈維持 Sheet 驅動（gnNextDate）不受影響。
-// 未來規則若變（例如改三組輪替、改週別），只需要改這個物件，不必動計算邏輯。
-// 2026-07-03 瘦身：組聚議程卡／迷你月曆已退役，本常數現在唯一用途是 Power Team 專區
-// E/D 卡的「下次組聚」計算（groupRotationNextDate，見後段），groupMeetingsInWindow 已移除。
+// GROUP_ROTATION — Power Team 五組官方固定組聚時段（GROUP_ROTATION_2026Q3，2026-07-03 全面更新）
+// 2026-07-03 王春雄（C 組組長）公告五組官方固定時段，取代原本 A/B/C 走 Sheet「雙週」推算
+// （已失準，例：B 組新規則下次是 7/10 不是舊推算的 7/3）。五組全部改「每月第 N 個指定星期」：
+//   A 地主改建整合鏈（柳慧燕）　　　　每月第 1、3 個週四・線上 20:30–22:00
+//   B 老屋現金流升級鏈（陳靖薇）　　　每月第 2、4 個週五・線上 21:00–22:00
+//   C 高齡安居×資產傳承（王春雄 Jayson）每月第 2、4 個週四・線上 21:00–22:00
+//   D 商用不動產升級鏈（陳向柔 Naomi）每月第 2、4 個週二・線上 21:00–22:00／實體 19:00–21:00
+//   E 房產客戶成長鏈（張瓊安）　　　　每月第 1、3 個週二・線上 20:30–21:30
+// 該月第 5 個指定星期兩組都休（沿用 D/E 舊制的邊界規則，泛化到全部五組）。
+// 遇受訓／課程當週可能整月取消，實際以分會 LINE 群公告為準；前端不計算此例外，只在文案註記。
+// 未來規則若變，只需要改這個物件，不必動計算邏輯。weekday：0=日...6=六（JS Date.getDay() 慣例）。
 // ─────────────────────────────────────────────
 var GROUP_ROTATION = {
-  'E': { weeks:[1,3], chainName:'房產客戶成長鏈', leader:'張瓊安' },
-  'D': { weeks:[2,4], chainName:'商用不動產升級鏈', leader:'陳向柔 Naomi' }
+  'A': { weeks:[1,3], weekday:4, chainName:'地主改建整合鏈',       leader:'柳慧燕',        timeText:'線上 20:30–22:00' },
+  'B': { weeks:[2,4], weekday:5, chainName:'老屋現金流升級鏈',     leader:'陳靖薇',        timeText:'線上 21:00–22:00' },
+  'C': { weeks:[2,4], weekday:4, chainName:'高齡安居 × 資產傳承',  leader:'王春雄 Jayson', timeText:'線上 21:00–22:00' },
+  'D': { weeks:[2,4], weekday:2, chainName:'商用不動產升級鏈',     leader:'陳向柔 Naomi',  timeText:'線上 21:00–22:00／實體 19:00–21:00' },
+  'E': { weeks:[1,3], weekday:2, chainName:'房產客戶成長鏈',       leader:'張瓊安',        timeText:'線上 20:30–21:30' }
 };
-// 遇受訓／課程當週可能整月取消，實際以分會 LINE 群公告為準；前端不計算此例外，只在文案註記。
 
-// 回傳指定 (y,m,0-indexed) 月份的所有週二日期（Date 物件陣列，第 1 個為每月第 1 個週二）
-function tuesdaysInMonth(y, m) {
+// 回傳指定 (y,m,0-indexed) 月份中，星期為 weekday 的所有日期（Date 物件陣列，第 1 個為當月第 1 個該星期）
+function weekdaysInMonth(y, m, weekday) {
   var out = [];
   var cur = new Date(y, m, 1);
   while (cur.getMonth() === m) {
-    if (cur.getDay() === 2) out.push(new Date(cur));
+    if (cur.getDay() === weekday) out.push(new Date(cur));
     cur.setDate(cur.getDate() + 1);
   }
   return out;
 }
 
-// 判斷 (y,m,d) 這天是否輪到 E 或 D 組組聚，回傳 { group:'E'|'D', weekNum } 或 null（含第 5 週兩組都休）
+// 判斷 (y,m,d) 這天是否輪到某組組聚，回傳 { group, weekNum } 或 null（含第 5 週該組休）。
+// 泛化自舊版只判斷週二的 groupMeetingOnDate，現在依各組自己的 weekday 判斷。
 function groupMeetingOnDate(y, m, d) {
   var target = new Date(y, m, d);
-  if (target.getDay() !== 2) return null; // 非週二
-  var tues = tuesdaysInMonth(y, m);
-  var weekNum = -1;
-  for (var i = 0; i < tues.length; i++) {
-    if (tues[i].getDate() === d) { weekNum = i + 1; break; }
-  }
-  if (weekNum < 1 || weekNum > 4) return null; // 找不到或第 5 週（兩組都休）
+  var dow = target.getDay();
   var groupKeys = Object.keys(GROUP_ROTATION);
   for (var k = 0; k < groupKeys.length; k++) {
     var key = groupKeys[k];
-    if (GROUP_ROTATION[key].weeks.indexOf(weekNum) > -1) {
+    var info = GROUP_ROTATION[key];
+    if (info.weekday !== dow) continue; // 這組不是這個星期，跳過
+    var wds = weekdaysInMonth(y, m, info.weekday);
+    var weekNum = -1;
+    for (var i = 0; i < wds.length; i++) {
+      if (wds[i].getDate() === d) { weekNum = i + 1; break; }
+    }
+    if (weekNum < 1 || weekNum > 4) continue; // 找不到或第 5 週（該組休）
+    if (info.weeks.indexOf(weekNum) > -1) {
       return { group: key, weekNum: weekNum };
     }
   }
@@ -2611,7 +2624,7 @@ function acMapFromCalendar(rows){
   });
 }
 (function loadActivities(){
-  // 讀行事曆分頁（快取 key 沿用歷史命名 'calendar-行事曆'，Power Team A/B/C 鏈的組聚 API 是另一支 sheet=組聚，不共用）
+  // 讀行事曆分頁（快取 key 沿用歷史命名 'calendar-行事曆'）
   var url = GAS_CAL_URL + '?sheet=' + encodeURIComponent('行事曆');
   fetchJSON(url, 'calendar-行事曆', 10 * 60 * 1000)
     .then(function(data){
@@ -2626,36 +2639,23 @@ function acMapFromCalendar(rows){
 })();
 
 // ─────────────────────────────────────────────
-// Power Team 組聚下次時間（GROUP_NEXT_3J）— 讀「組聚」分頁的「首次日期」，
-// 依「頻率」（雙週/每週/每月）自動算「從今天起的下一次」，前端永遠顯示最新、組長不用改。
+// Power Team 組聚下次時間（GROUP_NEXT_3J）
+// 2026-07-03 全面更新：五組都改用 GROUP_ROTATION 前端輪替常數計算，不再讀 Sheet「組聚」
+// 分頁（原本 A/B/C 走 Sheet「首次日期＋頻率」推算已失準）。gnNextDate（Sheet 驅動版本）
+// 已無呼叫點隨之移除；GAS「組聚」分頁 fetch 一併移除（省一次 API 呼叫，見下方 loadGroupMeetings）。
 // ─────────────────────────────────────────────
-function gnNextDate(firstStr, freq){
-  if(!firstStr) return null;
-  var first = new Date(String(firstStr).substring(0,10)+'T00:00:00');
-  if(isNaN(first)) return null;
-  var today = new Date(); today.setHours(0,0,0,0);
-  var stepDays = 14; // 預設雙週
-  if(/每週|每周|weekly/i.test(freq||'')) stepDays = 7;
-  else if(/每月|monthly/i.test(freq||'')) stepDays = 0; // 每月用月份遞增
-  var d = new Date(first);
-  if(stepDays===0){ // 每月：同日往後推月
-    while(d < today){ d.setMonth(d.getMonth()+1); }
-  }else{
-    while(d < today){ d.setDate(d.getDate()+stepDays); }
-  }
-  return d;
-}
 function gnFmt(d){
   if(!d) return null;
   var wd=['日','一','二','三','四','五','六'];
   return (d.getMonth()+1)+'/'+d.getDate()+'（'+wd[d.getDay()]+'）';
 }
 
-// E/D 組「從今天起的下一次」輪替場次（GROUP_ROTATION_NEXT，2026-07-03）：
-// 往後最多找 8 週（含跨月），第 5 週兩組都休會被 groupMeetingOnDate 自動跳過。
+// 五組「從今天起的下一次」輪替場次（GROUP_ROTATION_NEXT，2026-07-03 泛化自 E/D 舊版）：
+// 往後最多找 60 天（含跨月，足夠涵蓋任何星期的第 1-4 週circle），第 5 週該組休會被
+// groupMeetingOnDate 自動跳過。
 function groupRotationNextDate(groupKey){
   var d = new Date(); d.setHours(0,0,0,0);
-  for (var i = 0; i < 56; i++) { // 最多找 8 週
+  for (var i = 0; i < 60; i++) {
     var m = groupMeetingOnDate(d.getFullYear(), d.getMonth(), d.getDate());
     if (m && m.group === groupKey) return new Date(d);
     d.setDate(d.getDate() + 1);
@@ -2664,38 +2664,16 @@ function groupRotationNextDate(groupKey){
 }
 
 (function loadGroupMeetings(){
-  // E/D 兩組改用輪替常數計算，不依賴 Sheet（GROUP_ROTATION_2026Q3）
-  ['E','D'].forEach(function(key){
+  // 五組全數改用輪替常數計算，不依賴 Sheet（GROUP_ROTATION_2026Q3 全面更新）
+  Object.keys(GROUP_ROTATION).forEach(function(key){
     var span = document.querySelector('.chain-next[data-chain="'+key+'"]');
     if(!span) return;
     var nxt = groupRotationNextDate(key);
     if(nxt){
-      span.textContent = gnFmt(nxt) + ' Zoom';
+      span.textContent = gnFmt(nxt) + '・' + GROUP_ROTATION[key].timeText;
       span.style.color = 'rgba(255,255,255,.85)';
     }
   });
-
-  // A/B/C 鏈維持 Sheet 頻率計算（現行邏輯不變）
-  var url = GAS_CAL_URL + '?sheet=' + encodeURIComponent('組聚');
-  fetchJSON(url, 'calendar-組聚', 10 * 60 * 1000)
-    .then(function(data){
-      var rows = Array.isArray(data) ? data : (data.data || data.rows || []);
-      rows.forEach(function(r){
-        // 從「產業鏈」抓開頭字母 A-E 當 key
-        var m = String(r['產業鏈']||'').match(/^([A-E])/);
-        if(!m) return;
-        var key = m[1];
-        if(key === 'E' || key === 'D') return; // E/D 已用輪替常數算過，Sheet 雙週頻率對它們不準
-        var span = document.querySelector('.chain-next[data-chain="'+key+'"]');
-        if(!span) return;
-        var nxt = gnNextDate(r['首次日期']||r['首次組聚']||r['下次組聚時間'], r['頻率']);
-        if(nxt){
-          span.textContent = gnFmt(nxt) + ' Zoom';
-          span.style.color = 'rgba(255,255,255,.85)';
-        }
-      });
-    })
-    .catch(function(){ /* 失敗保留「時間待定」（A/B/C），E/D 已由輪替常數算好不受影響 */ });
 })();
 
 // ─────────────────────────────────────────────
