@@ -177,7 +177,7 @@
      ⬇⬇⬇  部署後回填這一行！  ⬇⬇⬇
      ═══════════════════════════════════════════════════════════ -->
 <script>
-const GAS_URL = 'REPLACE_AFTER_DEPLOY';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwX7BsF7OWcfP2DA5byYQ5CscN73SeOVe6w7qmCpMBMQaIdf6oyMAq6APVElfPS4kls/exec';
 </script>
 <!-- ═══════════════════════════════════════════════════════════
      ⬆⬆⬆  部署後回填這一行！  ⬆⬆⬆
@@ -302,7 +302,7 @@ function updateSubmitBtn() { submitBtn.disabled = !validateForm(); }
 });
 
 function fetchSessions() {
-  if (!GAS_URL || GAS_URL.indexOf('REPLACE_AFTER_DEPLOY') !== -1) {
+  if (!GAS_URL || GAS_URL.indexOf('https://script.google.com/macros/s/AKfycbwX7BsF7OWcfP2DA5byYQ5CscN73SeOVe6w7qmCpMBMQaIdf6oyMAq6APVElfPS4kls/exec') !== -1) {
     fieldSession.innerHTML = '<option value="">系統尚未設定完成</option>';
     showStatus('系統尚未設定完成，請聯絡導師協調夥伴。', 'error', 0);
     return;
