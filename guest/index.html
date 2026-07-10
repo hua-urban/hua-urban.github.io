@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#C8102E">
+<meta name="theme-color" content="#CF2030">
 <title>預約來賓體驗｜BNI 華都更分會</title>
 <script>
 /* LINE 內建瀏覽器自動跳手機系統瀏覽器（沿用自 huadu-tea / bni-powerteam） */
@@ -18,296 +18,149 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
 <style>
-  /* ─── 設計 Token：白底＋淺灰區塊＋深色文字，BNI 紅為唯一互動色，金為榮譽點綴（見 BNI華都更品牌配色.md） ─── */
-  :root {
-    --bg:        #FFFFFF;
-    --paper:     #F5F5F5;
-    --card:      #FFFFFF;
-    --ink:       #1A1A1A;
-    --ink-dim:   #5C5C5C;
-    --ink-faint: #76766F;
-    --line:      #E6E6E4;
-    --red:       #C8102E;
-    --red-dark:  #9C0C22;
-    --red-tint:  rgba(200, 16, 46, .06);
-    --gold:      #C8A04F;
-    --gold-deep: #A9853A;
-    --r-sm: 8px; --r-md: 10px; --r-lg: 16px; --r-xl: 24px;
-    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-    /* 深色 hero（見 BNI華都更品牌配色.md「深黑 #111111，計時器等深色場景用」） */
-    --hero-bg:     #14100E;
-    --hero-bg-2:   #0C0A09;
-    --hero-ink:    #F6F2E9;
-    --hero-dim:    #C6BEAF;
-    --hero-red:    #E2334F;
-    --hero-line:   rgba(246, 242, 233, .14);
-  }
+/* ══════════════════════════════════════════════════════════════════
+   V4：視覺 token 全數自 https://hua-urban.github.io/ 首頁實際 CSS 複製
+   （紅/金/灰階/圓角/陰影/字體/navbar/hero/zoom-sec 全部同款，做兄弟頁）
+   僅 3 處為表單可用性微調偏離 DNA：field-hint／placeholder／hero-sub／
+   sec-head p 的灰階從首頁的 gray-400（對白底僅 2.98:1，未達 WCAG 4.5:1）
+   提升到 gray-600（6:1），其餘全部原樣沿用首頁色票。
+══════════════════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#CF2030;--red-dark:#A8192A;--red-light:#E8404F;
+  --gold:#B8963E;
+  --white:#FFFFFF;--off-white:#F8F9FA;
+  --gray-50:#F2F3F5;--gray-100:#E4E6EA;--gray-200:#C8CDD6;--gray-300:#AEB4BF;
+  --gray-400:#8E96A3;--gray-500:#717985;--gray-600:#5A6472;--gray-800:#2D3440;--gray-900:#1A1F29;
+  --nav-h:64px;
+  --shadow-sm:0 1px 3px rgba(26,31,41,.08);
+  --shadow-md:0 4px 12px rgba(26,31,41,.10),0 2px 4px rgba(26,31,41,.06);
+  --r-sm:4px;--r-md:8px;--r-lg:12px;
+}
+html{scroll-behavior:smooth}
+body{font-family:"Noto Sans TC",sans-serif;background:var(--white);color:var(--gray-800);line-height:1.6;-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+.container{width:100%;max-width:1240px;margin:0 auto;padding:0 24px}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+/* ── NAV（照抄首頁 .navbar/.navbar-brand/.nav-cta）── */
+.navbar{position:sticky;top:0;z-index:100;height:var(--nav-h);background:var(--white);border-bottom:1px solid var(--gray-100);box-shadow:0 1px 8px rgba(26,31,41,.06)}
+.navbar>.container{height:100%}
+.navbar-inner{height:100%;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.navbar-brand{display:flex;align-items:center;gap:10px;line-height:1;min-width:0}
+.brand-logo{display:block;flex-shrink:0}
+.brand-divider{width:1px;height:22px;background:var(--gray-300);flex-shrink:0}
+.brand-name{font-size:15px;font-weight:700;color:var(--gray-900);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand-name span{color:var(--red)}
+.nav-cta{background:var(--red);color:#fff;font-weight:600;font-size:14px;border-radius:var(--r-sm);padding:8px 16px;white-space:nowrap;flex-shrink:0;transition:background .15s}
+.nav-cta:hover{background:var(--red-dark)}
+@media(max-width:420px){.brand-name{font-size:13px}.brand-divider{display:none}}
+@media(max-width:360px){.brand-name span{display:none}.nav-cta{padding:8px 12px;font-size:13px}}
 
-  html, body {
-    background: var(--bg);
-    color: var(--ink);
-    font-family: 'Noto Sans TC', sans-serif;
-    line-height: 1.6;
-    min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
-  }
+/* ── HERO（照抄首頁 .hero/.chapter-label/.hero-title/.hero-sub/.hero-slogan）── */
+.hero{background:var(--white);padding:56px 0 48px;text-align:center}
+.hero-strip{max-width:640px;margin:0 auto}
+.chapter-label{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.18em;color:var(--red);text-transform:uppercase;margin-bottom:14px}
+.hero-title{font-family:"Noto Serif TC",serif;font-size:clamp(28px,5.6vw,48px);font-weight:700;color:var(--gray-900);line-height:1.28;letter-spacing:-.02em;margin-bottom:12px}
+.hero-sub{font-size:15px;color:var(--gray-600);letter-spacing:.01em;margin-bottom:14px;line-height:1.75;max-width:44ch;margin-left:auto;margin-right:auto}
+.hero-slogan{font-size:13px;color:var(--gray-400);letter-spacing:.08em}
+@media(max-width:480px){.hero-title{font-size:26px}}
 
-  .page {
-    max-width: 1040px;
-    margin: 0 auto;
-    padding: 32px 20px 96px;
-  }
+/* ── ZOOM-SEC 紅色漸層卡（照抄首頁 .zoom-sec 家族，份量的主要來源）── */
+.zoom-sec{background:linear-gradient(135deg,var(--red-dark) 0%,var(--red) 55%,#E0303F 100%);padding:52px 0 56px;position:relative;overflow:hidden}
+.zoom-sec::before{content:"";position:absolute;top:-60px;right:-60px;width:320px;height:320px;border-radius:50%;background:rgba(255,255,255,.04);pointer-events:none}
+.zoom-sec::after{content:"";position:absolute;bottom:-80px;left:-40px;width:240px;height:240px;border-radius:50%;background:rgba(255,255,255,.03);pointer-events:none}
+.zoom-head{position:relative;z-index:1;margin-bottom:28px;max-width:640px}
+.zoom-label{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:10px}
+.zoom-title{font-family:"Noto Serif TC",serif;font-size:clamp(22px,3vw,30px);font-weight:700;color:#fff;line-height:1.25;margin-bottom:10px}
+.zoom-subtitle{font-size:15px;color:rgba(255,255,255,.82);line-height:1.7}
+.zoom-panels{display:grid;grid-template-columns:1fr 1fr;gap:20px;position:relative;z-index:1}
+.zoom-panel{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:var(--r-lg);padding:26px 26px 24px}
+.zoom-panel-label{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:12px}
+.zoom-panel-label svg{width:13px;height:13px;stroke:rgba(255,255,255,.6);fill:none;stroke-width:2;flex-shrink:0}
+.zoom-panel-title{font-family:"Noto Serif TC",serif;font-size:19px;font-weight:700;color:#fff;line-height:1.25;margin-bottom:14px}
+.zoom-info{display:flex;flex-direction:column;gap:9px;margin-bottom:18px}
+.zoom-info-row{display:flex;align-items:center;gap:10px;font-size:14px;color:rgba(255,255,255,.78)}
+.zoom-info-row svg{width:16px;height:16px;stroke:rgba(255,255,255,.62);fill:none;stroke-width:1.8;flex-shrink:0}
+.zoom-info-row strong{color:#fff;font-weight:700}
+.zoom-body{font-size:14px;color:rgba(255,255,255,.82);line-height:1.85}
+.zoom-note{font-size:12px;color:rgba(255,255,255,.55);font-style:italic;margin-top:14px;line-height:1.6}
+.zoom-btn{display:inline-flex;align-items:center;gap:9px;background:#fff;color:var(--red);padding:13px 24px;border-radius:var(--r-md);font-size:14px;font-weight:700;letter-spacing:.02em;box-shadow:0 4px 20px rgba(0,0,0,.18);transition:transform .18s,box-shadow .18s,color .18s;white-space:nowrap;border:none;cursor:pointer;font-family:"Noto Sans TC",sans-serif}
+.zoom-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.24);color:var(--red-dark)}
+.zoom-btn:focus-visible{outline:2px solid #fff;outline-offset:3px}
+@media(max-width:768px){.zoom-panels{grid-template-columns:1fr}}
+@media(max-width:480px){.zoom-btn{width:100%;justify-content:center}}
 
-  /* ── 品牌敘事區：深色 hero 面板（份量來源） ── */
-  .brand-panel {
-    position: relative;
-    overflow: hidden;
-    background: linear-gradient(155deg, var(--hero-bg) 0%, var(--hero-bg-2) 72%);
-    border-radius: var(--r-xl);
-    padding: 32px 24px 36px;
-    margin-bottom: 20px;
-    isolation: isolate;
-  }
-  .brand-panel::before {
-    /* 頂部暗紅光暈，做張力不做裝飾濫用 */
-    content: '';
-    position: absolute;
-    inset: -20% -10% auto -10%;
-    height: 60%;
-    background: radial-gradient(ellipse 70% 60% at 30% 0%, rgba(200, 16, 46, .28), transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
-  .brand-panel::after {
-    /* 斜切紅金分隔線，呼應 BNI 硬派線條，不做滿版裝飾 */
-    content: '';
-    position: absolute;
-    left: 24px; right: 24px; bottom: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--hero-red), var(--gold));
-    transform: skewX(-18deg) translateX(6px);
-    z-index: 1;
-  }
-  .hero-glyph {
-    position: absolute;
-    right: -10px;
-    bottom: -6%;
-    font-family: 'Noto Serif TC', serif;
-    font-weight: 900;
-    font-size: clamp(160px, 46vw, 260px);
-    line-height: 1;
-    color: transparent;
-    -webkit-text-stroke: 1.5px rgba(200, 16, 46, .22);
-    user-select: none;
-    z-index: 0;
-  }
-  .brand-copy { position: relative; z-index: 2; }
+/* ── 表單區（照抄首頁 .sec-head/.red-bar，欄位樣式借 .search-bar input 手感）── */
+.form-sec{background:var(--off-white);padding:52px 0 80px}
+.form-wrap{max-width:520px;margin:0 auto}
+.sec-head{margin-bottom:24px}
+.red-bar{display:block;width:36px;height:3px;background:var(--red);border-radius:2px;margin-bottom:14px}
+.sec-head h2{font-family:"Noto Serif TC",serif;font-size:clamp(20px,3vw,24px);font-weight:700;color:var(--gray-900);line-height:1.2;letter-spacing:-.01em;margin-bottom:6px}
+.sec-head p{font-size:14px;color:var(--gray-600)}
 
-  .topbar { display: flex; align-items: baseline; gap: 10px; margin-bottom: 28px; }
-  .wordmark { font-family: 'Noto Serif TC', serif; font-weight: 900; font-size: 18px; letter-spacing: .01em; color: var(--hero-ink); }
-  .wordmark span { color: var(--hero-red); }
-  .topbar-tag { font-size: 12px; color: var(--hero-dim); letter-spacing: .08em; }
+.form-card{background:var(--white);border:1px solid var(--gray-100);border-radius:var(--r-lg);padding:26px 22px;box-shadow:var(--shadow-sm)}
+@media(min-width:640px){.form-card{padding:36px 32px}}
 
-  .eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .14em;
-    color: var(--gold);
-    text-transform: uppercase;
-    margin-bottom: 18px;
-  }
-  .eyebrow::before { content: ''; width: 28px; height: 3px; background: var(--hero-red); border-radius: 2px; }
+.field-group{margin-bottom:16px}
+.field-label{font-size:13px;font-weight:700;color:var(--gray-900);letter-spacing:.01em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.field-label .req{color:var(--red);font-weight:600;font-size:11px}
+.field-label .opt{color:var(--gray-500);font-weight:600;font-size:11px}
 
-  h1 {
-    font-family: 'Noto Serif TC', serif;
-    font-weight: 900;
-    font-size: clamp(32px, 8.6vw, 46px);
-    line-height: 1.22;
-    letter-spacing: -.02em;
-    color: var(--hero-ink);
-    text-wrap: balance;
-    margin-bottom: 18px;
-  }
-  h1 em { display: block; font-style: normal; color: var(--hero-red); }
+.field-input,select.field-input{
+  width:100%;padding:12px 14px;border:1.5px solid var(--gray-200);border-radius:var(--r-md);
+  font-family:"Noto Sans TC",sans-serif;font-size:16px;color:var(--gray-800);background:var(--white);
+  outline:none;transition:border-color .15s,box-shadow .15s;
+}
+.field-input::placeholder{color:var(--gray-600)}
+.field-input:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(207,32,48,.1)}
+select.field-input{
+  -webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' stroke='%235A6472' stroke-width='1.5' fill='none'/></svg>");
+  background-repeat:no-repeat;background-position:right 14px center;padding-right:34px;
+}
+select.field-input option{background:var(--white);color:var(--gray-800)}
+.field-hint{margin-top:6px;font-size:12px;color:var(--gray-600);line-height:1.6}
 
-  .lede {
-    font-size: 15px;
-    color: var(--hero-dim);
-    line-height: 1.9;
-    max-width: 46ch;
-    margin-bottom: 24px;
-  }
+.action-area{margin-top:22px}
+.submit-btn{
+  background:var(--red);color:#fff;border:none;border-radius:var(--r-md);padding:15px 24px;
+  font-family:"Noto Sans TC",sans-serif;font-weight:700;font-size:16px;letter-spacing:.02em;
+  cursor:pointer;width:100%;box-shadow:var(--shadow-sm);
+  transition:background .18s,transform .12s,box-shadow .18s;
+}
+.submit-btn:hover:not(:disabled){background:var(--red-dark);box-shadow:0 8px 22px rgba(207,32,48,.28)}
+.submit-btn:active:not(:disabled){transform:scale(.98)}
+.submit-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.submit-btn:disabled{background:var(--gray-200);color:var(--gray-500);cursor:not-allowed;box-shadow:none}
 
-  .meta-row { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
-  .meta-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--hero-ink);
-  }
-  .meta-item svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--gold); }
+.status-msg{margin-top:14px;font-size:13px;color:var(--gray-600);min-height:18px;line-height:1.6;text-align:center}
+.status-msg.success{color:var(--gray-900);font-weight:700}
+.status-msg.error{color:var(--red);font-weight:700}
 
-  .culture-quote {
-    position: relative;
-    padding-left: 18px;
-    border-left: 2px solid var(--gold);
-    font-family: 'Noto Serif TC', serif;
-    font-weight: 500;
-    font-size: 15px;
-    font-style: normal;
-    color: var(--hero-dim);
-    line-height: 1.8;
-    max-width: 42ch;
-  }
+/* ── 成功畫面 ── */
+#successScreen{
+  display:none;background:var(--white);border:1px solid var(--gray-100);border-radius:var(--r-lg);
+  padding:46px 22px;text-align:center;box-shadow:var(--shadow-sm);animation:fadeUp .4s ease;
+}
+.success-icon{width:56px;height:56px;margin:0 auto 18px;border-radius:50%;background:rgba(207,32,48,.08);display:flex;align-items:center;justify-content:center;color:var(--red)}
+.success-icon svg{width:28px;height:28px}
+.success-title{font-family:"Noto Serif TC",serif;font-weight:700;font-size:20px;color:var(--gray-900);margin-bottom:10px}
+.success-count{font-family:"Noto Serif TC",serif;font-weight:700;font-size:28px;color:var(--red);margin-bottom:14px}
+.success-body{font-size:14px;color:var(--gray-600);line-height:1.9}
+.success-body strong{color:var(--gray-900)}
 
-  /* ── 表單卡 ── */
-  .form-card {
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: var(--r-lg);
-    padding: 28px 22px;
-    box-shadow: 0 24px 48px -32px rgba(26, 26, 26, .18);
-  }
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){
+  #successScreen{animation:none}
+  .field-input,select.field-input,.submit-btn,.zoom-btn,.nav-cta{transition:none}
+}
 
-  .form-card-title { font-family: 'Noto Serif TC', serif; font-weight: 700; font-size: 19px; color: var(--ink); margin-bottom: 6px; }
-  .form-card-sub { font-size: 13px; color: var(--ink-faint); line-height: 1.7; margin-bottom: 24px; }
-
-  .field-group { margin-bottom: 16px; }
-
-  .field-label {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--ink);
-    letter-spacing: .01em;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .field-label .req { color: var(--red); font-weight: 500; font-size: 11px; }
-  .field-label .opt { color: var(--ink-faint); font-weight: 500; font-size: 11px; }
-
-  .field-input, select.field-input {
-    width: 100%;
-    background: var(--paper);
-    border: 1.5px solid transparent;
-    border-radius: var(--r-md);
-    color: var(--ink);
-    font-family: 'Noto Sans TC', sans-serif;
-    font-size: 16px;
-    padding: 13px 14px;
-    outline: none;
-    transition: border-color .2s var(--ease-out), box-shadow .2s var(--ease-out), background-color .2s var(--ease-out);
-  }
-  .field-input::placeholder { color: var(--ink-faint); }
-  .field-input:hover { background: #F0F0EE; }
-  .field-input:focus {
-    background: var(--card);
-    border-color: var(--red);
-    box-shadow: 0 0 0 3px var(--red-tint);
-  }
-
-  select.field-input {
-    -webkit-appearance: none;
-    appearance: none;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' stroke='%231A1A1A' stroke-width='1.5' fill='none'/></svg>");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    padding-right: 34px;
-  }
-  select.field-input option { background: var(--card); color: var(--ink); }
-
-  .field-hint { margin-top: 6px; font-size: 12px; color: var(--ink-faint); line-height: 1.6; }
-
-  .action-area { margin-top: 24px; }
-
-  .submit-btn {
-    background: var(--red);
-    color: #fff;
-    border: none;
-    border-radius: var(--r-md);
-    padding: 16px 24px;
-    font-family: 'Noto Sans TC', sans-serif;
-    font-weight: 700;
-    font-size: 16px;
-    letter-spacing: .04em;
-    cursor: pointer;
-    width: 100%;
-    transition: background-color .2s var(--ease-out), transform .12s var(--ease-out), box-shadow .2s var(--ease-out);
-  }
-  .submit-btn:hover:not(:disabled) { background: var(--red-dark); box-shadow: 0 10px 24px -8px rgba(200, 16, 46, .45); }
-  .submit-btn:active:not(:disabled) { transform: scale(.98); }
-  .submit-btn:focus-visible { outline: 2px solid var(--gold-deep); outline-offset: 2px; }
-  .submit-btn:disabled { background: var(--line); color: var(--ink-faint); cursor: not-allowed; box-shadow: none; }
-
-  .field-input:focus-visible, select.field-input:focus-visible { outline: none; }
-
-  .status-msg { margin-top: 14px; font-size: 13px; color: var(--ink-dim); min-height: 18px; line-height: 1.6; text-align: center; }
-  .status-msg.success { color: var(--gold-deep); font-weight: 600; }
-  .status-msg.error   { color: var(--red); font-weight: 600; }
-
-  /* ── 成功畫面 ── */
-  #successScreen {
-    display: none;
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: var(--r-lg);
-    padding: 48px 24px;
-    text-align: center;
-    box-shadow: 0 24px 48px -32px rgba(26, 26, 26, .18);
-    animation: fadeUp .45s var(--ease-out);
-  }
-  .success-icon {
-    width: 56px; height: 56px;
-    margin: 0 auto 20px;
-    border-radius: 50%;
-    background: var(--red-tint);
-    display: flex; align-items: center; justify-content: center;
-    color: var(--red);
-  }
-  .success-icon svg { width: 28px; height: 28px; }
-  .success-title { font-family: 'Noto Serif TC', serif; font-weight: 700; font-size: 21px; color: var(--ink); margin-bottom: 10px; }
-  .success-count { font-family: 'Noto Serif TC', serif; font-weight: 900; font-size: 30px; color: var(--red); margin-bottom: 14px; }
-  .success-body { font-size: 14px; color: var(--ink-dim); line-height: 1.9; }
-  .success-body strong { color: var(--ink); }
-
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-
-  @media (prefers-reduced-motion: reduce) {
-    #successScreen { animation: none; }
-    .field-input, select.field-input, .submit-btn { transition: none; }
-  }
-
-  /* ── 桌機：左右兩欄（深色面板 vs 白卡並排，張力來源） ── */
-  @media (min-width: 860px) {
-    .page {
-      padding: 56px 40px 120px;
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 440px;
-      gap: 40px;
-      align-items: stretch;
-    }
-    .brand-panel { margin-bottom: 0; padding: 44px 44px 52px; display: flex; flex-direction: column; justify-content: center; }
-    h1 { font-size: clamp(36px, 3.4vw, 46px); }
-    .form-panel { display: flex; align-items: flex-start; }
-    .form-card { padding: 36px 32px; position: sticky; top: 32px; width: 100%; }
-  }
-
-  @media (max-width: 400px) {
-    .page { padding: 24px 16px 80px; }
-    .brand-panel { padding: 28px 20px 32px; }
-    .form-card { padding: 24px 18px; }
-    .hero-glyph { font-size: clamp(120px, 60vw, 180px); }
-  }
+/* ── 桌機微調 ── */
+@media(min-width:860px){
+  .zoom-panel{padding:32px 32px 28px}
+}
 </style>
 </head>
 <body>
@@ -322,99 +175,147 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbwX7BsF7OWcfP2DA5byYQ5C
      ⬆⬆⬆  部署後回填這一行！  ⬆⬆⬆
      ═══════════════════════════════════════════════════════════ -->
 
-<div class="page">
-
-  <div class="brand-panel">
-    <span class="hero-glyph" aria-hidden="true">更</span>
-    <div class="brand-copy">
-      <div class="topbar">
-        <span class="wordmark">BNI <span>華都更</span></span>
-        <span class="topbar-tag">白金分會</span>
+<nav class="navbar">
+  <div class="container">
+    <div class="navbar-inner">
+      <div class="navbar-brand">
+        <svg class="brand-logo" width="52" height="27" viewBox="0 0 116 60" xmlns="http://www.w3.org/2000/svg" aria-label="BNI">
+          <text x="0" y="46" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="48" fill="#CF2030" letter-spacing="-1">BNI</text>
+          <text x="104" y="20" font-family="Arial, sans-serif" font-size="13" fill="#CF2030">&#174;</text>
+        </svg>
+        <span class="brand-divider"></span>
+        <span class="brand-name">華都更 <span>Hua Urban+</span></span>
       </div>
-      <div class="eyebrow">商機媒合例會・來賓體驗</div>
-      <h1>都更這條路<em>從來不是一個人走</em></h1>
-      <p class="lede">我們是一群深耕都更危老改建產業鏈的夥伴，57 位跨越各種專業，每週三固定聚在一起交換案子、彼此引薦。想知道實際上都在聊什麼，先來體驗一次，我們幫您留位。</p>
-
-      <div class="meta-row">
-        <div class="meta-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
-          每週三 06:30–08:45
-        </div>
-        <div class="meta-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.4"/></svg>
-          Zoom 線上・商機媒合例會
-        </div>
-      </div>
-
-      <p class="culture-quote">先進來坐坐，說不定就認識了未來一起把案子做成的夥伴。</p>
+      <a href="#guestForm" class="nav-cta">預約來賓體驗</a>
     </div>
   </div>
+</nav>
 
-  <div class="form-panel">
-    <div class="form-card">
+<header class="hero">
+  <div class="container">
+    <div class="hero-strip">
+      <div class="chapter-label">商機媒合例會 · 來賓體驗</div>
+      <h1 class="hero-title">都更這條路<br>從來不是一個人走</h1>
+      <p class="hero-sub">我們是一群深耕都更危老改建產業鏈的夥伴，57 位跨越各種專業，每週三固定聚在一起交換案子、彼此引薦。</p>
+      <div class="hero-slogan">都市更新 · 產業整合 · 夥伴共榮</div>
+    </div>
+  </div>
+</header>
 
-      <div id="formSection">
-        <div class="form-card-title">填寫來賓資料</div>
-        <p class="form-card-sub">資料送出後，秘書會統一以 email／LINE 通知場地與細節。</p>
-
-        <div class="field-group">
-          <div class="field-label">想參加哪一場？ <span class="req">必選</span></div>
-          <select class="field-input" id="fieldSession">
-            <option value="">場次載入中…</option>
-          </select>
-          <div class="field-hint" id="sessionHint"></div>
+<section class="zoom-sec">
+  <div class="container">
+    <div class="zoom-head">
+      <div class="zoom-label">來賓專屬 · Guest Experience</div>
+      <div class="zoom-title">先進來看看，我們都在聊什麼</div>
+      <p class="zoom-subtitle">想知道實際上都在聊什麼，先來體驗一次例會，我們幫您留位。</p>
+    </div>
+    <div class="zoom-panels">
+      <div class="zoom-panel">
+        <div class="zoom-panel-label">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+          商機媒合例會
         </div>
-
-        <div class="field-group">
-          <div class="field-label">怎麼稱呼您？ <span class="req">必填</span></div>
-          <input class="field-input" type="text" id="fieldName" placeholder="請輸入姓名" autocomplete="name">
+        <div class="zoom-panel-title">每週三例會</div>
+        <div class="zoom-info">
+          <div class="zoom-info-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+            <span>每週三 <strong>06:30 — 08:45</strong></span>
+          </div>
+          <div class="zoom-info-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            <span>Zoom 線上・商機媒合例會</span>
+          </div>
         </div>
-
-        <div class="field-group">
-          <div class="field-label">您的專業領域？ <span class="req">必填</span></div>
-          <input class="field-input" type="text" id="fieldExpertise" placeholder="例：房屋仲介、室內設計、會計師">
+        <a href="#guestForm" class="zoom-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#CF2030" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          預約來賓體驗
+        </a>
+        <div class="zoom-note">秘書會在例會前以 email／LINE 通知您進場資訊。</div>
+      </div>
+      <div class="zoom-panel">
+        <div class="zoom-panel-label">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          夥伴文化
         </div>
+        <div class="zoom-panel-title">先進來坐坐</div>
+        <p class="zoom-body">說不定就認識了未來一起把案子做成的夥伴。57 位夥伴橫跨都更危老改建的各種專業，習慣互相引薦、互相成就。</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-        <div class="field-group">
-          <div class="field-label">是哪一位華都更夥伴邀請您呢？ <span class="req">必填</span></div>
-          <input class="field-input" type="text" id="fieldReferrer" placeholder="填寫邀請您的夥伴姓名">
-        </div>
+<section class="form-sec" id="guestForm">
+  <div class="container">
+    <div class="form-wrap">
 
-        <div class="field-group">
-          <div class="field-label">手機號碼 <span class="req">必填</span></div>
-          <input class="field-input" type="tel" id="fieldPhone" placeholder="09xxxxxxxx" autocomplete="tel" inputmode="numeric">
-          <div class="field-hint">格式：09 開頭，10 碼數字</div>
-        </div>
-
-        <div class="field-group">
-          <div class="field-label">LINE ID <span class="opt">選填</span></div>
-          <input class="field-input" type="text" id="fieldLineId" placeholder="方便會前聯繫，沒有可以留空">
-        </div>
-
-        <div class="field-group">
-          <div class="field-label">Email <span class="opt">選填</span></div>
-          <input class="field-input" type="email" id="fieldEmail" placeholder="your@email.com" autocomplete="email" inputmode="email">
-        </div>
-
-        <div class="action-area">
-          <button class="submit-btn" id="submitBtn" disabled>預約來賓體驗</button>
-          <div class="status-msg" id="statusMsg"></div>
-        </div>
-      </div><!-- /formSection -->
-
-      <div id="successScreen">
-        <div class="success-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>
-        </div>
-        <div class="success-title" id="successTitle">已為您留好位置！</div>
-        <div class="success-count" id="successCount"></div>
-        <div class="success-body" id="successBody"></div>
+      <div class="sec-head">
+        <span class="red-bar"></span>
+        <h2>填寫來賓資料</h2>
+        <p>資料送出後，秘書會統一以 email／LINE 通知場地與細節。</p>
       </div>
 
-    </div><!-- /form-card -->
-  </div><!-- /form-panel -->
+      <div class="form-card">
 
-</div><!-- /page -->
+        <div id="formSection">
+
+          <div class="field-group">
+            <div class="field-label">想參加哪一場？ <span class="req">必選</span></div>
+            <select class="field-input" id="fieldSession">
+              <option value="">場次載入中…</option>
+            </select>
+            <div class="field-hint" id="sessionHint"></div>
+          </div>
+
+          <div class="field-group">
+            <div class="field-label">怎麼稱呼您？ <span class="req">必填</span></div>
+            <input class="field-input" type="text" id="fieldName" placeholder="請輸入姓名" autocomplete="name">
+          </div>
+
+          <div class="field-group">
+            <div class="field-label">您的專業領域？ <span class="req">必填</span></div>
+            <input class="field-input" type="text" id="fieldExpertise" placeholder="例：房屋仲介、室內設計、會計師">
+          </div>
+
+          <div class="field-group">
+            <div class="field-label">是哪一位華都更夥伴邀請您呢？ <span class="req">必填</span></div>
+            <input class="field-input" type="text" id="fieldReferrer" placeholder="填寫邀請您的夥伴姓名">
+          </div>
+
+          <div class="field-group">
+            <div class="field-label">手機號碼 <span class="req">必填</span></div>
+            <input class="field-input" type="tel" id="fieldPhone" placeholder="09xxxxxxxx" autocomplete="tel" inputmode="numeric">
+            <div class="field-hint">格式：09 開頭，10 碼數字</div>
+          </div>
+
+          <div class="field-group">
+            <div class="field-label">LINE ID <span class="opt">選填</span></div>
+            <input class="field-input" type="text" id="fieldLineId" placeholder="方便會前聯繫，沒有可以留空">
+          </div>
+
+          <div class="field-group">
+            <div class="field-label">Email <span class="opt">選填</span></div>
+            <input class="field-input" type="email" id="fieldEmail" placeholder="your@email.com" autocomplete="email" inputmode="email">
+          </div>
+
+          <div class="action-area">
+            <button class="submit-btn" id="submitBtn" disabled>預約來賓體驗</button>
+            <div class="status-msg" id="statusMsg"></div>
+          </div>
+        </div><!-- /formSection -->
+
+        <div id="successScreen">
+          <div class="success-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>
+          </div>
+          <div class="success-title" id="successTitle">已為您留好位置！</div>
+          <div class="success-count" id="successCount"></div>
+          <div class="success-body" id="successBody"></div>
+        </div>
+
+      </div><!-- /form-card -->
+    </div><!-- /form-wrap -->
+  </div><!-- /container -->
+</section>
 
 <script>
 /* ════════════════════════════════════════════════════════════════
@@ -548,7 +449,9 @@ submitBtn.addEventListener('click', function () {
         document.getElementById('successBody').innerHTML =
           '感謝您邀請 <strong>' + payload.name + '</strong> 一起來看看！<br><br>秘書會統一以 email／LINE 通知場地資訊。<br>有任何問題歡迎聯絡引薦夥伴 ' + payload.referrer + '。';
       }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      /* V4 加了 navbar+hero+紅卡，頁面變長：scrollTo(top) 會把成功畫面藏到 fold 下面，
+         改成把 #guestForm 捲進可視範圍，不動任何送出/防重/資料邏輯 */
+      document.getElementById('guestForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else {
       showStatus(ERROR_MESSAGES[data.error] || '送出時卡住了，請確認網路後再試一次。若還是不行，麻煩聯絡導師協調夥伴。', 'error', 0);
       submitBtn.disabled = false;
