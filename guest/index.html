@@ -21,11 +21,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
 <style>
 /* ══════════════════════════════════════════════════════════════════
-   V4：視覺 token 全數自 https://hua-urban.github.io/ 首頁實際 CSS 複製
-   （紅/金/灰階/圓角/陰影/字體/navbar/hero/zoom-sec 全部同款，做兄弟頁）
-   僅 3 處為表單可用性微調偏離 DNA：field-hint／placeholder／hero-sub／
-   sec-head p 的灰階從首頁的 gray-400（對白底僅 2.98:1，未達 WCAG 4.5:1）
-   提升到 gray-600（6:1），其餘全部原樣沿用首頁色票。
+   視覺 token 全數自 https://hua-urban.github.io/ 首頁實際 CSS 複製
+   （紅/金/灰階/圓角/陰影/字體/navbar/zoom-sec 全部同款，做兄弟頁）
+   V5：Joan 圈定結構——白色襯線 hero 整段刪除，紅色漸層 zoom-sec 升格為
+   開場第一屏 hero，極簡到只剩 eyebrow＋大標＋一句副文（時間/連結/
+   玻璃卡全刪，表單本身不動）。
+   僅 3 處為表單可用性微調偏離 DNA：field-hint／placeholder／sec-head p
+   的灰階從首頁的 gray-400（對白底僅 2.98:1，未達 WCAG 4.5:1）提升到
+   gray-600（6:1），其餘全部原樣沿用首頁色票。
 ══════════════════════════════════════════════════════════════════ */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -58,39 +61,17 @@ a{text-decoration:none;color:inherit}
 @media(max-width:420px){.brand-name{font-size:13px}.brand-divider{display:none}}
 @media(max-width:360px){.brand-name span{display:none}.nav-cta{padding:8px 12px;font-size:13px}}
 
-/* ── HERO（照抄首頁 .hero/.chapter-label/.hero-title/.hero-sub/.hero-slogan）── */
-.hero{background:var(--white);padding:56px 0 48px;text-align:center}
-.hero-strip{max-width:640px;margin:0 auto}
-.chapter-label{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.18em;color:var(--red);text-transform:uppercase;margin-bottom:14px}
-.hero-title{font-family:"Noto Serif TC",serif;font-size:clamp(28px,5.6vw,48px);font-weight:700;color:var(--gray-900);line-height:1.28;letter-spacing:-.02em;margin-bottom:12px}
-.hero-sub{font-size:15px;color:var(--gray-600);letter-spacing:.01em;margin-bottom:14px;line-height:1.75;max-width:44ch;margin-left:auto;margin-right:auto}
-.hero-slogan{font-size:13px;color:var(--gray-400);letter-spacing:.08em}
-@media(max-width:480px){.hero-title{font-size:26px}}
-
-/* ── ZOOM-SEC 紅色漸層卡（照抄首頁 .zoom-sec 家族，份量的主要來源）── */
-.zoom-sec{background:linear-gradient(135deg,var(--red-dark) 0%,var(--red) 55%,#E0303F 100%);padding:52px 0 56px;position:relative;overflow:hidden}
+/* ── 紅色漸層 HERO（V5：Joan 圈定升格為開場第一屏，白色襯線 hero 整段刪除，
+   zoom-sec 極簡到只剩 eyebrow＋大標＋一句副文，時間/連結/玻璃卡全刪，
+   照抄首頁 .zoom-sec 漸層/裝飾圓，份量的唯一來源）── */
+.zoom-sec{background:linear-gradient(135deg,var(--red-dark) 0%,var(--red) 55%,#E0303F 100%);padding:64px 0 76px;position:relative;overflow:hidden}
 .zoom-sec::before{content:"";position:absolute;top:-60px;right:-60px;width:320px;height:320px;border-radius:50%;background:rgba(255,255,255,.04);pointer-events:none}
 .zoom-sec::after{content:"";position:absolute;bottom:-80px;left:-40px;width:240px;height:240px;border-radius:50%;background:rgba(255,255,255,.03);pointer-events:none}
-.zoom-head{position:relative;z-index:1;margin-bottom:28px;max-width:640px}
-.zoom-label{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:10px}
-.zoom-title{font-family:"Noto Serif TC",serif;font-size:clamp(22px,3vw,30px);font-weight:700;color:#fff;line-height:1.25;margin-bottom:10px}
-.zoom-subtitle{font-size:15px;color:rgba(255,255,255,.82);line-height:1.7}
-.zoom-panels{display:grid;grid-template-columns:1fr 1fr;gap:20px;position:relative;z-index:1}
-.zoom-panel{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:var(--r-lg);padding:26px 26px 24px}
-.zoom-panel-label{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:12px}
-.zoom-panel-label svg{width:13px;height:13px;stroke:rgba(255,255,255,.6);fill:none;stroke-width:2;flex-shrink:0}
-.zoom-panel-title{font-family:"Noto Serif TC",serif;font-size:19px;font-weight:700;color:#fff;line-height:1.25;margin-bottom:14px}
-.zoom-info{display:flex;flex-direction:column;gap:9px;margin-bottom:18px}
-.zoom-info-row{display:flex;align-items:center;gap:10px;font-size:14px;color:rgba(255,255,255,.78)}
-.zoom-info-row svg{width:16px;height:16px;stroke:rgba(255,255,255,.62);fill:none;stroke-width:1.8;flex-shrink:0}
-.zoom-info-row strong{color:#fff;font-weight:700}
-.zoom-body{font-size:14px;color:rgba(255,255,255,.82);line-height:1.85}
-.zoom-note{font-size:12px;color:rgba(255,255,255,.55);font-style:italic;margin-top:14px;line-height:1.6}
-.zoom-btn{display:inline-flex;align-items:center;gap:9px;background:#fff;color:var(--red);padding:13px 24px;border-radius:var(--r-md);font-size:14px;font-weight:700;letter-spacing:.02em;box-shadow:0 4px 20px rgba(0,0,0,.18);transition:transform .18s,box-shadow .18s,color .18s;white-space:nowrap;border:none;cursor:pointer;font-family:"Noto Sans TC",sans-serif}
-.zoom-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.24);color:var(--red-dark)}
-.zoom-btn:focus-visible{outline:2px solid #fff;outline-offset:3px}
-@media(max-width:768px){.zoom-panels{grid-template-columns:1fr}}
-@media(max-width:480px){.zoom-btn{width:100%;justify-content:center}}
+.zoom-head{position:relative;z-index:1;max-width:680px}
+.zoom-label{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:16px}
+.zoom-title{font-family:"Noto Serif TC",serif;font-size:clamp(32px,8vw,54px);font-weight:700;color:#fff;line-height:1.22;letter-spacing:-.01em;margin-bottom:16px;text-wrap:balance}
+.zoom-subtitle{font-size:16px;color:rgba(255,255,255,.85);line-height:1.75;max-width:42ch}
+@media(max-width:480px){.zoom-title{font-size:30px}}
 
 /* ── 表單區（照抄首頁 .sec-head/.red-bar，欄位樣式借 .search-bar input 手感）── */
 .form-sec{background:var(--off-white);padding:52px 0 80px}
@@ -154,12 +135,7 @@ select.field-input option{background:var(--white);color:var(--gray-800)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){
   #successScreen{animation:none}
-  .field-input,select.field-input,.submit-btn,.zoom-btn,.nav-cta{transition:none}
-}
-
-/* ── 桌機微調 ── */
-@media(min-width:860px){
-  .zoom-panel{padding:32px 32px 28px}
+  .field-input,select.field-input,.submit-btn,.nav-cta{transition:none}
 }
 </style>
 </head>
@@ -191,58 +167,15 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbwX7BsF7OWcfP2DA5byYQ5C
   </div>
 </nav>
 
-<header class="hero">
-  <div class="container">
-    <div class="hero-strip">
-      <div class="chapter-label">商機媒合例會 · 來賓體驗</div>
-      <h1 class="hero-title">都更這條路<br>從來不是一個人走</h1>
-      <p class="hero-sub">我們是一群深耕都更危老改建產業鏈的夥伴，57 位跨越各種專業，每週三固定聚在一起交換案子、彼此引薦。</p>
-      <div class="hero-slogan">都市更新 · 產業整合 · 夥伴共榮</div>
-    </div>
-  </div>
-</header>
-
-<section class="zoom-sec">
+<header class="zoom-sec">
   <div class="container">
     <div class="zoom-head">
       <div class="zoom-label">來賓專屬 · Guest Experience</div>
-      <div class="zoom-title">先進來看看，我們都在聊什麼</div>
+      <h1 class="zoom-title">先進來看看，我們都在聊什麼</h1>
       <p class="zoom-subtitle">想知道實際上都在聊什麼，先來體驗一次例會，我們幫您留位。</p>
     </div>
-    <div class="zoom-panels">
-      <div class="zoom-panel">
-        <div class="zoom-panel-label">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
-          商機媒合例會
-        </div>
-        <div class="zoom-panel-title">每週三例會</div>
-        <div class="zoom-info">
-          <div class="zoom-info-row">
-            <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
-            <span>每週三 <strong>06:30 — 08:45</strong></span>
-          </div>
-          <div class="zoom-info-row">
-            <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-            <span>Zoom 線上・商機媒合例會</span>
-          </div>
-        </div>
-        <a href="#guestForm" class="zoom-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#CF2030" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-          預約來賓體驗
-        </a>
-        <div class="zoom-note">秘書會在例會前以 email／LINE 通知您進場資訊。</div>
-      </div>
-      <div class="zoom-panel">
-        <div class="zoom-panel-label">
-          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-          夥伴文化
-        </div>
-        <div class="zoom-panel-title">先進來坐坐</div>
-        <p class="zoom-body">說不定就認識了未來一起把案子做成的夥伴。57 位夥伴橫跨都更危老改建的各種專業，習慣互相引薦、互相成就。</p>
-      </div>
-    </div>
   </div>
-</section>
+</header>
 
 <section class="form-sec" id="guestForm">
   <div class="container">
