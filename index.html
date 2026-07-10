@@ -316,8 +316,8 @@ a{text-decoration:none;color:inherit}
 .chain-desc{font-size:13px;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:16px}
 .chain-meta{font-size:12px;color:rgba(255,255,255,.45);line-height:1.5}
 .chain-meta strong{color:rgba(255,255,255,.75);font-weight:600}
-/* 組聚週二輪替小字（GROUP_ROTATION_2026Q3，2026-07-03）：只用於 D/E 兩鏈 */
-.chain-rotation-note{font-size:11px;color:rgba(255,255,255,.35);margin-top:4px}
+/* .chain-rotation-note 卡片小字（2026-07-03 建、2026-07-10 移除）：SCHEDULE_DISP_7K2Q9M 二次修正時
+   已整段拿掉 HTML div＋JS 填字，跟對照表／下次組聚重複；規則同步刪除，DOM 已無此 class 可用 */
 
 /* 五組固定組聚時段對照表（SCHEDULE_DISP_7K2Q9M，2026-07-10）：內容由 JS 從 GROUP_ROTATION 生成，樣式配 Power Team 深色區塊 */
 .schedule-tbl-wrap{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--r-lg);overflow:hidden;margin-bottom:28px}
@@ -1831,8 +1831,7 @@ section[id]{scroll-margin-top:68px}
         <div class="chain-meta">
           <div><strong>召集人：</strong>柳慧燕</div>
           <div><strong>下次組聚：</strong><span class="chain-next" data-chain="A">（時間待定）</span></div>
-          <!-- SCHEDULE_DISP_7K2Q9M：文字由 JS 從 GROUP_ROTATION.A 生成，勿手寫時間 -->
-          <div class="chain-rotation-note" data-chain="A"></div>
+          <!-- SCHEDULE_DISP_7K2Q9M：2026-07-10 移除卡片 rotation-note 小字（與上方對照表＋本行下次組聚重複，Joan 反饋）-->
         </div>
       </div>
       <!-- B 老屋現金流升級鏈：每月第 2、4 個週五（GROUP_ROTATION_2026Q3） -->
@@ -1842,7 +1841,6 @@ section[id]{scroll-margin-top:68px}
         <div class="chain-meta">
           <div><strong>召集人：</strong>陳靖薇</div>
           <div><strong>下次組聚：</strong><span class="chain-next" data-chain="B">（時間待定）</span></div>
-          <div class="chain-rotation-note" data-chain="B"></div>
         </div>
       </div>
       <!-- C 高齡安居 × 資產傳承產業鏈：每月第 2、4 個週四（GROUP_ROTATION_2026Q3） -->
@@ -1852,7 +1850,6 @@ section[id]{scroll-margin-top:68px}
         <div class="chain-meta">
           <div><strong>召集人：</strong>王春雄 Jayson</div>
           <div><strong>下次組聚：</strong><span class="chain-next" data-chain="C">（時間待定）</span></div>
-          <div class="chain-rotation-note" data-chain="C"></div>
         </div>
       </div>
       <!-- D 商用不動產升級鏈：每月第 2、4 個週二（GROUP_ROTATION_2026Q3） -->
@@ -1862,7 +1859,6 @@ section[id]{scroll-margin-top:68px}
         <div class="chain-meta">
           <div><strong>召集人：</strong>陳向柔 Naomi</div>
           <div><strong>下次組聚：</strong><span class="chain-next" data-chain="D">（時間待定）</span></div>
-          <div class="chain-rotation-note" data-chain="D"></div>
         </div>
       </div>
       <!-- E 房產客戶成長鏈：每月第 1、3 個週二（GROUP_ROTATION_2026Q3） -->
@@ -1872,7 +1868,6 @@ section[id]{scroll-margin-top:68px}
         <div class="chain-meta">
           <div><strong>召集人：</strong>張瓊安</div>
           <div><strong>下次組聚：</strong><span class="chain-next" data-chain="E">（時間待定）</span></div>
-          <div class="chain-rotation-note" data-chain="E"></div>
         </div>
       </div>
     </div>
@@ -2140,35 +2135,26 @@ function groupMeetingOnDate(y, m, d) {
 }
 
 // ─────────────────────────────────────────────
-// 固定組聚時段顯示（SCHEDULE_DISP_7K2Q9M，2026-07-10）
-// 兩處顯示（① 每張 chain 卡的 chain-rotation-note 小字　② Power Team 專區上方五組對照表）
-// 都從 GROUP_ROTATION 單一資料源生成，不再各自手寫時間字串（禁 drift）。
+// 固定組聚時段顯示（SCHEDULE_DISP_7K2Q9M，2026-07-10；2026-07-10 二次修正）
+// 只剩一處顯示：Power Team 專區上方「五組固定組聚時段」對照表，從 GROUP_ROTATION
+// 單一資料源生成（禁手寫時間造成 drift）。
+// 卡片下方 rotation-note 小字（原本重複打「每月第 N、M 週X・時間・第 5 週休」）已依 Joan
+// 反饋整段移除——跟本對照表、以及卡片自己的「下次組聚」動態行三重重複，只留對照表 + 下次組聚。
 // 「下次組聚」動態行（chain-next span）不動，仍由下方既有 loadGroupMeetings() 負責。
 // ─────────────────────────────────────────────
 function scheduleWeeksText(info) {
   var wd = ['日', '一', '二', '三', '四', '五', '六'];
   return '每月第 ' + info.weeks.join('、') + ' 週' + wd[info.weekday];
 }
-function scheduleNoteText(info) {
-  return scheduleWeeksText(info) + '・' + info.timeText + '・第 5 週休';
-}
 function scheduleTableTimeText(info) {
   return scheduleWeeksText(info) + '・' + info.timeText;
 }
 
 (function renderScheduleDisplay() {
-  var groupKeys = Object.keys(GROUP_ROTATION);
-
-  // ① 五張卡片的固定時段小字
-  groupKeys.forEach(function (key) {
-    var note = document.querySelector('.chain-rotation-note[data-chain="' + key + '"]');
-    if (note) note.textContent = scheduleNoteText(GROUP_ROTATION[key]);
-  });
-
-  // ② Power Team 專區「五組固定組聚時段」對照表
+  // Power Team 專區「五組固定組聚時段」對照表
   var tbody = document.getElementById('scheduleTblBody');
   if (tbody) {
-    tbody.innerHTML = groupKeys.map(function (key) {
+    tbody.innerHTML = Object.keys(GROUP_ROTATION).map(function (key) {
       var info = GROUP_ROTATION[key];
       return '<tr>' +
         '<td class="stbl-group" data-label="組別">' + key + '</td>' +
