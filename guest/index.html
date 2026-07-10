@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>邀請來賓申請表｜BNI 華都更分會</title>
+<script>
+/* LINE 內建瀏覽器自動跳手機系統瀏覽器（沿用自 huadu-tea / bni-powerteam） */
+(function () {
+  var ua = navigator.userAgent || '';
+  if (/Line\//.test(ua) && !new URL(location.href).searchParams.has('openExternalBrowser')) {
+    var url = new URL(location.href);
+    url.searchParams.set('openExternalBrowser', '1');
+    window.location.href = url.toString();
+  }
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;700;900&family=Noto+Sans+TC:wght@300;400;500;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  /* ─── 設計 Token（BNI 華都更官方配色：紅 #C8102E／金 #C8A04F，深色雜誌風比照 huadu-tea）── */
+  :root {
+    --bg:         #0e0d0b;
+    --paper:      #1c1a14;
+    --ink:        #ede6d3;
+    --ink-dim:    #9a917a;
+    --gold:       #c8a04f;
+    --gold-bright:#ddbd75;
+    --gold-deep:  #8a6f3a;
+    --red:        #c8102e;
+    --red-bright: #e2334f;
+    --line:       #2a261c;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Noto Sans TC', sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(200,160,79,0.08), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 100%, rgba(200,16,46,0.05), transparent);
+  }
+
+  .container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 48px 20px 100px;
+    position: relative;
+    z-index: 2;
+  }
+
+  header { text-align: center; padding-bottom: 40px; border-bottom: 1px solid var(--line); margin-bottom: 40px; }
+
+  .eyebrow {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    color: var(--gold);
+    font-size: 16px;
+    letter-spacing: 0.15em;
+    margin-bottom: 16px;
+  }
+  .eyebrow::before, .eyebrow::after { content: '✦'; margin: 0 10px; color: var(--gold-deep); }
+
+  h1 {
+    font-family: 'Noto Serif TC', serif;
+    font-weight: 900;
+    font-size: clamp(26px, 7vw, 38px);
+    line-height: 1.3;
+    margin-bottom: 16px;
+    background: linear-gradient(180deg, var(--ink) 0%, var(--gold-bright) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .subtitle { color: var(--ink-dim); font-size: 13px; line-height: 1.9; }
+
+  .field-group {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 20px 20px;
+    margin-bottom: 14px;
+    transition: border-color 0.3s;
+  }
+  .field-group:focus-within { border-color: var(--gold-deep); }
+
+  .field-label {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gold);
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .field-label .req { color: var(--red-bright); font-size: 11px; }
+  .field-label .opt { color: var(--ink-dim); font-weight: 300; font-size: 11px; }
+
+  .field-input, select.field-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--gold-deep);
+    color: var(--ink);
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 16px;
+    padding: 8px 4px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  .field-input:focus { border-bottom-color: var(--gold-bright); }
+  .field-input::placeholder { color: var(--ink-dim); opacity: 0.5; font-size: 14px; }
+
+  select.field-input {
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' stroke='%23c8a04f' stroke-width='1.5' fill='none'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 4px center;
+  }
+  select.field-input option { background: var(--paper); color: var(--ink); }
+
+  .field-hint { margin-top: 6px; font-size: 11px; color: var(--ink-dim); opacity: 0.75; }
+
+  .action-area { margin-top: 32px; text-align: center; }
+
+  .submit-btn {
+    background: var(--red);
+    color: #fff;
+    border: none;
+    padding: 16px 48px;
+    font-family: 'Noto Serif TC', serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s;
+  }
+  .submit-btn:hover { background: var(--red-bright); transform: translateY(-2px); box-shadow: 0 10px 28px rgba(200,16,46,0.28); }
+  .submit-btn:disabled { background: var(--line); color: var(--ink-dim); cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .status-msg { margin-top: 16px; font-size: 13px; color: var(--ink-dim); min-height: 20px; line-height: 1.6; }
+  .status-msg.success { color: var(--gold-bright); }
+  .status-msg.error   { color: var(--red-bright); }
+
+  #successScreen { display: none; text-align: center; padding: 56px 16px; animation: fadeUp 0.5s ease; }
+  .success-icon { font-size: 44px; margin-bottom: 18px; color: var(--gold-bright); }
+  .success-title { font-family: 'Noto Serif TC', serif; font-weight: 700; font-size: 22px; color: var(--gold-bright); margin-bottom: 14px; }
+  .success-body { font-size: 14px; color: var(--ink-dim); line-height: 2; }
+  .success-body strong { color: var(--ink); }
+  .success-count { font-family: 'Noto Serif TC', serif; font-size: 28px; color: var(--red-bright); margin: 12px 0; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+  @media (max-width: 400px) {
+    .container { padding: 36px 16px 80px; }
+    .field-group { padding: 16px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     ⬇⬇⬇  部署後回填這一行！  ⬇⬇⬇
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+const GAS_URL = 'REPLACE_AFTER_DEPLOY';
+</script>
+<!-- ═══════════════════════════════════════════════════════════
+     ⬆⬆⬆  部署後回填這一行！  ⬆⬆⬆
+     ═══════════════════════════════════════════════════════════ -->
+
+<div class="container">
+  <header>
+    <div class="eyebrow">BNI 華都更分會</div>
+    <h1>邀請來賓<br>申請表</h1>
+    <p class="subtitle">填好資料送出，秘書會後統一確認場地資訊。<br>期待與您邀請的朋友相見。</p>
+  </header>
+
+  <div id="formSection">
+
+    <div class="field-group">
+      <div class="field-label">選擇場次 <span class="req">必選</span></div>
+      <select class="field-input" id="fieldSession">
+        <option value="">場次載入中…</option>
+      </select>
+      <div class="field-hint" id="sessionHint"></div>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">來賓姓名 <span class="req">必填</span></div>
+      <input class="field-input" type="text" id="fieldName" placeholder="請輸入來賓姓名" autocomplete="name">
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">專業別 <span class="req">必填</span></div>
+      <input class="field-input" type="text" id="fieldExpertise" placeholder="例：房屋仲介、室內設計、會計師">
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">引薦人 / 邀請夥伴 <span class="req">必填</span></div>
+      <input class="field-input" type="text" id="fieldReferrer" placeholder="哪位 BNI 夥伴邀請這位來賓？">
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">來賓手機 <span class="req">必填</span></div>
+      <input class="field-input" type="tel" id="fieldPhone" placeholder="09xxxxxxxx" autocomplete="tel" inputmode="numeric">
+      <div class="field-hint">格式：09 開頭，10 碼數字</div>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">來賓 LINE ID <span class="opt">選填</span></div>
+      <input class="field-input" type="text" id="fieldLineId" placeholder="方便會前聯繫（沒有可留空）">
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">來賓 Email <span class="opt">選填</span></div>
+      <input class="field-input" type="email" id="fieldEmail" placeholder="your@email.com" autocomplete="email" inputmode="email">
+    </div>
+
+    <div class="action-area">
+      <button class="submit-btn" id="submitBtn" disabled>送出報名</button>
+      <div class="status-msg" id="statusMsg"></div>
+    </div>
+
+  </div><!-- /formSection -->
+
+  <div id="successScreen">
+    <div class="success-icon">✦</div>
+    <div class="success-title" id="successTitle">已登記！</div>
+    <div class="success-count" id="successCount"></div>
+    <div class="success-body" id="successBody"></div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   資料流：
+   1. 頁面載入 → fetchSessions() 向 GAS doGet(?sessions=1) 拿開放場次
+   2. 填完必填欄位 + 選好場次 → submitBtn 啟用
+   3. 送出 → fetch POST（text/plain，避開 preflight，非 no-cors 才能讀 body）
+      - ok:true, duplicate:false → 顯示成功畫面「第 N 位」
+      - ok:true, duplicate:true  → 顯示成功畫面「已登記，第 N 位」（idempotent，非錯誤）
+      - ok:false                → 依 error 顯示對應訊息
+════════════════════════════════════════════════════════════════ */
+
+var fieldSession   = document.getElementById('fieldSession');
+var fieldName      = document.getElementById('fieldName');
+var fieldExpertise = document.getElementById('fieldExpertise');
+var fieldReferrer  = document.getElementById('fieldReferrer');
+var fieldPhone     = document.getElementById('fieldPhone');
+var fieldLineId    = document.getElementById('fieldLineId');
+var fieldEmail     = document.getElementById('fieldEmail');
+var submitBtn      = document.getElementById('submitBtn');
+var statusMsg      = document.getElementById('statusMsg');
+var sessionHint    = document.getElementById('sessionHint');
+var formSection    = document.getElementById('formSection');
+var successScreen  = document.getElementById('successScreen');
+
+var sessionsData = [];
+
+function showStatus(text, cls, duration) {
+  statusMsg.textContent = text;
+  statusMsg.className = 'status-msg' + (cls ? ' ' + cls : '');
+  if (duration) {
+    setTimeout(function () { statusMsg.textContent = ''; statusMsg.className = 'status-msg'; }, duration);
+  }
+}
+
+function validateForm() {
+  var name      = fieldName.value.trim();
+  var expertise = fieldExpertise.value.trim();
+  var referrer  = fieldReferrer.value.trim();
+  var phone     = fieldPhone.value.trim();
+  var session   = fieldSession.value;
+  if (!name || !expertise || !referrer || !phone || !session) return false;
+  if (!/^09\d{8}$/.test(phone)) return false;
+  var email = fieldEmail.value.trim();
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return false;
+  return true;
+}
+
+function updateSubmitBtn() { submitBtn.disabled = !validateForm(); }
+
+[fieldSession, fieldName, fieldExpertise, fieldReferrer, fieldPhone, fieldEmail].forEach(function (f) {
+  f.addEventListener('input', updateSubmitBtn);
+  f.addEventListener('change', updateSubmitBtn);
+});
+
+function fetchSessions() {
+  if (!GAS_URL || GAS_URL.indexOf('REPLACE_AFTER_DEPLOY') !== -1) {
+    fieldSession.innerHTML = '<option value="">系統尚未設定完成</option>';
+    showStatus('系統尚未設定完成，請聯絡導師協調夥伴。', 'error', 0);
+    return;
+  }
+  fetch(GAS_URL + '?sessions=1')
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+      if (!data.ok || !Array.isArray(data.sessions)) throw new Error('格式錯誤');
+      sessionsData = data.sessions;
+      if (sessionsData.length === 0) {
+        fieldSession.innerHTML = '<option value="">目前尚無開放場次</option>';
+        sessionHint.textContent = '目前沒有開放中的場次，請稍後再查詢或聯絡導師協調夥伴。';
+        return;
+      }
+      fieldSession.innerHTML = '<option value="">請選擇場次</option>' +
+        sessionsData.map(function (s) {
+          return '<option value="' + s.id + '">' + s.date + '</option>';
+        }).join('');
+      fieldSession.addEventListener('change', function () {
+        var s = sessionsData.filter(function (x) { return x.id === fieldSession.value; })[0];
+        sessionHint.textContent = s && s.deadline ? ('Precall 截止：' + s.deadline) : '';
+      });
+    })
+    .catch(function () {
+      fieldSession.innerHTML = '<option value="">場次載入失敗</option>';
+      showStatus('場次載入失敗，請重新整理頁面或聯絡導師協調夥伴。', 'error', 0);
+    });
+}
+
+var ERROR_MESSAGES = {
+  missing_field: '請完整填寫必填欄位。',
+  invalid_phone: '手機格式不正確，請填 09 開頭的 10 碼數字。',
+  invalid_email: 'Email 格式不正確，請重新確認。',
+  session_not_found: '找不到此場次，請重新整理頁面。',
+  session_closed: '此場次已不開放報名，請重新整理頁面選擇其他場次。'
+};
+
+submitBtn.addEventListener('click', function () {
+  if (!validateForm()) return;
+
+  submitBtn.disabled = true;
+  showStatus('送出中，請稍候…', '', 0);
+
+  var payload = {
+    session:    fieldSession.value,
+    name:       fieldName.value.trim(),
+    expertise:  fieldExpertise.value.trim(),
+    referrer:   fieldReferrer.value.trim(),
+    phone:      fieldPhone.value.trim(),
+    lineId:     fieldLineId.value.trim(),
+    email:      fieldEmail.value.trim()
+  };
+
+  fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  })
+  .then(function (res) {
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  })
+  .then(function (data) {
+    if (data.ok) {
+      formSection.style.display = 'none';
+      successScreen.style.display = 'block';
+      document.getElementById('successCount').textContent = '第 ' + data.count + ' 位';
+      if (data.duplicate) {
+        document.getElementById('successTitle').textContent = '您已登記過囉！';
+        document.getElementById('successBody').innerHTML =
+          '<strong>' + payload.name + '</strong> 已經在名單裡了，不用重複填寫。<br><br>有任何問題歡迎聯絡引薦夥伴 ' + payload.referrer + '。';
+      } else {
+        document.getElementById('successTitle').textContent = '已登記！';
+        document.getElementById('successBody').innerHTML =
+          '感謝為 <strong>' + payload.name + '</strong> 完成邀請登記！<br><br>秘書會後會統一以 email／LINE 通知場地資訊。<br>有任何問題歡迎聯絡引薦夥伴 ' + payload.referrer + '。';
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      showStatus(ERROR_MESSAGES[data.error] || '送出失敗，請確認網路後再試一次。若問題持續，請聯絡導師協調夥伴。', 'error', 0);
+      submitBtn.disabled = false;
+    }
+  })
+  .catch(function (err) {
+    console.error(err);
+    showStatus('送出失敗，請確認網路後再試一次。若問題持續，請聯絡導師協調夥伴。', 'error', 0);
+    submitBtn.disabled = false;
+  });
+});
+
+fetchSessions();
+</script>
+
+</body>
+</html>
