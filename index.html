@@ -1704,7 +1704,7 @@ section[id]{scroll-margin-top:68px}
     <!-- #activities 錨點（scrollspy + nav「活動」連結沿用，指向議程列表本身，掛在 section[id] 規則外要單獨補 scroll-margin-top） -->
     <span id="activities" class="agenda-anchor"></span>
 
-    <!-- 議程列表（主體，AGENDA_LIST_7QK3）：Sheet 活動，依日期排序，本月+下月窗口。
+    <!-- 議程列表（主體，AGENDA_LIST_7QK3）：Sheet 活動，未來在前、已結束沉底；窗口＝過去 14 天＋全部未來（AGENDA_WINDOW_ROLL_2026Q3）。
          組聚場次卡已退役（2026-07-03），不再合併進來。 -->
     <div id="agendaList">
       <div class="ac-loading" style="font-size:14px;color:var(--gray-400);padding:18px 0">活動資料載入中…</div>
@@ -2550,7 +2550,21 @@ function renderAgendaList(activityRows){
   var box=document.getElementById('agendaList');
   if(!box) return;
   var acts=(activityRows||[]).filter(function(x){return x['活動名稱'];});
-  acts.sort(function(a,b){ return String(a['日期時間']||'').localeCompare(String(b['日期時間']||'')); });
+  // AGENDA_WINDOW_ROLL_2026Q3（2026-07-25）：未來活動排前面（近→遠），已結束的沉到最底（新→舊）。
+  // 原本純日期升冪會讓剛辦完的活動卡在最上面，一進站先看到兩張「已結束」。
+  var acDayKey = function(x){ return String(x['日期時間']||'').substring(0,10); };
+  acts.sort(function(a,b){
+    var ea = a['狀態']==='已結束', eb = b['狀態']==='已結束';
+    if(ea !== eb) return ea ? 1 : -1;                        // 未結束的一律在前
+    var ka = acDayKey(a), kb = acDayKey(b);
+    return ea ? kb.localeCompare(ka) : ka.localeCompare(kb); // 已結束：新→舊；未來：近→遠
+  });
+  // 筆數上限：未來活動最多 8 筆，避免哪天一次排滿把首頁撐爆（已結束的不佔額度，本來就只留 14 天）
+  var AGENDA_FUTURE_MAX = 8, futureSeen = 0;
+  acts = acts.filter(function(x){
+    if(x['狀態']==='已結束') return true;
+    futureSeen++; return futureSeen <= AGENDA_FUTURE_MAX;
+  });
   if(!acts.length){ box.innerHTML='<div class="ac-loading" style="font-size:14px;color:var(--gray-400);padding:18px 0">近期暫無活動，請留意分會 LINE 群公告。</div>'; return; }
   box.innerHTML = acts.map(acEventCardHtml).join('');
 }
@@ -2563,10 +2577,12 @@ function extractTime(v){ var m = String(v||'').match(/(\d{1,2}:\d{2})/); return 
 
 function acMapFromCalendar(rows){
   var now = new Date();
-  var curY = now.getFullYear(), curM = now.getMonth();
-  // 本月 1 號 00:00 ~ 下月底 23:59（含本月與下月，共 2 個月窗口）
-  var winStart = new Date(curY, curM, 1, 0, 0, 0);
-  var winEnd   = new Date(curY, curM + 2, 0, 23, 59, 59); // curM+2 的第 0 天 = 下月最後一天
+  // AGENDA_WINDOW_ROLL_2026Q3（2026-07-25 改）：原本是「本月 1 號 ~ 下月底」的月曆式窗口，
+  // 缺點是月底時未來視野只剩幾天，早就排好的下下個月活動完全看不到（實例：7/25 看不到 9/18 中秋烤肉夜）。
+  // 改成滾動窗口：往回只留 14 天（近期剛辦完的還看得到），往前不設日期上限——
+  // 分會活動本來就稀疏，與其猜幾週，不如「排了就看得到」，只用筆數上限（見 AGENDA_FUTURE_MAX）防爆版。
+  var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+  var winStart = new Date(todayStart.getTime() - 14 * 86400000); // 今天往回 14 天
   return (rows||[]).filter(function(r){
     // 過濾條件：類型含活動/聚會/例會/來賓，或活動標題含這些詞（相容新舊欄名）
     var title = r['活動標題'] || r['名稱'] || '';
@@ -2574,7 +2590,7 @@ function acMapFromCalendar(rows){
     if(!isAct) return false;
     var d = r['日期'] ? new Date(String(r['日期']).substring(0,10)+'T00:00:00') : null;
     if(!d || isNaN(d)) return false;
-    return d >= winStart && d <= winEnd;   // 只留本月+下月
+    return d >= winStart;   // 過去 14 天內 + 所有未來活動
   }).map(function(r){
     // 活動標題：讀新欄名，fallback 舊欄名
     var title = r['活動標題'] || r['名稱'] || '';
