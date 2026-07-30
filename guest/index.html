@@ -74,6 +74,30 @@ a{text-decoration:none;color:inherit}
 .zoom-tagline{font-size:13px;color:rgba(255,255,255,.6);letter-spacing:.08em;margin-top:18px}
 @media(max-width:480px){.zoom-title{font-size:30px}}
 
+/* ── 本週專講預告區（Phase 1b：抄華地產「首屏秀本週專講」，圖由 Canva／總簡報
+   自動化 pipeline 每日更新，固定檔名覆蓋。容錯三態：雙卡 → 單卡（16:9 備援）
+   → 整區隱藏，三態皆由 JS 預載判斷，絕不留破圖）── */
+.topic-sec{background:var(--white);padding:40px 0 8px}
+.topic-sec[hidden]{display:none}
+.topic-wrap{max-width:720px;margin:0 auto}
+.topic-head-align{max-width:520px;margin:0 auto}
+.topic-cards{display:grid;grid-template-columns:1fr;gap:16px}
+.topic-cards[hidden]{display:none}
+@media(min-width:620px){.topic-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.topic-cards-single{grid-template-columns:1fr}
+.topic-card-btn{display:block;width:100%;padding:0;border:none;background:none;cursor:pointer;border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-sm);transition:transform .18s ease,box-shadow .18s ease}
+.topic-card-btn:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.topic-card-btn:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.topic-img{display:block;width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;background:var(--gray-50)}
+.topic-img-wide{aspect-ratio:16/9;object-fit:cover}
+
+.topic-lightbox{padding:0;margin:0;border:none;width:100vw;height:100vh;max-width:100vw;max-height:100vh;background:rgba(20,23,28,.92);display:none;align-items:center;justify-content:center}
+.topic-lightbox[open]{display:flex}
+.topic-lightbox::backdrop{background:transparent}
+.topic-lightbox img{max-width:92vw;max-height:88vh;width:auto;height:auto;border-radius:var(--r-lg);box-shadow:var(--shadow-md)}
+.lightbox-close{position:fixed;top:20px;right:20px;width:40px;height:40px;border-radius:50%;background:var(--white);border:none;color:var(--gray-900);font-size:22px;line-height:1;cursor:pointer;box-shadow:var(--shadow-md);display:flex;align-items:center;justify-content:center}
+.lightbox-close:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
 /* ── 表單區（照抄首頁 .sec-head/.red-bar，欄位樣式借 .search-bar input 手感）── */
 .form-sec{background:var(--off-white);padding:52px 0 80px}
 .form-wrap{max-width:520px;margin:0 auto}
@@ -136,7 +160,7 @@ select.field-input option{background:var(--white);color:var(--gray-800)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){
   #successScreen{animation:none}
-  .field-input,select.field-input,.submit-btn,.nav-cta{transition:none}
+  .field-input,select.field-input,.submit-btn,.nav-cta,.topic-card-btn{transition:none}
 }
 </style>
 </head>
@@ -178,6 +202,124 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbwX7BsF7OWcfP2DA5byYQ5C
     </div>
   </div>
 </header>
+
+<section class="topic-sec" id="topicSec" hidden>
+  <div class="container">
+    <div class="topic-wrap">
+
+      <div class="topic-head-align">
+        <div class="sec-head">
+          <span class="red-bar"></span>
+          <h2>這場你會聽到</h2>
+          <p>入座前先看看，本週兩位夥伴會分享什麼實戰案例。</p>
+        </div>
+      </div>
+
+      <div class="topic-cards" id="topicCardsDual">
+        <button type="button" class="topic-card-btn" aria-label="放大檢視講者一專講預告卡">
+          <img class="topic-img" id="topicImg1" alt="本週 5 分鐘專講預告卡・講者一">
+        </button>
+        <button type="button" class="topic-card-btn" aria-label="放大檢視講者二專講預告卡">
+          <img class="topic-img" id="topicImg2" alt="本週 5 分鐘專講預告卡・講者二">
+        </button>
+      </div>
+
+      <div class="topic-cards topic-cards-single" id="topicCardsSingle" hidden>
+        <button type="button" class="topic-card-btn" aria-label="放大檢視本週專講預告卡">
+          <img class="topic-img topic-img-wide" id="topicImgSingle" alt="本週 5 分鐘專講預告卡（雙講者合版）">
+        </button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<dialog id="topicLightbox" class="topic-lightbox" aria-label="專講預告放大檢視">
+  <button type="button" class="lightbox-close" id="lightboxClose" aria-label="關閉放大圖">&times;</button>
+  <img id="lightboxImg" src="" alt="">
+</dialog>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   本週專講預告區：容錯三態
+   1. 先預載雙卡（topic-card-1/2.png），皆成功 → 顯示雙卡
+   2. 任一失敗 → 改預載單卡備援（topic-card.png），成功 → 顯示單卡
+   3. 單卡也失敗 → 整區維持 hidden，表單完全不受影響
+   全程用 Image() 物件預載後才寫入可見 <img src>，絕不出現破圖圖示。
+   快取處理：src 帶上「當天日期」cache-bust 參數，固定檔名覆蓋當天內
+   最多一天就能吃到新圖，不用隨機值浪費流量。
+════════════════════════════════════════════════════════════════ */
+(function () {
+  var topicSec     = document.getElementById('topicSec');
+  var dualWrap     = document.getElementById('topicCardsDual');
+  var singleWrap   = document.getElementById('topicCardsSingle');
+  var img1         = document.getElementById('topicImg1');
+  var img2         = document.getElementById('topicImg2');
+  var imgSingle    = document.getElementById('topicImgSingle');
+
+  function cacheBustTag() {
+    var d = new Date();
+    var y = d.getFullYear();
+    var m = String(d.getMonth() + 1).padStart(2, '0');
+    var day = String(d.getDate()).padStart(2, '0');
+    return '' + y + m + day;
+  }
+  var bustTag = cacheBustTag();
+  function withBust(url) { return url + '?d=' + bustTag; }
+
+  function preload(url) {
+    return new Promise(function (resolve) {
+      var probe = new Image();
+      probe.onload = function () { resolve(true); };
+      probe.onerror = function () { resolve(false); };
+      probe.src = withBust(url);
+    });
+  }
+
+  Promise.all([preload('images/topic-card-1.png'), preload('images/topic-card-2.png')])
+    .then(function (results) {
+      if (results[0] && results[1]) {
+        img1.src = withBust('images/topic-card-1.png');
+        img2.src = withBust('images/topic-card-2.png');
+        topicSec.hidden = false;
+        return;
+      }
+      dualWrap.hidden = true;
+      preload('images/topic-card.png').then(function (ok) {
+        if (ok) {
+          imgSingle.src = withBust('images/topic-card.png');
+          singleWrap.hidden = false;
+          topicSec.hidden = false;
+        }
+        /* 兩層都失敗 → topicSec 維持 hidden，不留破圖與空白框 */
+      });
+    });
+
+  /* ── Lightbox：原生 <dialog>，Esc／點背景關閉為瀏覽器內建行為 ── */
+  var lightbox      = document.getElementById('topicLightbox');
+  var lightboxImg   = document.getElementById('lightboxImg');
+  var lightboxClose = document.getElementById('lightboxClose');
+
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.topic-card-btn');
+    if (!btn) return;
+    var thumb = btn.querySelector('img');
+    if (!thumb || !thumb.src) return;
+    lightboxImg.src = thumb.src;
+    lightboxImg.alt = thumb.alt;
+    if (typeof lightbox.showModal === 'function') lightbox.showModal();
+  });
+
+  lightboxClose.addEventListener('click', function () { lightbox.close(); });
+  lightbox.addEventListener('click', function (e) {
+    if (e.target === lightbox) lightbox.close();
+  });
+  lightbox.addEventListener('close', function () {
+    lightboxImg.src = '';
+    lightboxImg.alt = '';
+  });
+})();
+</script>
 
 <section class="form-sec" id="guestForm">
   <div class="container">
