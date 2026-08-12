@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>華都更 會員紅綠燈</title>
+    <meta name="robots" content="noindex, nofollow, noarchive">
+    <meta name="referrer" content="no-referrer">
+    <meta name="description" content="BNI 華都更分會會員紅綠燈（分會領導團隊內部使用）">
+</head>
+<body>
+<style>
+:root{
+  --bg:#F6F7F9; --surface:#FFFFFF; --surface-2:#EFF1F4; --border:#DDE2E8;
+  --text:#181B1F; --text-2:#565E67; --text-3:#89929C;
+  --accent:#1F4E79; --accent-soft:#E7EEF5;
+  --green:#12795A; --green-bg:#E0F0E9; --green-line:#17936C;
+  --amber:#9E6F00; --amber-bg:#F8EED4; --amber-line:#C08D08;
+  --red:#B23A2E; --red-bg:#F8E4E1; --red-line:#CF5244;
+  --grey:#3C444C; --grey-bg:#E3E6EA; --grey-line:#525B64;
+  --shadow:0 1px 2px rgba(20,26,33,.05), 0 8px 24px -12px rgba(20,26,33,.16);
+  --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI Variable Text","Segoe UI","PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  --font-mono:ui-monospace,"Cascadia Mono","SF Mono",Consolas,"Roboto Mono",monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#131619; --surface:#1B1F24; --surface-2:#22272D; --border:#2C333A;
+    --text:#E9EDF1; --text-2:#A6AEB7; --text-3:#767F89;
+    --accent:#7FB0DC; --accent-soft:#1B2A38;
+    --green:#48C795; --green-bg:#122C23; --green-line:#2E9E74;
+    --amber:#DFAA2C; --amber-bg:#2E2510; --amber-line:#B98B18;
+    --red:#E87C6E; --red-bg:#301A17; --red-line:#C25547;
+    --grey:#B9C1C9; --grey-bg:#1E2329; --grey-line:#8B949D;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#131619; --surface:#1B1F24; --surface-2:#22272D; --border:#2C333A;
+  --text:#E9EDF1; --text-2:#A6AEB7; --text-3:#767F89;
+  --accent:#7FB0DC; --accent-soft:#1B2A38;
+  --green:#48C795; --green-bg:#122C23; --green-line:#2E9E74;
+  --amber:#DFAA2C; --amber-bg:#2E2510; --amber-line:#B98B18;
+  --red:#E87C6E; --red-bg:#301A17; --red-line:#C25547;
+  --grey:#B9C1C9; --grey-bg:#1E2329; --grey-line:#8B949D;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:var(--font-sans); font-size:15px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px; margin:0 auto; padding:28px 20px 80px}
+.num{font-family:var(--font-mono); font-variant-numeric:tabular-nums}
+
+/* ---------- header ---------- */
+.eyebrow{
+  font-size:11.5px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--text-3); font-weight:600; margin:0 0 6px;
+}
+h1{font-size:clamp(26px,4vw,34px); line-height:1.2; letter-spacing:-.02em; margin:0; font-weight:700; text-wrap:balance}
+.period{color:var(--text-2); font-size:14px; margin:6px 0 0}
+.period b{color:var(--text); font-weight:600}
+.scope{
+  margin:12px 0 0; padding:9px 14px; font-size:13px; line-height:1.55;
+  color:var(--text-2); background:var(--accent-soft);
+  border-left:3px solid var(--accent); border-radius:0 8px 8px 0;
+}
+.scope b{color:var(--accent)}
+.demo-tag{
+  display:inline-block; margin-left:10px; padding:2px 8px; border-radius:999px;
+  background:var(--accent-soft); color:var(--accent); font-size:11.5px; font-weight:700;
+  letter-spacing:.06em; vertical-align:3px;
+}
+
+/* ---------- distribution bar ---------- */
+.dist{margin:26px 0 0; display:flex; flex-direction:column; gap:10px}
+.dist-bar{display:flex; height:32px; border-radius:8px; overflow:hidden; border:1px solid var(--border)}
+.dist-seg{display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:700; color:#fff; min-width:0}
+.dist-legend{display:flex; flex-wrap:wrap; gap:8px 22px; font-size:13px; color:var(--text-2)}
+.dist-legend span{display:inline-flex; align-items:center; gap:7px}
+.dot{width:10px; height:10px; border-radius:3px; flex:none}
+.goal{
+  font-size:13px; color:var(--text-2); background:var(--surface); border:1px solid var(--border);
+  border-radius:8px; padding:10px 14px; margin-top:2px;
+}
+.goal b{color:var(--text)}
+.stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; margin-top:4px}
+.stat{
+  background:var(--surface); border:1px solid var(--border); border-radius:10px;
+  padding:13px 16px; border-left:4px solid var(--s-line);
+}
+.stat-label{
+  font-size:11.5px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--text-3); font-weight:700; margin:0 0 3px;
+}
+.stat-value{
+  font-family:var(--font-mono); font-variant-numeric:tabular-nums;
+  font-size:27px; font-weight:700; line-height:1.1; letter-spacing:-.02em; color:var(--s-line);
+}
+.stat-value small{font-size:13px; font-weight:600; color:var(--text-3); letter-spacing:0; margin-left:3px}
+.stat-note{font-size:12.5px; color:var(--text-2); margin:4px 0 0}
+.stat-note b{color:var(--text); font-family:var(--font-mono)}
+.s-green{--s-line:var(--green-line)}
+.s-amber{--s-line:var(--amber-line)}
+.s-red  {--s-line:var(--red-line)}
+.s-grey {--s-line:var(--grey-line)}
+
+
+/* ---------- tabs ---------- */
+.tabs{display:flex; gap:4px; margin:30px 0 0; border-bottom:1px solid var(--border); flex-wrap:wrap}
+.tab{
+  appearance:none; background:none; border:0; border-bottom:2px solid transparent;
+  padding:10px 14px; font:inherit; font-size:14.5px; font-weight:600; color:var(--text-2);
+  cursor:pointer; margin-bottom:-1px;
+}
+.tab:hover{color:var(--text)}
+.tab[aria-selected="true"]{color:var(--accent); border-bottom-color:var(--accent)}
+.tab:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px}
+.panel{padding-top:22px}
+.panel[hidden]{display:none}
+
+/* ---------- search ---------- */
+.searchrow{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:18px}
+.search{
+  flex:1 1 260px; max-width:380px; padding:10px 14px; font:inherit; font-size:15px;
+  border:1px solid var(--border); border-radius:9px; background:var(--surface); color:var(--text);
+}
+.search:focus{outline:2px solid var(--accent); outline-offset:-1px; border-color:transparent}
+.filters{display:flex; gap:6px; flex-wrap:wrap}
+.chip{
+  appearance:none; font:inherit; font-size:13px; font-weight:600; cursor:pointer;
+  padding:7px 13px; border-radius:999px; border:1px solid var(--border);
+  background:var(--surface); color:var(--text-2);
+}
+.chip[aria-pressed="true"]{background:var(--text); color:var(--bg); border-color:var(--text)}
+.chip:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.count{font-size:13px; color:var(--text-3); margin-left:auto}
+
+/* ---------- member cards ---------- */
+.grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(212px,1fr)); gap:12px}
+.card{
+  position:relative; text-align:left; font:inherit; cursor:pointer;
+  background:var(--surface); border:1px solid var(--border); border-radius:11px;
+  padding:14px 15px 14px 19px; overflow:hidden; color:var(--text);
+  transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+.card::before{content:""; position:absolute; left:0; top:0; bottom:0; width:5px; background:var(--tone-line)}
+.card:hover{transform:translateY(-2px); box-shadow:var(--shadow); border-color:var(--tone-line)}
+.card:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.card-top{display:flex; align-items:baseline; justify-content:space-between; gap:10px}
+.name{font-weight:650; font-size:15.5px; letter-spacing:-.01em; line-height:1.3}
+.rank{font-size:11.5px; color:var(--text-3)}
+.score{font-size:32px; font-weight:700; line-height:1.05; letter-spacing:-.03em; color:var(--tone)}
+.score small{font-size:14px; font-weight:600; color:var(--text-3); letter-spacing:0}
+.card-bot{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px}
+.pill{
+  font-size:12px; font-weight:700; padding:3px 9px; border-radius:999px;
+  background:var(--tone-bg); color:var(--tone);
+}
+.gap{font-size:12.5px; color:var(--text-2)}
+.gap b{color:var(--text); font-family:var(--font-mono)}
+.tone-green{--tone:var(--green); --tone-bg:var(--green-bg); --tone-line:var(--green-line)}
+.tone-amber{--tone:var(--amber); --tone-bg:var(--amber-bg); --tone-line:var(--amber-line)}
+.tone-red{--tone:var(--red); --tone-bg:var(--red-bg); --tone-line:var(--red-line)}
+.tone-grey{--tone:var(--grey); --tone-bg:var(--grey-bg); --tone-line:var(--grey-line)}
+
+/* ---------- modal ---------- */
+.overlay{
+  position:fixed; inset:0; background:rgba(12,16,20,.55); backdrop-filter:blur(2px);
+  display:flex; align-items:flex-start; justify-content:center; padding:24px 16px; overflow-y:auto; z-index:50;
+}
+.overlay[hidden]{display:none}
+.sheet{
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  width:100%; max-width:660px; box-shadow:var(--shadow); overflow:hidden;
+}
+.sheet-head{padding:20px 22px 18px; border-bottom:1px solid var(--border); background:var(--tone-bg)}
+.sheet-head .row{display:flex; align-items:flex-start; justify-content:space-between; gap:14px}
+.sheet-name{font-size:21px; font-weight:700; letter-spacing:-.02em; margin:0}
+.sheet-sub{font-size:13px; color:var(--text-2); margin:3px 0 0}
+.sheet-score{font-size:44px; font-weight:700; line-height:1; letter-spacing:-.03em; color:var(--tone); text-align:right}
+.sheet-score small{display:block; font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--tone); margin-top:5px}
+.closebtn{
+  appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--text-2);
+  width:30px; height:30px; border-radius:8px; cursor:pointer; font-size:17px; line-height:1; flex:none;
+}
+.closebtn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.sheet-body{padding:20px 22px 24px; display:flex; flex-direction:column; gap:22px}
+.sec-title{
+  font-size:11.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--text-3);
+  font-weight:700; margin:0 0 12px;
+}
+
+/* metric rows — 每一項自己判狀態，不吃整體燈號 */
+.mgroup + .mgroup{margin-top:22px}
+.mgroup-title{
+  display:flex; align-items:center; gap:10px; margin:0 0 13px;
+  font-size:12.5px; font-weight:700; color:var(--text-2);
+}
+.mgroup-title::after{content:""; flex:1; height:1px; background:var(--border)}
+.metric{display:grid; grid-template-columns:1fr auto; gap:3px 12px; margin-bottom:15px}
+.metric:last-child{margin-bottom:0}
+.metric-name{font-size:14px; font-weight:600}
+.metric-val{font-size:13px; color:var(--text-2); text-align:right; white-space:nowrap}
+.metric-val b{color:var(--text); font-family:var(--font-mono); font-variant-numeric:tabular-nums}
+.mstat{
+  display:inline-block; margin-left:7px; padding:1px 7px; border-radius:999px;
+  font-size:11.5px; font-weight:700; font-family:var(--font-mono);
+  background:var(--m-bg); color:var(--m);
+}
+.track{
+  grid-column:1/-1; position:relative; height:8px; border-radius:4px;
+  background:var(--surface-2); margin-top:4px;
+}
+.track i{display:block; height:100%; background:var(--m); border-radius:4px}
+.track u{
+  position:absolute; top:-3px; bottom:-3px; width:2px; border-radius:1px;
+  background:var(--text-3); text-decoration:none;
+}
+.metric-note{grid-column:1/-1; font-size:12.5px; color:var(--text-3); margin-top:4px}
+.metric-note b{color:var(--m); font-weight:600}
+.is-max {--m:var(--green-line); --m-bg:var(--green-bg)}
+.is-part{--m:var(--amber-line); --m-bg:var(--amber-bg)}
+.is-zero{--m:var(--red-line);   --m-bg:var(--red-bg)}
+.is-lost{--m:var(--grey-line);  --m-bg:var(--grey-bg)}
+.is-zero .track{background:var(--red-bg)}
+
+/* 到綠燈的階梯 */
+.actions{background:var(--surface-2); border-radius:11px; padding:16px 18px}
+.ladder{position:relative; display:flex; flex-direction:column}
+.ladder::before{
+  content:""; position:absolute; left:11px; top:24px; bottom:24px;
+  width:2px; background:var(--border);
+}
+.rung{
+  display:grid; grid-template-columns:24px 1fr auto; gap:13px;
+  align-items:center; padding:9px 0;
+}
+.rung-mark{
+  position:relative; z-index:1; width:24px; height:24px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-mono); font-size:12px; font-weight:700;
+  background:var(--surface); border:2px solid var(--border); color:var(--text-3);
+}
+.rung-body{font-size:14px; line-height:1.45}
+.rung-body small{display:block; color:var(--text-3); font-size:12.5px}
+.rung-after{
+  text-align:right; white-space:nowrap; font-size:13px; color:var(--text-2);
+  display:flex; align-items:center; gap:7px;
+}
+.rung-after b{
+  font-family:var(--font-mono); font-variant-numeric:tabular-nums;
+  font-size:16px; font-weight:700; color:var(--text);
+}
+.rung-pill{
+  font-size:11.5px; font-weight:700; padding:2px 8px; border-radius:999px;
+  background:var(--r-bg); color:var(--r);
+}
+.rung-now .rung-body{color:var(--text-2)}
+.rung-step .rung-mark{background:var(--accent); border-color:var(--accent); color:#fff}
+.rung-goal .rung-mark{background:var(--green-line); border-color:var(--green-line); color:#fff}
+.rung-goal .rung-after b{color:var(--green-line)}
+.r-green{--r:var(--green); --r-bg:var(--green-bg)}
+.r-amber{--r:var(--amber); --r-bg:var(--amber-bg)}
+.r-red  {--r:var(--red);   --r-bg:var(--red-bg)}
+.r-grey {--r:var(--grey);  --r-bg:var(--grey-bg)}
+.ladder-note{
+  margin:13px 0 0; padding-top:13px; border-top:1px solid var(--border);
+  font-size:13px; color:var(--text-2);
+}
+.ladder-note b{color:var(--text)}
+.ok-note{font-size:14px; color:var(--text-2); margin:0}
+.note{
+  margin-top:12px; font-size:13.5px; color:var(--text-2);
+  background:var(--n-bg); border-left:3px solid var(--n-line);
+  border-radius:0 8px 8px 0; padding:10px 14px;
+}
+.note b{color:var(--n-line); font-weight:700}
+.note-ok   {--n-bg:var(--green-bg); --n-line:var(--green-line)}
+.note-watch{--n-bg:var(--amber-bg); --n-line:var(--amber-line)}
+.note-warn {--n-bg:var(--red-bg);   --n-line:var(--red-line)}
+
+/* ---------- watchlist ---------- */
+.lists{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px}
+.list{background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden}
+.list-head{padding:14px 17px; border-bottom:1px solid var(--border)}
+.list-head h3{margin:0; font-size:15.5px; font-weight:700; letter-spacing:-.01em}
+.list-head p{margin:3px 0 0; font-size:12.5px; color:var(--text-2)}
+.list-body{padding:6px 0}
+.li{
+  display:grid; grid-template-columns:auto 1fr auto; gap:3px 12px; align-items:baseline;
+  padding:11px 17px; width:100%;
+  background:none; border:0; font:inherit; text-align:left; cursor:pointer; color:var(--text);
+}
+.li + .li{border-top:1px solid var(--border)}
+.li:hover{background:var(--surface-2)}
+.li:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}
+.li-score{font-family:var(--font-mono); font-size:14px; font-weight:700; color:var(--tone)}
+.li-name{font-size:14.5px; font-weight:650}
+.li-tag{
+  font-size:12px; font-weight:700; padding:2px 9px; border-radius:999px;
+  background:var(--tone-bg); color:var(--tone); white-space:nowrap;
+}
+.li-how{grid-column:2/-1; font-size:12.5px; color:var(--text-2); line-height:1.5}
+.li-how b{color:var(--text); font-weight:600}
+.empty{padding:16px 17px; font-size:13.5px; color:var(--text-3)}
+
+/* ---------- rules ---------- */
+.rules{display:grid; grid-template-columns:repeat(auto-fit,minmax(272px,1fr)); gap:14px}
+.rule{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px 18px}
+.rule h3{margin:0 0 2px; font-size:15.5px; font-weight:700; letter-spacing:-.01em}
+.rule .sub{margin:0 0 12px; font-size:12.5px; color:var(--text-3)}
+.rule table{width:100%; border-collapse:collapse; font-size:13.5px}
+.rule td{padding:5px 0; border-bottom:1px solid var(--border)}
+.rule tr:last-child td{border-bottom:0}
+.rule td:last-child{text-align:right; font-family:var(--font-mono); font-weight:700; font-variant-numeric:tabular-nums}
+.rule-foot{
+  grid-column:1/-1; font-size:13.5px; color:var(--text-2); background:var(--surface);
+  border:1px solid var(--border); border-radius:12px; padding:15px 18px; line-height:1.65;
+}
+.rule-foot b{color:var(--text)}
+.rule-foot code{font-family:var(--font-mono); font-size:12.5px; background:var(--surface-2); padding:1px 5px; border-radius:4px}
+.mtable-wrap{overflow-x:auto; margin-top:12px}
+.mtable{width:100%; border-collapse:collapse; font-size:13.5px; min-width:340px}
+.mtable th{
+  text-align:left; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--text-3); font-weight:700; padding:0 10px 6px 0; border-bottom:1px solid var(--border);
+}
+.mtable th:nth-child(2), .mtable th:nth-child(3){text-align:right}
+.mtable td{padding:6px 10px 6px 0; border-bottom:1px solid var(--border)}
+.mtable td.num{text-align:right; font-family:var(--font-mono); font-variant-numeric:tabular-nums}
+.mtable tbody tr:last-child td{border-bottom:0; font-weight:700}
+.mtable tbody tr:last-child td.num{color:var(--text)}
+.mdir{width:22px; text-align:center; font-size:11px; color:var(--text-3)}
+.mdir.up{color:var(--green-line)}
+.mdir.down{color:var(--red-line)}
+
+/* ---------- 怎麼上綠燈分會 ---------- */
+.cbox{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:16px}
+.cbox h3{margin:0 0 4px; font-size:16px; font-weight:700; letter-spacing:-.01em}
+.cbox .sub{margin:0 0 14px; font-size:13px; color:var(--text-2); line-height:1.6}
+.cbox .sub b{color:var(--text)}
+.ctable-wrap{overflow-x:auto}
+.ctable{width:100%; border-collapse:collapse; font-size:13.5px; min-width:520px}
+.ctable th{
+  text-align:left; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--text-3); font-weight:700; padding:0 12px 7px 0; border-bottom:1px solid var(--border); white-space:nowrap;
+}
+.ctable td{padding:9px 12px 9px 0; border-bottom:1px solid var(--border); vertical-align:middle}
+.ctable tr:last-child td{border-bottom:0}
+.ctable td.n{font-family:var(--font-mono); font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap}
+.ctable .verdict{font-size:12px; font-weight:700; padding:2px 9px; border-radius:999px; white-space:nowrap}
+.v-good{background:var(--green-bg); color:var(--green)}
+.v-mid {background:var(--surface-2); color:var(--text-2)}
+.v-bad {background:var(--red-bg); color:var(--red)}
+.target{
+  display:grid; grid-template-columns:auto 1fr; gap:12px 15px; align-items:start;
+  padding:14px 0; border-bottom:1px dashed var(--border);
+}
+.target:last-of-type{border-bottom:0; padding-bottom:0}
+.target-num{
+  width:28px; height:28px; border-radius:50%; background:var(--accent); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-mono); font-size:13px; font-weight:700;
+}
+.target-h{margin:0 0 3px; font-size:15px; font-weight:700; line-height:1.4}
+.target-b{margin:0; font-size:13.5px; color:var(--text-2); line-height:1.6}
+.target-b b{color:var(--text)}
+.caveat{
+  font-size:13px; color:var(--text-2); line-height:1.65;
+  background:var(--amber-bg); border-left:3px solid var(--amber-line);
+  border-radius:0 8px 8px 0; padding:12px 15px;
+}
+.caveat b{color:var(--amber)}
+
+/* ---------- 更新資料 ---------- */
+.drop{
+  border:2px dashed var(--border); border-radius:12px; background:var(--surface);
+  padding:34px 24px; text-align:center;
+}
+.drop-icon{font-size:34px; line-height:1; margin-bottom:10px}
+.drop h3{margin:0 0 5px; font-size:16.5px; font-weight:700}
+.drop p{margin:0; font-size:13.5px; color:var(--text-2)}
+.drop-row{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:18px}
+.btn{
+  appearance:none; font:inherit; font-size:14px; font-weight:650; cursor:pointer;
+  padding:10px 20px; border-radius:9px; border:1px solid var(--accent);
+  background:var(--accent); color:#fff;
+}
+.btn.ghost{background:var(--surface); color:var(--accent)}
+.btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.pw{
+  padding:10px 14px; font:inherit; font-size:14px; width:200px;
+  border:1px solid var(--border); border-radius:9px; background:var(--surface); color:var(--text);
+}
+.pw:focus{outline:2px solid var(--accent); outline-offset:-1px}
+.steps{display:grid; gap:0; margin-top:6px}
+.step{display:grid; grid-template-columns:auto 1fr; gap:12px 14px; padding:12px 0; border-bottom:1px dashed var(--border)}
+.step:last-child{border-bottom:0}
+.step-n{
+  width:26px; height:26px; border-radius:50%; border:2px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-mono); font-size:12px; font-weight:700; color:var(--text-3);
+}
+.step-t{font-size:14px; line-height:1.5}
+.step-t small{display:block; color:var(--text-3); font-size:12.5px; margin-top:1px}
+.fake{
+  margin-top:14px; font-size:13px; color:var(--text-2); text-align:center;
+  padding:10px; background:var(--surface-2); border-radius:8px;
+}
+
+.foot{
+  margin-top:46px; padding-top:20px; border-top:1px solid var(--border);
+  font-size:12.5px; color:var(--text-3); line-height:1.7;
+}
+.foot p{margin:0}
+.foot .warn-line{color:var(--red); font-weight:600; margin-top:6px}
+
+@media (max-width:560px){
+  .wrap{padding:22px 14px 60px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px}
+  .score{font-size:27px}
+  .sheet-score{font-size:36px}
+  .dist-seg{font-size:11px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important; animation:none !important}
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">BNI 華都更 Hua Urban+</p>
+    <h1>會員紅綠燈<span class="demo-tag">2026 年 7 月</span></h1>
+    <p class="period">計分期間 <b>2026-02-01 – 2026-07-31</b>　往前算 6 個月的累計，每月更新一次就往前滾一個月</p>
+    <p class="scope"><b>這頁給導師協調人與各組組長看。</b>面談時可以打開當事人那一頁給他本人看，整份不對全體公開。</p>
+
+    <div class="dist">
+      <div class="dist-bar" id="distBar"></div>
+      <div class="dist-legend" id="distLegend"></div>
+      <div class="stats" id="chapterStats"></div>
+      <div class="goal" id="goalNote"></div>
+    </div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" aria-controls="p-all" id="t-all">全分會 57 人</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="p-watch" id="t-watch">導師協調要關心的人</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="p-chapter" id="t-chapter">怎麼上綠燈分會</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="p-rules" id="t-rules">分數怎麼算</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="p-upload" id="t-upload">更新資料</button>
+  </div>
+
+  <section class="panel" id="p-all" role="tabpanel" aria-labelledby="t-all">
+    <div class="searchrow">
+      <input class="search" id="q" type="search" placeholder="打你的名字，例如：瓊安" aria-label="搜尋會員姓名">
+      <div class="filters" id="filters"></div>
+      <span class="count" id="count"></span>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="panel" id="p-watch" role="tabpanel" aria-labelledby="t-watch" hidden>
+    <div class="lists" id="lists"></div>
+  </section>
+
+  <section class="panel" id="p-chapter" role="tabpanel" aria-labelledby="t-chapter" hidden>
+    <div id="chapterPanel"></div>
+  </section>
+
+  <section class="panel" id="p-rules" role="tabpanel" aria-labelledby="t-rules" hidden>
+    <div class="rules" id="rules"></div>
+  </section>
+
+  <section class="panel" id="p-upload" role="tabpanel" aria-labelledby="t-upload" hidden>
+    <div id="uploadPanel"></div>
+  </section>
+
+  <footer class="foot">
+    <p>BNI 華都更分會　會員紅綠燈　·　資料期間 2026-02-01 – 2026-07-31（6 個月）</p>
+    <p>個人分數依 BNI 官方會員紅綠燈原始檔計算，分會分數依 BNI Accelerate《分會紅綠燈計算方式》。</p>
+    <p class="warn-line">內含全體會員姓名與個人數據，僅供分會領導團隊參考，請勿對外散布。</p>
+  </footer>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetName"></div>
+</div>
+
+<script>
+const RAW = [[1,"張瑜晏 Chang Yu Yen",13,13,0,0,0,0,23,4,0,26,9,3000000],[2,"王常殷 Hubert Wang",13,13,0,0,0,0,9,10,6,48,16,1565000],[3,"王寶佳 Phoenix Wang",13,13,0,0,0,0,21,9,2,60,23,172099],[4,"吳翊辰 ICHEN WU",13,13,0,0,0,0,23,9,1,48,18,888],[5,"陳靖薇 Penny Chen",13,13,0,0,0,0,3,9,0,52,28,33800000],[6,"張瓊安 Joanne",13,13,0,0,0,0,16,13,0,65,14,168000],[7,"王春雄 Jayson Wang",13,13,0,0,0,0,9,9,4,58,10,0],[8,"詹媛婷 Chan yuan ting",13,13,0,0,0,0,5,3,1,25,6,14930000],[9,"陳向柔Naomi Chen",13,13,0,0,0,0,12,5,2,103,25,8760],[10,"包育翎 PAO,YU-LING",13,13,0,0,0,0,1,1,1,12,45,10899104],[11,"施宜妏 YiwenShih",13,13,0,0,0,0,5,3,0,34,2,3732000],[12,"劉羿岑 Yitsen Liu",13,13,0,0,0,0,4,5,0,44,14,0],[13,"林必涵 Pi Han Lin",13,13,0,0,0,0,7,12,0,37,10,11760],[14,"蔡馨葳 TSAI HSIN WEI",13,13,0,0,0,0,1,4,0,29,10,0],[15,"柳慧燕 Ann Liu",13,13,0,0,0,0,2,4,0,35,6,0],[16,"蔡岱達 DAI-DA TSAI",13,13,0,0,0,0,13,13,0,61,2,0],[17,"林佩君 Pei Lin",13,11,0,0,0,2,2,1,0,29,6,0],[18,"謝夢瑰",13,13,0,0,0,0,7,2,1,23,6,15000],[19,"王佳筠 JIA",13,13,0,0,0,0,13,14,1,41,0,50000],[20,"凃馨文 TU SINGWEN",13,13,0,0,0,0,0,1,0,18,10,0],[21,"劉恩秀 Liou en Siou",13,13,0,0,0,0,12,9,0,17,5,10000],[22,"張怡蘋 April Chang",13,13,0,0,0,0,5,7,0,56,4,3600],[23,"蔡明璋 TSAI MING CHANG",13,13,0,0,0,0,1,7,0,39,4,0],[24,"高翊書 Eason Kao",13,13,0,0,0,0,2,3,0,28,4,0],[25,"陳黎玲 JOSSIE",13,13,0,0,0,0,6,7,0,39,4,0],[26,"周以仁 Chou Yi Jen",13,13,0,0,0,0,3,13,0,20,0,2295000],[27,"林晏伃 ALICE LIN",13,13,0,0,0,0,0,1,0,22,4,0],[28,"蔡淯思 Mina Tsai",13,13,0,0,0,0,0,2,0,30,2,0],[29,"洪嘉璿 J.syuan",13,13,0,0,0,0,2,6,0,26,2,0],[30,"黃冠霖 Kuan Lin Huang",13,13,0,0,0,0,1,0,0,45,2,0],[31,"何俊彥 Daris Ho",13,13,0,0,0,0,7,3,0,35,2,0],[32,"蘇瓜雅 Sophia Su",13,13,0,0,0,0,6,2,0,21,2,0],[33,"楊之慧 Yang Jr Huei",13,13,0,0,0,0,3,1,0,21,2,0],[34,"陳昭男 Johnny",13,13,0,0,0,0,1,4,0,29,0,0],[35,"鍾智媛 Fiona Chung Jhih Yuan",13,13,0,0,0,0,0,4,0,36,0,0],[36,"莊涵勝 HanSheng Chuang",13,13,0,0,0,0,1,2,0,32,0,0],[37,"諸紀平 CHI PING CHU",13,13,0,0,0,0,2,6,0,28,0,0],[38,"陳秒螢 chen miao ying",13,13,0,0,0,0,1,8,0,26,0,0],[39,"李瑞雲",13,13,0,0,0,0,2,2,0,29,0,0],[40,"黃郁婷 Catherine Huang",13,13,0,0,0,0,5,2,0,34,0,0],[41,"莊大永 Chuang, Ta-Yung",13,13,0,0,0,0,1,7,0,31,0,0],[42,"陳品攸 Yuna Chen",9,8,0,0,0,1,4,4,0,18,0,3600],[43,"藍堂嘉 Albert LAN",13,11,0,0,0,2,5,6,0,28,0,0],[44,"張耕豪",10,10,0,0,0,0,1,2,0,15,0,0],[45,"林媜媁 Winnie Lin",13,13,0,0,0,0,0,3,0,20,0,0],[46,"王雅慧 Wang,ya-hui",13,13,0,0,0,0,2,3,0,15,0,0],[47,"李艾莉 AILI LEE",13,12,1,0,0,0,0,6,0,19,2,0],[48,"莊慧劍 CHuang Hui Chien",13,13,0,0,0,0,0,0,1,11,0,0],[49,"周育慈 CHOU YU TZU",13,13,0,0,0,0,1,1,0,10,0,0],[50,"宋馨巧 Hsin-Chiao Sung",13,13,0,0,0,0,0,4,0,10,0,0],[51,"楊淑媛 Augusta Yang",13,10,2,0,0,1,1,5,0,26,0,32000],[52,"吳念鎧 WU-NIEN-KAI",8,8,0,0,0,0,0,1,0,1,0,0],[53,"李慧如 LE HUI JU",13,13,0,0,0,0,0,3,0,1,0,0],[54,"古育瑋 Allen",4,4,0,0,0,0,0,0,0,0,0,0],[55,"沈瑞婷 Ivy Shen",6,6,0,0,0,0,1,1,0,1,0,0],[56,"林中群 ChungChing Lin",13,11,1,0,0,1,1,6,0,9,0,0],[57,"黃建嘉 CHIENCHIA HUANG",13,11,2,0,0,0,0,3,0,3,0,0]];
+
+/* ---------- 計分規則（照 Excel「評分」分頁還原，57 人逐欄驗證吻合） ---------- */
+const TIER = {
+  absent : [[0,20],[1,15],[2,10]],                                  // 缺席次數（少者高分）
+  ref    : [[0.75,5],[1,10],[1.2,15],[1.5,20]],                     // 每週提供引薦
+  vis    : [[1,10],[2,15]],                                         // 每 4 週來賓
+  o2o    : [[0.5,5],[1,10],[2,15]],                                 // 每週一對一
+  ceu    : [[2,5],[4,10],[6,15]],                                   // 分會教育單位
+  tyfcb  : [[400000,5],[800000,10],[2000000,15]]                    // 交易價值
+};
+const GREEN = 70, AMBER = 50, RED = 30;
+
+/* 分會層級的數字不在會員檔裡，來自 BNI 官方《分會紅綠燈報告》。
+   這裡先放 2026-07 的實際值示範，正式版由每月那份分會報告帶入。 */
+const CHAPTER = {
+  period: '2026 年 7 月',
+  score: 65, prevScore: 70,
+  gyPct: 30, prevGyPct: 20,
+  delta: {green: 1, amber: 5, red: -7, grey: 2},
+  moves: {up: 22, down: 11, flat: 22, joined: 2},
+  /* BNI Accelerate《分會紅綠燈計算方式》官方計分表。
+     拿全區 25 分會 × 2 個月共 50 筆驗證，45 筆完全命中，華都更兩個月都分毫不差。 */
+  official: [
+    {k:'分會大小',              v:57,     unit:'人',   tiers:[[31,15],[26,10],[21,5],[0,0]],
+     label:['31 以上','26–30','21–25','20 以下'], note:'月底回報的會員人數'},
+    {k:'會員成長（6 個月）',     v:57,     unit:'人',   tiers:[[5,15],[3,10],[1,5],[0,0]],
+     label:['5 以上','3–4','1–2','1 以下'], note:'過去 6 個月會員總數的變化'},
+    {k:'保留率（12 個月）',      v:0,      unit:'%',    tiers:[[70,15],[60,10],[50.01,5],[0,0]],
+     label:['70% 以上','60–69.99%','50.01–59.99%','50% 以下'], note:'入會滿 12 個月的會員裡，還留在 BNI 的比例'},
+    {k:'會員每週引薦數（6 個月）',v:0.34,   unit:'件',   tiers:[[1.11,15],[0.91,10],[0.71,5],[0,0]],
+     label:['1.11 以上','0.91–1.1','0.71–0.9','0.7 以下'], note:'每位會員每週平均給出的引薦'},
+    {k:'每週來賓數（6 個月）',   v:1.77,   unit:'位',   tiers:[[2.01,15],[1.51,10],[1.01,5],[0,0]],
+     label:['2.01 以上','1.51–2','1.01–1.5','1 以下'], note:'期間內來賓總數 ÷ 會議次數'},
+    {k:'轉換率（6 個月）',       v:247.83, unit:'%',    tiers:[[20.01,10],[10.01,5],[0,0]],
+     label:['20.01% 以上','10.01–20%','10% 以下'], note:'6 個月內入會人數 ÷ 參與會議的來賓數'},
+    {k:'缺席率（6 個月）',       v:0.84,   unit:'%',    low:1, tiers:[[5,15],[10,10],[12,5],[999,0]],
+     label:['少於 5%','5–9.99%','10–11.99%','12% 以上'], note:'越低越好'}
+  ],
+  metrics: [
+    ['分會規模',        '56',     '57',     'up'],
+    ['會員增長（6 個月）','56',     '57',     'up'],
+    ['保留率 %',        '0',      '0',      'flat'],
+    ['引薦數／週',      '0.39',   '0.34',   'down'],
+    ['來賓數／週',      '2.38',   '1.77',   'down'],
+    ['轉換率 %',        '294.74', '247.83', 'down'],
+    ['缺席率 %',        '0.47',   '0.84',   'down'],
+    ['分會得分',        '70',     '65',     'down']
+  ]
+};
+
+const scoreAbsent = a => a===0?20 : a===1?15 : a===2?10 : 0;
+const byRate = (val, tiers) => tiers.reduce((s,[t,p]) => val >= t-1e-9 ? p : s, 0);
+
+function scoreOf(m){
+  const W = m.weeks || 1;
+  return {
+    absent: scoreAbsent(m.A),
+    ref   : byRate(m.RG / W, TIER.ref),
+    vis   : byRate(m.V / W * 4, TIER.vis),
+    o2o   : byRate(m.O2O / W, TIER.o2o),
+    ceu   : byRate(m.CEU, TIER.ceu),
+    tyfcb : byRate(m.TYFCB, TIER.tyfcb)
+  };
+}
+const lightOf = t => t >= GREEN ? 'green' : t >= AMBER ? 'amber' : t >= RED ? 'red' : 'grey';
+const LIGHT = {
+  green:{name:'綠燈', cls:'tone-green', color:'--green-line'},
+  amber:{name:'黃燈', cls:'tone-amber', color:'--amber-line'},
+  red  :{name:'紅燈', cls:'tone-red',   color:'--red-line'},
+  grey :{name:'黑燈', cls:'tone-grey',  color:'--grey-line'}
+};
+const nf = n => n.toLocaleString('en-US');
+
+/* ---------- 下一步建議：找出補到綠燈最省力的組合 ---------- */
+const COST = {ref:3, vis:14, o2o:2, ceu:1, tyfcb:3};   // 每一單位的相對力氣
+function optionsFor(m, sc){
+  const W = m.weeks || 1, out = [];
+  const push = (key,gain,need,text,detail) => {
+    if (gain <= 0 || need <= 0) return;
+    out.push({key, gain, need, text, detail, cost: need * COST[key] / gain});
+  };
+  TIER.ref.forEach(([r,p]) => push('ref', p - sc.ref, Math.ceil(r*W - 1e-9) - m.RG,
+    `再給出 N 件引薦`, `目前 ${m.RG} 件，每週 ${(m.RG/W).toFixed(2)} 件`));
+  TIER.vis.forEach(([r,p]) => push('vis', p - sc.vis, Math.ceil(r*W/4 - 1e-9) - m.V,
+    `再帶 N 位來賓`, `目前 ${m.V} 位`));
+  TIER.o2o.forEach(([r,p]) => push('o2o', p - sc.o2o, Math.ceil(r*W - 1e-9) - m.O2O,
+    `再約 N 次一對一`, `目前 ${m.O2O} 次，每週 ${(m.O2O/W).toFixed(2)} 次`));
+  TIER.ceu.forEach(([t,p]) => push('ceu', p - sc.ceu, t - m.CEU,
+    `再上 N 個分會教育單位`, `目前 ${m.CEU} 個`));
+  TIER.tyfcb.forEach(([t,p]) => push('tyfcb', p - sc.tyfcb, Math.ceil((t - m.TYFCB)/10000),
+    `交易價值再進 N 萬`, `目前 ${nf(m.TYFCB)} 元`));
+  return out;
+}
+function planFor(m, sc, total){
+  const need = GREEN - total;
+  if (need <= 0) return [];
+  const opts = optionsFor(m, sc).sort((a,b) => a.cost - b.cost);
+  const picked = [], used = new Set();
+  let got = 0;
+  for (const o of opts){
+    if (got >= need || picked.length >= 3) break;   // 最多給三步，多了沒人做
+    if (used.has(o.key)) continue;
+    used.add(o.key); picked.push(o); got += o.gain;
+  }
+  // 收尾：能換成同項目較低一階仍夠用的，就換掉，省力氣
+  for (let i = picked.length - 1; i >= 0 && picked.length; i--){
+    const p = picked[i];
+    const smallestEnough = optionsFor(m, sc)
+      .filter(o => o.key === p.key && o.gain < p.gain)
+      .sort((a,b) => a.gain - b.gain)
+      .find(o => got - p.gain + o.gain >= need);
+    if (smallestEnough){
+      got = got - p.gain + smallestEnough.gain;
+      picked[i] = smallestEnough;
+    }
+  }
+  return picked.map(p => ({...p, text: p.text.replace('N', p.need)}));
+}
+
+/* ---------- 組資料 ---------- */
+const M = RAW.map(r => {
+  const m = {no:r[0], name:r[1], weeks:r[2], P:r[3], A:r[4], L:r[5], Med:r[6], S:r[7],
+             RG:r[8], RR:r[9], V:r[10], O2O:r[11], CEU:r[12], TYFCB:r[13]};
+  m.sc = scoreOf(m);
+  m.total = Object.values(m.sc).reduce((a,b) => a+b, 0);
+  m.light = lightOf(m.total);
+  m.plan = planFor(m, m.sc, m.total);
+  m.attend = Math.round((m.P + m.S) / (m.weeks||1) * 100);
+  // 再缺席一次會怎樣
+  const nextTotal = m.total - m.sc.absent + scoreAbsent(m.A + 1);
+  m.riskDrop = m.total - nextTotal;
+  m.riskLight = lightOf(nextTotal);
+  m.shortName = m.name.split(/[\s（(]/)[0];
+  return m;
+}).sort((a,b) => b.total - a.total || a.no - b.no);
+
+/* 週數最多的人＝待滿整個計分區間；比他少代表這半年才入會 */
+const FULL_WEEKS = Math.max(...M.map(m => m.weeks));
+M.forEach(m => {
+  m.isNew = m.weeks < FULL_WEEKS;
+  m.zeroCount = Object.values(m.sc).filter(v => v === 0).length;
+});
+
+/* ---------- 分布條 ---------- */
+const ORDER = ['green','amber','red','grey'];
+const counts = Object.fromEntries(ORDER.map(k => [k, M.filter(m => m.light===k).length]));
+document.getElementById('distBar').innerHTML = ORDER.map(k => {
+  const pct = counts[k] / M.length * 100;
+  return `<div class="dist-seg" style="width:${pct}%;background:var(${LIGHT[k].color})">${pct >= 9 ? Math.round(pct)+'%' : ''}</div>`;
+}).join('');
+document.getElementById('distLegend').innerHTML = ORDER.map(k => {
+  const d = CHAPTER.delta[k];
+  const tail = d === 0 ? '' : ` <span class="num" style="color:var(--text-3)">(${d > 0 ? '+' : ''}${d})</span>`;
+  return `<span><i class="dot" style="background:var(${LIGHT[k].color})"></i>${LIGHT[k].name} <b class="num">${counts[k]}</b> 人${tail}</span>`;
+}).join('');
+const greenPct = Math.round(counts.green / M.length * 100);
+const gyPct = Math.round((counts.green + counts.amber) / M.length * 100);
+const avg = M.reduce((a,m) => a + m.total, 0) / M.length;
+const avgLight = lightOf(avg);
+const needGreen = Math.ceil(M.length * 0.6) - counts.green;   // 綠燈目標 60%
+const needAmber = M.length - counts.green - counts.amber;     // 綠 60 + 黃 40 = 全員至少黃燈
+
+const chapLight = lightOf(CHAPTER.score);
+const chapDiff = CHAPTER.score - CHAPTER.prevScore;
+const arrow = d => d > 0 ? `▲ +${d}` : d < 0 ? `▼ ${d}` : '—';
+
+document.getElementById('chapterStats').innerHTML = `
+  <div class="stat s-${chapLight}">
+    <p class="stat-label">分會得分 · BNI 官方</p>
+    <div class="stat-value">${CHAPTER.score}<small>分 · ${LIGHT[chapLight].name}</small></div>
+    <p class="stat-note">上月 <b>${CHAPTER.prevScore}</b> 分　${arrow(chapDiff)}</p>
+  </div>
+  <div class="stat s-green">
+    <p class="stat-label">綠燈比例</p>
+    <div class="stat-value">${greenPct}<small>% · 目標 60%</small></div>
+    <p class="stat-note">還要再 <b>${needGreen}</b> 人變綠燈才達標</p>
+  </div>
+  <div class="stat s-amber">
+    <p class="stat-label">綠燈加黃燈</p>
+    <div class="stat-value">${gyPct}<small>% · 上月 ${CHAPTER.prevGyPct}%</small></div>
+    <p class="stat-note">還有 <b>${needAmber}</b> 人在紅燈或黑燈</p>
+  </div>`;
+
+document.getElementById('goalNote').innerHTML =
+  `分會目標是<b>綠燈 60%、黃燈 40%</b>——換句話說，紅燈跟黑燈這兩格本來應該是空的，現在有 `+
+  `<b class="num">${counts.red + counts.grey}</b> 人。本月會員得分<b>上升 ${CHAPTER.moves.up} 人、`+
+  `下降 ${CHAPTER.moves.down} 人、持平 ${CHAPTER.moves.flat} 人、新進 ${CHAPTER.moves.joined} 人</b>。`;
+
+/* ---------- 卡片牆 ---------- */
+let filter = 'all', query = '';
+document.getElementById('filters').innerHTML =
+  [['all','全部'],...ORDER.map(k => [k, LIGHT[k].name])]
+  .map(([k,label]) => `<button class="chip" data-f="${k}" aria-pressed="${k==='all'}">${label}${k!=='all'?` ${counts[k]}`:''}</button>`)
+  .join('');
+
+function render(){
+  const list = M.filter(m =>
+    (filter === 'all' || m.light === filter) &&
+    (!query || m.name.toLowerCase().includes(query))
+  );
+  document.getElementById('count').textContent = `顯示 ${list.length} 人`;
+  document.getElementById('grid').innerHTML = list.map(m => {
+    const L = LIGHT[m.light];
+    const gap = m.total >= GREEN
+      ? `<span class="gap">已達綠燈</span>`
+      : `<span class="gap">離綠燈 <b>${GREEN - m.total}</b> 分</span>`;
+    const aria = `${m.shortName}，${L.name}，${m.total} 分，${m.total >= GREEN ? '已達綠燈' : `離綠燈 ${GREEN - m.total} 分`}`;
+    return `<button class="card ${L.cls}" data-name="${m.name}" aria-label="${aria}">
+      <div class="card-top"><span class="name">${m.shortName}</span><span class="rank num">#${m.no}</span></div>
+      <div class="score num">${m.total}<small>/100</small></div>
+      <div class="card-bot"><span class="pill">${L.name}</span>${gap}</div>
+    </button>`;
+  }).join('') || `<p class="empty">找不到這個名字。</p>`;
+}
+document.getElementById('q').addEventListener('input', e => { query = e.target.value.trim().toLowerCase(); render(); });
+document.getElementById('filters').addEventListener('click', e => {
+  const b = e.target.closest('[data-f]'); if (!b) return;
+  filter = b.dataset.f;
+  [...document.querySelectorAll('[data-f]')].forEach(x => x.setAttribute('aria-pressed', x === b));
+  render();
+});
+render();
+
+/* ---------- 個人明細 ---------- */
+const METRICS = [
+  {key:'absent', name:'出席（看缺席次數）', max:20, unit:'次',
+   cur:m => `缺席 ${m.A} 次`},
+  {key:'ref', name:'提供引薦', max:20, unit:'件',
+   cur:m => `目前 ${m.RG} 件，每週 ${(m.RG/m.weeks).toFixed(2)} 件`},
+  {key:'vis', name:'帶來賓', max:15, unit:'位',
+   cur:m => `目前 ${m.V} 位，每 4 週 ${(m.V/m.weeks*4).toFixed(2)} 位`},
+  {key:'o2o', name:'一對一會面', max:15, unit:'次',
+   cur:m => `目前 ${m.O2O} 次，每週 ${(m.O2O/m.weeks).toFixed(2)} 次`},
+  {key:'ceu', name:'分會教育單位', max:15, unit:'個',
+   cur:m => `目前 ${m.CEU} 個`},
+  {key:'tyfcb', name:'交易價值', max:15, unit:'萬',
+   cur:m => `目前 ${nf(m.TYFCB)} 元`}
+];
+
+/* 每一項的狀態：滿分 / 還能加 / 完全沒分 / 補不回來 */
+function metricState(m, def){
+  const got = m.sc[def.key];
+  const next = optionsFor(m, m.sc)
+    .filter(o => o.key === def.key)
+    .sort((a,b) => a.gain - b.gain)[0] || null;
+  const cls = !next ? (got === def.max ? 'is-max' : 'is-lost')
+                    : (got === 0 ? 'is-zero' : 'is-part');
+  return {got, next, cls, headroom: next ? def.max - got : 0};
+}
+
+function openSheet(name){
+  const m = M.find(x => x.name === name); if (!m) return;
+  const L = LIGHT[m.light];
+  const rows = METRICS.map(def => ({def, st: metricState(m, def)}));
+  const canGain = rows.filter(r => r.st.next).sort((a,b) => b.st.headroom - a.st.headroom);
+  const settled = rows.filter(r => !r.st.next);
+
+  const drawRow = ({def, st}) => {
+    const {got, next, cls} = st;
+    const tick = next ? `<u style="left:min(calc(${(got + next.gain) / def.max * 100}% - 1px), calc(100% - 2px))"></u>` : '';
+    const badge = next ? `+${next.gain}` : (cls === 'is-max' ? '滿分' : '補不回來');
+    const hint = next
+      ? `<b>${next.text.replace('N', next.need)}就 +${next.gain} 分</b>`
+      : (cls === 'is-max' ? '已經是最高階' : '缺席的分數補不回來，剩下的守住');
+    return `<div class="metric ${cls}">
+      <span class="metric-name">${def.name}</span>
+      <span class="metric-val"><b>${got}</b> / ${def.max} 分<em class="mstat">${badge}</em></span>
+      <span class="track"><i style="width:${got / def.max * 100}%"></i>${tick}</span>
+      <span class="metric-note">${def.cur(m)}　·　${hint}</span>
+    </div>`;
+  };
+
+  const metrics =
+    (canGain.length ? `<div class="mgroup"><p class="mgroup-title">還能加分的 ${canGain.length} 項</p>${canGain.map(drawRow).join('')}</div>` : '') +
+    (settled.length ? `<div class="mgroup"><p class="mgroup-title">這幾項不用再花力氣</p>${settled.map(drawRow).join('')}</div>` : '');
+
+  const ladder = (() => {
+    if (m.total >= GREEN) return `<p class="ok-note">已經是綠燈，六項分數維持住就好。</p>`;
+    if (!m.plan.length)   return `<p class="ok-note">六項都在最高階，分數已經滿了。</p>`;
+    let acc = m.total;
+    const steps = m.plan.map((p, i) => {
+      acc += p.gain;
+      const lt = lightOf(acc), reached = lt === 'green';
+      return `<div class="rung ${reached ? 'rung-goal' : 'rung-step'} r-${lt}">
+        <span class="rung-mark">${reached ? '✓' : i + 1}</span>
+        <span class="rung-body">${p.text}<small>${p.detail}</small></span>
+        <span class="rung-after"><b>${acc}</b> 分<em class="rung-pill">${LIGHT[lt].name}</em></span>
+      </div>`;
+    }).join('');
+    const done = acc >= GREEN;
+    const note = done
+      ? `每做完一件就<b>立刻加分</b>，不用等全部做完。做到第 ${m.plan.length} 件的那一刻就是綠燈。`
+      : `每做完一件就<b>立刻加分</b>。這 ${m.plan.length} 件全做完會到 ${acc} 分（${LIGHT[lightOf(acc)].name}），先往上跨一階再說。`;
+    return `<div class="ladder">
+        <div class="rung rung-now r-${m.light}">
+          <span class="rung-mark">●</span>
+          <span class="rung-body">現在</span>
+          <span class="rung-after"><b>${m.total}</b> 分<em class="rung-pill">${L.name}</em></span>
+        </div>${steps}
+      </div>
+      <p class="ladder-note">${note}</p>`;
+  })();
+
+  const risk = (() => {
+    if (m.riskDrop <= 0) return '';                       // 已經扣到底，沒有更低了
+    const drops = m.riskLight !== m.light;
+    if (m.A === 0){                                       // 全勤：是恭喜加提醒，不是警告
+      return drops
+        ? `<div class="note note-watch">這 ${m.weeks} 週<b>一次都沒缺席</b>，出席這項拿滿 20 分。
+             這 6 個月裡只要缺 1 次就少 5 分，會從${L.name}掉到${LIGHT[m.riskLight].name}。</div>`
+        : `<div class="note note-ok">這 ${m.weeks} 週<b>一次都沒缺席</b>，出席這項拿滿 20 分。缺席補不回來，這 20 分要守住。</div>`;
+    }
+    return `<div class="note note-warn">已經缺席 <b>${m.A}</b> 次。再缺 1 次會少 ${m.riskDrop} 分`
+         + (drops ? `，從${L.name}掉到${LIGHT[m.riskLight].name}。` : `。`) + `</div>`;
+  })();
+
+  document.getElementById('sheet').className = `sheet ${L.cls}`;
+  document.getElementById('sheet').innerHTML = `
+    <div class="sheet-head">
+      <div class="row">
+        <div>
+          <h2 class="sheet-name" id="sheetName">${m.name}</h2>
+          <p class="sheet-sub">會員編號 ${m.no}　·　這段期間計入 ${m.weeks} 週　·　${
+            m.A === 0 ? '沒缺席過' : `缺席 ${m.A} 次（出席率 ${m.attend}%）`}</p>
+        </div>
+        <div style="display:flex; gap:12px; align-items:flex-start">
+          <div class="sheet-score num">${m.total}<small>${L.name}</small></div>
+          <button class="closebtn" id="closeBtn" aria-label="關閉">×</button>
+        </div>
+      </div>
+    </div>
+    <div class="sheet-body">
+      <div>
+        <p class="sec-title">${m.total >= GREEN ? '守住這幾項' : '最快到綠燈的做法'}</p>
+        <div class="actions">${ladder}</div>
+        ${risk}
+      </div>
+      <div>
+        <p class="sec-title">六項分數，哪裡還有空間</p>
+        ${metrics}
+      </div>
+    </div>`;
+  document.getElementById('overlay').hidden = false;
+  document.getElementById('closeBtn').focus();
+}
+function closeSheet(){ document.getElementById('overlay').hidden = true; }
+document.addEventListener('click', e => {
+  const card = e.target.closest('[data-name]');
+  if (card) return openSheet(card.dataset.name);
+  if (e.target.id === 'overlay' || e.target.id === 'closeBtn') closeSheet();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+
+/* ---------- 導師協調人：要盯的人 ---------- */
+const nearGreen = M.filter(m => m.light === 'amber' && GREEN - m.total <= 10)
+                   .sort((a,b) => (GREEN-a.total) - (GREEN-b.total));
+const willDrop  = M.filter(m => m.riskLight !== m.light && m.light !== 'grey')
+                   .sort((a,b) => b.total - a.total);
+// 灰燈：待滿整個區間還在灰燈的排前面，那才是真的需要有人去找他
+const greyList  = M.filter(m => m.light === 'grey')
+                   .sort((a,b) => (a.isNew - b.isNew) || (a.total - b.total));
+const easyWin   = M.filter(m => m.light === 'red')
+                   .map(m => ({...m, effort: m.plan[0] ? m.plan[0].need * COST[m.plan[0].key] : 1e9}))
+                   .sort((a,b) => a.effort - b.effort).slice(0, 10);
+
+function listBlock(title, sub, arr, why){
+  const rows = arr.length ? arr.map(m => {
+    const {tag, how} = why(m);
+    return `<button class="li ${LIGHT[m.light].cls}" data-name="${m.name}" aria-label="${m.shortName}，${m.total} 分，${tag}，${how.replace(/<[^>]+>/g,'')}">
+      <span class="li-score num">${m.total}</span>
+      <span class="li-name">${m.shortName}</span>
+      <span class="li-tag">${tag}</span>
+      <span class="li-how">${how}</span>
+    </button>`;
+  }).join('') : `<p class="empty">目前沒有人在這一類。</p>`;
+  return `<div class="list"><div class="list-head"><h3>${title}</h3><p>${sub}</p></div><div class="list-body">${rows}</div></div>`;
+}
+document.getElementById('lists').innerHTML =
+  listBlock('黑燈，最需要有人陪的一群', `${greyList.length} 人。黑燈通常不是不努力，是已經跟分會脫節了，先有人去找他比給他目標有用。`, greyList,
+            m => ({
+              tag: m.isNew ? `入會 ${m.weeks} 週` : '整個區間都在',
+              how: m.isNew
+                ? `才來 ${m.weeks} 週，分數低是正常的。先陪他把${m.plan[0] ? m.plan[0].text.replace(/^再/, '') : '基本盤'}做起來`
+                : `待滿 ${m.weeks} 週還是黑燈，六項裡有 <b>${m.zeroCount} 項掛零</b>。${m.plan[0] ? `最容易起步的是：${m.plan[0].text}` : ''}`
+            })) +
+  listBlock('差一點就綠燈', `${nearGreen.length} 人，只差 10 分以內。推這幾位最快看到成效。`, nearGreen,
+            m => ({
+              tag: `差 ${GREEN - m.total} 分`,
+              how: m.plan.length === 1
+                ? `<b>做這 1 件就綠燈：</b>${m.plan[0].text}`
+                : `到綠燈要 ${m.plan.length} 件事，<b>第一件：</b>${m.plan[0].text}（先做完就 +${m.plan[0].gain} 分）`
+            })) +
+  listBlock('再缺席一次就掉燈', `${willDrop.length} 人。缺席分數補不回來，掉了就是掉了。`, willDrop,
+            m => ({
+              tag: `會掉到${LIGHT[m.riskLight].name}`,
+              how: `現在 ${m.total} 分${m.A === 0 ? '、全勤' : `、已缺席 ${m.A} 次`}，再缺 1 次就少 ${m.riskDrop} 分`
+            })) +
+  listBlock('紅燈裡最省力就能加分的', `紅燈的 ${counts.red} 人裡，花最少力氣就能往上跨一階的 ${easyWin.length} 位。`, easyWin,
+            m => ({
+              tag: m.plan[0] ? `+${m.plan[0].gain} 分` : '—',
+              how: m.plan[0] ? `<b>${m.plan[0].text}</b>　${m.plan[0].detail}` : ''
+            }));
+
+/* ---------- 計分規則 ---------- */
+const RULE_CARDS = [
+  {t:'出席（缺席次數）', s:'滿分 20 分　缺席只會扣，補不回來', rows:[['沒缺席','20'],['缺席 1 次','15'],['缺席 2 次','10'],['缺席 3 次以上','0']]},
+  {t:'提供引薦', s:'滿分 20 分　算每週平均（分會內外都算）', rows:[['每週 1.5 件以上','20'],['每週 1.2 件以上','15'],['每週 1 件以上','10'],['每週 0.75 件以上','5'],['低於 0.75 件','0']]},
+  {t:'帶來賓', s:'滿分 15 分　算每 4 週平均', rows:[['每 4 週 2 位以上','15'],['每 4 週 1 位以上','10'],['不到 1 位','0']]},
+  {t:'一對一會面', s:'滿分 15 分　算每週平均', rows:[['每週 2 次以上','15'],['每週 1 次以上','10'],['每週 0.5 次以上','5'],['低於 0.5 次','0']]},
+  {t:'分會教育單位', s:'滿分 15 分　看累計個數', rows:[['6 個以上','15'],['4 個以上','10'],['2 個以上','5'],['0 到 1 個','0']]},
+  {t:'交易價值', s:'滿分 15 分　看累計金額', rows:[['200 萬以上','15'],['80 萬以上','10'],['40 萬以上','5'],['不到 40 萬','0']]}
+];
+document.getElementById('rules').innerHTML =
+  RULE_CARDS.map(c => `<div class="rule"><h3>${c.t}</h3><p class="sub">${c.s}</p><table><tbody>${
+    c.rows.map(([a,b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join('')}</tbody></table></div>`).join('') +
+  `<div class="rule-foot">
+     六項加起來滿分 100 分。<b>70 分以上綠燈、50 到 65 分黃燈、30 到 45 分紅燈、25 分以下黑燈。</b><br>
+     分數是<b>往前算 6 個月</b>的累計，不是單月。每週平均的分母是這 6 個月裡實際計入的週數，
+     新入會的人週數比較少，不會因為入會晚就吃虧。<br>
+     這套規則是從主席副主席那張表的第二個分頁還原出來的，
+     拿全分會 57 人重算，<b>每個人的六項分數與總分都跟原表完全一致</b>。
+   </div>
+   <div class="rule-foot">
+     <b>分會得分和個人得分是兩套，不要混在一起。</b>
+     上面那六項算的是「每一位會員」的分數。頁面最上方那個 <b>${CHAPTER.score} 分</b>
+     是 BNI 官方《分會紅綠燈計算方式》給整個分會的成績，看的是下面這七項，跟個人六項無關。
+     <div class="mtable-wrap"><table class="mtable">
+       <thead><tr><th>官方指標</th><th>15 分</th><th>10 分</th><th>5 分</th><th>0 分</th></tr></thead>
+       <tbody>${CHAPTER.official.map(m => {
+         const cells = m.label.length === 3
+           ? ['—', m.label[0], m.label[1], m.label[2]]   // 轉換率只有三階，最高 10 分
+           : m.label;
+         return `<tr><td>${m.k}</td>${cells.map(c => `<td class="num" style="text-align:right">${c}</td>`).join('')}</tr>`;
+       }).join('')}
+       </tbody>
+     </table></div>
+     <p style="margin:10px 0 0">七項加起來滿分 100 分（轉換率只有三階、最高 10 分）。
+     <b>70 分以上就是綠燈分會。</b>缺席率那一列是越低越好。
+     這張表是 BNI Accelerate 官方版本，拿全區 25 個分會兩個月共 50 筆資料驗證過，45 筆完全命中。
+     這七個數字不在會員成績表裡，要另外從分會紅綠燈報告帶進來。</p>
+   </div>`;
+
+/* ---------- tabs ---------- */
+/* ---------- 怎麼上綠燈分會（依 BNI 官方計分表） ---------- */
+(() => {
+  const O = CHAPTER.official;
+  const pts = m => {
+    for (const [th, p] of m.tiers) if (m.low ? m.v < th : m.v >= th) return p;
+    return 0;
+  };
+  const maxOf = m => Math.max(...m.tiers.map(t => t[1]));
+  const total = O.reduce((a, m) => a + pts(m), 0);
+  const ceilingNow = O.reduce((a, m) => a + (m.k.startsWith('保留率') ? 0 : maxOf(m)), 0);
+
+  const rows = O.map(m => {
+    const got = pts(m), max = maxOf(m), full = got === max;
+    // 下一階：分數比現在高、且最接近的一階
+    const up = [...m.tiers].filter(t => t[1] > got).sort((a, b) => a[1] - b[1])[0];
+    const cls = full ? 'v-good' : got === 0 ? 'v-bad' : 'v-mid';
+    const tag = full ? '滿分' : got === 0 ? '掛零' : `還能 +${up[1] - got}`;
+    const idx = m.tiers.findIndex(t => t[1] === got);
+    return `<tr>
+      <td>${m.k}<div style="font-size:12px;color:var(--text-3);margin-top:1px">${m.note}</div></td>
+      <td class="n">${m.v}${m.unit}</td>
+      <td>${m.label[idx] || '—'}</td>
+      <td class="n"><b>${got}</b> / ${max}</td>
+      <td><span class="verdict ${cls}">${tag}</span></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('chapterPanel').innerHTML = `
+    <div class="cbox">
+      <h3>只差一件事就是綠燈分會</h3>
+      <p class="sub">依 BNI 官方《分會紅綠燈計算方式》七項逐格對出來的：
+        華都更現在 <b>${total} 分</b>，七項裡<b>四項已經滿分</b>。
+        上個月 70 分掉到 65，<b>唯一變動的是來賓</b>——每週從 2.38 掉到 1.77，就這一項少了 5 分。</p>
+      <div class="target" style="border-bottom:0;padding-top:4px">
+        <span class="target-num" style="background:var(--green-line)">✓</span>
+        <div>
+          <p class="target-h">每週來賓數從 1.77 拉回 2.01 以上 → 直接 70 分</p>
+          <p class="target-b">6 個月的來賓總數要到 <b>27 位</b>，現在約 23 位，<b>整個分會再多帶 4 位就到了</b>。<br>
+            這是七項裡唯一「花小力氣就能跨階」的一格——其他能加分的兩項都做不到或來不及（往下看）。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="cbox">
+      <h3>七項逐格對照</h3>
+      <div class="ctable-wrap"><table class="ctable">
+        <thead><tr><th>官方指標</th><th style="text-align:right">我們的數字</th><th>落在哪一格</th><th style="text-align:right">得分</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+      <p class="sub" style="margin:14px 0 0">滿分 100 分（轉換率只有三階、最高 10 分，其餘六項各 15 分）。
+        <b>70 分以上就是綠燈分會，全區 25 家目前只有 5 家做到。</b></p>
+    </div>
+
+    <div class="cbox">
+      <h3>另外兩項為什麼先不用碰</h3>
+      <div class="target">
+        <span class="target-num" style="background:var(--grey-line)">－</span>
+        <div>
+          <p class="target-h">保留率：現在拿不到，不是我們不努力</p>
+          <p class="target-b">官方定義是「<b>入會滿 12 個月</b>的會員裡有多少還留在 BNI」。
+            我們的「會員成長 6 個月」是 <b>57</b>，剛好等於全部人數——代表 6 個月前分會人數是 0，
+            <b>華都更是新分會，還沒有任何人入會滿 12 個月</b>，所以這格結構性為 0。<br>
+            也就是說<b>現階段的天花板是 ${ceilingNow} 分不是 100 分</b>。
+            等分會滿 12 個月，這 15 分才會開始計算，那時候才輪到「留人」這件事。</p>
+        </div>
+      </div>
+      <div class="target">
+        <span class="target-num" style="background:var(--amber-line)">△</span>
+        <div>
+          <p class="target-h">引薦：這一輪追不上，但值得長期做</p>
+          <p class="target-b">現在每人每週 <b>0.34 件</b>，下一階門檻是 0.71，要 <b>+5 分</b>。
+            換算下來 6 個月要 527 件，我們現在 253 件，<b>差 274 件、平均每人多給 4.8 件</b>。<br>
+            比起「全分會多帶 4 位來賓」，這條路難太多。先拿來賓那 5 分，引薦當下一季的目標。</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="caveat"><b>這頁的計分表是 BNI Accelerate 官方版本。</b>
+      拿全區 25 個分會、兩個月共 50 筆實際資料回推驗證，<b>45 筆完全命中</b>，
+      華都更 6 月的 70 分與 7 月的 65 分都逐項對得起來，可以直接照這個算。
+      （5 筆對不上的分會差 5～10 分，推測是區報告顯示的數字四捨五入後跨過門檻。）</p>`;
+})();
+
+/* ---------- 更新資料 ---------- */
+document.getElementById('uploadPanel').innerHTML = `
+  <div class="cbox">
+    <h3>這個月的資料是誰更新的</h3>
+    <p class="sub">目前是 <b>第一階段</b>：頁面已經上線可以用，但自助上傳還沒接。
+      這個月（2026 年 7 月）的數字由資訊組匯入，<b>下個月的更新一樣由資訊組處理，九長不用做任何事</b>。</p>
+  </div>
+
+  <div class="drop">
+    <div class="drop-icon">📄</div>
+    <h3>第二階段會長這樣</h3>
+    <p>接上去以後，主席、副主席、導師協調人誰有空誰做，整件事 2 分鐘</p>
+    <div class="drop-row">
+      <button class="btn ghost" id="pickFile" disabled style="opacity:.5;cursor:default">選擇檔案</button>
+      <input class="pw" type="password" placeholder="分會共用密碼" aria-label="分會共用密碼" disabled style="opacity:.5">
+      <button class="btn" id="doUpload" disabled style="opacity:.5;cursor:default">更新這個月的資料</button>
+    </div>
+    <p class="fake" id="uploadMsg">這一區還沒接上，按了不會有反應。接好之後會直接通知九長。</p>
+  </div>
+
+  <div class="cbox" style="margin-top:16px">
+    <h3>接好之後每個月要做的事，就這三步</h3>
+    <div class="steps">
+      <div class="step"><span class="step-n">1</span><span class="step-t">到 BNI 官方系統下載兩個檔<small>會員成績表（算個人分數）＋ 分會紅綠燈報告（拿分會分數）</small></span></div>
+      <div class="step"><span class="step-n">2</span><span class="step-t">回到這一頁，把兩個檔拉進上面那個框，輸入分會共用密碼<small>密碼是分會共用的，不綁個人帳號</small></span></div>
+      <div class="step"><span class="step-n">3</span><span class="step-t">按「更新這個月的資料」<small>分數、燈號、要關心的名單全部自動重算，舊的月份留著看趨勢</small></span></div>
+    </div>
+    <p class="sub" style="margin:14px 0 0">拉錯檔案會當場說哪裡不對，<b>不會把現有資料蓋掉</b>。</p>
+  </div>
+`;
+
+document.getElementById('uploadPanel').addEventListener('click', e => {
+  if (e.target.id === 'pickFile' || e.target.id === 'doUpload') {
+    document.getElementById('uploadMsg').textContent =
+      '這是示範畫面，還沒接上真的上傳。正式版按下去 2 秒內整頁就是新的月份。';
+  }
+});
+
+document.querySelector('.tabs').addEventListener('click', e => {
+  const t = e.target.closest('.tab'); if (!t) return;
+  document.querySelectorAll('.tab').forEach(x => {
+    const on = x === t;
+    x.setAttribute('aria-selected', on);
+    document.getElementById(x.getAttribute('aria-controls')).hidden = !on;
+  });
+});
+</script>
+
+</body>
+</html>
