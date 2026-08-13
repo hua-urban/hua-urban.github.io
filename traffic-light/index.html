@@ -390,11 +390,6 @@ h1{font-size:clamp(26px,4vw,34px); line-height:1.2; letter-spacing:-.02em; margi
 }
 .btn.ghost{background:var(--surface); color:var(--accent)}
 .btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
-.pw{
-  padding:10px 14px; font:inherit; font-size:14px; width:200px;
-  border:1px solid var(--border); border-radius:9px; background:var(--surface); color:var(--text);
-}
-.pw:focus{outline:2px solid var(--accent); outline-offset:-1px}
 .steps{display:grid; gap:0; margin-top:6px}
 .step{display:grid; grid-template-columns:auto 1fr; gap:12px 14px; padding:12px 0; border-bottom:1px dashed var(--border)}
 .step:last-child{border-bottom:0}
@@ -1029,8 +1024,7 @@ document.getElementById('uploadPanel').innerHTML = `
     <h3>第二階段會長這樣</h3>
     <p>接上去以後，主席、副主席、導師協調人誰有空誰做，整件事 2 分鐘</p>
     <div class="drop-row">
-      <button class="btn ghost" id="pickFile" disabled style="opacity:.5;cursor:default">選擇檔案</button>
-      <input class="pw" type="password" placeholder="分會共用密碼" aria-label="分會共用密碼" disabled style="opacity:.5">
+      <button class="btn ghost" id="pickFile" disabled style="opacity:.5;cursor:default">選擇兩個檔</button>
       <button class="btn" id="doUpload" disabled style="opacity:.5;cursor:default">更新這個月的資料</button>
     </div>
     <p class="fake" id="uploadMsg">這一區還沒接上，按了不會有反應。接好之後會直接通知九長。</p>
@@ -1040,10 +1034,17 @@ document.getElementById('uploadPanel').innerHTML = `
     <h3>接好之後每個月要做的事，就這三步</h3>
     <div class="steps">
       <div class="step"><span class="step-n">1</span><span class="step-t">到 BNI 官方系統下載兩個檔<small>會員成績表（算個人分數）＋ 分會紅綠燈報告（拿分會分數）</small></span></div>
-      <div class="step"><span class="step-n">2</span><span class="step-t">回到這一頁，把兩個檔拉進上面那個框，輸入分會共用密碼<small>密碼是分會共用的，不綁個人帳號</small></span></div>
+      <div class="step"><span class="step-n">2</span><span class="step-t">回到這一頁，把兩個檔拉進上面那個框<small>第一次會請你用自己的 Google 帳號按一下允許，之後就不用了</small></span></div>
       <div class="step"><span class="step-n">3</span><span class="step-t">按「更新這個月的資料」<small>分數、燈號、要關心的名單全部自動重算，舊的月份留著看趨勢</small></span></div>
     </div>
     <p class="sub" style="margin:14px 0 0">拉錯檔案會當場說哪裡不對，<b>不會把現有資料蓋掉</b>。</p>
+  </div>
+
+  <div class="cbox">
+    <h3>誰可以更新</h3>
+    <p class="sub">上傳會覆蓋整個分會的資料，所以不能誰都能傳。做法是<b>指定幾個 Google 帳號有權限</b>——
+      預計是主席、副主席、導師協調人加資訊組，名單隨時可以改。<br>
+      <b>不會有共用密碼。</b>用各自的 Google 帳號按一下允許就好，沒有人需要記住或保管任何密碼。</p>
   </div>
 `;
 
