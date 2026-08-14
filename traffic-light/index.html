@@ -305,6 +305,12 @@ h1{font-size:clamp(26px,4vw,34px); line-height:1.2; letter-spacing:-.02em; margi
 .li-how{grid-column:2/-1; font-size:12.5px; color:var(--text-2); line-height:1.5}
 .li-how b{color:var(--text); font-weight:600}
 .empty{padding:16px 17px; font-size:13.5px; color:var(--text-3)}
+.hint{
+  grid-column:1/-1; margin:0; padding:44px 24px; text-align:center; line-height:1.9;
+  background:var(--surface); border:1px dashed var(--border); border-radius:12px;
+}
+.hint b{display:block; font-size:15px; font-weight:600; color:var(--text)}
+.hint span{font-size:13px; color:var(--text-3)}
 
 /* ---------- rules ---------- */
 .rules{display:grid; grid-template-columns:repeat(auto-fit,minmax(272px,1fr)); gap:14px}
@@ -444,7 +450,7 @@ h1{font-size:clamp(26px,4vw,34px); line-height:1.2; letter-spacing:-.02em; margi
     <p class="eyebrow">BNI 華都更 Hua Urban+</p>
     <h1>會員紅綠燈<span class="demo-tag">2026 年 7 月</span></h1>
     <p class="period">計分期間 <b>2026-02-01 – 2026-07-31</b>　往前算 6 個月的累計，每月更新一次就往前滾一個月</p>
-    <p class="scope"><b>這頁給導師協調人與各組組長看。</b>面談時可以打開當事人那一頁給他本人看，整份不對全體公開。</p>
+    <p class="scope"><b>這頁給導師協調人與各組組長看。</b>不對全體公開。</p>
 
     <div class="dist">
       <div class="dist-bar" id="distBar"></div>
@@ -455,7 +461,7 @@ h1{font-size:clamp(26px,4vw,34px); line-height:1.2; letter-spacing:-.02em; margi
   </header>
 
   <div class="tabs" role="tablist">
-    <button class="tab" role="tab" aria-selected="true" aria-controls="p-all" id="t-all">全分會 57 人</button>
+    <button class="tab" role="tab" aria-selected="true" aria-controls="p-all" id="t-all">查會員</button>
     <button class="tab" role="tab" aria-selected="false" aria-controls="p-watch" id="t-watch">導師協調要關心的人</button>
     <button class="tab" role="tab" aria-selected="false" aria-controls="p-chapter" id="t-chapter">怎麼上綠燈分會</button>
     <button class="tab" role="tab" aria-selected="false" aria-controls="p-rules" id="t-rules">分數怎麼算</button>
@@ -464,7 +470,7 @@ h1{font-size:clamp(26px,4vw,34px); line-height:1.2; letter-spacing:-.02em; margi
 
   <section class="panel" id="p-all" role="tabpanel" aria-labelledby="t-all">
     <div class="searchrow">
-      <input class="search" id="q" type="search" placeholder="打你的名字，例如：瓊安" aria-label="搜尋會員姓名">
+      <input class="search" id="q" type="search" placeholder="輸入姓名，例如：瓊安" aria-label="搜尋會員姓名">
       <div class="filters" id="filters"></div>
       <span class="count" id="count"></span>
     </div>
@@ -709,33 +715,45 @@ document.getElementById('chapterStats').innerHTML = `
   <div class="stat s-green">
     <p class="stat-label">綠燈比例</p>
     <div class="stat-value">${greenPct}<small>% · 目標 60%</small></div>
-    <p class="stat-note">還要再 <b>${needGreen}</b> 人變綠燈才達標</p>
+    <p class="stat-note">距離目標還有 <b>${needGreen}</b> 人</p>
   </div>
   <div class="stat s-amber">
     <p class="stat-label">綠燈加黃燈</p>
     <div class="stat-value">${gyPct}<small>% · 上月 ${CHAPTER.prevGyPct}%</small></div>
-    <p class="stat-note">還有 <b>${needAmber}</b> 人在紅燈或黑燈</p>
+    <p class="stat-note">紅燈與黑燈 <b>${needAmber}</b> 人</p>
   </div>`;
 
 document.getElementById('goalNote').innerHTML =
-  `分會目標是<b>綠燈 60%、黃燈 40%</b>——換句話說，紅燈跟黑燈這兩格本來應該是空的，現在有 `+
+  `分會目標：<b>綠燈 60%、黃燈 40%</b>。目前紅燈與黑燈合計 `+
   `<b class="num">${counts.red + counts.grey}</b> 人。本月會員得分<b>上升 ${CHAPTER.moves.up} 人、`+
   `下降 ${CHAPTER.moves.down} 人、持平 ${CHAPTER.moves.flat} 人、新進 ${CHAPTER.moves.joined} 人</b>。`;
 
 /* ---------- 卡片牆 ---------- */
 let filter = 'all', query = '';
 document.getElementById('filters').innerHTML =
-  [['all','全部'],...ORDER.map(k => [k, LIGHT[k].name])]
+  [['all','清除'],...ORDER.map(k => [k, LIGHT[k].name])]
   .map(([k,label]) => `<button class="chip" data-f="${k}" aria-pressed="${k==='all'}">${label}${k!=='all'?` ${counts[k]}`:''}</button>`)
   .join('');
 
 function render(){
+  const grid = document.getElementById('grid');
+  const cnt = document.getElementById('count');
+
+  // 沒輸入姓名、也沒選燈號時不列出任何人
+  if (!query && filter === 'all'){
+    cnt.textContent = '';
+    grid.innerHTML = `<p class="hint">
+        <b>輸入姓名查個人，或點上方燈號看該組名單。</b>
+        <span>共 ${M.length} 位會員。</span></p>`;
+    return;
+  }
+
   const list = M.filter(m =>
     (filter === 'all' || m.light === filter) &&
     (!query || m.name.toLowerCase().includes(query))
   );
-  document.getElementById('count').textContent = `顯示 ${list.length} 人`;
-  document.getElementById('grid').innerHTML = list.map(m => {
+  cnt.textContent = `顯示 ${list.length} 人`;
+  grid.innerHTML = list.map(m => {
     const L = LIGHT[m.light];
     const gap = m.total >= GREEN
       ? `<span class="gap">已達綠燈</span>`
@@ -794,10 +812,10 @@ function openSheet(name){
   const drawRow = ({def, st}) => {
     const {got, next, cls} = st;
     const tick = next ? `<u style="left:min(calc(${(got + next.gain) / def.max * 100}% - 1px), calc(100% - 2px))"></u>` : '';
-    const badge = next ? `+${next.gain}` : (cls === 'is-max' ? '滿分' : '補不回來');
+    const badge = next ? `+${next.gain}` : (cls === 'is-max' ? '滿分' : '不可回補');
     const hint = next
-      ? `<b>${next.text.replace('N', next.need)}就 +${next.gain} 分</b>`
-      : (cls === 'is-max' ? '已經是最高階' : '缺席的分數補不回來，剩下的守住');
+      ? `<b>${next.text.replace('N', next.need)} → +${next.gain} 分</b>`
+      : (cls === 'is-max' ? '已達最高階' : '缺席分數不可回補');
     return `<div class="metric ${cls}">
       <span class="metric-name">${def.name}</span>
       <span class="metric-val"><b>${got}</b> / ${def.max} 分<em class="mstat">${badge}</em></span>
@@ -807,12 +825,12 @@ function openSheet(name){
   };
 
   const metrics =
-    (canGain.length ? `<div class="mgroup"><p class="mgroup-title">還能加分的 ${canGain.length} 項</p>${canGain.map(drawRow).join('')}</div>` : '') +
-    (settled.length ? `<div class="mgroup"><p class="mgroup-title">這幾項不用再花力氣</p>${settled.map(drawRow).join('')}</div>` : '');
+    (canGain.length ? `<div class="mgroup"><p class="mgroup-title">尚有空間 ${canGain.length} 項</p>${canGain.map(drawRow).join('')}</div>` : '') +
+    (settled.length ? `<div class="mgroup"><p class="mgroup-title">已達上限</p>${settled.map(drawRow).join('')}</div>` : '');
 
   const ladder = (() => {
-    if (m.total >= GREEN) return `<p class="ok-note">已經是綠燈，六項分數維持住就好。</p>`;
-    if (!m.plan.length)   return `<p class="ok-note">六項都在最高階，分數已經滿了。</p>`;
+    if (m.total >= GREEN) return `<p class="ok-note">總分 ${m.total} 分，已達綠燈門檻 70 分。</p>`;
+    if (!m.plan.length)   return `<p class="ok-note">六項都已達最高階。</p>`;
     let acc = m.total;
     const steps = m.plan.map((p, i) => {
       acc += p.gain;
@@ -825,12 +843,12 @@ function openSheet(name){
     }).join('');
     const done = acc >= GREEN;
     const note = done
-      ? `每做完一件就<b>立刻加分</b>，不用等全部做完。做到第 ${m.plan.length} 件的那一刻就是綠燈。`
-      : `每做完一件就<b>立刻加分</b>。這 ${m.plan.length} 件全做完會到 ${acc} 分（${LIGHT[lightOf(acc)].name}），先往上跨一階再說。`;
+      ? `每一項是分開計分的，完成一項就加一次分。`
+      : `這 ${m.plan.length} 項全部完成後為 ${acc} 分（${LIGHT[lightOf(acc)].name}）。`;
     return `<div class="ladder">
         <div class="rung rung-now r-${m.light}">
           <span class="rung-mark">●</span>
-          <span class="rung-body">現在</span>
+          <span class="rung-body">目前</span>
           <span class="rung-after"><b>${m.total}</b> 分<em class="rung-pill">${L.name}</em></span>
         </div>${steps}
       </div>
@@ -842,12 +860,12 @@ function openSheet(name){
     const drops = m.riskLight !== m.light;
     if (m.A === 0){                                       // 全勤：是恭喜加提醒，不是警告
       return drops
-        ? `<div class="note note-watch">這 ${m.weeks} 週<b>一次都沒缺席</b>，出席這項拿滿 20 分。
-             這 6 個月裡只要缺 1 次就少 5 分，會從${L.name}掉到${LIGHT[m.riskLight].name}。</div>`
-        : `<div class="note note-ok">這 ${m.weeks} 週<b>一次都沒缺席</b>，出席這項拿滿 20 分。缺席補不回來，這 20 分要守住。</div>`;
+        ? `<div class="note note-watch">${m.weeks} 週<b>全勤</b>，出席項 20 分（滿分）。
+             此區間內每缺席 1 次減 5 分，減分後為${LIGHT[m.riskLight].name}。</div>`
+        : `<div class="note note-ok">${m.weeks} 週<b>全勤</b>，出席項 20 分（滿分）。</div>`;
     }
-    return `<div class="note note-warn">已經缺席 <b>${m.A}</b> 次。再缺 1 次會少 ${m.riskDrop} 分`
-         + (drops ? `，從${L.name}掉到${LIGHT[m.riskLight].name}。` : `。`) + `</div>`;
+    return `<div class="note note-warn">缺席 <b>${m.A}</b> 次。再缺席 1 次減 ${m.riskDrop} 分`
+         + (drops ? `，減分後為${LIGHT[m.riskLight].name}。` : `。`) + `</div>`;
   })();
 
   document.getElementById('sheet').className = `sheet ${L.cls}`;
@@ -867,12 +885,12 @@ function openSheet(name){
     </div>
     <div class="sheet-body">
       <div>
-        <p class="sec-title">${m.total >= GREEN ? '守住這幾項' : '最快到綠燈的做法'}</p>
+        <p class="sec-title">${m.total >= GREEN ? '目前狀態' : '到綠燈的差距'}</p>
         <div class="actions">${ladder}</div>
         ${risk}
       </div>
       <div>
-        <p class="sec-title">六項分數，哪裡還有空間</p>
+        <p class="sec-title">六項分數</p>
         ${metrics}
       </div>
     </div>`;
@@ -912,26 +930,26 @@ function listBlock(title, sub, arr, why){
   return `<div class="list"><div class="list-head"><h3>${title}</h3><p>${sub}</p></div><div class="list-body">${rows}</div></div>`;
 }
 document.getElementById('lists').innerHTML =
-  listBlock('黑燈，最需要有人陪的一群', `${greyList.length} 人。黑燈通常不是不努力，是已經跟分會脫節了，先有人去找他比給他目標有用。`, greyList,
+  listBlock('黑燈', `${greyList.length} 人，總分 25 分以下。其中 ${greyList.filter(m => !m.isNew).length} 位待滿整個計分區間。`, greyList,
             m => ({
-              tag: m.isNew ? `入會 ${m.weeks} 週` : '整個區間都在',
+              tag: m.isNew ? `入會 ${m.weeks} 週` : '待滿全期',
               how: m.isNew
-                ? `才來 ${m.weeks} 週，分數低是正常的。先陪他把${m.plan[0] ? m.plan[0].text.replace(/^再/, '') : '基本盤'}做起來`
-                : `待滿 ${m.weeks} 週還是黑燈，六項裡有 <b>${m.zeroCount} 項掛零</b>。${m.plan[0] ? `最容易起步的是：${m.plan[0].text}` : ''}`
+                ? `計分週數 ${m.weeks} 週，少於全期 ${FULL_WEEKS} 週${m.plan[0] ? `　·　${m.plan[0].text}` : ''}`
+                : `計分 ${m.weeks} 週，六項中有 <b>${m.zeroCount} 項為 0 分</b>${m.plan[0] ? `　·　${m.plan[0].text}` : ''}`
             })) +
-  listBlock('差一點就綠燈', `${nearGreen.length} 人，只差 10 分以內。推這幾位最快看到成效。`, nearGreen,
+  listBlock('距綠燈 10 分以內', `${nearGreen.length} 人。`, nearGreen,
             m => ({
               tag: `差 ${GREEN - m.total} 分`,
               how: m.plan.length === 1
-                ? `<b>做這 1 件就綠燈：</b>${m.plan[0].text}`
-                : `到綠燈要 ${m.plan.length} 件事，<b>第一件：</b>${m.plan[0].text}（先做完就 +${m.plan[0].gain} 分）`
+                ? `<b>${m.plan[0].text}</b> → 達綠燈`
+                : `需 ${m.plan.length} 項，其一：<b>${m.plan[0].text}</b>（+${m.plan[0].gain} 分）`
             })) +
-  listBlock('再缺席一次就掉燈', `${willDrop.length} 人。缺席分數補不回來，掉了就是掉了。`, willDrop,
+  listBlock('再缺席一次會掉燈', `${willDrop.length} 人。缺席分數不可回補。`, willDrop,
             m => ({
               tag: `會掉到${LIGHT[m.riskLight].name}`,
-              how: `現在 ${m.total} 分${m.A === 0 ? '、全勤' : `、已缺席 ${m.A} 次`}，再缺 1 次就少 ${m.riskDrop} 分`
+              how: `${m.total} 分${m.A === 0 ? '，全勤' : `，缺席 ${m.A} 次`}　·　再缺 1 次減 ${m.riskDrop} 分`
             })) +
-  listBlock('紅燈裡最省力就能加分的', `紅燈的 ${counts.red} 人裡，花最少力氣就能往上跨一階的 ${easyWin.length} 位。`, easyWin,
+  listBlock('紅燈中跨階所需增量最小的', `紅燈 ${counts.red} 人中的 ${easyWin.length} 位。`, easyWin,
             m => ({
               tag: m.plan[0] ? `+${m.plan[0].gain} 分` : '—',
               how: m.plan[0] ? `<b>${m.plan[0].text}</b>　${m.plan[0].detail}` : ''
@@ -939,7 +957,7 @@ document.getElementById('lists').innerHTML =
 
 /* ---------- 計分規則 ---------- */
 const RULE_CARDS = [
-  {t:'出席（缺席次數）', s:'滿分 20 分　缺席只會扣，補不回來', rows:[['沒缺席','20'],['缺席 1 次','15'],['缺席 2 次','10'],['缺席 3 次以上','0']]},
+  {t:'出席（缺席次數）', s:'滿分 20 分　缺席分數不可回補', rows:[['沒缺席','20'],['缺席 1 次','15'],['缺席 2 次','10'],['缺席 3 次以上','0']]},
   {t:'提供引薦', s:'滿分 20 分　算每週平均（分會內外都算）', rows:[['每週 1.5 件以上','20'],['每週 1.2 件以上','15'],['每週 1 件以上','10'],['每週 0.75 件以上','5'],['低於 0.75 件','0']]},
   {t:'帶來賓', s:'滿分 15 分　算每 4 週平均', rows:[['每 4 週 2 位以上','15'],['每 4 週 1 位以上','10'],['不到 1 位','0']]},
   {t:'一對一會面', s:'滿分 15 分　算每週平均', rows:[['每週 2 次以上','15'],['每週 1 次以上','10'],['每週 0.5 次以上','5'],['低於 0.5 次','0']]},
@@ -951,8 +969,8 @@ document.getElementById('rules').innerHTML =
     c.rows.map(([a,b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join('')}</tbody></table></div>`).join('') +
   `<div class="rule-foot">
      六項加起來滿分 100 分。<b>70 分以上綠燈、50 到 65 分黃燈、30 到 45 分紅燈、25 分以下黑燈。</b><br>
-     分數是<b>往前算 6 個月</b>的累計，不是單月。每週平均的分母是這 6 個月裡實際計入的週數，
-     新入會的人週數比較少，不會因為入會晚就吃虧。<br>
+     分數為<b>往前 6 個月</b>的累計，非單月。每週平均的分母是該期間實際計入的週數，
+     新入會者週數較少，計算上不受入會時間影響。<br>
      這套規則是從主席副主席那張表的第二個分頁還原出來的，
      拿全分會 57 人重算，<b>每個人的六項分數與總分都跟原表完全一致</b>。
    </div>
@@ -1006,16 +1024,16 @@ document.getElementById('rules').innerHTML =
 
   document.getElementById('chapterPanel').innerHTML = `
     <div class="cbox">
-      <h3>只差一件事就是綠燈分會</h3>
+      <h3>目前與綠燈分會的差距</h3>
       <p class="sub">依 BNI 官方《分會紅綠燈計算方式》七項逐格對出來的：
-        華都更現在 <b>${total} 分</b>，七項裡<b>四項已經滿分</b>。
-        上個月 70 分掉到 65，<b>唯一變動的是來賓</b>——每週從 2.38 掉到 1.77，就這一項少了 5 分。</p>
+        華都更 <b>${total} 分</b>，七項中四項已達滿分。
+        上月 70 分，本月 65 分，差異來自每週來賓數由 2.38 降至 1.77（該項 15 分降為 10 分）。</p>
       <div class="target" style="border-bottom:0;padding-top:4px">
         <span class="target-num" style="background:var(--green-line)">✓</span>
         <div>
-          <p class="target-h">每週來賓數從 1.77 拉回 2.01 以上 → 直接 70 分</p>
-          <p class="target-b">6 個月的來賓總數要到 <b>27 位</b>，現在約 23 位，<b>整個分會再多帶 4 位就到了</b>。<br>
-            這是七項裡唯一「花小力氣就能跨階」的一格——其他能加分的兩項都做不到或來不及（往下看）。</p>
+          <p class="target-h">每週來賓數達 2.01 以上 → 總分 70 分</p>
+          <p class="target-b">6 個月來賓總數需達 <b>27 位</b>，目前約 23 位，差 <b>4 位</b>。<br>
+            另外兩項可加分的指標，達標所需增量較大，說明如下。</p>
         </div>
       </div>
     </div>
@@ -1026,30 +1044,28 @@ document.getElementById('rules').innerHTML =
         <thead><tr><th>官方指標</th><th style="text-align:right">我們的數字</th><th>落在哪一格</th><th style="text-align:right">得分</th><th></th></tr></thead>
         <tbody>${rows}</tbody>
       </table></div>
-      <p class="sub" style="margin:14px 0 0">滿分 100 分（轉換率只有三階、最高 10 分，其餘六項各 15 分）。
-        <b>70 分以上就是綠燈分會，全區 25 家目前只有 5 家做到。</b></p>
+      <p class="sub" style="margin:14px 0 0">滿分 100 分（轉換率三階、最高 10 分，其餘六項各 15 分）。
+        <b>70 分以上為綠燈分會，全區 25 家中有 5 家。</b></p>
     </div>
 
     <div class="cbox">
-      <h3>另外兩項為什麼先不用碰</h3>
+      <h3>另外兩項的現況</h3>
       <div class="target">
         <span class="target-num" style="background:var(--grey-line)">－</span>
         <div>
-          <p class="target-h">保留率：現在拿不到，不是我們不努力</p>
+          <p class="target-h">保留率：本期不計分</p>
           <p class="target-b">官方定義是「<b>入會滿 12 個月</b>的會員裡有多少還留在 BNI」。
             我們的「會員成長 6 個月」是 <b>57</b>，剛好等於全部人數——代表 6 個月前分會人數是 0，
-            <b>華都更是新分會，還沒有任何人入會滿 12 個月</b>，所以這格結構性為 0。<br>
-            也就是說<b>現階段的天花板是 ${ceilingNow} 分不是 100 分</b>。
-            等分會滿 12 個月，這 15 分才會開始計算，那時候才輪到「留人」這件事。</p>
+            分會成立未滿 12 個月，尚無會員符合此項計算條件，故為 0。<br>
+            <b>現階段總分上限為 ${ceilingNow} 分</b>。分會滿 12 個月後此項 15 分開始計算。</p>
         </div>
       </div>
       <div class="target">
         <span class="target-num" style="background:var(--amber-line)">△</span>
         <div>
-          <p class="target-h">引薦：這一輪追不上，但值得長期做</p>
+          <p class="target-h">引薦：達下一階需增加 274 件</p>
           <p class="target-b">現在每人每週 <b>0.34 件</b>，下一階門檻是 0.71，要 <b>+5 分</b>。
-            換算下來 6 個月要 527 件，我們現在 253 件，<b>差 274 件、平均每人多給 4.8 件</b>。<br>
-            比起「全分會多帶 4 位來賓」，這條路難太多。先拿來賓那 5 分，引薦當下一季的目標。</p>
+            6 個月需達 527 件，目前 253 件，<b>差 274 件，平均每人 4.8 件</b>。</p>
         </div>
       </div>
     </div>
@@ -1064,11 +1080,11 @@ document.getElementById('rules').innerHTML =
 document.getElementById('uploadPanel').innerHTML = `
   <div class="cbox">
     <h3>更新這個月的數字</h3>
-    <p class="sub">主席、副主席、導師協調人，誰有空誰做。<b>整件事大概 2 分鐘</b>，不用登入、不用密碼。</p>
+    <p class="sub">主席、副主席、導師協調人皆可操作。<b>約 2 分鐘</b>，不需登入或密碼。</p>
     <div class="steps">
-      <div class="step"><span class="step-n">1</span><span class="step-t">到 BNI 官方系統下載<b>會員成績表</b><small>下載完不用打開，也不用改任何東西</small></span></div>
-      <div class="step"><span class="step-n">2</span><span class="step-t">在下面選那個檔，畫面會先讀給你看<small>確認人數對不對，不對就重選</small></span></div>
-      <div class="step"><span class="step-n">3</span><span class="step-t">照《分會紅綠燈報告》把七個數字填一填，按更新<small>只有分會那七項要手動抄，會員的部分是自動的</small></span></div>
+      <div class="step"><span class="step-n">1</span><span class="step-t">到 BNI 官方系統下載<b>會員成績表</b><small>不需開啟或修改檔案</small></span></div>
+      <div class="step"><span class="step-n">2</span><span class="step-t">在下方選擇該檔<small>畫面會先顯示讀取結果供核對</small></span></div>
+      <div class="step"><span class="step-n">3</span><span class="step-t">依《分會紅綠燈報告》填寫七項數字，按更新<small>僅分會七項需手動填寫，會員資料為自動解析</small></span></div>
     </div>
   </div>
 
@@ -1090,7 +1106,7 @@ document.getElementById('uploadPanel').innerHTML = `
 
   <div class="cbox" id="chapterBox" hidden>
     <h3>分會那七項（照《分會紅綠燈報告》抄）</h3>
-    <p class="sub">這七個數字不在會員成績表裡，要看分會報告。<b>沒有變的就不用改</b>，下面預帶的是上次的數字。</p>
+    <p class="sub">這七項不在會員成績表內，需依分會報告填寫。欄位預帶上次的數值。</p>
     <div class="fgrid" id="chapterForm"></div>
     <div class="drop-row" style="margin-top:18px; justify-content:flex-start">
       <input class="pw" id="uploaderName" placeholder="你的名字（選填）" aria-label="上傳者姓名" style="width:190px">
@@ -1168,7 +1184,7 @@ async function handleFile(file){
     document.getElementById('previewBody').innerHTML =
       '<p class="target-b" style="margin:0 0 12px">從「' + parsed.sheet + '」分頁讀到 <b>'
       + members.length + ' 位會員</b>，計分週數 <b>' + members[0][2] + ' 週</b>。<br>前三位是：'
-      + top + '。<br><b>人數對的話，把下面七個數字填一填再按更新。</b></p>';
+      + top + '。<br>核對無誤後，於下方填寫七項數字並按更新。</p>';
     document.getElementById('previewBox').hidden = false;
     document.getElementById('chapterBox').hidden = false;
     document.getElementById('chapterBox').scrollIntoView({behavior: 'smooth', block: 'start'});
