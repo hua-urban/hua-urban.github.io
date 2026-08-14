@@ -513,14 +513,14 @@ const DATA_URL = 'data.json';
     const r = await fetch(DATA_URL + '?t=' + Date.now(), {cache: 'no-store'});
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const d = await r.json();
-    boot(d.members, d.chapter || {}, d.updatedAt);
+    boot(d.members, d.chapter || {}, d.updatedAt, d.prev || null);
   } catch (e) {
     app.innerHTML = '<p style="padding:40px;text-align:center;color:var(--red)">'
       + '讀不到資料（' + e.message + '）。<br>如果是剛更新完，等 30 秒再重新整理。</p>';
   }
 })();
 
-function boot(RAW, CH, updatedAt) {
+function boot(RAW, CH, updatedAt, PREV) {
 
 
 /* ---------- 計分規則（照 Excel「評分」分頁還原，57 人逐欄驗證吻合） ---------- */
@@ -540,8 +540,8 @@ const CHAPTER = {
   period: '2026 年 7 月',
   score: 65, prevScore: 70,
   gyPct: 30, prevGyPct: 20,
-  delta: {green: 1, amber: 5, red: -7, grey: 2},
-  moves: {up: 22, down: 11, flat: 22, joined: 2},
+  delta: null,   // 與上一期的燈號人數差，boot 時從 prev 算
+  moves: null,   // 會員得分升降人數，boot 時從 prev 算
   /* BNI Accelerate《分會紅綠燈計算方式》官方計分表。
      拿全區 25 分會 × 2 個月共 50 筆驗證，45 筆完全命中，華都更兩個月都分毫不差。 */
   official: [
@@ -683,15 +683,40 @@ M.forEach(m => {
   m.zeroCount = Object.values(m.sc).filter(v => v === 0).length;
 });
 
+/* 上一期資料：畫面上所有「跟上個月比」的敘述都由這裡算，沒有上一期就不顯示 */
+const PREVM = (PREV && Array.isArray(PREV.members)) ? PREV.members : null;
+const PREVC = (PREV && PREV.chapter) ? PREV.chapter : null;
+
+function scoreOfRow(row){
+  const m = {weeks:row[2], A:row[4], RG:row[8], V:row[10], O2O:row[11], CEU:row[12], TYFCB:row[13]};
+  const sc = scoreOf(m);
+  return Object.values(sc).reduce((a,b) => a+b, 0);
+}
+
 /* ---------- 分布條 ---------- */
 const ORDER = ['green','amber','red','grey'];
 const counts = Object.fromEntries(ORDER.map(k => [k, M.filter(m => m.light===k).length]));
+
+(() => {
+  if (!PREVM) return;
+  const prevScores = new Map(PREVM.map(r => [r[0], scoreOfRow(r)]));
+  const prevCounts = Object.fromEntries(ORDER.map(k => [k, 0]));
+  prevScores.forEach(v => prevCounts[lightOf(v)]++);
+  CHAPTER.delta = Object.fromEntries(ORDER.map(k => [k, counts[k] - prevCounts[k]]));
+  let up = 0, down = 0, flat = 0, joined = 0;
+  M.forEach(m => {
+    if (!prevScores.has(m.no)) { joined++; return; }
+    const d = m.total - prevScores.get(m.no);
+    if (d > 0) up++; else if (d < 0) down++; else flat++;
+  });
+  CHAPTER.moves = {up, down, flat, joined};
+})();
 document.getElementById('distBar').innerHTML = ORDER.map(k => {
   const pct = counts[k] / M.length * 100;
   return `<div class="dist-seg" style="width:${pct}%;background:var(${LIGHT[k].color})">${pct >= 9 ? Math.round(pct)+'%' : ''}</div>`;
 }).join('');
 document.getElementById('distLegend').innerHTML = ORDER.map(k => {
-  const d = CHAPTER.delta[k];
+  const d = CHAPTER.delta ? CHAPTER.delta[k] : 0;
   const tail = d === 0 ? '' : ` <span class="num" style="color:var(--text-3)">(${d > 0 ? '+' : ''}${d})</span>`;
   return `<span><i class="dot" style="background:var(${LIGHT[k].color})"></i>${LIGHT[k].name} <b class="num">${counts[k]}</b> 人${tail}</span>`;
 }).join('');
@@ -725,8 +750,11 @@ document.getElementById('chapterStats').innerHTML = `
 
 document.getElementById('goalNote').innerHTML =
   `分會目標：<b>綠燈 60%、黃燈 40%</b>。目前紅燈與黑燈合計 `+
-  `<b class="num">${counts.red + counts.grey}</b> 人。本月會員得分<b>上升 ${CHAPTER.moves.up} 人、`+
-  `下降 ${CHAPTER.moves.down} 人、持平 ${CHAPTER.moves.flat} 人、新進 ${CHAPTER.moves.joined} 人</b>。`;
+  `<b class="num">${counts.red + counts.grey}</b> 人。`+
+  (CHAPTER.moves
+    ? `本月會員得分<b>上升 ${CHAPTER.moves.up} 人、下降 ${CHAPTER.moves.down} 人、`+
+      `持平 ${CHAPTER.moves.flat} 人、新進 ${CHAPTER.moves.joined} 人</b>。`
+    : '');
 
 /* ---------- 卡片牆 ---------- */
 let filter = 'all', query = '';
@@ -1022,20 +1050,85 @@ document.getElementById('rules').innerHTML =
     </tr>`;
   }).join('');
 
+  /* ── 以下敘述全部由資料算出，換月份不用改任何文字 ── */
+  const W = M[0] ? M[0].weeks : 13;                        // 計分週數
+  const N = M.length;                                       // 會員數
+  const sumV = M.reduce((a, m) => a + m.V, 0);              // 來賓總數
+  const sumRG = M.reduce((a, m) => a + m.RG, 0);            // 引薦總數
+  const visWithScore = M.filter(m => m.sc.vis > 0).length;  // 個人端來賓有得分的人數
+
+  // 每一項「升到下一階」要補多少，換算成看得懂的量
+  const gaps = O.map(m => {
+    const got = pts(m), max = maxOf(m);
+    if (got === max) return null;
+    const up = [...m.tiers].filter(t => t[1] > got).sort((a, b) => a[1] - b[1])[0];
+    if (!up) return null;
+    const th = up[0], gain = up[1] - got;
+    let need = '';
+    if (m.k.indexOf('每週來賓數') === 0) {
+      const total = Math.ceil(th * W), now = Math.round(m.v * W);
+      need = `6 個月來賓總數需達 <b>${total} 位</b>，目前約 ${now} 位，差 <b>${total - now} 位</b>`;
+    } else if (m.k.indexOf('會員每週引薦數') === 0) {
+      const total = Math.ceil(th * W * N), diff = total - sumRG;
+      need = `6 個月需達 <b>${total} 件</b>，目前 ${sumRG} 件，差 <b>${diff} 件</b>，平均每人 ${(diff / N).toFixed(1)} 件`;
+    } else if (m.k.indexOf('保留率') === 0) {
+      need = `需達 <b>${th}%</b>`;
+    } else {
+      need = `需達 <b>${th}${m.unit}</b>（目前 ${m.v}${m.unit}）`;
+    }
+    return {m, th, gain, need, unit: m.unit};
+  }).filter(Boolean);
+
+  // 跟上一期比，是哪幾項造成分數變化
+  let changeLine = '';
+  if (PREVC) {
+    const prevPts = {};
+    O.forEach(m => {
+      const key = m.k;
+      const pv = PREVC[({'分會大小':'size','會員成長':'growth','保留率':'retention',
+                         '會員每週引薦數':'ref','每週來賓數':'vis','轉換率':'conv','缺席率':'absent'})[
+                        Object.keys({'分會大小':1,'會員成長':1,'保留率':1,'會員每週引薦數':1,
+                                     '每週來賓數':1,'轉換率':1,'缺席率':1}).find(k => key.indexOf(k) === 0)]];
+      if (typeof pv !== 'number') return;
+      const before = (() => { for (const [th, p] of m.tiers) if (m.low ? pv < th : pv >= th) return p; return 0; })();
+      if (before !== pts(m)) prevPts[key] = {before, after: pts(m), pv, v: m.v};
+    });
+    const keys = Object.keys(prevPts);
+    if (keys.length) {
+      changeLine = '差異來自' + keys.map(k => {
+        const c = prevPts[k];
+        return `${k.replace(/（.*/, '')}（${c.pv} → ${c.v}，${c.before} 分 → ${c.after} 分）`;
+      }).join('、') + '。';
+    } else if (typeof PREVC.score === 'number' && PREVC.score === CHAPTER.score) {
+      changeLine = '七項得分與上一期相同。';
+    }
+  }
+
+  // 排序看「離下一階門檻多遠」，不是看能加幾分——保留率從 0 起跳，實務上最遠
+  const distance = g => {
+    if (g.m.low) return g.m.v <= g.th ? 0 : (g.m.v - g.th) / Math.max(g.m.v, 1);
+    return g.th > 0 ? Math.max(0, (g.th - g.m.v) / g.th) : 1;
+  };
+  gaps.sort((x, y) => distance(x) - distance(y));
+  const cheapest = gaps[0];
+  const toGreen = GREEN - total;
+
   document.getElementById('chapterPanel').innerHTML = `
     <div class="cbox">
       <h3>目前與綠燈分會的差距</h3>
       <p class="sub">依 BNI 官方《分會紅綠燈計算方式》七項逐格對出來的：
-        華都更 <b>${total} 分</b>，七項中四項已達滿分。
-        上月 70 分，本月 65 分，差異來自每週來賓數由 2.38 降至 1.77（該項 15 分降為 10 分）。</p>
+        華都更 <b>${total} 分</b>，七項中 ${O.filter(m => pts(m) === maxOf(m)).length} 項已達滿分。
+        ${PREVC && typeof PREVC.score === 'number'
+          ? `上一期 ${PREVC.score} 分，本期 ${CHAPTER.score} 分。${changeLine}` : ''}</p>
+      ${toGreen > 0 && cheapest ? `
       <div class="target" style="border-bottom:0;padding-top:4px">
-        <span class="target-num" style="background:var(--green-line)">✓</span>
+        <span class="target-num" style="background:var(--green-line)">→</span>
         <div>
-          <p class="target-h">每週來賓數達 2.01 以上 → 總分 70 分</p>
-          <p class="target-b">6 個月來賓總數需達 <b>27 位</b>，目前約 23 位，差 <b>4 位</b>。<br>
-            另外兩項可加分的指標，達標所需增量較大，說明如下。</p>
+          <p class="target-h">${cheapest.m.k.replace(/（.*/, '')}達 ${cheapest.th}${cheapest.unit === '%' ? '%' : ' '+cheapest.unit} 以上 → 總分 ${total + cheapest.gain} 分${total + cheapest.gain >= GREEN ? '（綠燈）' : ''}</p>
+          <p class="target-b">${cheapest.need}。<br>
+            距綠燈門檻 70 分還差 <b>${toGreen} 分</b>，可加分的項目共 ${gaps.length} 項，列於下方。</p>
         </div>
-      </div>
+      </div>` : `<p class="ok-note">已達綠燈分會門檻。</p>`}
     </div>
 
     <div class="cbox">
@@ -1045,34 +1138,34 @@ document.getElementById('rules').innerHTML =
         <tbody>${rows}</tbody>
       </table></div>
       <p class="sub" style="margin:14px 0 0">滿分 100 分（轉換率三階、最高 10 分，其餘六項各 15 分）。
-        <b>70 分以上為綠燈分會，全區 25 家中有 5 家。</b></p>
+        <b>70 分以上為綠燈分會。</b>現階段總分上限 ${ceilingNow} 分。</p>
     </div>
 
+    ${gaps.length ? `
     <div class="cbox">
-      <h3>另外兩項的現況</h3>
+      <h3>可加分的項目</h3>
+      ${gaps.map(g => `
       <div class="target">
-        <span class="target-num" style="background:var(--grey-line)">－</span>
+        <span class="target-num" style="background:var(--amber-line)">+${g.gain}</span>
         <div>
-          <p class="target-h">保留率：本期不計分</p>
-          <p class="target-b">官方定義是「<b>入會滿 12 個月</b>的會員裡有多少還留在 BNI」。
-            我們的「會員成長 6 個月」是 <b>57</b>，剛好等於全部人數——代表 6 個月前分會人數是 0，
-            分會成立未滿 12 個月，尚無會員符合此項計算條件，故為 0。<br>
-            <b>現階段總分上限為 ${ceilingNow} 分</b>。分會滿 12 個月後此項 15 分開始計算。</p>
-        </div>
-      </div>
-      <div class="target">
-        <span class="target-num" style="background:var(--amber-line)">△</span>
-        <div>
-          <p class="target-h">引薦：達下一階需增加 274 件</p>
-          <p class="target-b">現在每人每週 <b>0.34 件</b>，下一階門檻是 0.71，要 <b>+5 分</b>。
-            6 個月需達 527 件，目前 253 件，<b>差 274 件，平均每人 4.8 件</b>。</p>
-        </div>
-      </div>
+          <p class="target-h">${g.m.k.replace(/（.*/, '')}：達 ${g.th}${g.unit === '%' ? '%' : ' '+g.unit} 可得 ${pts(g.m) + g.gain} 分</p>
+          <p class="target-b">${g.need}。${
+            g.m.k.indexOf('保留率') === 0
+              ? '<br>分會成立未滿 12 個月，尚無會員符合此項計算條件，本期為 0。'
+              : ''}</p>
+        </div>`).join('')}
+    </div>` : ''}
+
+    <div class="cbox">
+      <h3>與個人分數的關聯</h3>
+      <p class="sub">分會分數與個人分數是兩套算法，但<b>引薦與來賓兩項在兩邊都計分</b>。
+        目前全分會 ${W} 週共 ${sumRG} 件引薦、${sumV} 位來賓；
+        個人端「帶來賓」有得分的為 ${visWithScore} 人。</p>
     </div>
 
     <p class="caveat"><b>這頁的計分表是 BNI Accelerate 官方版本。</b>
       拿全區 25 個分會、兩個月共 50 筆實際資料回推驗證，<b>45 筆完全命中</b>，
-      華都更 6 月的 70 分與 7 月的 65 分都逐項對得起來，可以直接照這個算。
+      華都更 2026-06 的 70 分與 2026-07 的 65 分都逐項對得起來。
       （5 筆對不上的分會差 5～10 分，推測是區報告顯示的數字四捨五入後跨過門檻。）</p>`;
 })();
 
