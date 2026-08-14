@@ -375,6 +375,21 @@ h1{font-size:clamp(26px,4vw,34px); line-height:1.2; letter-spacing:-.02em; margi
 .caveat b{color:var(--amber)}
 
 /* ---------- 更新資料 ---------- */
+.fgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px}
+.fitem{display:flex; flex-direction:column; gap:5px}
+.flabel{font-size:13px; font-weight:600; color:var(--text)}
+.flabel small{display:block; font-weight:400; font-size:11.5px; color:var(--text-3); margin-top:1px}
+.finput{
+  padding:9px 12px; font:inherit; font-size:14.5px; font-family:var(--font-mono);
+  border:1px solid var(--border); border-radius:8px; background:var(--surface); color:var(--text);
+}
+.finput:focus{outline:2px solid var(--accent); outline-offset:-1px; border-color:transparent}
+.pw{
+  padding:10px 14px; font:inherit; font-size:14px;
+  border:1px solid var(--border); border-radius:9px; background:var(--surface); color:var(--text);
+}
+.pw:focus{outline:2px solid var(--accent); outline-offset:-1px}
+
 .drop{
   border:2px dashed var(--border); border-radius:12px; background:var(--surface);
   padding:34px 24px; text-align:center;
@@ -484,7 +499,23 @@ h1{font-size:clamp(26px,4vw,34px); line-height:1.2; letter-spacing:-.02em; margi
 </div>
 
 <script>
-const RAW = [[1,"張瑜晏 Chang Yu Yen",13,13,0,0,0,0,23,4,0,26,9,3000000],[2,"王常殷 Hubert Wang",13,13,0,0,0,0,9,10,6,48,16,1565000],[3,"王寶佳 Phoenix Wang",13,13,0,0,0,0,21,9,2,60,23,172099],[4,"吳翊辰 ICHEN WU",13,13,0,0,0,0,23,9,1,48,18,888],[5,"陳靖薇 Penny Chen",13,13,0,0,0,0,3,9,0,52,28,33800000],[6,"張瓊安 Joanne",13,13,0,0,0,0,16,13,0,65,14,168000],[7,"王春雄 Jayson Wang",13,13,0,0,0,0,9,9,4,58,10,0],[8,"詹媛婷 Chan yuan ting",13,13,0,0,0,0,5,3,1,25,6,14930000],[9,"陳向柔Naomi Chen",13,13,0,0,0,0,12,5,2,103,25,8760],[10,"包育翎 PAO,YU-LING",13,13,0,0,0,0,1,1,1,12,45,10899104],[11,"施宜妏 YiwenShih",13,13,0,0,0,0,5,3,0,34,2,3732000],[12,"劉羿岑 Yitsen Liu",13,13,0,0,0,0,4,5,0,44,14,0],[13,"林必涵 Pi Han Lin",13,13,0,0,0,0,7,12,0,37,10,11760],[14,"蔡馨葳 TSAI HSIN WEI",13,13,0,0,0,0,1,4,0,29,10,0],[15,"柳慧燕 Ann Liu",13,13,0,0,0,0,2,4,0,35,6,0],[16,"蔡岱達 DAI-DA TSAI",13,13,0,0,0,0,13,13,0,61,2,0],[17,"林佩君 Pei Lin",13,11,0,0,0,2,2,1,0,29,6,0],[18,"謝夢瑰",13,13,0,0,0,0,7,2,1,23,6,15000],[19,"王佳筠 JIA",13,13,0,0,0,0,13,14,1,41,0,50000],[20,"凃馨文 TU SINGWEN",13,13,0,0,0,0,0,1,0,18,10,0],[21,"劉恩秀 Liou en Siou",13,13,0,0,0,0,12,9,0,17,5,10000],[22,"張怡蘋 April Chang",13,13,0,0,0,0,5,7,0,56,4,3600],[23,"蔡明璋 TSAI MING CHANG",13,13,0,0,0,0,1,7,0,39,4,0],[24,"高翊書 Eason Kao",13,13,0,0,0,0,2,3,0,28,4,0],[25,"陳黎玲 JOSSIE",13,13,0,0,0,0,6,7,0,39,4,0],[26,"周以仁 Chou Yi Jen",13,13,0,0,0,0,3,13,0,20,0,2295000],[27,"林晏伃 ALICE LIN",13,13,0,0,0,0,0,1,0,22,4,0],[28,"蔡淯思 Mina Tsai",13,13,0,0,0,0,0,2,0,30,2,0],[29,"洪嘉璿 J.syuan",13,13,0,0,0,0,2,6,0,26,2,0],[30,"黃冠霖 Kuan Lin Huang",13,13,0,0,0,0,1,0,0,45,2,0],[31,"何俊彥 Daris Ho",13,13,0,0,0,0,7,3,0,35,2,0],[32,"蘇瓜雅 Sophia Su",13,13,0,0,0,0,6,2,0,21,2,0],[33,"楊之慧 Yang Jr Huei",13,13,0,0,0,0,3,1,0,21,2,0],[34,"陳昭男 Johnny",13,13,0,0,0,0,1,4,0,29,0,0],[35,"鍾智媛 Fiona Chung Jhih Yuan",13,13,0,0,0,0,0,4,0,36,0,0],[36,"莊涵勝 HanSheng Chuang",13,13,0,0,0,0,1,2,0,32,0,0],[37,"諸紀平 CHI PING CHU",13,13,0,0,0,0,2,6,0,28,0,0],[38,"陳秒螢 chen miao ying",13,13,0,0,0,0,1,8,0,26,0,0],[39,"李瑞雲",13,13,0,0,0,0,2,2,0,29,0,0],[40,"黃郁婷 Catherine Huang",13,13,0,0,0,0,5,2,0,34,0,0],[41,"莊大永 Chuang, Ta-Yung",13,13,0,0,0,0,1,7,0,31,0,0],[42,"陳品攸 Yuna Chen",9,8,0,0,0,1,4,4,0,18,0,3600],[43,"藍堂嘉 Albert LAN",13,11,0,0,0,2,5,6,0,28,0,0],[44,"張耕豪",10,10,0,0,0,0,1,2,0,15,0,0],[45,"林媜媁 Winnie Lin",13,13,0,0,0,0,0,3,0,20,0,0],[46,"王雅慧 Wang,ya-hui",13,13,0,0,0,0,2,3,0,15,0,0],[47,"李艾莉 AILI LEE",13,12,1,0,0,0,0,6,0,19,2,0],[48,"莊慧劍 CHuang Hui Chien",13,13,0,0,0,0,0,0,1,11,0,0],[49,"周育慈 CHOU YU TZU",13,13,0,0,0,0,1,1,0,10,0,0],[50,"宋馨巧 Hsin-Chiao Sung",13,13,0,0,0,0,0,4,0,10,0,0],[51,"楊淑媛 Augusta Yang",13,10,2,0,0,1,1,5,0,26,0,32000],[52,"吳念鎧 WU-NIEN-KAI",8,8,0,0,0,0,0,1,0,1,0,0],[53,"李慧如 LE HUI JU",13,13,0,0,0,0,0,3,0,1,0,0],[54,"古育瑋 Allen",4,4,0,0,0,0,0,0,0,0,0,0],[55,"沈瑞婷 Ivy Shen",6,6,0,0,0,0,1,1,0,1,0,0],[56,"林中群 ChungChing Lin",13,11,1,0,0,1,1,6,0,9,0,0],[57,"黃建嘉 CHIENCHIA HUANG",13,11,2,0,0,0,0,3,0,3,0,0]];
+const DATA_URL = 'data.json';
+
+(async () => {
+  const app = document.querySelector('.wrap');
+  try {
+    const r = await fetch(DATA_URL + '?t=' + Date.now(), {cache: 'no-store'});
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    boot(d.members, d.chapter || {}, d.updatedAt);
+  } catch (e) {
+    app.innerHTML = '<p style="padding:40px;text-align:center;color:var(--red)">'
+      + '讀不到資料（' + e.message + '）。<br>如果是剛更新完，等 30 秒再重新整理。</p>';
+  }
+})();
+
+function boot(RAW, CH, updatedAt) {
+
 
 /* ---------- 計分規則（照 Excel「評分」分頁還原，57 人逐欄驗證吻合） ---------- */
 const TIER = {
@@ -534,6 +565,24 @@ const CHAPTER = {
     ['分會得分',        '70',     '65',     'down']
   ]
 };
+
+
+/* 線上資料覆蓋分會那七項與月份 */
+(() => {
+  if (!CH) return;
+  if (typeof CH.score === 'number') CHAPTER.score = CH.score;
+  if (typeof CH.prevScore === 'number') CHAPTER.prevScore = CH.prevScore;
+  if (CH.period) CHAPTER.period = CH.period;
+  const MAP = {'分會大小':'size','會員成長':'growth','保留率':'retention',
+               '會員每週引薦數':'ref','每週來賓數':'vis','轉換率':'conv','缺席率':'absent'};
+  CHAPTER.official.forEach(m => {
+    for (const pre in MAP) if (m.k.indexOf(pre) === 0 && typeof CH[MAP[pre]] === 'number') m.v = CH[MAP[pre]];
+  });
+  const tag = document.querySelector('.demo-tag');
+  if (tag && CH.period) tag.textContent = CH.period;
+  const rng = document.querySelector('.period b');
+  if (rng && CH.range) rng.textContent = CH.range;
+})();
 
 const scoreAbsent = a => a===0?20 : a===1?15 : a===2?10 : 0;
 const byRate = (val, tiers) => tiers.reduce((s,[t,p]) => val >= t-1e-9 ? p : s, 0);
@@ -1014,44 +1063,157 @@ document.getElementById('rules').innerHTML =
 /* ---------- 更新資料 ---------- */
 document.getElementById('uploadPanel').innerHTML = `
   <div class="cbox">
-    <h3>這個月的資料是誰更新的</h3>
-    <p class="sub">目前是 <b>第一階段</b>：頁面已經上線可以用，但自助上傳還沒接。
-      這個月（2026 年 7 月）的數字由資訊組匯入，<b>下個月的更新一樣由資訊組處理，九長不用做任何事</b>。</p>
-  </div>
-
-  <div class="drop">
-    <div class="drop-icon">📄</div>
-    <h3>第二階段會長這樣</h3>
-    <p>接上去以後，主席、副主席、導師協調人誰有空誰做，整件事 2 分鐘</p>
-    <div class="drop-row">
-      <button class="btn ghost" id="pickFile" disabled style="opacity:.5;cursor:default">選擇兩個檔</button>
-      <button class="btn" id="doUpload" disabled style="opacity:.5;cursor:default">更新這個月的資料</button>
-    </div>
-    <p class="fake" id="uploadMsg">這一區還沒接上，按了不會有反應。接好之後會直接通知九長。</p>
-  </div>
-
-  <div class="cbox" style="margin-top:16px">
-    <h3>接好之後每個月要做的事，就這三步</h3>
+    <h3>更新這個月的數字</h3>
+    <p class="sub">主席、副主席、導師協調人，誰有空誰做。<b>整件事大概 2 分鐘</b>，不用登入、不用密碼。</p>
     <div class="steps">
-      <div class="step"><span class="step-n">1</span><span class="step-t">到 BNI 官方系統下載兩個檔<small>會員成績表（算個人分數）＋ 分會紅綠燈報告（拿分會分數）</small></span></div>
-      <div class="step"><span class="step-n">2</span><span class="step-t">回到這一頁，把兩個檔拉進上面那個框<small>第一次會請你用自己的 Google 帳號按一下允許，之後就不用了</small></span></div>
-      <div class="step"><span class="step-n">3</span><span class="step-t">按「更新這個月的資料」<small>分數、燈號、要關心的名單全部自動重算，舊的月份留著看趨勢</small></span></div>
+      <div class="step"><span class="step-n">1</span><span class="step-t">到 BNI 官方系統下載<b>會員成績表</b><small>下載完不用打開，也不用改任何東西</small></span></div>
+      <div class="step"><span class="step-n">2</span><span class="step-t">在下面選那個檔，畫面會先讀給你看<small>確認人數對不對，不對就重選</small></span></div>
+      <div class="step"><span class="step-n">3</span><span class="step-t">照《分會紅綠燈報告》把七個數字填一填，按更新<small>只有分會那七項要手動抄，會員的部分是自動的</small></span></div>
     </div>
-    <p class="sub" style="margin:14px 0 0">拉錯檔案會當場說哪裡不對，<b>不會把現有資料蓋掉</b>。</p>
   </div>
 
-  <div class="cbox">
-    <h3>誰可以更新</h3>
-    <p class="sub">上傳會覆蓋整個分會的資料，所以不能誰都能傳。做法是<b>指定幾個 Google 帳號有權限</b>——
-      預計是主席、副主席、導師協調人加資訊組，名單隨時可以改。<br>
-      <b>不會有共用密碼。</b>用各自的 Google 帳號按一下允許就好，沒有人需要記住或保管任何密碼。</p>
+  <div class="drop" id="dropZone">
+    <div class="drop-icon">📄</div>
+    <h3>選擇會員成績表</h3>
+    <p>就是 BNI 下載的那個 Excel 檔（.xlsx），也可以直接把檔案拖進這個框</p>
+    <div class="drop-row">
+      <input type="file" id="fileInput" accept=".xlsx,.xls" hidden>
+      <button class="btn ghost" id="pickFile">選擇檔案</button>
+    </div>
+    <p class="fake" id="fileMsg">還沒選檔案</p>
+  </div>
+
+  <div class="cbox" id="previewBox" hidden>
+    <h3>讀到的內容</h3>
+    <div id="previewBody"></div>
+  </div>
+
+  <div class="cbox" id="chapterBox" hidden>
+    <h3>分會那七項（照《分會紅綠燈報告》抄）</h3>
+    <p class="sub">這七個數字不在會員成績表裡，要看分會報告。<b>沒有變的就不用改</b>，下面預帶的是上次的數字。</p>
+    <div class="fgrid" id="chapterForm"></div>
+    <div class="drop-row" style="margin-top:18px; justify-content:flex-start">
+      <input class="pw" id="uploaderName" placeholder="你的名字（選填）" aria-label="上傳者姓名" style="width:190px">
+      <button class="btn" id="doUpload">確認更新</button>
+    </div>
+    <p class="fake" id="uploadMsg" hidden></p>
   </div>
 `;
 
-document.getElementById('uploadPanel').addEventListener('click', e => {
-  if (e.target.id === 'pickFile' || e.target.id === 'doUpload') {
-    document.getElementById('uploadMsg').textContent =
-      '這是示範畫面，還沒接上真的上傳。正式版按下去 2 秒內整頁就是新的月份。';
+/* ---------- 上傳流程 ---------- */
+const API = 'https://htl-api.vercel.app/api/upload';
+const CH_FIELDS = [
+  {k:'score',      label:'分會得分',        hint:'本月'},
+  {k:'prevScore',  label:'分會得分（上月）', hint:'上個月的分數'},
+  {k:'size',       label:'分會大小',        hint:'月底回報的會員人數'},
+  {k:'growth',     label:'會員成長 6 個月',  hint:'過去 6 個月的變化'},
+  {k:'retention',  label:'保留率 %',        hint:'12 個月'},
+  {k:'ref',        label:'每週引薦數',      hint:'每位會員每週'},
+  {k:'vis',        label:'每週來賓數',      hint:'全分會每週'},
+  {k:'conv',       label:'轉換率 %',        hint:'6 個月'},
+  {k:'absent',     label:'缺席率 %',        hint:'越低越好'}
+];
+let parsedMembers = null;
+
+(() => {
+  const cur = {score: CHAPTER.score, prevScore: CHAPTER.prevScore};
+  const MAP = {'分會大小':'size','會員成長':'growth','保留率':'retention',
+               '會員每週引薦數':'ref','每週來賓數':'vis','轉換率':'conv','缺席率':'absent'};
+  CHAPTER.official.forEach(m => { for (const pre in MAP) if (m.k.indexOf(pre) === 0) cur[MAP[pre]] = m.v; });
+  document.getElementById('chapterForm').innerHTML = CH_FIELDS.map(f =>
+    '<label class="fitem"><span class="flabel">' + f.label + '<small>' + f.hint + '</small></span>'
+    + '<input class="finput" type="number" step="any" id="ch-' + f.k + '" value="' + cur[f.k] + '"></label>').join('');
+})();
+
+function loadSheetJS(){
+  if (window.XLSX) return Promise.resolve();
+  return new Promise((ok, bad) => {
+    const el = document.createElement('script');
+    el.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+    el.onload = ok;
+    el.onerror = () => bad(new Error('讀取解析工具失敗，請檢查網路'));
+    document.head.appendChild(el);
+  });
+}
+
+const num = v => (typeof v === 'number' && isFinite(v)) ? v : 0;
+
+function parseWorkbook(wb){
+  const name = wb.SheetNames.find(n => /traffic|紅綠燈/i.test(n)) || wb.SheetNames[0];
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets[name], {header: 1, defval: null, raw: true});
+  const out = [];
+  for (const r of rows){
+    if (!r) continue;
+    const no = r[0], nm = r[1];
+    if (typeof no !== 'number' || !nm || typeof nm !== 'string' || !nm.trim()) continue;
+    out.push([no, nm.trim(), num(r[3]), num(r[12]), num(r[13]), num(r[14]), num(r[15]), num(r[16]),
+              num(r[17]), num(r[18]), num(r[19]), num(r[20]), num(r[21]), num(r[22])]);
+  }
+  return {sheet: name, members: out};
+}
+
+async function handleFile(file){
+  const msg = document.getElementById('fileMsg');
+  msg.textContent = '讀取中…';
+  try {
+    await loadSheetJS();
+    const buf = await file.arrayBuffer();
+    const parsed = parseWorkbook(XLSX.read(buf, {type: 'array'}));
+    const members = parsed.members;
+    if (members.length < 10) throw new Error('只讀到 ' + members.length + ' 位會員，這可能不是會員成績表');
+    parsedMembers = members;
+    msg.textContent = '已讀取 ' + file.name;
+
+    const top = members.slice(0, 3).map(m => m[1].split(/[\s（(]/)[0] + '（第 ' + m[0] + ' 位）').join('、');
+    document.getElementById('previewBody').innerHTML =
+      '<p class="target-b" style="margin:0 0 12px">從「' + parsed.sheet + '」分頁讀到 <b>'
+      + members.length + ' 位會員</b>，計分週數 <b>' + members[0][2] + ' 週</b>。<br>前三位是：'
+      + top + '。<br><b>人數對的話，把下面七個數字填一填再按更新。</b></p>';
+    document.getElementById('previewBox').hidden = false;
+    document.getElementById('chapterBox').hidden = false;
+    document.getElementById('chapterBox').scrollIntoView({behavior: 'smooth', block: 'start'});
+  } catch (e) {
+    parsedMembers = null;
+    msg.textContent = '讀不到：' + e.message;
+    document.getElementById('previewBox').hidden = true;
+    document.getElementById('chapterBox').hidden = true;
+  }
+}
+
+document.getElementById('pickFile').addEventListener('click', () => document.getElementById('fileInput').click());
+document.getElementById('fileInput').addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+const dz = document.getElementById('dropZone');
+['dragover','dragenter'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.style.borderColor = 'var(--accent)'; }));
+['dragleave','drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.style.borderColor = ''; }));
+dz.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) handleFile(f); });
+
+document.getElementById('doUpload').addEventListener('click', async () => {
+  const btn = document.getElementById('doUpload');
+  const msg = document.getElementById('uploadMsg');
+  msg.hidden = false;
+  if (!parsedMembers) { msg.textContent = '還沒選檔案。'; return; }
+  const chapter = {};
+  for (const f of CH_FIELDS){
+    const v = parseFloat(document.getElementById('ch-' + f.k).value);
+    if (!isFinite(v)) { msg.textContent = '「' + f.label + '」沒有填數字。'; return; }
+    chapter[f.k] = v;
+  }
+  chapter.period = CHAPTER.period;
+  btn.disabled = true; btn.textContent = '更新中…';
+  msg.textContent = '正在寫入，請不要關掉這一頁…';
+  try {
+    const r = await fetch(API, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({members: parsedMembers, chapter,
+                            uploadedBy: document.getElementById('uploaderName').value.trim()})
+    });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || '未知錯誤');
+    msg.innerHTML = '✅ ' + d.message + '<br>這一頁 30 秒後重新整理就會看到新的數字。';
+    btn.textContent = '已更新';
+  } catch (e) {
+    msg.textContent = '更新失敗：' + e.message + '　資料沒有被改動，可以再試一次。';
+    btn.disabled = false; btn.textContent = '確認更新';
   }
 });
 
@@ -1063,6 +1225,8 @@ document.querySelector('.tabs').addEventListener('click', e => {
     document.getElementById(x.getAttribute('aria-controls')).hidden = !on;
   });
 });
+
+}
 </script>
 
 </body>
