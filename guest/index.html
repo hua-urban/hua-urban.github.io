@@ -89,7 +89,7 @@ a{text-decoration:none;color:inherit}
 .topic-card-btn:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
 .topic-card-btn:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 .topic-img{display:block;width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;background:var(--gray-50)}
-.topic-img-wide{aspect-ratio:16/9;object-fit:cover}
+.topic-img-wide{aspect-ratio:auto;object-fit:contain;width:auto;max-width:100%;max-height:80vh;margin:0 auto}
 
 .topic-lightbox{padding:0;margin:0;border:none;width:100vw;height:100vh;max-width:100vw;max-height:100vh;background:rgba(20,23,28,.92);display:none;align-items:center;justify-content:center}
 .topic-lightbox[open]{display:flex}
@@ -211,7 +211,7 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbwX7BsF7OWcfP2DA5byYQ5C
         <div class="sec-head">
           <span class="red-bar"></span>
           <h2>這場你會聽到</h2>
-          <p>入座前先看看，本週兩位夥伴會分享什麼實戰案例。</p>
+          <p id="topicLede">入座前先看看，本週兩位夥伴會分享什麼實戰案例。</p>
         </div>
       </div>
 
@@ -226,7 +226,7 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbwX7BsF7OWcfP2DA5byYQ5C
 
       <div class="topic-cards topic-cards-single" id="topicCardsSingle" hidden>
         <button type="button" class="topic-card-btn" aria-label="放大檢視本週專講預告卡">
-          <img class="topic-img topic-img-wide" id="topicImgSingle" alt="本週 5 分鐘專講預告卡（雙講者合版）">
+          <img class="topic-img topic-img-wide" id="topicImgSingle" alt="本週專講預告卡">
         </button>
       </div>
 
@@ -241,7 +241,11 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbwX7BsF7OWcfP2DA5byYQ5C
 
 <script>
 /* ════════════════════════════════════════════════════════════════
-   本週專講預告區：容錯三態
+   本週專講預告區：容錯四態
+   0. 特別版覆蓋（topic-card-override.png）：BOD／擴大商機日這類「整場只有一張
+      主視覺」的檔期用。存在且未過 OVERRIDE_UNTIL → 直接顯示它，完全略過雙卡。
+      檔名獨立，每日 08:00／20:00 的 bni_topic_card.py 排程只覆蓋 topic-card-1/2.png，
+      碰不到它；過了 OVERRIDE_UNTIL 當天結束就自動失效，無需任何人動手改回來。
    1. 先預載雙卡（topic-card-1/2.png），皆成功 → 顯示雙卡
    2. 任一失敗 → 改預載單卡備援（topic-card.png），成功 → 顯示單卡
    3. 單卡也失敗 → 整區維持 hidden，表單完全不受影響
@@ -265,6 +269,11 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbwX7BsF7OWcfP2DA5byYQ5C
     return '' + y + m + day;
   }
   var bustTag = cacheBustTag();
+
+  /* 特別版覆蓋的最後生效日（含當天，YYYYMMDD）。
+     2026-09-02 = BOD 擴大商機日當天；隔天起自動回到雙卡。
+     下次再有特別版：換掉 topic-card-override.png 並改這一行即可。 */
+  var OVERRIDE_UNTIL = '20260902';
   function withBust(url) { return url + '?d=' + bustTag; }
 
   function preload(url) {
@@ -276,24 +285,39 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbwX7BsF7OWcfP2DA5byYQ5C
     });
   }
 
-  Promise.all([preload('images/topic-card-1.png'), preload('images/topic-card-2.png')])
-    .then(function (results) {
-      if (results[0] && results[1]) {
-        img1.src = withBust('images/topic-card-1.png');
-        img2.src = withBust('images/topic-card-2.png');
-        topicSec.hidden = false;
-        return;
-      }
-      dualWrap.hidden = true;
-      preload('images/topic-card.png').then(function (ok) {
-        if (ok) {
-          imgSingle.src = withBust('images/topic-card.png');
-          singleWrap.hidden = false;
+  function showSingle(url) {
+    dualWrap.hidden = true;
+    imgSingle.src = withBust(url);
+    var lede = document.getElementById('topicLede');
+    if (lede) { lede.textContent = '入座前先看看，本週的分享主題。'; }
+    singleWrap.hidden = false;
+    topicSec.hidden = false;
+  }
+
+  function runDual() {
+    Promise.all([preload('images/topic-card-1.png'), preload('images/topic-card-2.png')])
+      .then(function (results) {
+        if (results[0] && results[1]) {
+          img1.src = withBust('images/topic-card-1.png');
+          img2.src = withBust('images/topic-card-2.png');
           topicSec.hidden = false;
+          return;
         }
-        /* 兩層都失敗 → topicSec 維持 hidden，不留破圖與空白框 */
+        preload('images/topic-card.png').then(function (ok) {
+          if (ok) { showSingle('images/topic-card.png'); }
+          /* 兩層都失敗 → topicSec 維持 hidden，不留破圖與空白框 */
+        });
       });
+  }
+
+  if (bustTag <= OVERRIDE_UNTIL) {
+    preload('images/topic-card-override.png').then(function (ok) {
+      if (ok) { showSingle('images/topic-card-override.png'); return; }
+      runDual();
     });
+  } else {
+    runDual();
+  }
 
   /* ── Lightbox：原生 <dialog>，Esc／點背景關閉為瀏覽器內建行為 ── */
   var lightbox      = document.getElementById('topicLightbox');
