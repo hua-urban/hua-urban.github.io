@@ -245,7 +245,9 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbwX7BsF7OWcfP2DA5byYQ5C
    0. 特別版覆蓋（topic-card-override.png）：BOD／擴大商機日這類「整場只有一張
       主視覺」的檔期用。存在且未過 OVERRIDE_UNTIL → 直接顯示它，完全略過雙卡。
       檔名獨立，每日 08:00／20:00 的 bni_topic_card.py 排程只覆蓋 topic-card-1/2.png，
-      碰不到它；過了 OVERRIDE_UNTIL 當天結束就自動失效，無需任何人動手改回來。
+      碰不到它；一過 OVERRIDE_UNTIL 就自動失效，無需任何人動手改回來。
+      切換點抓「例會散場的那一刻」（09:00），不是當天午夜——散會後來賓看到的
+      該是下一場的預告。判斷用台北時間，來賓裝置設在別的時區也不會早換或晚換。
    1. 先預載雙卡（topic-card-1/2.png），皆成功 → 顯示雙卡
    2. 任一失敗 → 改預載單卡備援（topic-card.png），成功 → 顯示單卡
    3. 單卡也失敗 → 整區維持 hidden，表單完全不受影響
@@ -270,10 +272,19 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbwX7BsF7OWcfP2DA5byYQ5C
   }
   var bustTag = cacheBustTag();
 
-  /* 特別版覆蓋的最後生效日（含當天，YYYYMMDD）。
-     2026-09-02 = BOD 擴大商機日當天；隔天起自動回到雙卡。
+  /* 特別版覆蓋的失效時刻（台北時間，YYYYMMDDHHmm，到點即換）。
+     202609020900 = 9/2 BOD 擴大商機日例會散場；09:00 起自動回到雙卡。
      下次再有特別版：換掉 topic-card-override.png 並改這一行即可。 */
-  var OVERRIDE_UNTIL = '20260902';
+  var OVERRIDE_UNTIL = '202609020900';
+
+  /* 台北時間戳（UTC+8，台灣無日光節約），與來賓裝置的時區設定無關。 */
+  function taipeiStamp() {
+    var d = new Date();
+    var t = new Date(d.getTime() + d.getTimezoneOffset() * 60000 + 8 * 3600000);
+    var p = function (n) { return String(n).padStart(2, '0'); };
+    return '' + t.getFullYear() + p(t.getMonth() + 1) + p(t.getDate())
+             + p(t.getHours()) + p(t.getMinutes());
+  }
   function withBust(url) { return url + '?d=' + bustTag; }
 
   function preload(url) {
@@ -310,7 +321,7 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbwX7BsF7OWcfP2DA5byYQ5C
       });
   }
 
-  if (bustTag <= OVERRIDE_UNTIL) {
+  if (taipeiStamp() < OVERRIDE_UNTIL) {
     preload('images/topic-card-override.png').then(function (ok) {
       if (ok) { showSingle('images/topic-card-override.png'); return; }
       runDual();
