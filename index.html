@@ -1836,7 +1836,7 @@ section[id]{scroll-margin-top:68px}
         <div class="chain-badge">E</div>
         <div class="chain-name">E 房產客戶成長鏈</div>
         <div class="chain-meta">
-          <div><strong>召集人：</strong>張瓊安</div>
+          <div><strong>召集人：</strong>洪嘉璿左左</div>
           <div><strong>下次組聚：</strong><span class="chain-next" data-chain="E">（時間待定）</span></div>
         </div>
       </div>
@@ -2054,9 +2054,10 @@ var GAS_CAL_URL = 'https://script.google.com/macros/s/AKfycbyCL7tHMfIkHHAhL0WDX-
 //   B 老屋現金流升級鏈（陳靖薇）　　　每月第 2、4 個週五・線上 21:00–22:00
 //   C 高齡安居×資產傳承（王春雄 Jayson）每月第 2、4 個週四・線上 21:00–22:00
 //   D 商用不動產升級鏈（陳向柔 Naomi）每月第 2、4 個週二・線上 21:00–22:00／實體 19:00–21:00
-//   E 房產客戶成長鏈（張瓊安）　　　　每月第 1、3 個週二・線上 20:30–21:30
+//   E 房產客戶成長鏈（洪嘉璿左左）　　每月第 1、3 個週二・線上 20:30–21:30
 // 該月第 5 個指定星期兩組都休（沿用 D/E 舊制的邊界規則，泛化到全部五組）。
 // 遇受訓／課程當週可能整月取消，實際以分會 LINE 群公告為準；前端不計算此例外，只在文案註記。
+// 2026-08-26 E 組組長交接：召集人改為洪嘉璿左左（本頁 2026-09-02 補上，與 bni-pt-groups 一致）。
 // 未來規則若變，只需要改這個物件，不必動計算邏輯。weekday：0=日...6=六（JS Date.getDay() 慣例）。
 // ─────────────────────────────────────────────
 var GROUP_ROTATION = {
@@ -2064,7 +2065,7 @@ var GROUP_ROTATION = {
   'B': { weeks:[2,4], weekday:5, chainName:'老屋現金流升級鏈',     leader:'陳靖薇',        timeText:'線上 21:00–22:00' },
   'C': { weeks:[2,4], weekday:4, chainName:'高齡安居 × 資產傳承',  leader:'王春雄 Jayson', timeText:'線上 21:00–22:00' },
   'D': { weeks:[2,4], weekday:2, chainName:'商用不動產升級鏈',     leader:'陳向柔 Naomi',  timeText:'線上 21:00–22:00／實體 19:00–21:00' },
-  'E': { weeks:[1,3], weekday:2, chainName:'房產客戶成長鏈',       leader:'張瓊安',        timeText:'線上 20:30–21:30' }
+  'E': { weeks:[1,3], weekday:2, chainName:'房產客戶成長鏈',       leader:'洪嘉璿左左',    timeText:'線上 20:30–21:30' }
 };
 
 // 回傳指定 (y,m,0-indexed) 月份中，星期為 weekday 的所有日期（Date 物件陣列，第 1 個為當月第 1 個該星期）
