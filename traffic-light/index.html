@@ -494,7 +494,7 @@ h1{font-size:clamp(26px,4vw,34px); line-height:1.2; letter-spacing:-.02em; margi
   </section>
 
   <footer class="foot">
-    <p>BNI 華都更分會　會員紅綠燈　·　資料期間 2026-02-01 – 2026-07-31（6 個月）</p>
+    <p>BNI 華都更分會　會員紅綠燈　·　資料期間 <span class="foot-range">2026-02-01 – 2026-07-31</span>（6 個月）</p>
     <p>個人分數依 BNI 官方會員紅綠燈原始檔計算，分會分數依 BNI Accelerate《分會紅綠燈計算方式》。</p>
     <p class="warn-line">內含全體會員姓名與個人數據，僅供分會領導團隊參考，請勿對外散布。</p>
   </footer>
@@ -586,11 +586,8 @@ const CHAPTER = {
   });
   const tag = document.querySelector('.demo-tag');
   if (tag && CH.period) tag.textContent = CH.period;
-  const rng = document.querySelector('.period b');
-  if (rng) {
-    const r = CH.range || rangeFromPeriod(CH.period);
-    if (r) rng.textContent = r;
-  }
+  const r = CH.range || rangeFromPeriod(CH.period);
+  if (r) document.querySelectorAll('.period b, .foot-range').forEach(el => el.textContent = r);
 })();
 
 function rangeFromPeriod(p){
@@ -1236,6 +1233,8 @@ const CH_FIELDS = [
 ];
 let parsedMembers = null;
 let pendingPeriod = null;
+let pendingRange = null;
+let periodSource = '';
 
 // 從成績表檔名抓計分月份，例如「…(2026-08).xlsx」「…2026年8月…」；抓不到就回上一個月
 function periodFromFilename(name){
@@ -1283,8 +1282,23 @@ function parseWorkbook(wb){
     out.push([no, nm.trim(), num(r[3]), num(r[12]), num(r[13]), num(r[14]), num(r[15]), num(r[16]),
               num(r[17]), num(r[18]), num(r[19]), num(r[20]), num(r[21]), num(r[22])]);
   }
-  return {sheet: name, members: out};
+  return {sheet: name, members: out, range: findRangeInRows(rows)};
 }
+
+// 成績表表頭有「2026-03-01 - 2026-08-31 (6個月)」這行，優先採用它
+function findRangeInRows(rows){
+  for (let i = 0; i < Math.min(rows.length, 12); i++){
+    const r = rows[i]; if (!r) continue;
+    for (const cell of r){
+      if (typeof cell !== 'string') continue;
+      const m = /(20\d{2})[-/.](\d{1,2})[-/.](\d{1,2})\s*[-–~至]\s*(20\d{2})[-/.](\d{1,2})[-/.](\d{1,2})/.exec(cell);
+      if (m) return {start: pad(m[1],m[2],m[3]), end: pad(m[4],m[5],m[6]),
+                     endYear: +m[4], endMonth: +m[5]};
+    }
+  }
+  return null;
+}
+function pad(y,m,d){ return y + '-' + String(+m).padStart(2,'0') + '-' + String(+d).padStart(2,'0'); }
 
 async function handleFile(file){
   const msg = document.getElementById('fileMsg');
@@ -1296,21 +1310,30 @@ async function handleFile(file){
     const members = parsed.members;
     if (members.length < 10) throw new Error('只讀到 ' + members.length + ' 位會員，這可能不是會員成績表');
     parsedMembers = members;
-    pendingPeriod = periodFromFilename(file.name);
+    if (parsed.range){
+      pendingPeriod = parsed.range.endYear + ' 年 ' + parsed.range.endMonth + ' 月';
+      pendingRange  = parsed.range.start + ' – ' + parsed.range.end;
+      periodSource  = '成績表內的計分期間';
+    } else {
+      pendingPeriod = periodFromFilename(file.name);
+      pendingRange  = rangeFromPeriod(pendingPeriod);
+      periodSource  = /20\d{2}/.test(file.name) ? '檔名' : '推算（檔名沒有月份，帶上一個月）';
+    }
     msg.textContent = '已讀取 ' + file.name;
 
     const top = members.slice(0, 3).map(m => m[1].split(/[\s（(]/)[0] + '（第 ' + m[0] + ' 位）').join('、');
     document.getElementById('previewBody').innerHTML =
       '<p class="target-b" style="margin:0 0 12px">從「' + parsed.sheet + '」分頁讀到 <b>'
       + members.length + ' 位會員</b>，計分週數 <b>' + members[0][2] + ' 週</b>。<br>前三位是：'
-      + top + '。<br>計分月份：<b>' + pendingPeriod + '</b>（計分期間 ' + rangeFromPeriod(pendingPeriod) + '）'
+      + top + '。<br>計分月份：<b>' + pendingPeriod + '</b>　計分期間 <b>' + pendingRange + '</b>'
+      + '<br><span style="color:var(--text-2)">（月份取自' + periodSource + '）</span>'
       + '<br>核對無誤後，於下方填寫七項數字並按更新。</p>';
     document.getElementById('previewBox').hidden = false;
     document.getElementById('chapterBox').hidden = false;
     document.getElementById('chapterBox').scrollIntoView({behavior: 'smooth', block: 'start'});
   } catch (e) {
     parsedMembers = null;
-    pendingPeriod = null;
+    pendingPeriod = null; pendingRange = null; periodSource = '';
     msg.textContent = '讀不到：' + e.message;
     document.getElementById('previewBox').hidden = true;
     document.getElementById('chapterBox').hidden = true;
@@ -1336,6 +1359,7 @@ document.getElementById('doUpload').addEventListener('click', async () => {
     chapter[f.k] = v;
   }
   chapter.period = pendingPeriod || CHAPTER.period;
+  if (pendingRange) chapter.range = pendingRange;
   btn.disabled = true; btn.textContent = '更新中…';
   msg.textContent = '正在寫入，請不要關掉這一頁…';
   try {
