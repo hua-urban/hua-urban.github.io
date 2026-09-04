@@ -1208,8 +1208,8 @@ document.getElementById('uploadPanel').innerHTML = `
   </div>
 
   <div class="cbox" id="chapterBox" hidden>
-    <h3>分會那七項（照《分會紅綠燈報告》抄）</h3>
-    <p class="sub">這七項不在會員成績表內，需依分會報告填寫。欄位預帶上次的數值。</p>
+    <h3>分會那七項</h3>
+    <p class="sub" id="chapterNote">這七項不在會員成績表內，系統會自動去《分會紅綠燈報告》取得。取不到才需要自己填。</p>
     <div class="fgrid" id="chapterForm"></div>
     <div class="drop-row" style="margin-top:18px; justify-content:flex-start">
       <input class="pw" id="uploaderName" placeholder="你的名字（選填）" aria-label="上傳者姓名" style="width:190px">
@@ -1221,6 +1221,7 @@ document.getElementById('uploadPanel').innerHTML = `
 
 /* ---------- 上傳流程 ---------- */
 const API = 'https://htl-api.vercel.app/api/upload';
+const CHAPTER_API = 'https://htl-api.vercel.app/api/chapter';
 const CH_FIELDS = [
   {k:'score',      label:'分會得分',        hint:'本月'},
   {k:'prevScore',  label:'分會得分（上月）', hint:'上個月的分數'},
@@ -1258,6 +1259,29 @@ function periodFromFilename(name){
     '<label class="fitem"><span class="flabel">' + f.label + '<small>' + f.hint + '</small></span>'
     + '<input class="finput" type="number" step="any" id="ch-' + f.k + '" value="' + cur[f.k] + '"></label>').join('');
 })();
+
+// 那七項去《分會紅綠燈報告》拿。對方晚發佈時端點會自動退回上一期，並回報 stale。
+async function fetchChapter(period){
+  const note = document.getElementById('chapterNote');
+  const m = /(\d{4})\s*年\s*(\d{1,2})\s*月/.exec(period || '');
+  if (!m) return;
+  note.textContent = '正在取得分會那七項…';
+  try {
+    const r = await fetch(CHAPTER_API + '?year=' + m[1] + '&month=' + m[2]);
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || '取不到');
+    for (const f of CH_FIELDS){
+      const el = document.getElementById('ch-' + f.k);
+      if (el && typeof d.chapter[f.k] === 'number') el.value = d.chapter[f.k];
+    }
+    note.innerHTML = d.stale
+      ? '⚠️ <b>' + period + '</b> 的分會報告還沒發佈，以下填的是 <b>' + d.reportMonth
+        + '</b> 的數字。等對方發佈後再上傳一次就會更新，或直接改下面的欄位。'
+      : '✅ 已自動帶入 <b>' + d.reportMonth + '</b> 的分會報告數字，核對一下即可。';
+  } catch (e) {
+    note.innerHTML = '取不到分會報告（' + e.message + '），下面七格請照《分會紅綠燈報告》自己填，欄位是上次的數值。';
+  }
+}
 
 function loadSheetJS(){
   if (window.XLSX) return Promise.resolve();
@@ -1332,6 +1356,7 @@ async function handleFile(file){
     document.getElementById('previewBox').hidden = false;
     document.getElementById('chapterBox').hidden = false;
     document.getElementById('chapterBox').scrollIntoView({behavior: 'smooth', block: 'start'});
+    fetchChapter(pendingPeriod);
   } catch (e) {
     parsedMembers = null;
     pendingPeriod = null; pendingRange = null; periodSource = '';
