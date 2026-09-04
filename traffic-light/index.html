@@ -450,7 +450,7 @@ h1{font-size:clamp(26px,4vw,34px); line-height:1.2; letter-spacing:-.02em; margi
     <p class="eyebrow">BNI 華都更 Hua Urban+</p>
     <h1>會員紅綠燈<span class="demo-tag">2026 年 7 月</span></h1>
     <p class="period">計分期間 <b>2026-02-01 – 2026-07-31</b>　往前算 6 個月的累計，每月更新一次就往前滾一個月</p>
-    <p class="scope"><b>這頁給導師協調人與各組組長看。</b>不對全體公開。</p>
+    <p class="scope"><b>僅供華都更內部成員使用。</b></p>
 
     <div class="dist">
       <div class="dist-bar" id="distBar"></div>
@@ -587,9 +587,21 @@ const CHAPTER = {
   const tag = document.querySelector('.demo-tag');
   if (tag && CH.period) tag.textContent = CH.period;
   const rng = document.querySelector('.period b');
-  if (rng && CH.range) rng.textContent = CH.range;
+  if (rng) {
+    const r = CH.range || rangeFromPeriod(CH.period);
+    if (r) rng.textContent = r;
+  }
 })();
 
+function rangeFromPeriod(p){
+  const m = /(\d{4})\s*年\s*(\d{1,2})\s*月/.exec(p||'');
+  if (!m) return '';
+  const y = +m[1], mo = +m[2];
+  const end = new Date(Date.UTC(y, mo, 0));            // 該月最後一天
+  const start = new Date(Date.UTC(y, mo - 6, 1));      // 往前算 6 個月的第一天
+  const f = d => d.toISOString().slice(0,10);
+  return f(start) + ' – ' + f(end);
+}
 const scoreAbsent = a => a===0?20 : a===1?15 : a===2?10 : 0;
 const byRate = (val, tiers) => tiers.reduce((s,[t,p]) => val >= t-1e-9 ? p : s, 0);
 
@@ -1223,6 +1235,19 @@ const CH_FIELDS = [
   {k:'absent',     label:'缺席率 %',        hint:'越低越好'}
 ];
 let parsedMembers = null;
+let pendingPeriod = null;
+
+// 從成績表檔名抓計分月份，例如「…(2026-08).xlsx」「…2026年8月…」；抓不到就回上一個月
+function periodFromFilename(name){
+  let m = /(20\d{2})[-_./年\s]*(\d{1,2})\s*月?/.exec(name || '');
+  if (m) {
+    const mo = +m[2];
+    if (mo >= 1 && mo <= 12) return +m[1] + ' 年 ' + mo + ' 月';
+  }
+  const d = new Date();
+  d.setDate(1); d.setMonth(d.getMonth() - 1);
+  return d.getFullYear() + ' 年 ' + (d.getMonth() + 1) + ' 月';
+}
 
 (() => {
   const cur = {score: CHAPTER.score, prevScore: CHAPTER.prevScore};
@@ -1271,18 +1296,21 @@ async function handleFile(file){
     const members = parsed.members;
     if (members.length < 10) throw new Error('只讀到 ' + members.length + ' 位會員，這可能不是會員成績表');
     parsedMembers = members;
+    pendingPeriod = periodFromFilename(file.name);
     msg.textContent = '已讀取 ' + file.name;
 
     const top = members.slice(0, 3).map(m => m[1].split(/[\s（(]/)[0] + '（第 ' + m[0] + ' 位）').join('、');
     document.getElementById('previewBody').innerHTML =
       '<p class="target-b" style="margin:0 0 12px">從「' + parsed.sheet + '」分頁讀到 <b>'
       + members.length + ' 位會員</b>，計分週數 <b>' + members[0][2] + ' 週</b>。<br>前三位是：'
-      + top + '。<br>核對無誤後，於下方填寫七項數字並按更新。</p>';
+      + top + '。<br>計分月份：<b>' + pendingPeriod + '</b>（計分期間 ' + rangeFromPeriod(pendingPeriod) + '）'
+      + '<br>核對無誤後，於下方填寫七項數字並按更新。</p>';
     document.getElementById('previewBox').hidden = false;
     document.getElementById('chapterBox').hidden = false;
     document.getElementById('chapterBox').scrollIntoView({behavior: 'smooth', block: 'start'});
   } catch (e) {
     parsedMembers = null;
+    pendingPeriod = null;
     msg.textContent = '讀不到：' + e.message;
     document.getElementById('previewBox').hidden = true;
     document.getElementById('chapterBox').hidden = true;
@@ -1307,7 +1335,7 @@ document.getElementById('doUpload').addEventListener('click', async () => {
     if (!isFinite(v)) { msg.textContent = '「' + f.label + '」沒有填數字。'; return; }
     chapter[f.k] = v;
   }
-  chapter.period = CHAPTER.period;
+  chapter.period = pendingPeriod || CHAPTER.period;
   btn.disabled = true; btn.textContent = '更新中…';
   msg.textContent = '正在寫入，請不要關掉這一頁…';
   try {
