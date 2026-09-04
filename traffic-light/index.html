@@ -99,6 +99,15 @@ h1{font-size:clamp(26px,4vw,34px); line-height:1.2; letter-spacing:-.02em; margi
   font-size:27px; font-weight:700; line-height:1.1; letter-spacing:-.02em; color:var(--s-line);
 }
 .stat-value small{font-size:13px; font-weight:600; color:var(--text-3); letter-spacing:0; margin-left:3px}
+.leave-list{
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr));
+  gap:6px 14px; margin-top:14px; max-height:340px; overflow-y:auto;
+  padding:12px; border:1px solid var(--border); border-radius:10px;
+}
+.leave-item{display:flex; align-items:center; gap:8px; font-size:14px; cursor:pointer; padding:3px 0}
+.leave-item input{width:16px; height:16px; cursor:pointer; flex:none}
+.leave-item.on{color:var(--text-2); text-decoration:line-through}
+.leave-item .lno{color:var(--text-3); font-size:12px; font-family:var(--font-mono)}
 .stat-src{margin:6px 0 0; font-size:12px; color:var(--text-2); line-height:1.5}
 .stat-src button{
   border:1px solid var(--border); background:transparent; color:var(--text-2);
@@ -521,14 +530,14 @@ const DATA_URL = 'data.json';
     const r = await fetch(DATA_URL + '?t=' + Date.now(), {cache: 'no-store'});
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const d = await r.json();
-    boot(d.members, d.chapter || {}, d.updatedAt, d.prev || null);
+    boot(d.members, d.chapter || {}, d.updatedAt, d.prev || null, d.leftMembers || []);
   } catch (e) {
     app.innerHTML = '<p style="padding:40px;text-align:center;color:var(--red)">'
       + '讀不到資料（' + e.message + '）。<br>如果是剛更新完，等 30 秒再重新整理。</p>';
   }
 })();
 
-function boot(RAW, CH, updatedAt, PREV) {
+function boot(RAW, CH, updatedAt, PREV, LEFTRAW) {
 
 
 /* ---------- 計分規則（照 Excel「評分」分頁還原，57 人逐欄驗證吻合） ---------- */
@@ -593,7 +602,11 @@ const CHAPTER = {
     for (const pre in MAP) if (m.k.indexOf(pre) === 0 && typeof CH[MAP[pre]] === 'number') m.v = CH[MAP[pre]];
   });
   const tag = document.querySelector('.demo-tag');
-  if (tag && CH.period) tag.textContent = CH.period;
+  if (tag) {
+    // 還沒上傳過任何資料時不要顯示寫在程式裡的示範月份，會被誤認成真的
+    if (CH.period) tag.textContent = CH.period;
+    else if (!RAW || !RAW.length) tag.textContent = '尚未上傳資料';
+  }
   const r = CH.range || rangeFromPeriod(CH.period);
   if (r) document.querySelectorAll('.period b, .foot-range').forEach(el => el.textContent = r);
   CHAPTER.chapterMonth = CH.chapterMonth || null;
@@ -679,8 +692,25 @@ function planFor(m, sc, total){
   return picked.map(p => ({...p, text: p.text.replace('N', p.need)}));
 }
 
+// 跟上一期比對不能用編號——有人退會後 BNI 會把後面的人編號往前遞補，
+// 用編號比會整組錯位（例：42 號退會，原本的 43 號變成 42 號，就被拿去跟退會那位比）。
+//
+// 也不能用完整姓名——會員在系統裡補上或改掉英文名是常事
+// （實例：2026-05「黃建嘉」→ 2026-08「黃建嘉 CHIENCHIA HUANG」，同一人）。
+// 用完整姓名比會把他算成「一位退會＋一位新進」。
+// 所以取中文姓名當比對鍵；沒有中文名的（外籍會員）才退回完整字串。
+const nameKey = n => {
+  const s = String(n || '').trim();
+  const m = s.match(/^[一-龥]{2,4}/);
+  return m ? m[0] : s.replace(/\s+/g, '').toLowerCase();
+};
+
 /* ---------- 組資料 ---------- */
-const M = RAW.map(r => {
+// 退會的人 BNI 官方成績表不會拿掉（實例：楊淑媛 2026-07-28 退會，8 月成績表仍列在編號 55），
+// 所以由分會自己標。標了就不列入任何統計與名單，但資料留著，隨時可以取消標記。
+const LEFT = new Set((Array.isArray(LEFTRAW) ? LEFTRAW : []).map(nameKey));
+
+const ALL = RAW.map(r => {
   const m = {no:r[0], name:r[1], weeks:r[2], P:r[3], A:r[4], L:r[5], Med:r[6], S:r[7],
              RG:r[8], RR:r[9], V:r[10], O2O:r[11], CEU:r[12], TYFCB:r[13]};
   m.sc = scoreOf(m);
@@ -693,8 +723,13 @@ const M = RAW.map(r => {
   m.riskDrop = m.total - nextTotal;
   m.riskLight = lightOf(nextTotal);
   m.shortName = m.name.split(/[\s（(]/)[0];
+  m.hasLeft = LEFT.has(nameKey(m.name));
   return m;
 }).sort((a,b) => b.total - a.total || a.no - b.no);
+
+// 分會現況只算現任會員；退會的另存一份，只在「更新資料」分頁看得到
+const M = ALL.filter(m => !m.hasLeft);
+const LEFT_M = ALL.filter(m => m.hasLeft);
 
 /* 週數最多的人＝待滿整個計分區間；比他少代表這半年才入會 */
 const FULL_WEEKS = Math.max(...M.map(m => m.weeks));
@@ -719,17 +754,27 @@ const counts = Object.fromEntries(ORDER.map(k => [k, M.filter(m => m.light===k).
 
 (() => {
   if (!PREVM) return;
-  const prevScores = new Map(PREVM.map(r => [r[0], scoreOfRow(r)]));
+  // 上一期也要排除已退會的人，否則「黑燈 -1」會被誤讀成有人進步，
+  // 實際上只是那個人不在分會了
+  const prevScores = new Map(
+    PREVM.filter(r => !LEFT.has(nameKey(r[1])))
+         .map(r => [nameKey(r[1]), scoreOfRow(r)]));
   const prevCounts = Object.fromEntries(ORDER.map(k => [k, 0]));
   prevScores.forEach(v => prevCounts[lightOf(v)]++);
   CHAPTER.delta = Object.fromEntries(ORDER.map(k => [k, counts[k] - prevCounts[k]]));
   let up = 0, down = 0, flat = 0, joined = 0;
+  const seen = new Set();
   M.forEach(m => {
-    if (!prevScores.has(m.no)) { joined++; return; }
-    const d = m.total - prevScores.get(m.no);
+    const k = nameKey(m.name);
+    seen.add(k);
+    if (!prevScores.has(k)) { joined++; return; }
+    const d = m.total - prevScores.get(k);
     if (d > 0) up++; else if (d < 0) down++; else flat++;
   });
-  CHAPTER.moves = {up, down, flat, joined};
+  // 上一期有、這一期不在名單裡的，就是退會或離開分會的人
+  let left = 0;
+  prevScores.forEach((_, k) => { if (!seen.has(k)) left++; });
+  CHAPTER.moves = {up, down, flat, joined, left};
 })();
 document.getElementById('distBar').innerHTML = ORDER.map(k => {
   const pct = counts[k] / M.length * 100;
@@ -740,8 +785,10 @@ document.getElementById('distLegend').innerHTML = ORDER.map(k => {
   const tail = d === 0 ? '' : ` <span class="num" style="color:var(--text-3)">(${d > 0 ? '+' : ''}${d})</span>`;
   return `<span><i class="dot" style="background:var(${LIGHT[k].color})"></i>${LIGHT[k].name} <b class="num">${counts[k]}</b> 人${tail}</span>`;
 }).join('');
-const greenPct = Math.round(counts.green / M.length * 100);
-const gyPct = Math.round((counts.green + counts.amber) / M.length * 100);
+// 還沒上傳過任何成績表時 M.length 是 0，不除零
+const pctOf = n => M.length ? Math.round(n / M.length * 100) : 0;
+const greenPct = pctOf(counts.green);
+const gyPct = pctOf(counts.green + counts.amber);
 const avg = M.reduce((a,m) => a + m.total, 0) / M.length;
 const avgLight = lightOf(avg);
 const needGreen = Math.ceil(M.length * 0.6) - counts.green;   // 綠燈目標 60%
@@ -844,7 +891,10 @@ document.getElementById('goalNote').innerHTML =
   `<b class="num">${counts.red + counts.grey}</b> 人。`+
   (CHAPTER.moves
     ? `本月會員得分<b>上升 ${CHAPTER.moves.up} 人、下降 ${CHAPTER.moves.down} 人、`+
-      `持平 ${CHAPTER.moves.flat} 人、新進 ${CHAPTER.moves.joined} 人</b>。`
+      `持平 ${CHAPTER.moves.flat} 人、新進 ${CHAPTER.moves.joined} 人</b>。`+
+      (CHAPTER.moves.left
+        ? `上一期有 <b>${CHAPTER.moves.left}</b> 位不在這次的名單裡（退會或轉出），已不列入。`
+        : '')
     : '');
 
 /* ---------- 卡片牆 ---------- */
@@ -1299,6 +1349,17 @@ document.getElementById('uploadPanel').innerHTML = `
     </div>
     <p class="fake" id="uploadMsg" hidden></p>
   </div>
+
+  <div class="cbox" id="leaveBox">
+    <h3>退會的人</h3>
+    <p class="sub" id="leaveNote">BNI 官方成績表不會把退會的人拿掉，要在這裡標。
+      標了就不會出現在名單與統計裡，資料仍保留，隨時可以取消。</p>
+    <div id="leaveList" class="leave-list"></div>
+    <div class="drop-row" style="margin-top:16px; justify-content:flex-start">
+      <button class="btn" id="doLeave">儲存</button>
+    </div>
+    <p class="fake" id="leaveMsg" hidden></p>
+  </div>
 `;
 
 /* ---------- 上傳流程 ---------- */
@@ -1449,6 +1510,60 @@ async function handleFile(file){
     document.getElementById('chapterBox').hidden = true;
   }
 }
+
+/* ---------- 標記退會 ---------- */
+// 官方成績表不會把退會的人拿掉（實例：楊淑媛 2026-07-28 退會，8 月成績表仍列在編號 55），
+// 所以由分會自己勾。勾了就不列入名單與統計，但資料留著，取消勾選就回來。
+function renderLeaveList(){
+  const box = document.getElementById('leaveList');
+  if (!box) return;
+  if (!ALL.length) {
+    box.innerHTML = '<p class="empty" style="padding:8px">還沒有會員資料，先上傳一次成績表。</p>';
+    return;
+  }
+  box.innerHTML = ALL.slice()
+    .sort((a, b) => a.no - b.no)
+    .map(m => `<label class="leave-item${m.hasLeft ? ' on' : ''}">
+        <input type="checkbox" data-leave="${m.name.replace(/"/g, '&quot;')}"${m.hasLeft ? ' checked' : ''}>
+        <span class="lno">#${m.no}</span><span>${m.shortName}</span>
+      </label>`).join('');
+}
+
+document.getElementById('leaveList').addEventListener('change', e => {
+  const cb = e.target.closest('[data-leave]');
+  if (cb) cb.closest('.leave-item').classList.toggle('on', cb.checked);
+});
+
+document.getElementById('doLeave').addEventListener('click', async () => {
+  const btn = document.getElementById('doLeave');
+  const msg = document.getElementById('leaveMsg');
+  msg.hidden = false;
+  const picked = [...document.querySelectorAll('#leaveList [data-leave]')]
+    .filter(cb => cb.checked).map(cb => cb.dataset.leave);
+  if (picked.length >= ALL.length) {
+    msg.textContent = '不能把所有人都標成退會。'; return;
+  }
+  btn.disabled = true; btn.textContent = '儲存中…';
+  msg.textContent = '正在儲存，請不要關掉這一頁…';
+  try {
+    const chapter = Object.assign({}, CH, {period: CHAPTER.period});
+    const r = await fetch(API, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({chapterOnly: true, chapter, leftMembers: picked, uploadedBy: ''}),
+    });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || '儲存失敗');
+    msg.innerHTML = picked.length
+      ? `✅ 已標記 <b>${picked.length}</b> 位退會，他們不會再出現在名單與統計裡。重新整理這一頁就會看到。`
+      : '✅ 已清空退會標記，所有人都會列入。重新整理這一頁就會看到。';
+    btn.textContent = '已儲存';
+  } catch (e) {
+    msg.textContent = '儲存失敗：' + e.message + '　資料沒有被改動，可以再試一次。';
+    btn.disabled = false; btn.textContent = '儲存';
+  }
+});
+
+renderLeaveList();
 
 document.getElementById('pickFile').addEventListener('click', () => document.getElementById('fileInput').click());
 document.getElementById('fileInput').addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
