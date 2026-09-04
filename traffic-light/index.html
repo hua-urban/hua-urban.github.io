@@ -99,6 +99,14 @@ h1{font-size:clamp(26px,4vw,34px); line-height:1.2; letter-spacing:-.02em; margi
   font-size:27px; font-weight:700; line-height:1.1; letter-spacing:-.02em; color:var(--s-line);
 }
 .stat-value small{font-size:13px; font-weight:600; color:var(--text-3); letter-spacing:0; margin-left:3px}
+.stat-src{margin:6px 0 0; font-size:12px; color:var(--text-2); line-height:1.5}
+.stat-src button{
+  border:1px solid var(--border); background:transparent; color:var(--text-2);
+  font:inherit; font-size:11.5px; padding:2px 8px; border-radius:999px;
+  cursor:pointer; margin-left:6px;
+}
+.stat-src button:hover{background:var(--card-2, rgba(0,0,0,.04)); color:var(--text)}
+.stat-src button[disabled]{opacity:.55; cursor:default}
 .stat-note{font-size:12.5px; color:var(--text-2); margin:4px 0 0}
 .stat-note b{color:var(--text); font-family:var(--font-mono)}
 .s-green{--s-line:var(--green-line)}
@@ -588,6 +596,9 @@ const CHAPTER = {
   if (tag && CH.period) tag.textContent = CH.period;
   const r = CH.range || rangeFromPeriod(CH.period);
   if (r) document.querySelectorAll('.period b, .foot-range').forEach(el => el.textContent = r);
+  CHAPTER.chapterMonth = CH.chapterMonth || null;
+  CHAPTER.chapterStale = !!CH.chapterStale;
+  CHAPTER.chapterFetchedAt = CH.chapterFetchedAt || null;
 })();
 
 function rangeFromPeriod(p){
@@ -745,6 +756,7 @@ document.getElementById('chapterStats').innerHTML = `
     <p class="stat-label">分會得分 · BNI 官方</p>
     <div class="stat-value">${CHAPTER.score}<small>分 · ${LIGHT[chapLight].name}</small></div>
     <p class="stat-note">上月 <b>${CHAPTER.prevScore}</b> 分　${arrow(chapDiff)}</p>
+    <p class="stat-src" id="chapterSrc"></p>
   </div>
   <div class="stat s-green">
     <p class="stat-label">綠燈比例</p>
@@ -756,6 +768,76 @@ document.getElementById('chapterStats').innerHTML = `
     <div class="stat-value">${gyPct}<small>% · 上月 ${CHAPTER.prevGyPct}%</small></div>
     <p class="stat-note">紅燈與黑燈 <b>${needAmber}</b> 人</p>
   </div>`;
+
+// 分會那七項的來源與更新鈕。抓取只在有人按下時發生，沒有排程。
+function fmtWhen(iso){
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d)) return '';
+  return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
+}
+
+function renderChapterSrc(){
+  const box = document.getElementById('chapterSrc');
+  if (!box) return;
+  const m = CHAPTER.chapterMonth;
+  const when = fmtWhen(CHAPTER.chapterFetchedAt);
+  let txt;
+  if (!m) {
+    txt = '分會報告來源未記錄';
+  } else if (CHAPTER.chapterStale) {
+    txt = `這七項是 <b>${m}</b> 的分會報告${when ? `，${when} 取得` : ''}`;
+  } else {
+    txt = `分會報告 <b>${m}</b>${when ? `，${when} 取得` : ''}`;
+  }
+  box.innerHTML = txt + ' <button id="refreshChapter" type="button">看看有沒有新的</button>';
+  document.getElementById('refreshChapter').addEventListener('click', refreshChapter);
+}
+
+async function refreshChapter(){
+  const btn = document.getElementById('refreshChapter');
+  const box = document.getElementById('chapterSrc');
+  const mm = /(\d{4})\s*年\s*(\d{1,2})\s*月/.exec(CHAPTER.period || '');
+  if (!mm) return;
+  btn.disabled = true; btn.textContent = '查詢中…';
+  try {
+    const r = await fetch(CHAPTER_API + '?year=' + mm[1] + '&month=' + mm[2]);
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || '取不到');
+
+    // 跟現在畫面上的比，一樣就不必寫入
+    if (d.reportMonth === CHAPTER.chapterMonth && d.chapter.score === CHAPTER.score) {
+      box.innerHTML = `分會報告 <b>${d.reportMonth}</b> 還是最新的，沒有變。`
+        + ' <button id="refreshChapter" type="button">再查一次</button>';
+      document.getElementById('refreshChapter').addEventListener('click', refreshChapter);
+      return;
+    }
+
+    btn.textContent = '更新中…';
+    const chapter = Object.assign({}, d.chapter, {
+      period: CHAPTER.period,
+      range: CHAPTER.range || rangeFromPeriod(CHAPTER.period),
+      chapterMonth: d.reportMonth,
+      chapterStale: !!d.stale,
+      chapterFetchedAt: new Date().toISOString(),
+    });
+    const up = await fetch(API, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({chapterOnly: true, chapter, uploadedBy: ''}),
+    });
+    const ud = await up.json();
+    if (!ud.ok) throw new Error(ud.error || '寫入失敗');
+    box.innerHTML = `✅ 已換成 <b>${d.reportMonth}</b> 的分會報告（得分 ${d.chapter.score}）。`
+      + '重新整理這一頁就會看到新的數字。';
+  } catch (e) {
+    box.innerHTML = `查不到新的（${e.message}）。`
+      + ' <button id="refreshChapter" type="button">再試一次</button>';
+    const b2 = document.getElementById('refreshChapter');
+    if (b2) b2.addEventListener('click', refreshChapter);
+  }
+}
+
+renderChapterSrc();
 
 document.getElementById('goalNote').innerHTML =
   `分會目標：<b>綠燈 60%、黃燈 40%</b>。目前紅燈與黑燈合計 `+
@@ -1237,6 +1319,7 @@ let parsedMembers = null;
 let pendingPeriod = null;
 let pendingRange = null;
 let periodSource = '';
+let chapterMeta = null;
 
 // 從成績表檔名抓計分月份，例如「…(2026-08).xlsx」「…2026年8月…」；抓不到就回上一個月
 function periodFromFilename(name){
@@ -1274,6 +1357,7 @@ async function fetchChapter(period){
       const el = document.getElementById('ch-' + f.k);
       if (el && typeof d.chapter[f.k] === 'number') el.value = d.chapter[f.k];
     }
+    chapterMeta = {reportMonth: d.reportMonth, stale: !!d.stale, source: d.source};
     note.innerHTML = d.stale
       ? '⚠️ <b>' + period + '</b> 的分會報告還沒發佈，以下填的是 <b>' + d.reportMonth
         + '</b> 的數字。等對方發佈後再上傳一次就會更新，或直接改下面的欄位。'
@@ -1386,6 +1470,11 @@ document.getElementById('doUpload').addEventListener('click', async () => {
   }
   chapter.period = pendingPeriod || CHAPTER.period;
   if (pendingRange) chapter.range = pendingRange;
+  if (chapterMeta) {
+    chapter.chapterMonth = chapterMeta.reportMonth;   // 那七項來自哪一期的分會報告
+    chapter.chapterStale = chapterMeta.stale;
+  }
+  chapter.chapterFetchedAt = new Date().toISOString();
   btn.disabled = true; btn.textContent = '更新中…';
   msg.textContent = '正在寫入，請不要關掉這一頁…';
   try {
