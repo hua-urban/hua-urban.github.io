@@ -1,20 +1,21 @@
 {
- "updatedAt": "2026-09-04T08:38:27.880Z",
+ "updatedAt": "2026-09-07T03:18:34.469Z",
  "uploadedBy": "",
  "chapter": {
-  "score": 65,
-  "prevScore": 70,
   "size": 57,
   "growth": 57,
   "retention": 0,
-  "ref": 0.34,
-  "vis": 1.77,
-  "conv": 247.83,
-  "absent": 0.84,
+  "ref": 0.39,
+  "vis": 1.41,
+  "conv": 237.5,
+  "absent": 1.7,
+  "score": 60,
+  "prevScore": 65,
   "period": "2026 年 8 月",
   "range": "2026-03-01 – 2026-08-31",
-  "chapterMonth": "2026 年 7 月",
-  "chapterStale": true
+  "chapterMonth": "2026 年 8 月",
+  "chapterStale": false,
+  "chapterFetchedAt": "2026-09-07T03:18:33.016Z"
  },
  "members": [
   [
