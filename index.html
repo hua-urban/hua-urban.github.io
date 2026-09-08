@@ -51,7 +51,7 @@ a{text-decoration:none;color:inherit}
 .navbar-inner{height:100%;display:flex;align-items:center;justify-content:space-between}
 .navbar-brand{display:flex;align-items:center;gap:10px;line-height:1}
 .nav-list{margin:0}
-.brand-logo{display:block;flex-shrink:0;height:30px;width:auto}
+.brand-logo{display:block;flex-shrink:0;height:17px;width:auto}
 .brand-divider{width:1px;height:22px;background:var(--gray-300, #d4d8de)}
 .brand-name{font-size:15px;font-weight:700;color:var(--gray-900);letter-spacing:-.01em;white-space:nowrap}
 .brand-name span{color:var(--red)}
@@ -1388,10 +1388,14 @@ section[id]{scroll-margin-top:68px}
         <!-- BRAND_LOGO_OFFICIAL_2026Q3（2026-09-08 換）：原本是用 Arial Black 自繪的近似
              字樣（2026-06 當時抓不到官方檔才自繪），字重與 ® 位置都與官方標準不同。
              改用官方 logo 圖檔；WebP 為主、PNG 供舊瀏覽器回退。
-             寬高比 2.604:1 依原圖等比設定，避免變形。 -->
+             寬高比 2.604:1 依原圖等比設定，避免變形。
+             尺寸依據（2026-09-08 Joan 回饋「原本的比例比較好」）：舊版自繪 SVG 的元素框
+             雖是 58x30，但紅字實際只佔 50x16（SVG 內留白），視覺上比框小一圈。官方圖是
+             滿版去背、整張都是紅字，若照舊框高 30px 放會變成近兩倍大。故改以「紅字實際
+             視覺高度」對齊：高 17px、寬 44px。 -->
         <picture>
           <source srcset="assets/bni-logo.webp" type="image/webp">
-          <img class="brand-logo" src="assets/bni-logo.png" width="78" height="30" alt="BNI">
+          <img class="brand-logo" src="assets/bni-logo.png" width="44" height="17" alt="BNI">
         </picture>
         <span class="brand-divider"></span>
         <span class="brand-name">華都更 <span>Hua Urban+</span></span>
