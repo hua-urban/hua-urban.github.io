@@ -2581,10 +2581,18 @@ function acMapFromCalendar(rows){
   var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
   var winStart = new Date(todayStart.getTime() - 14 * 86400000); // 今天往回 14 天
   return (rows||[]).filter(function(r){
-    // 過濾條件：類型含活動/聚會/例會/來賓，或活動標題含這些詞（相容新舊欄名）
+    // AGENDA_TYPE_BLOCKLIST_2026Q3（2026-09-08 改）：原本是白名單（類型或標題要含
+    // 活動/聚會/例會/來賓才顯示），缺點是後台每冒出一個新類型就整筆被靜默丟掉，夥伴填了
+    // 卻不知道為什麼沒出現（實例：9/12「參訪」類型的 ANNA 共生公寓開放參觀整筆消失）。
+    // 改成黑名單：本區塊定位是「近期活動一覽」，例會有 Zoom 專區、組聚有 Power Team
+    // 專區，只排除那兩類，其餘一律顯示——後台日後新增任何類型都不必再回頭改前端。
     var title = r['活動標題'] || r['名稱'] || '';
-    var isAct = /活動|聚會|例會|來賓/.test(r['類型']||'') || /聚會|例會|來賓日|活動/.test(title);
-    if(!isAct) return false;
+    var type  = r['類型'] || '';
+    // 只排除有專屬區塊的兩類（例會／組聚）
+    var hasOwnSection = /例會|組聚/.test(type) || (!type && /例會|組聚/.test(title));
+    if(hasOwnSection) return false;
+    // 後台留白列（無標題）不顯示
+    if(!String(title).trim()) return false;
     var d = r['日期'] ? new Date(String(r['日期']).substring(0,10)+'T00:00:00') : null;
     if(!d || isNaN(d)) return false;
     return d >= winStart;   // 過去 14 天內 + 所有未來活動
