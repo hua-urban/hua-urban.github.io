@@ -52,7 +52,7 @@ a{text-decoration:none;color:inherit}
 .navbar>.container{height:100%}
 .navbar-inner{height:100%;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .navbar-brand{display:flex;align-items:center;gap:10px;line-height:1;min-width:0}
-.brand-logo{display:block;flex-shrink:0}
+.brand-logo{display:block;flex-shrink:0;height:17px;width:auto}
 .brand-divider{width:1px;height:22px;background:var(--gray-300);flex-shrink:0}
 .brand-name{font-size:15px;font-weight:700;color:var(--gray-900);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .brand-name span{color:var(--red)}
@@ -180,10 +180,15 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbwX7BsF7OWcfP2DA5byYQ5C
   <div class="container">
     <div class="navbar-inner">
       <div class="navbar-brand">
-        <svg class="brand-logo" width="52" height="27" viewBox="0 0 116 60" xmlns="http://www.w3.org/2000/svg" aria-label="BNI">
-          <text x="0" y="46" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="48" fill="#CF2030" letter-spacing="-1">BNI</text>
-          <text x="104" y="20" font-family="Arial, sans-serif" font-size="13" fill="#CF2030">&#174;</text>
-        </svg>
+        <!-- BRAND_LOGO_OFFICIAL_2026Q3（2026-09-08 換，與首頁同步）：原為 Arial Black
+             自繪的近似字樣，改用官方 logo 圖檔。WebP 為主、PNG 供舊瀏覽器回退。
+             尺寸沿用首頁同一套「紅字實際視覺高度」基準（高 17px、寬 44px）：舊 SVG 框
+             52x27 但紅字實際只佔 50x16，官方圖是滿版去背，照舊框高度放會大掉一倍。
+             本頁在 guest/ 子目錄，assets 需用 ../ 相對路徑。 -->
+        <picture>
+          <source srcset="../assets/bni-logo.webp" type="image/webp">
+          <img class="brand-logo" src="../assets/bni-logo.png" width="44" height="17" alt="BNI">
+        </picture>
         <span class="brand-divider"></span>
         <span class="brand-name">華都更 <span>Hua Urban+</span></span>
       </div>
