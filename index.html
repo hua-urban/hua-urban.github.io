@@ -544,6 +544,10 @@ section[id]{scroll-margin-top:68px}
 .hero-slide[data-img]:not([data-img=""]) .size-badge{display:none}
 /* 完整介紹卡（16:9 設計圖）：用 contain 完整顯示不裁切，深色底襯 */
 .hero-slide.has-photo-contain{background-size:contain;background-color:#1a1a1a}
+/* 九長版介紹圖（HERO_LEADERSHIP_2026Q3）：整張都是資訊，contain 完整顯示不裁切。
+   圖面自身是深色底，slide 底色同步改深色才不會在圖外露出灰邊。 */
+.hero-slide.slide-photo-full{background:#1a1a1a;padding:0}
+.hero-photo-full{width:100%;height:100%;object-fit:contain;display:block}
 
 /* ── 董顧介紹卡（網頁重刻，取代跑版簡報圖）DC_CARD_8H2Q ── */
 .dc-card{
@@ -691,6 +695,14 @@ section[id]{scroll-margin-top:68px}
 @media(max-width:680px){
   /* 董顧卡所在的 hero 容器：手機解除 16:9，給足固定高度容兩張 slide（董顧卡上圖下文最高） */
   .photo-wrap{aspect-ratio:auto;min-height:540px}
+  /* 九長版介紹圖（HERO_LEADERSHIP_2026Q3）手機處理：容器為了董顧卡固定 540px 高，
+     本張是 16:9 寬圖，contain 後只佔約 190px、上下一大片黑，圖上人名職稱看不清。
+     改為橫向捲動檢視：圖以容器「高度」為基準放大（寬度自然超出），使用者左右滑就能
+     逐段看清人名與職稱，等同把大圖攤開在手機上，不必另外開燈箱或跳頁。
+     touch 捲動限定本張 slide，不影響輪播左右箭頭與其他兩張。 */
+  .hero-slide.slide-photo-full{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;justify-content:flex-start}
+  .hero-slide.slide-photo-full>picture{height:100%;display:block;flex:0 0 auto}
+  .hero-photo-full{width:auto;height:100%;max-width:none}
   .dc-card{grid-template-columns:1fr;grid-template-rows:190px 1fr}
   .dc-photo{order:-1}
   .dc-photo img{object-position:center 15%}
@@ -1439,17 +1451,18 @@ section[id]{scroll-margin-top:68px}
 
       <div class="hero-slides-track">
 
-        <!-- 第 1 張：YouTube 影片封面（VIDCOVER_KQ8F3T2M）
-             預設顯示自訂品牌封面，點擊後才注入 iframe autoplay，避免首屏糊縮圖 -->
-        <div class="hero-slide active">
-          <div class="hero-slide-video" id="ytSlideWrap">
-            <!-- 自訂封面：點擊載入影片 -->
-            <div class="yt-cover" id="ytCover" onclick="ytCoverPlay()">
-              <div class="yt-play-btn" aria-label="播放影片"></div>
-              <p class="yt-cover-title">華都更 — 要讓都更真正動起來</p>
-              <p class="yt-cover-hint">點擊播放分會形象影片</p>
-            </div>
-          </div>
+        <!-- 第 1 張：第一屆九長領導團隊介紹圖（HERO_LEADERSHIP_2026Q3，2026-09-08 加）
+             Joan 指定順序：九長版 → 董顧 → 影片。原第 3 張「九長合照佔位」註解區塊由本張取代
+             （那格等的就是這張，已一併移除，不再留空佔位）。
+             圖是 1280x720 的 16:9 設計稿，整張都是資訊（人名、職稱、五大產業鏈），
+             用 object-fit:contain 完整顯示不裁切，深色底與圖面自身底色相襯。 -->
+        <div class="hero-slide slide-photo-full active">
+          <picture>
+            <source srcset="assets/hero-leadership.webp" type="image/webp">
+            <img class="hero-photo-full" src="assets/hero-leadership.jpg"
+                 alt="BNI 華都更分會 第一屆白金分會 54 位跨域夥伴與九長領導團隊"
+                 width="1280" height="720">
+          </picture>
         </div>
 
         <!-- 第 2 張：董事顧問 邱碩鈺 Ellie（網頁重刻，取代跑版簡報圖 DC_CARD_8H2Q）-->
@@ -1479,27 +1492,18 @@ section[id]{scroll-margin-top:68px}
           </div>
         </div>
 
-        <!-- 第 3 張：第一屆九長領導團隊（2026-07-03 隱藏，九長合照到位後恢復）
-             輪播 JS 用 querySelectorAll 動態抓 .hero-slide/.carousel-dot 數量，用 display:none
-             隱藏會讓 slides.length 仍算入此張造成輪播切到空白格。改用 HTML 註解整段拿掉，
-             DOM 查不到、輪播自動剩 2 張正常運作，程式碼與對應的第 3 顆 dot 都保留在下方註解內。
-             恢復方式：取消這行與對應 dot 的註解，並把 data-img="" 改成 data-img="assets/九長合照.jpg" -->
-        <!--
-        <div class="hero-slide" data-img="">
-          <div class="photo-banner">第一屆九長領導團隊（請置入照片）</div>
-          <div class="photo-icon">
-            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
-          </div>
-          <div class="photo-text">
-            <h3>第一屆九長領導團隊</h3>
-            <p>請置入照片</p>
-          </div>
-          <div class="size-badge">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-            建議尺寸 1600 × 900 px（16:9）
+        <!-- 第 3 張：YouTube 影片封面（VIDCOVER_KQ8F3T2M）
+             預設顯示自訂品牌封面，點擊後才注入 iframe autoplay，避免首屏糊縮圖 -->
+        <div class="hero-slide">
+          <div class="hero-slide-video" id="ytSlideWrap">
+            <!-- 自訂封面：點擊載入影片 -->
+            <div class="yt-cover" id="ytCover" onclick="ytCoverPlay()">
+              <div class="yt-play-btn" aria-label="播放影片"></div>
+              <p class="yt-cover-title">華都更 — 要讓都更真正動起來</p>
+              <p class="yt-cover-hint">點擊播放分會形象影片</p>
+            </div>
           </div>
         </div>
-        -->
 
       </div><!-- /hero-slides-track -->
 
@@ -1507,11 +1511,12 @@ section[id]{scroll-margin-top:68px}
       <button class="carousel-btn carousel-prev" aria-label="上一張" onclick="heroCarouselMove(-1)">&#8249;</button>
       <button class="carousel-btn carousel-next" aria-label="下一張" onclick="heroCarouselMove(1)">&#8250;</button>
 
-      <!-- 底部圓點：對應上方 slide 數量，第 3 顆隨第 3 張 slide 一併隱藏（九長合照到位後恢復） -->
+      <!-- 底部圓點：對應上方 slide 數量（3 張：九長版／董顧／影片）。
+           2026-09-08 九長版介紹圖到位，第 3 顆 dot 恢復。 -->
       <div class="carousel-dots">
         <button class="carousel-dot active" aria-label="第 1 張" onclick="heroCarouselGo(0)"></button>
         <button class="carousel-dot" aria-label="第 2 張" onclick="heroCarouselGo(1)"></button>
-        <!-- <button class="carousel-dot" aria-label="第 3 張" onclick="heroCarouselGo(2)"></button> -->
+        <button class="carousel-dot" aria-label="第 3 張" onclick="heroCarouselGo(2)"></button>
       </div>
 
     </div><!-- /photo-wrap -->
