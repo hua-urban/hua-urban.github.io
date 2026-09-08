@@ -51,7 +51,7 @@ a{text-decoration:none;color:inherit}
 .navbar-inner{height:100%;display:flex;align-items:center;justify-content:space-between}
 .navbar-brand{display:flex;align-items:center;gap:10px;line-height:1}
 .nav-list{margin:0}
-.brand-logo{display:block;flex-shrink:0}
+.brand-logo{display:block;flex-shrink:0;height:30px;width:auto}
 .brand-divider{width:1px;height:22px;background:var(--gray-300, #d4d8de)}
 .brand-name{font-size:15px;font-weight:700;color:var(--gray-900);letter-spacing:-.01em;white-space:nowrap}
 .brand-name span{color:var(--red)}
@@ -1385,10 +1385,14 @@ section[id]{scroll-margin-top:68px}
   <div class="container">
     <div class="navbar-inner">
       <div class="navbar-brand">
-        <svg class="brand-logo" width="58" height="30" viewBox="0 0 116 60" xmlns="http://www.w3.org/2000/svg" aria-label="BNI">
-          <text x="0" y="46" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="48" fill="#CF2030" letter-spacing="-1">BNI</text>
-          <text x="104" y="20" font-family="Arial, sans-serif" font-size="13" fill="#CF2030">&#174;</text>
-        </svg>
+        <!-- BRAND_LOGO_OFFICIAL_2026Q3（2026-09-08 換）：原本是用 Arial Black 自繪的近似
+             字樣（2026-06 當時抓不到官方檔才自繪），字重與 ® 位置都與官方標準不同。
+             改用官方 logo 圖檔；WebP 為主、PNG 供舊瀏覽器回退。
+             寬高比 2.604:1 依原圖等比設定，避免變形。 -->
+        <picture>
+          <source srcset="assets/bni-logo.webp" type="image/webp">
+          <img class="brand-logo" src="assets/bni-logo.png" width="78" height="30" alt="BNI">
+        </picture>
         <span class="brand-divider"></span>
         <span class="brand-name">華都更 <span>Hua Urban+</span></span>
       </div>
