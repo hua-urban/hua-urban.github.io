@@ -1808,7 +1808,7 @@ section[id]{scroll-margin-top:68px}
       </div>
     </div>
     <div class="chains" id="chainsContainer">
-      <!-- A 地主改建整合鏈：2026-07-03 王春雄公告官方固定時段，每月第 1、3 個週四（GROUP_ROTATION_2026Q3） -->
+      <!-- A 地主改建整合鏈：每月第 1、3 個週四 21:00 起（2026-09-14 陳昭男調整，原 20:30；GROUP_ROTATION_2026Q3） -->
       <div class="chain ca">
         <div class="chain-badge">A</div>
         <div class="chain-name">A 地主改建整合鏈</div>
@@ -1828,7 +1828,7 @@ section[id]{scroll-margin-top:68px}
           <div><strong>下次組聚：</strong><span class="chain-next" data-chain="B">（時間待定）</span></div>
         </div>
       </div>
-      <!-- C 高齡安居 × 資產傳承產業鏈：每月第 2、4 個週四（GROUP_ROTATION_2026Q3） -->
+      <!-- C 高齡安居 × 資產傳承產業鏈：每月第 2、4 個週一（2026-09-14 陳昭男由週四改週一；GROUP_ROTATION_2026Q3） -->
       <div class="chain cc">
         <div class="chain-badge">C</div>
         <div class="chain-name">C 高齡安居 × 資產傳承產業鏈</div>
@@ -2065,20 +2065,21 @@ var GAS_CAL_URL = 'https://script.google.com/macros/s/AKfycbyCL7tHMfIkHHAhL0WDX-
 // GROUP_ROTATION — Power Team 五組官方固定組聚時段（GROUP_ROTATION_2026Q3，2026-07-03 全面更新）
 // 2026-07-03 王春雄（C 組組長）公告五組官方固定時段，取代原本 A/B/C 走 Sheet「雙週」推算
 // （已失準，例：B 組新規則下次是 7/10 不是舊推算的 7/3）。五組全部改「每月第 N 個指定星期」：
-//   A 地主改建整合鏈（柳慧燕）　　　　每月第 1、3 個週四・線上 20:30–22:00
+//   A 地主改建整合鏈（柳慧燕）　　　　每月第 1、3 個週四・線上 21:00–22:00
 //   B 老屋現金流升級鏈（陳靖薇）　　　每月第 2、4 個週五・線上 21:00–22:00
-//   C 高齡安居×資產傳承（王春雄 Jayson）每月第 2、4 個週四・線上 21:00–22:00
+//   C 高齡安居×資產傳承（王春雄 Jayson）每月第 2、4 個週一・線上 21:00–22:00
 //   D 商用不動產升級鏈（陳向柔 Naomi）每月第 2、4 個週二・線上 21:00–22:00／實體 19:00–21:00
 //   E 房產客戶成長鏈（洪嘉璿左左）　　每月第 1、3 個週二・線上 20:30–21:30
 // 該月第 5 個指定星期兩組都休（沿用 D/E 舊制的邊界規則，泛化到全部五組）。
 // 遇受訓／課程當週可能整月取消，實際以分會 LINE 群公告為準；前端不計算此例外，只在文案註記。
 // 2026-08-26 E 組組長交接：召集人改為洪嘉璿左左（本頁 2026-09-02 補上，與 bni-pt-groups 一致）。
+// 2026-09-14 成長協調 NO.035 陳昭男調整兩組：A 改 21:00 開始（原 20:30）；C 由週四改週一（weekday 4→1）。
 // 未來規則若變，只需要改這個物件，不必動計算邏輯。weekday：0=日...6=六（JS Date.getDay() 慣例）。
 // ─────────────────────────────────────────────
 var GROUP_ROTATION = {
-  'A': { weeks:[1,3], weekday:4, chainName:'地主改建整合鏈',       leader:'柳慧燕',        timeText:'線上 20:30–22:00' },
+  'A': { weeks:[1,3], weekday:4, chainName:'地主改建整合鏈',       leader:'柳慧燕',        timeText:'線上 21:00–22:00' },
   'B': { weeks:[2,4], weekday:5, chainName:'老屋現金流升級鏈',     leader:'陳靖薇',        timeText:'線上 21:00–22:00' },
-  'C': { weeks:[2,4], weekday:4, chainName:'高齡安居 × 資產傳承',  leader:'王春雄 Jayson', timeText:'線上 21:00–22:00' },
+  'C': { weeks:[2,4], weekday:1, chainName:'高齡安居 × 資產傳承',  leader:'王春雄 Jayson', timeText:'線上 21:00–22:00' },
   'D': { weeks:[2,4], weekday:2, chainName:'商用不動產升級鏈',     leader:'陳向柔 Naomi',  timeText:'線上 21:00–22:00／實體 19:00–21:00' },
   'E': { weeks:[1,3], weekday:2, chainName:'房產客戶成長鏈',       leader:'洪嘉璿左左',    timeText:'線上 20:30–21:30' }
 };
