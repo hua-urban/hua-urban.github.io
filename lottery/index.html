@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>BNI 晨光抽獎</title>
+<style>
+:root{
+  --red:#C8102E; --gold:#C8A04F; --gold-soft:#e8d4a4;
+  --ink:#1A1A1A; --dim:#6b6b6b; --line:#e2ddd2;
+  --paper:#F5F3EE; --white:#fff;
+  --stage:#16130f; --stage2:#241e16;
+  --ok:#2e7d52; --warn:#b4531f;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  font-size:16px; line-height:1.6;
+}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select{font:inherit;color:inherit}
+
+/* ---------- 版面 ---------- */
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px 48px}
+header{
+  position:sticky;top:0;z-index:20;background:var(--paper);
+  border-bottom:1px solid var(--line);
+}
+.bar{max-width:1100px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-weight:800;letter-spacing:.06em;font-size:18px}
+.brand span{color:var(--red)}
+.today{margin-left:auto;font-size:14px;color:var(--dim)}
+nav{display:flex;gap:4px;max-width:1100px;margin:0 auto;padding:0 16px 8px;flex-wrap:wrap}
+nav button{
+  padding:8px 16px;border-radius:999px;font-size:15px;font-weight:600;color:var(--dim);
+  border:1px solid transparent;
+}
+nav button.on{background:var(--ink);color:var(--white)}
+nav button:not(.on):hover{border-color:var(--line);background:var(--white)}
+.page{display:none;padding-top:20px}
+.page.on{display:block}
+
+/* ---------- 抽獎舞台 ---------- */
+.stage{
+  background:linear-gradient(160deg,var(--stage) 0%,var(--stage2) 100%);
+  border-radius:20px;padding:28px 20px 32px;color:#f4efe6;text-align:center;
+  box-shadow:0 14px 40px rgba(0,0,0,.22);
+}
+.slot{
+  font-size:14px;letter-spacing:.22em;color:var(--gold);font-weight:700;
+  text-transform:uppercase;
+}
+.giftline{margin-top:10px;font-size:clamp(17px,3.4vw,24px);font-weight:700;color:var(--gold-soft)}
+.sponsorline{margin-top:4px;font-size:14px;color:#9d9285}
+.display{
+  margin:22px auto 8px;min-height:clamp(110px,22vw,168px);
+  display:flex;align-items:center;justify-content:center;
+  border-top:1px solid rgba(200,160,79,.28);border-bottom:1px solid rgba(200,160,79,.28);
+  padding:14px 6px;overflow:hidden;
+}
+.name{
+  font-size:clamp(34px,10vw,84px);font-weight:900;letter-spacing:.02em;line-height:1.15;
+  word-break:break-all;
+}
+.name.rolling{color:#8a8175}
+.name.win{color:var(--gold);text-shadow:0 0 28px rgba(200,160,79,.45);animation:pop .5s ease}
+@keyframes pop{0%{transform:scale(.86);opacity:.3}60%{transform:scale(1.06)}100%{transform:scale(1)}}
+.prof{font-size:clamp(13px,2.4vw,16px);color:#a79c8c;min-height:24px}
+.stagebtns{margin-top:22px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.big{
+  padding:15px 40px;border-radius:999px;font-size:18px;font-weight:800;letter-spacing:.04em;
+  background:var(--gold);color:#1b1408;
+}
+.big:disabled{opacity:.35;cursor:not-allowed}
+.ghost{padding:15px 26px;border-radius:999px;font-weight:700;border:1px solid rgba(244,239,230,.3);color:#e8e1d5}
+.poolinfo{margin-top:16px;font-size:14px;color:#9d9285}
+
+/* ---------- 卡片與表單 ---------- */
+.card{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:16px}
+.card h2{font-size:16px;font-weight:800;margin-bottom:4px}
+.card .hint{font-size:13px;color:var(--dim);margin-bottom:14px}
+.grid{display:grid;gap:12px}
+@media(min-width:760px){.grid.two{grid-template-columns:1fr 1fr}}
+label.f{display:block;font-size:13px;font-weight:700;color:var(--dim);margin-bottom:5px}
+.in{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--white)}
+.in:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,160,79,.18)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{padding:9px 16px;border-radius:9px;font-weight:700;font-size:14px;border:1px solid var(--line);background:var(--white)}
+.btn:hover{border-color:var(--gold)}
+.btn.solid{background:var(--ink);color:var(--white);border-color:var(--ink)}
+.btn.danger{color:var(--red);border-color:#f0cfd5}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700}
+.pill.g{background:#e8f2ec;color:var(--ok)}
+.pill.y{background:#fbf0e3;color:var(--warn)}
+.pill.r{background:#fbe9ec;color:var(--red)}
+
+/* ---------- 出席名單 ---------- */
+.people{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:7px;margin-top:12px}
+.person{
+  display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line);
+  border-radius:9px;background:var(--white);cursor:pointer;font-size:14px;
+}
+.person.off{opacity:.42;background:#faf9f6}
+.person input{margin-top:3px;flex:none;width:16px;height:16px;accent-color:var(--gold)}
+.person .nm{font-weight:700;line-height:1.3}
+.person .pf{font-size:11px;color:var(--dim);line-height:1.3}
+.person .tag{font-size:10px;font-weight:800;color:var(--gold);letter-spacing:.04em}
+
+/* ---------- 表格 ---------- */
+.tblwrap{overflow-x:auto;margin-top:12px;border:1px solid var(--line);border-radius:11px}
+table{width:100%;border-collapse:collapse;font-size:14px;background:var(--white);min-width:560px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{background:#faf8f4;font-size:12px;font-weight:800;color:var(--dim);letter-spacing:.04em}
+tr:last-child td{border-bottom:none}
+td.wide{white-space:normal;min-width:150px}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.stat{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:14px}
+.stat b{display:block;font-size:26px;font-weight:900;line-height:1.2}
+.stat span{font-size:12px;color:var(--dim);font-weight:700}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 11px;font-size:13px}
+
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+  background:var(--ink);color:var(--white);padding:11px 20px;border-radius:999px;
+  font-size:14px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:60;
+  max-width:90vw;text-align:center;
+}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+dialog{border:none;border-radius:16px;padding:0;max-width:440px;width:92vw}
+dialog::backdrop{background:rgba(20,16,10,.5)}
+.dlg{padding:22px}
+.dlg h3{font-size:17px;margin-bottom:8px}
+.dlg p{font-size:14px;color:var(--dim);margin-bottom:16px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <div class="brand">BNI <span>晨光抽獎</span></div>
+    <div class="today" id="todayLabel"></div>
+  </div>
+  <nav>
+    <button data-tab="draw" class="on">抽獎</button>
+    <button data-tab="setup">今日設定</button>
+    <button data-tab="log">紀錄</button>
+    <button data-tab="people">名單</button>
+  </nav>
+</header>
+
+<div class="wrap">
+
+<!-- ============ 抽獎 ============ -->
+<section class="page on" id="p-draw">
+  <div class="stage">
+    <div class="slot" id="slotLabel">第一輪 · 6:45</div>
+    <div class="giftline" id="giftLabel">尚未設定禮品</div>
+    <div class="sponsorline" id="sponsorLabel">到「今日設定」填寫禮品與贊助人</div>
+    <div class="display"><div class="name" id="nameBox">準備好了</div></div>
+    <div class="prof" id="profBox"></div>
+    <div class="stagebtns">
+      <button class="big" id="btnDraw">開始抽獎</button>
+      <button class="ghost" id="btnConfirm" hidden>確認送出</button>
+      <button class="ghost" id="btnRedraw" hidden>重抽</button>
+    </div>
+    <div class="poolinfo" id="poolInfo"></div>
+  </div>
+
+  <div class="card">
+    <h2>今天的兩輪</h2>
+    <div class="hint">抽完會自動記錄，不用另外存。</div>
+    <div class="tblwrap">
+      <table id="todayTbl"><thead><tr>
+        <th>輪次</th><th>禮品</th><th>贊助人</th><th>中獎</th><th></th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 今日設定 ============ -->
+<section class="page" id="p-setup">
+  <div class="card">
+    <h2>今天的場次</h2>
+    <div class="hint">日期預設帶今天。每週三晨光時間兩輪：6:45、6:50。</div>
+    <div class="grid two">
+      <div><label class="f">日期</label><input type="date" class="in" id="sDate"></div>
+      <div><label class="f">抽獎規則</label>
+        <select class="in" id="sMode">
+          <option value="exclude">中過的人不進獎池（建議）</option>
+          <option value="weighted">中過的人只降低機率</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>第一輪 · 6:45</h2>
+    <div class="grid two">
+      <div><label class="f">禮品</label><input class="in" id="g1" placeholder="例如：眼睛的保健食品"></div>
+      <div><label class="f">贊助人</label><input class="in" id="s1" list="memberList" placeholder="輸入姓名"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>第二輪 · 6:50</h2>
+    <div class="grid two">
+      <div><label class="f">禮品</label><input class="in" id="g2" placeholder="同一份禮品就填一樣的"></div>
+      <div><label class="f">贊助人</label><input class="in" id="s2" list="memberList" placeholder="輸入姓名"></div>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn" id="btnSameAs1">跟第一輪一樣</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>今天有到場的人</h2>
+    <div class="hint">只有勾起來的人會進獎池。<b id="attCount"></b></div>
+    <div class="row">
+      <button class="btn" id="btnAll">全部勾選</button>
+      <button class="btn" id="btnNone">全部取消</button>
+      <button class="btn solid" id="btnSaveSetup">儲存設定</button>
+    </div>
+    <div class="people" id="attBox"></div>
+  </div>
+  <datalist id="memberList"></datalist>
+</section>
+
+<!-- ============ 紀錄 ============ -->
+<section class="page" id="p-log">
+  <div class="stats" style="margin-top:16px">
+    <div class="stat"><b id="stMeet">0</b><span>已辦場次</span></div>
+    <div class="stat"><b id="stGift">0</b><span>送出獎品</span></div>
+    <div class="stat"><b id="stWon">0</b><span>中過獎的夥伴</span></div>
+    <div class="stat"><b id="stNever">0</b><span>還沒中過</span></div>
+  </div>
+
+  <div class="card">
+    <h2>還沒中過獎的夥伴</h2>
+    <div class="hint">這些人目前在獎池裡。</div>
+    <div class="chips" id="neverBox"></div>
+  </div>
+
+  <div class="card">
+    <h2>中獎次數</h2>
+    <div class="tblwrap">
+      <table id="cntTbl"><thead><tr><th>次數</th><th>夥伴</th><th>狀態</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>全部紀錄</h2>
+    <div class="row">
+      <button class="btn" id="btnCsv">匯出表格檔</button>
+      <button class="btn" id="btnBackup">下載備份</button>
+      <button class="btn" id="btnRestore">還原備份</button>
+      <input type="file" id="fileIn" accept="application/json" hidden>
+    </div>
+    <div class="tblwrap">
+      <table id="logTbl"><thead><tr>
+        <th>日期</th><th>輪次</th><th>禮品</th><th>贊助人</th><th>中獎人</th><th></th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 名單 ============ -->
+<section class="page" id="p-people">
+  <div class="card">
+    <h2>分會名單</h2>
+    <div class="hint">離會的人請按「設為離會」，歷史紀錄會保留，但不再進獎池。</div>
+    <div class="row">
+      <input class="in" id="newName" placeholder="姓名" style="max-width:190px">
+      <input class="in" id="newProf" placeholder="專業別" style="max-width:260px">
+      <button class="btn solid" id="btnAddPerson">新增夥伴</button>
+    </div>
+    <div class="tblwrap">
+      <table id="memTbl"><thead><tr>
+        <th>姓名</th><th>專業別</th><th>中獎</th><th>狀態</th><th></th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<dialog id="confirmDlg"><div class="dlg">
+  <h3 id="dlgTitle">確認</h3>
+  <p id="dlgBody"></p>
+  <div class="row" style="justify-content:flex-end">
+    <button class="btn" id="dlgNo">取消</button>
+    <button class="btn solid" id="dlgYes">確定</button>
+  </div>
+</div></dialog>
+
+<script>
+/* ============================================================
+   BNI 晨光抽獎機
+   資料全部存在這台裝置（localStorage），離線可用。
+   ============================================================ */
+const SEED = {"members": [{"name": "王常殷Hubert", "profession": "都更危老建設-新竹地區"}, {"name": "藍堂嘉", "profession": "包租代管平台負責人"}, {"name": "劉羿岑", "profession": "節能減碳顧問"}, {"name": "陳向柔Naomi", "profession": "商業空間室內設計-新竹以北"}, {"name": "劉恩秀Joan", "profession": "人力派遣"}, {"name": "周以仁", "profession": "仲介經紀人-台北市大安區"}, {"name": "張瓊安", "profession": "仲介經紀人-新北市三重、蘆洲、新莊"}, {"name": "高翊書Eason", "profession": "都更危老建設-台北市信義區"}, {"name": "王寶佳Renee", "profession": "置產投資客-台北市萬華區"}, {"name": "王春雄Jayson", "profession": "理財規劃顧問-雙北"}, {"name": "陳靖薇", "profession": "包租代管-台北市內湖、松山區"}, {"name": "蘇瓜雅", "profession": "財務管理-不動產聯合開發-台北市"}, {"name": "施宜妏", "profession": "金融業-法務顧問"}, {"name": "莊大永", "profession": "地主召集人-台東市-自主更新"}, {"name": "莊涵勝", "profession": "仲介經紀人-台北市信義區"}, {"name": "黃冠霖", "profession": "證券交易系統-軟體工程師"}, {"name": "諸紀平", "profession": "住宅室內設計裝修-台北市"}, {"name": "陳秒螢Emma", "profession": "房屋貸款-新竹以北"}, {"name": "李艾莉Aili", "profession": "工業蒸氣熱能系統"}, {"name": "吳翊辰", "profession": "地政士-中彰投雲嘉南"}, {"name": "黃郁婷", "profession": "金融業-財務"}, {"name": "林必涵", "profession": "農地廠房收租-台中"}, {"name": "蔡明璋", "profession": "合法隔套置產投資-台北市大安、中正區"}, {"name": "王佳筠", "profession": "建案代銷專案管理-北部"}, {"name": "楊之慧", "profession": "金融業-後台交割"}, {"name": "陳黎玲Jossie", "profession": "會展空間裝修設計-新竹以北"}, {"name": "林佩君", "profession": "仲介經紀人-台北市中山區"}, {"name": "林媜媁Wei", "profession": "資通訊業-財務分析師"}, {"name": "李慧如Eva", "profession": "再造回收過濾鐵網、太空包"}, {"name": "凃馨文Wen", "profession": "家電B2B"}, {"name": "柳慧燕", "profession": "危老都更推動建築師-台北市"}, {"name": "宋馨巧", "profession": "韓語線上家教"}, {"name": "張瑜晏", "profession": "不動產估價與鑑定-雙北、桃園"}, {"name": "陳昭男", "profession": "都更土地開發-台北市"}, {"name": "包育翎", "profession": "地主召集人-高雄市鳳山區"}, {"name": "蔡岱達", "profession": "磁磚經銷商-台中以北"}, {"name": "蔡淯思Mina", "profession": "ERP專案管理"}, {"name": "詹媛婷", "profession": "房貸減壓-台北市"}, {"name": "王雅慧Peggy", "profession": "置產投資客-台北市中山、大同區"}, {"name": "何俊彥", "profession": "老屋翻新包租代管-台北市"}, {"name": "周育慈Anna", "profession": "包租代管-台北市大安區"}, {"name": "洪嘉璿左左", "profession": "MMT天賦諮詢師"}, {"name": "鍾智媛Fiona", "profession": "商務中心-台北市大安、中山區"}, {"name": "林中群", "profession": "鋼結構防蝕工程"}, {"name": "蔡馨葳Mandy", "profession": "人壽財務規劃-桃園"}, {"name": "林晏伃", "profession": "都更長照建築師-台北市"}, {"name": "李瑞雲Grace", "profession": "置產投資客-台北市松山區"}, {"name": "謝夢瑰Dian", "profession": "高資產房地產顧問-台北"}, {"name": "張怡蘋April", "profession": "工程顧問"}, {"name": "張耕豪", "profession": "大板磚工程-連工帶料"}, {"name": "陳品攸", "profession": "商業法律顧問"}, {"name": "吳念鎧", "profession": "仲介經紀人-大新竹區"}, {"name": "沈瑞婷", "profession": "智慧物流導入顧問"}, {"name": "古育瑋", "profession": "廠房建築師與營造-桃竹苗"}, {"name": "王振伊（喬王）", "profession": "房產財經教育"}], "history": [{"date": "2026-05-06", "round": 1, "epoch": 1, "gift": "星巴克咖啡券", "sponsor": "愛莉老師", "winner": "莊慧劍", "ts": "2026-05-06T06:45:00"}, {"date": "2026-05-06", "round": 2, "epoch": 1, "gift": "星巴克咖啡券", "sponsor": "愛莉老師", "winner": "周以仁", "ts": "2026-05-06T06:50:00"}, {"date": "2026-05-13", "round": 1, "epoch": 1, "gift": "中興公司公益咖啡禮盒", "sponsor": "張怡蘋April", "winner": "張瓊安", "ts": "2026-05-13T06:45:00"}, {"date": "2026-05-13", "round": 2, "epoch": 1, "gift": "中興公司公益咖啡禮盒", "sponsor": "張怡蘋April", "winner": "蔡明璋", "ts": "2026-05-13T06:50:00"}, {"date": "2026-05-27", "round": 1, "epoch": 1, "gift": "自種無毒南瓜", "sponsor": "吳翊辰", "winner": "凃馨文Wen", "ts": "2026-05-27T06:45:00"}, {"date": "2026-05-27", "round": 2, "epoch": 1, "gift": "自種無毒南瓜", "sponsor": "吳翊辰", "winner": "黃冠霖", "ts": "2026-05-27T06:50:00"}, {"date": "2026-06-03", "round": 1, "epoch": 1, "gift": "玉荷包", "sponsor": "施宜妏", "winner": "莊慧劍", "ts": "2026-06-03T06:45:00"}, {"date": "2026-06-10", "round": 1, "epoch": 1, "gift": "滴雞精", "sponsor": "宋馨巧", "winner": "包育翎", "ts": "2026-06-10T06:45:00"}, {"date": "2026-06-10", "round": 2, "epoch": 1, "gift": "滴雞精", "sponsor": "宋馨巧", "winner": "周以仁", "ts": "2026-06-10T06:50:00"}, {"date": "2026-06-17", "round": 1, "epoch": 1, "gift": "巧克力海苔片", "sponsor": "劉恩秀Joan", "winner": "莊慧劍", "ts": "2026-06-17T06:45:00"}, {"date": "2026-06-17", "round": 2, "epoch": 1, "gift": "巧克力海苔片", "sponsor": "劉恩秀Joan", "winner": "王春雄Jayson", "ts": "2026-06-17T06:50:00"}, {"date": "2026-07-01", "round": 1, "epoch": 1, "gift": "禪香不二-善緣香", "sponsor": "林晏伃", "winner": "鍾智媛Fiona", "ts": "2026-07-01T06:45:00"}, {"date": "2026-07-08", "round": 1, "epoch": 1, "gift": "養生茶包", "sponsor": "李艾莉Aili", "winner": "古育瑋", "ts": "2026-07-08T06:45:00"}, {"date": "2026-07-08", "round": 2, "epoch": 1, "gift": "養生茶包", "sponsor": "李艾莉Aili", "winner": "李瑞雲Grace", "ts": "2026-07-08T06:50:00"}, {"date": "2026-07-15", "round": 1, "epoch": 1, "gift": "銀行發財水", "sponsor": "楊之慧", "winner": "陳向柔Naomi", "ts": "2026-07-15T06:45:00"}, {"date": "2026-07-15", "round": 2, "epoch": 1, "gift": "銀行發財水", "sponsor": "楊之慧", "winner": "王春雄Jayson", "ts": "2026-07-15T06:50:00"}, {"date": "2026-07-22", "round": 1, "epoch": 1, "gift": "牛樟芝B群", "sponsor": "林佩君", "winner": "黃建嘉", "ts": "2026-07-22T06:45:00"}, {"date": "2026-07-22", "round": 2, "epoch": 1, "gift": "牛樟芝B群", "sponsor": "林佩君", "winner": "吳翊辰", "ts": "2026-07-22T06:50:00"}, {"date": "2026-07-29", "round": 1, "epoch": 1, "gift": "茶葉禮盒", "sponsor": "張瑜晏", "winner": "凃馨文Wen", "ts": "2026-07-29T06:45:00"}, {"date": "2026-07-29", "round": 2, "epoch": 1, "gift": "茶葉禮盒", "sponsor": "張瑜晏", "winner": "何俊彥", "ts": "2026-07-29T06:50:00"}, {"date": "2026-08-05", "round": 1, "epoch": 1, "gift": "NAD+", "sponsor": "陳向柔Naomi", "winner": "莊涵勝", "ts": "2026-08-05T06:45:00"}, {"date": "2026-08-05", "round": 2, "epoch": 1, "gift": "美術展門票", "sponsor": "蔡馨葳Mandy", "winner": "王寶佳Renee", "ts": "2026-08-05T06:50:00"}, {"date": "2026-08-12", "round": 1, "epoch": 1, "gift": "巧克力", "sponsor": "宋馨巧", "winner": "陳向柔Naomi", "ts": "2026-08-12T06:45:00"}, {"date": "2026-08-12", "round": 2, "epoch": 1, "gift": "巧克力", "sponsor": "宋馨巧", "winner": "林晏伃", "ts": "2026-08-12T06:50:00"}, {"date": "2026-08-19", "round": 1, "epoch": 1, "gift": "買房人生課（作者簽名書）", "sponsor": "愛莉老師（華都更創會人）", "winner": "黃冠霖", "ts": "2026-08-19T06:45:00"}, {"date": "2026-08-19", "round": 2, "epoch": 1, "gift": "買房人生課（作者簽名書）", "sponsor": "愛莉老師（華都更創會人）", "winner": "蘇瓜雅", "ts": "2026-08-19T06:50:00"}, {"date": "2026-09-09", "round": 1, "epoch": 1, "gift": "能量襪", "sponsor": "王寶佳Renee", "winner": "陳靖薇", "ts": "2026-09-09T06:45:00"}, {"date": "2026-09-09", "round": 2, "epoch": 1, "gift": "能量襪", "sponsor": "王寶佳Renee", "winner": "何俊彥", "ts": "2026-09-09T06:50:00"}, {"date": "2026-09-16", "round": 1, "epoch": 1, "gift": "粗粒花生奶酥", "sponsor": "王常殷Hubert", "winner": "宋馨巧", "ts": "2026-09-16T06:45:00"}, {"date": "2026-09-16", "round": 2, "epoch": 1, "gift": "粗粒花生奶酥", "sponsor": "王常殷Hubert", "winner": "柳慧燕", "ts": "2026-09-16T06:50:00"}]};
+const KEY = 'bni-lottery-v1';
+const ROUNDS = [{n:1,label:'第一輪 · 6:45'},{n:2,label:'第二輪 · 6:50'}];
+
+/* ---------- 資料層 ---------- */
+function todayStr(){
+  const d=new Date(); const p=x=>String(x).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+}
+function freshState(){
+  return {
+    members: SEED.members.map(m=>({...m, active:true})),
+    history: SEED.history.slice(),
+    epoch: 1,
+    settings: {mode:'exclude'},
+    today: {date: todayStr(), attendees:null, rounds:[{gift:'',sponsor:''},{gift:'',sponsor:''}]}
+  };
+}
+let S;
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw){ S = JSON.parse(raw); migrate(); save(); return; }
+  }catch(e){ console.warn('讀取失敗，改用預設資料', e); }
+  S = freshState(); save();
+}
+function migrate(){
+  S.members ||= []; S.history ||= []; S.epoch ||= 1;
+  S.settings ||= {mode:'exclude'};
+  S.today ||= {date:todayStr(), attendees:null, rounds:[{gift:'',sponsor:''},{gift:'',sponsor:''}]};
+  // 換日一律把日期推到今天，出席重新來過。
+  // 但前一晚先填好隔天的禮品與贊助人是規格上的正常流程（現場流程第 1 步），
+  // 那種情況要把填好的內容帶過來，不能過了午夜就清掉。
+  if(S.today.date !== todayStr()){
+    const drawn  = S.history.some(h=>h.date===S.today.date);
+    const rounds = S.today.rounds || [];
+    const filled = rounds.some(r=>r && (r.gift||r.sponsor));
+    const carry  = (!drawn && filled)
+      ? rounds.map(r=>({gift:(r&&r.gift)||'', sponsor:(r&&r.sponsor)||''}))
+      : [{gift:'',sponsor:''},{gift:'',sponsor:''}];
+    S.today = {date:todayStr(), attendees:null, rounds:carry};
+  }
+  S.members.forEach(m=>{ if(m.active===undefined) m.active=true; });
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(S)); }
+  catch(e){ toast('存檔失敗，請先匯出備份'); }
+}
+
+/* ---------- 共用查詢 ---------- */
+const activeMembers = ()=> S.members.filter(m=>m.active);
+const memberByName = n => S.members.find(m=>m.name===n);
+function winCount(name, epoch){
+  return S.history.filter(h=>h.winner===name && (epoch==null || (h.epoch||1)===epoch)).length;
+}
+function wonThisEpoch(name){ return winCount(name, S.epoch) > 0; }
+function attendeeNames(){
+  if(!S.today.attendees) return activeMembers().map(m=>m.name);
+  const set = new Set(S.today.attendees);
+  return activeMembers().filter(m=>set.has(m.name)).map(m=>m.name);
+}
+function drawnToday(round){
+  return S.history.find(h=>h.date===S.today.date && h.round===round);
+}
+/** 目前這一輪的候選池 [{name, weight}] */
+function pool(round){
+  const already = new Set(S.history.filter(h=>h.date===S.today.date).map(h=>h.winner));
+  let names = attendeeNames().filter(n=>!already.has(n));
+  if(S.settings.mode==='exclude'){
+    const fresh = names.filter(n=>!wonThisEpoch(n));
+    if(fresh.length) return fresh.map(n=>({name:n, weight:1}));
+    return {empty:true, names};           // 全員都中過 → 需要開新一輪
+  }
+  return names.map(n=>({name:n, weight: 1/(winCount(n,S.epoch)+1)}));
+}
+
+/* ---------- 抽選 ---------- */
+function pickWeighted(list){
+  const total = list.reduce((a,b)=>a+b.weight,0);
+  let r = Math.random()*total;
+  for(const it of list){ r -= it.weight; if(r<=0) return it.name; }
+  return list[list.length-1].name;
+}
+
+/* ---------- 介面小工具 ---------- */
+const $ = s=>document.querySelector(s);
+const $$ = s=>[...document.querySelectorAll(s)];
+let toastTimer;
+function toast(msg){
+  const t=$('#toast'); t.textContent=msg; t.classList.add('on');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('on'),2600);
+}
+function ask(title, body){
+  return new Promise(res=>{
+    $('#dlgTitle').textContent=title; $('#dlgBody').textContent=body;
+    const d=$('#confirmDlg'); d.showModal();
+    const done=v=>{ d.close(); $('#dlgYes').onclick=null; $('#dlgNo').onclick=null; res(v); };
+    $('#dlgYes').onclick=()=>done(true); $('#dlgNo').onclick=()=>done(false);
+  });
+}
+
+/* ---------- 分頁 ---------- */
+$$('nav button').forEach(b=>b.onclick=()=>{
+  $$('nav button').forEach(x=>x.classList.toggle('on', x===b));
+  $$('.page').forEach(p=>p.classList.toggle('on', p.id==='p-'+b.dataset.tab));
+  window.scrollTo({top:0,behavior:'smooth'});
+  renderAll();
+});
+
+/* ============================================================
+   抽獎頁
+   ============================================================ */
+let currentRound = 1, rolling=false, pendingWinner=null;
+
+function nextRound(){
+  for(const r of ROUNDS){ if(!drawnToday(r.n)) return r.n; }
+  return null;
+}
+function renderDraw(){
+  const rn = pendingWinner ? currentRound : (nextRound() ?? ROUNDS[ROUNDS.length-1].n);
+  currentRound = rn;
+  const meta = ROUNDS.find(r=>r.n===rn) || ROUNDS[0];
+  const cfg = S.today.rounds[rn-1] || {gift:'',sponsor:''};
+  $('#slotLabel').textContent = meta.label;
+  $('#giftLabel').textContent = cfg.gift || '尚未設定禮品';
+  $('#sponsorLabel').textContent = cfg.sponsor ? `贊助人：${cfg.sponsor}` : '到「今日設定」填寫禮品與贊助人';
+
+  const done = nextRound()===null && !pendingWinner;
+  const p = pool(rn);
+  const poolSize = p.empty ? 0 : p.length;
+
+  if(done){
+    $('#nameBox').textContent='今天抽完了';
+    $('#nameBox').className='name';
+    $('#profBox').textContent='紀錄已存好，可以到「紀錄」分頁看。';
+    $('#btnDraw').hidden=true;
+  }else if(!pendingWinner && !rolling){
+    $('#nameBox').textContent='準備好了';
+    $('#nameBox').className='name';
+    $('#profBox').textContent='';
+    $('#btnDraw').hidden=false;
+    $('#btnDraw').disabled = poolSize===0 && !p.empty;
+  }
+  $('#btnConfirm').hidden = !pendingWinner;
+  $('#btnRedraw').hidden = !pendingWinner;
+  if(pendingWinner) $('#btnDraw').hidden = true;
+
+  $('#poolInfo').textContent = p.empty
+    ? '全部夥伴都中過一輪了，按開始抽獎會自動開新的一輪。'
+    : `獎池 ${poolSize} 人 · 出席 ${attendeeNames().length} 人 · 規則：${S.settings.mode==='exclude'?'中過的人不進池':'中過的人降低機率'}`;
+
+  const tb=$('#todayTbl tbody'); tb.innerHTML='';
+  ROUNDS.forEach(r=>{
+    const rec = drawnToday(r.n); const cfg2 = S.today.rounds[r.n-1]||{};
+    const tr=document.createElement('tr');
+    tr.innerHTML = `<td>${r.label}</td>
+      <td class="wide">${esc(rec? rec.gift : (cfg2.gift||'—'))}</td>
+      <td>${esc(rec? rec.sponsor : (cfg2.sponsor||'—'))}</td>
+      <td><b>${rec? esc(rec.winner) : '<span style="color:#6b6b6b">未抽</span>'}</b></td>
+      <td>${rec? `<button class="btn danger" data-undo="${r.n}">撤銷</button>`:''}</td>`;
+    tb.appendChild(tr);
+  });
+  tb.querySelectorAll('[data-undo]').forEach(b=>b.onclick=async()=>{
+    const rn2=+b.dataset.undo;
+    if(await ask('撤銷這一輪？','會把這一輪的中獎紀錄刪掉，可以重抽。')){
+      S.history = S.history.filter(h=>!(h.date===S.today.date && h.round===rn2));
+      save(); pendingWinner=null; renderAll(); toast('已撤銷');
+    }
+  });
+}
+
+function startRoll(){
+  if(rolling) return;
+  const cfg = S.today.rounds[currentRound-1]||{};
+  if(!cfg.gift){ toast('先到「今日設定」填今天的禮品'); return; }
+
+  let p = pool(currentRound);
+  if(p.empty){
+    S.epoch += 1; save();
+    toast(`全員都中過，開始第 ${S.epoch} 輪`);
+    p = pool(currentRound);
+  }
+  if(!p.length){ toast('獎池沒有人，檢查出席名單'); return; }
+
+  rolling=true; pendingWinner=null;
+  $('#btnDraw').disabled=true; $('#btnConfirm').hidden=true; $('#btnRedraw').hidden=true;
+  const box=$('#nameBox'); box.className='name rolling'; $('#profBox').textContent='';
+
+  const names = p.map(x=>x.name);
+  const winner = pickWeighted(p);
+  const t0 = performance.now();
+  const DUR = 3200;
+  let last=0;
+  function frame(t){
+    const e = t-t0;
+    if(e>=DUR){
+      box.textContent = winner; box.className='name win';
+      const m = memberByName(winner);
+      $('#profBox').textContent = m && m.profession ? m.profession : '';
+      rolling=false; pendingWinner=winner;
+      renderDraw();
+      return;
+    }
+    // 由快到慢
+    const prog = e/DUR;
+    const gap = 42 + Math.pow(prog,3)*320;
+    if(t-last >= gap){
+      box.textContent = names[Math.floor(Math.random()*names.length)];
+      last=t;
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+function confirmWinner(){
+  if(!pendingWinner) return;
+  const cfg = S.today.rounds[currentRound-1]||{};
+  S.history.push({
+    date:S.today.date, round:currentRound, epoch:S.epoch,
+    gift:cfg.gift||'', sponsor:cfg.sponsor||'', winner:pendingWinner,
+    ts:new Date().toISOString()
+  });
+  save();
+  const w=pendingWinner; pendingWinner=null;
+  renderAll(); toast(`已記錄：${w}`);
+}
+
+$('#btnDraw').onclick = startRoll;
+$('#btnConfirm').onclick = confirmWinner;
+$('#btnRedraw').onclick = ()=>{ pendingWinner=null; renderDraw(); startRoll(); };
+
+/* ============================================================
+   今日設定
+   ============================================================ */
+function renderSetup(){
+  $('#sDate').value = S.today.date;
+  $('#sMode').value = S.settings.mode;
+  $('#g1').value = S.today.rounds[0].gift; $('#s1').value = S.today.rounds[0].sponsor;
+  $('#g2').value = S.today.rounds[1].gift; $('#s2').value = S.today.rounds[1].sponsor;
+
+  const dl=$('#memberList'); dl.innerHTML='';
+  activeMembers().forEach(m=>{ const o=document.createElement('option'); o.value=m.name; dl.appendChild(o); });
+
+  const chosen = new Set(attendeeNames());
+  const box=$('#attBox'); box.innerHTML='';
+  activeMembers().forEach(m=>{
+    const on = chosen.has(m.name);
+    const el=document.createElement('label');
+    el.className='person'+(on?'':' off');
+    el.innerHTML=`<input type="checkbox" ${on?'checked':''}>
+      <span><span class="nm">${esc(m.name)}</span>
+      <span class="pf">${esc(m.profession||'')}</span>
+      ${wonThisEpoch(m.name)?'<span class="tag">已中過</span>':''}</span>`;
+    el.querySelector('input').onchange=e=>{
+      const names = new Set(attendeeNames());
+      e.target.checked ? names.add(m.name) : names.delete(m.name);
+      S.today.attendees=[...names]; save(); renderSetup(); renderDraw();
+    };
+    box.appendChild(el);
+  });
+  $('#attCount').textContent = `目前勾了 ${chosen.size} 人`;
+}
+$('#sDate').onchange=e=>{ S.today.date=e.target.value; save(); renderAll(); };
+$('#sMode').onchange=e=>{ S.settings.mode=e.target.value; save(); renderAll(); };
+[['#g1',0,'gift'],['#s1',0,'sponsor'],['#g2',1,'gift'],['#s2',1,'sponsor']].forEach(([sel,i,k])=>{
+  $(sel).oninput=e=>{ S.today.rounds[i][k]=e.target.value.trim(); save(); renderDraw(); };
+});
+$('#btnSameAs1').onclick=()=>{
+  S.today.rounds[1]={...S.today.rounds[0]}; save(); renderSetup(); renderDraw(); toast('已複製第一輪');
+};
+$('#btnAll').onclick=()=>{ S.today.attendees=activeMembers().map(m=>m.name); save(); renderSetup(); renderDraw(); };
+$('#btnNone').onclick=()=>{ S.today.attendees=[]; save(); renderSetup(); renderDraw(); };
+$('#btnSaveSetup').onclick=()=>{ save(); toast('設定已存'); };
+
+/* ============================================================
+   紀錄
+   ============================================================ */
+function renderLog(){
+  const meetings = new Set(S.history.map(h=>h.date));
+  const names = activeMembers().map(m=>m.name);
+  const won = names.filter(n=>winCount(n)>0);
+  const never = names.filter(n=>winCount(n)===0);
+  $('#stMeet').textContent=meetings.size;
+  $('#stGift').textContent=S.history.length;
+  $('#stWon').textContent=won.length;
+  $('#stNever').textContent=never.length;
+
+  const nb=$('#neverBox'); nb.innerHTML='';
+  never.sort().forEach(n=>{ const c=document.createElement('span'); c.className='chip'; c.textContent=n; nb.appendChild(c); });
+  if(!never.length) nb.innerHTML='<span class="chip">全部夥伴都中過了</span>';
+
+  const cnt={};
+  S.history.forEach(h=>{ cnt[h.winner]=(cnt[h.winner]||0)+1; });
+  const ct=$('#cntTbl tbody'); ct.innerHTML='';
+  Object.entries(cnt).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'zh-Hant')).forEach(([n,k])=>{
+    const m=memberByName(n);
+    const st = !m ? '<span class="pill r">已離會</span>'
+             : !m.active ? '<span class="pill r">已離會</span>'
+             : wonThisEpoch(n) ? '<span class="pill y">本輪中過</span>'
+             : '<span class="pill g">在獎池</span>';
+    ct.insertAdjacentHTML('beforeend', `<tr><td><b>${k}</b></td><td>${esc(n)}</td><td>${st}</td></tr>`);
+  });
+
+  const lt=$('#logTbl tbody'); lt.innerHTML='';
+  S.history.slice().sort((a,b)=> b.date.localeCompare(a.date) || b.round-a.round).forEach((h,i)=>{
+    const idx = S.history.indexOf(h);
+    lt.insertAdjacentHTML('beforeend',
+      `<tr><td>${esc(h.date)}</td><td>${h.round===1?'6:45':'6:50'}</td>
+       <td class="wide">${esc(h.gift||'—')}</td><td>${esc(h.sponsor||'—')}</td>
+       <td><b>${esc(h.winner||'—')}</b></td>
+       <td><button class="btn danger" data-del="${idx}">刪除</button></td></tr>`);
+  });
+  lt.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{
+    if(await ask('刪除這筆紀錄？','刪掉之後這個人會回到獎池。')){
+      S.history.splice(+b.dataset.del,1); save(); renderAll(); toast('已刪除');
+    }
+  });
+}
+
+function download(name, text, type){
+  const blob=new Blob(["﻿"+text],{type});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+}
+$('#btnCsv').onclick=()=>{
+  const rows=[['日期','輪次','禮品','贊助人','中獎人']];
+  S.history.slice().sort((a,b)=>a.date.localeCompare(b.date)||a.round-b.round)
+    .forEach(h=>rows.push([h.date, h.round===1?'6:45':'6:50', h.gift||'', h.sponsor||'', h.winner||'']));
+  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  download(`BNI晨光抽獎_${todayStr()}.csv`, csv, 'text/csv;charset=utf-8');
+  toast('已匯出');
+};
+$('#btnBackup').onclick=()=>{
+  download(`bni-lottery-backup-${todayStr()}.json`, JSON.stringify(S,null,2), 'application/json');
+  toast('備份已下載');
+};
+$('#btnRestore').onclick=()=>$('#fileIn').click();
+$('#fileIn').onchange=e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=async()=>{
+    try{
+      const d=JSON.parse(r.result);
+      if(!d.members||!d.history) throw new Error('格式不對');
+      if(await ask('還原備份？','現在的資料會被備份檔覆蓋。')){
+        S=d; migrate(); save(); renderAll(); toast('已還原');
+      }
+    }catch(err){ toast('這個檔案讀不了'); }
+    e.target.value='';
+  };
+  r.readAsText(f);
+};
+
+/* ============================================================
+   名單
+   ============================================================ */
+function renderPeople(){
+  const tb=$('#memTbl tbody'); tb.innerHTML='';
+  S.members.slice().sort((a,b)=>a.name.localeCompare(b.name,'zh-Hant')).forEach(m=>{
+    const i=S.members.indexOf(m);
+    tb.insertAdjacentHTML('beforeend',
+      `<tr><td><b>${esc(m.name)}</b></td>
+       <td class="wide">${esc(m.profession||'')}</td>
+       <td>${winCount(m.name)} 次</td>
+       <td>${m.active?'<span class="pill g">在會</span>':'<span class="pill r">已離會</span>'}</td>
+       <td><button class="btn" data-tog="${i}">${m.active?'設為離會':'恢復在會'}</button></td></tr>`);
+  });
+  tb.querySelectorAll('[data-tog]').forEach(b=>b.onclick=()=>{
+    const m=S.members[+b.dataset.tog]; m.active=!m.active; save(); renderAll();
+    toast(`${m.name} ${m.active?'已恢復':'已設為離會'}`);
+  });
+}
+$('#btnAddPerson').onclick=()=>{
+  const n=$('#newName').value.trim(), p=$('#newProf').value.trim();
+  if(!n){ toast('要填姓名'); return; }
+  if(memberByName(n)){ toast('這個人已經在名單裡'); return; }
+  S.members.push({name:n, profession:p, active:true});
+  $('#newName').value=''; $('#newProf').value='';
+  save(); renderAll(); toast(`已加入 ${n}`);
+};
+
+/* ---------- 總渲染 ---------- */
+function esc(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function renderAll(){
+  $('#todayLabel').textContent = `${S.today.date} · 第 ${S.epoch} 輪 · 名單 ${activeMembers().length} 人`;
+  renderDraw(); renderSetup(); renderLog(); renderPeople();
+}
+load(); renderAll();
+</script>
+</body>
+</html>
