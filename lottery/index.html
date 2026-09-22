@@ -313,6 +313,43 @@ const SEED = {"members": [{"name": "王常殷Hubert", "profession": "都更危�
 const KEY = 'bni-lottery-v1';
 const ROUNDS = [{n:1,label:'第一輪 · 6:45'},{n:2,label:'第二輪 · 6:50'}];
 
+/* ---------- Google 試算表同步 ---------- */
+// 抽完自動把紀錄補進分會的試算表，讓夥伴自己看得到。
+// 這是「事後核對」用的第二層，抽獎本身完全不依賴它：
+// 送不出去就排進待送佇列，下次有網路再補，現場不會因為沒網路卡住。
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzgnbB3dpFEnyFir3L0rIRGXF6TbsZeiiYMAnO7yflhxNpEGaFJsm94uCMjgQGKKUbZ/exec';
+const QUEUE_KEY = 'bni-lottery-queue';
+
+function queued(){
+  try{ return JSON.parse(localStorage.getItem(QUEUE_KEY)) || []; }catch(e){ return []; }
+}
+function setQueued(q){
+  try{ localStorage.setItem(QUEUE_KEY, JSON.stringify(q)); }catch(e){}
+}
+/** 把一筆紀錄排進待送佇列，然後試著把整個佇列送出去 */
+function syncRow(row){
+  const q = queued();
+  q.push(row); setQueued(q);
+  flushQueue();
+}
+/** 送出待送佇列。失敗就留著，下次再試，不打擾操作者。 */
+function flushQueue(){
+  const q = queued();
+  if(!q.length || !SHEET_URL) return;
+  // Apps Script 會轉址到別的網域，瀏覽器讀不到回應內容，所以用 no-cors 送。
+  // 送出去就算數：後端本來就會擋掉重複（同日期＋同輪次＋同中獎人只留一筆），
+  // 萬一這次其實沒送成，下次補送也不會寫出兩行。
+  fetch(SHEET_URL, {
+    method:'POST', mode:'no-cors',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify({rows:q})
+  })
+  .then(()=>setQueued([]))
+  .catch(()=>{ /* 沒網路就留著，下次再送 */ });
+}
+// 開頁時把上次沒送成功的補送掉
+window.addEventListener('load', ()=>setTimeout(flushQueue, 1500));
+
 /* ---------- 離線快取 ---------- */
 // 註冊後這個網址斷網也打得開（6:45 現場網路不可靠）。
 // 用 file:// 直接開檔時沒有 serviceWorker，靜默略過即可。
@@ -591,6 +628,8 @@ function confirmWinner(){
     ts:new Date().toISOString()
   });
   save();
+  syncRow({date:S.today.date, round:currentRound, gift:cfg.gift||'',
+           sponsor:cfg.sponsor||'', winner:pendingWinner, ts:new Date().toISOString()});
   const w=pendingWinner; pendingWinner=null;
   skipped = [];
   renderAll(); toast(`已記錄：${w}`);
