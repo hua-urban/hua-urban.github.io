@@ -193,8 +193,8 @@ dialog::backdrop{background:rgba(20,16,10,.5)}
       <div><label class="f">日期</label><input type="date" class="in" id="sDate"></div>
       <div><label class="f">抽獎規則</label>
         <select class="in" id="sMode">
-          <option value="exclude">輪次制：沒中過的先抽（建議）</option>
-          <option value="weighted">中過的人只降低機率</option>
+          <option value="fair">第一份給中最少的，第二份大家抽（建議）</option>
+          <option value="weighted">兩份都照機率，中過的人機率低</option>
         </select>
       </div>
     </div>
@@ -329,7 +329,7 @@ function freshState(){
     members: SEED.members.map(m=>({...m, active:true})),
     history: SEED.history.slice(),
     epoch: 1,
-    settings: {mode:'exclude'},
+    settings: {mode:'fair'},
     today: {date: todayStr(), attendees:null, rounds:[{gift:'',sponsor:''},{gift:'',sponsor:''}]}
   };
 }
@@ -343,7 +343,7 @@ function load(){
 }
 function migrate(){
   S.members ||= []; S.history ||= []; S.epoch ||= 1;
-  S.settings ||= {mode:'exclude'};
+  S.settings ||= {mode:'fair'};
   S.today ||= {date:todayStr(), attendees:null, rounds:[{gift:'',sponsor:''},{gift:'',sponsor:''}]};
   // 換日一律把日期推到今天，出席重新來過。
   // 但前一晚先填好隔天的禮品與贊助人是規格上的正常流程（現場流程第 1 步），
@@ -357,6 +357,8 @@ function migrate(){
       : [{gift:'',sponsor:''},{gift:'',sponsor:''}];
     S.today = {date:todayStr(), attendees:null, rounds:carry};
   }
+  // 舊版的 exclude（中過就整輪不進池）已改成雙軌制 fair
+  if(S.settings.mode === 'exclude') S.settings.mode = 'fair';
   S.members.forEach(m=>{ if(m.active===undefined) m.active=true; });
 }
 function save(){
@@ -379,16 +381,43 @@ function attendeeNames(){
 function drawnToday(round){
   return S.history.find(h=>h.date===S.today.date && h.round===round);
 }
-/** 目前這一輪的候選池 [{name, weight}] */
+/** 從頭到現在的累計中獎次數（跨輪次，不歸零） */
+function totalWins(name){ return winCount(name, null); }
+
+/** 目前這一輪的候選池 [{name, weight}]
+ *
+ *  雙軌制（2026-09-22 改）：
+ *   第一份 → 只抽「累計中獎次數最少」的到場夥伴，所以還有人沒中過時，
+ *            第一份一定落在沒中過的人身上。
+ *   第二份 → 今天到場的人全部都能抽，只排除第一份剛中的人。
+ *
+ *  這樣沒中過的人被優先照顧，中過的人每週仍有第二份可以期待，
+ *  不會有人被排除好幾個月。
+ */
 function pool(round){
   const already = new Set(S.history.filter(h=>h.date===S.today.date).map(h=>h.winner));
-  let names = attendeeNames().filter(n=>!already.has(n));
-  if(S.settings.mode==='exclude'){
-    const fresh = names.filter(n=>!wonThisEpoch(n));
-    if(fresh.length) return fresh.map(n=>({name:n, weight:1}));
-    return {empty:true, names};           // 全員都中過 → 需要開新一輪
+  const names = attendeeNames().filter(n=>!already.has(n));
+  if(!names.length) return [];
+
+  if(S.settings.mode==='weighted'){
+    return names.map(n=>({name:n, weight: 1/(totalWins(n)+1)}));
   }
-  return names.map(n=>({name:n, weight: 1/(winCount(n,S.epoch)+1)}));
+
+  // 預設 fair 模式
+  if(round === 1){
+    const min = Math.min(...names.map(totalWins));
+    return names.filter(n=>totalWins(n)===min).map(n=>({name:n, weight:1}));
+  }
+  return names.map(n=>({name:n, weight:1}));
+}
+
+/** 今天到場者裡，累計中獎次數最少的那一群有多少人、中過幾次 */
+function firstPrizeTier(){
+  const already = new Set(S.history.filter(h=>h.date===S.today.date).map(h=>h.winner));
+  const names = attendeeNames().filter(n=>!already.has(n));
+  if(!names.length) return {min:0, size:0};
+  const min = Math.min(...names.map(totalWins));
+  return {min, size: names.filter(n=>totalWins(n)===min).length};
 }
 
 /* ---------- 抽選 ---------- */
@@ -444,7 +473,7 @@ function renderDraw(){
 
   const done = nextRound()===null && !pendingWinner;
   const p = pool(rn);
-  const poolSize = p.empty ? 0 : p.length;
+  const poolSize = p.length;
 
   if(done){
     $('#nameBox').textContent='今天抽完了';
@@ -456,17 +485,23 @@ function renderDraw(){
     $('#nameBox').className='name';
     $('#profBox').textContent='';
     $('#btnDraw').hidden=false;
-    $('#btnDraw').disabled = poolSize===0 && !p.empty;
+    $('#btnDraw').disabled = poolSize===0;
   }
   $('#btnConfirm').hidden = !pendingWinner;
   $('#btnRedraw').hidden = !pendingWinner;
   if(pendingWinner) $('#btnDraw').hidden = true;
 
-  $('#poolInfo').textContent = p.empty
-    ? '這一輪全部跑完了，按開始抽獎大家重新開始。'
-    : (S.settings.mode==='exclude'
-        ? `第 ${S.epoch} 輪 · 還有 ${poolSize} 位沒中過 · 出席 ${attendeeNames().length} 人 · 跑完這輪全部重來`
-        : `第 ${S.epoch} 輪 · 獎池 ${poolSize} 人 · 出席 ${attendeeNames().length} 人 · 中過的人降低機率`);
+  const att = attendeeNames().length;
+  if(S.settings.mode === 'weighted'){
+    $('#poolInfo').textContent = `獎池 ${poolSize} 人 · 出席 ${att} 人 · 中過的人降低機率`;
+  }else if(currentRound === 1){
+    const t = firstPrizeTier();
+    $('#poolInfo').textContent = t.min === 0
+      ? `第一份 · 從還沒中過的 ${t.size} 位裡抽 · 出席 ${att} 人`
+      : `第一份 · 從中獎最少的 ${t.size} 位裡抽（各中過 ${t.min} 次）· 出席 ${att} 人`;
+  }else{
+    $('#poolInfo').textContent = `第二份 · 到場的 ${poolSize} 位一起抽 · 出席 ${att} 人`;
+  }
 
   const tb=$('#todayTbl tbody'); tb.innerHTML='';
   ROUNDS.forEach(r=>{
@@ -493,12 +528,7 @@ function startRoll(){
   const cfg = S.today.rounds[currentRound-1]||{};
   if(!cfg.gift){ toast('先到「今日設定」填今天的禮品'); return; }
 
-  let p = pool(currentRound);
-  if(p.empty){
-    S.epoch += 1; save();
-    toast(`這一輪跑完了，現在開始第 ${S.epoch} 輪，大家重新開始`);
-    p = pool(currentRound);
-  }
+  const p = pool(currentRound);
   if(!p.length){ toast('獎池沒有人，檢查出席名單'); return; }
 
   rolling=true; pendingWinner=null;
@@ -574,7 +604,7 @@ function renderSetup(){
     el.innerHTML=`<input type="checkbox" ${on?'checked':''}>
       <span><span class="nm">${esc(m.name)}</span>
       <span class="pf">${esc(m.profession||'')}</span>
-      ${wonThisEpoch(m.name)?'<span class="tag">已中過</span>':''}</span>`;
+      ${totalWins(m.name)?`<span class="tag">中過 ${totalWins(m.name)} 次</span>`:''}</span>`;
     el.querySelector('input').onchange=e=>{
       const names = new Set(attendeeNames());
       e.target.checked ? names.add(m.name) : names.delete(m.name);
@@ -620,8 +650,7 @@ function renderLog(){
     const m=memberByName(n);
     const st = !m ? '<span class="pill r">已離會</span>'
              : !m.active ? '<span class="pill r">已離會</span>'
-             : wonThisEpoch(n) ? '<span class="pill y">本輪中過</span>'
-             : '<span class="pill g">在獎池</span>';
+             : '<span class="pill g">在名單</span>';
     ct.insertAdjacentHTML('beforeend', `<tr><td><b>${k}</b></td><td>${esc(n)}</td><td>${st}</td></tr>`);
   });
 
@@ -708,7 +737,7 @@ $('#btnAddPerson').onclick=()=>{
 /* ---------- 總渲染 ---------- */
 function esc(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function renderAll(){
-  $('#todayLabel').textContent = `${S.today.date} · 第 ${S.epoch} 輪 · 名單 ${activeMembers().length} 人`;
+  $('#todayLabel').textContent = `${S.today.date} · 名單 ${activeMembers().length} 人`;
   renderDraw(); renderSetup(); renderLog(); renderPeople();
 }
 load(); renderAll();
