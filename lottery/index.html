@@ -310,6 +310,15 @@ const SEED = {"members": [{"name": "王常殷Hubert", "profession": "都更危�
 const KEY = 'bni-lottery-v1';
 const ROUNDS = [{n:1,label:'第一輪 · 6:45'},{n:2,label:'第二輪 · 6:50'}];
 
+/* ---------- 離線快取 ---------- */
+// 註冊後這個網址斷網也打得開（6:45 現場網路不可靠）。
+// 用 file:// 直接開檔時沒有 serviceWorker，靜默略過即可。
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+
 /* ---------- 資料層 ---------- */
 function todayStr(){
   const d=new Date(); const p=x=>String(x).padStart(2,'0');
