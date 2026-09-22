@@ -193,7 +193,7 @@ dialog::backdrop{background:rgba(20,16,10,.5)}
       <div><label class="f">日期</label><input type="date" class="in" id="sDate"></div>
       <div><label class="f">抽獎規則</label>
         <select class="in" id="sMode">
-          <option value="exclude">中過的人不進獎池（建議）</option>
+          <option value="exclude">輪次制：沒中過的先抽（建議）</option>
           <option value="weighted">中過的人只降低機率</option>
         </select>
       </div>
@@ -463,8 +463,10 @@ function renderDraw(){
   if(pendingWinner) $('#btnDraw').hidden = true;
 
   $('#poolInfo').textContent = p.empty
-    ? '全部夥伴都中過一輪了，按開始抽獎會自動開新的一輪。'
-    : `獎池 ${poolSize} 人 · 出席 ${attendeeNames().length} 人 · 規則：${S.settings.mode==='exclude'?'中過的人不進池':'中過的人降低機率'}`;
+    ? '這一輪全部跑完了，按開始抽獎大家重新開始。'
+    : (S.settings.mode==='exclude'
+        ? `第 ${S.epoch} 輪 · 還有 ${poolSize} 位沒中過 · 出席 ${attendeeNames().length} 人 · 跑完這輪全部重來`
+        : `第 ${S.epoch} 輪 · 獎池 ${poolSize} 人 · 出席 ${attendeeNames().length} 人 · 中過的人降低機率`);
 
   const tb=$('#todayTbl tbody'); tb.innerHTML='';
   ROUNDS.forEach(r=>{
@@ -494,7 +496,7 @@ function startRoll(){
   let p = pool(currentRound);
   if(p.empty){
     S.epoch += 1; save();
-    toast(`全員都中過，開始第 ${S.epoch} 輪`);
+    toast(`這一輪跑完了，現在開始第 ${S.epoch} 輪，大家重新開始`);
     p = pool(currentRound);
   }
   if(!p.length){ toast('獎池沒有人，檢查出席名單'); return; }
@@ -503,7 +505,11 @@ function startRoll(){
   $('#btnDraw').disabled=true; $('#btnConfirm').hidden=true; $('#btnRedraw').hidden=true;
   const box=$('#nameBox'); box.className='name rolling'; $('#profBox').textContent='';
 
-  const names = p.map(x=>x.name);
+  // 滾動時滾「今天所有到場的人」，不是只滾獎池。
+  // 已經中過的人也要在螢幕上跑過，不然他坐在台下等於被畫面消失。
+  // 真正的落點仍然只從獎池取，規則沒有變。
+  const rollNames = attendeeNames();
+  const names = rollNames.length ? rollNames : p.map(x=>x.name);
   const winner = pickWeighted(p);
   const t0 = performance.now();
   const DUR = 3200;
@@ -605,7 +611,7 @@ function renderLog(){
 
   const nb=$('#neverBox'); nb.innerHTML='';
   never.sort().forEach(n=>{ const c=document.createElement('span'); c.className='chip'; c.textContent=n; nb.appendChild(c); });
-  if(!never.length) nb.innerHTML='<span class="chip">全部夥伴都中過了</span>';
+  if(!never.length) nb.innerHTML='<span class="chip">這一輪全部跑完了</span>';
 
   const cnt={};
   S.history.forEach(h=>{ cnt[h.winner]=(cnt[h.winner]||0)+1; });
