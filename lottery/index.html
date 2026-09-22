@@ -193,7 +193,7 @@ dialog::backdrop{background:rgba(20,16,10,.5)}
       <div><label class="f">日期</label><input type="date" class="in" id="sDate"></div>
       <div><label class="f">抽獎規則</label>
         <select class="in" id="sMode">
-          <option value="fair">第一份給中最少的，第二份大家抽（建議）</option>
+          <option value="fair">第一份大家抽，第二份給中最少的（建議）</option>
           <option value="weighted">兩份都照機率，中過的人機率低</option>
         </select>
       </div>
@@ -386,13 +386,13 @@ function totalWins(name){ return winCount(name, null); }
 
 /** 目前這一輪的候選池 [{name, weight}]
  *
- *  雙軌制（2026-09-22 改）：
- *   第一份 → 只抽「累計中獎次數最少」的到場夥伴，所以還有人沒中過時，
- *            第一份一定落在沒中過的人身上。
- *   第二份 → 今天到場的人全部都能抽，只排除第一份剛中的人。
+ *  雙軌制（2026-09-22）：
+ *   6:45 第一份 → 到場的人全部一起抽。這份獎勵早起，準時到就有機會。
+ *   6:50 第二份 → 只抽「累計中獎次數最少」的到場夥伴，所以還有人沒中過時，
+ *                 這份一定落在沒中過的人身上。
  *
- *  這樣沒中過的人被優先照顧，中過的人每週仍有第二份可以期待，
- *  不會有人被排除好幾個月。
+ *  早到的人每週都有期待（第一份），沒中過的人被優先照顧（第二份），
+ *  兩件事各由一份獎處理，不會有人被排除好幾個月。
  */
 function pool(round){
   const already = new Set(S.history.filter(h=>h.date===S.today.date).map(h=>h.winner));
@@ -404,15 +404,17 @@ function pool(round){
   }
 
   // 預設 fair 模式
+  // 6:45 第一份：到場的人全部一起抽 —— 這份是獎勵早起，準時到就有機會。
+  // 6:50 第二份：只從累計中獎次數最少的那群抽 —— 這份負責把禮物輪到沒拿過的人。
   if(round === 1){
-    const min = Math.min(...names.map(totalWins));
-    return names.filter(n=>totalWins(n)===min).map(n=>({name:n, weight:1}));
+    return names.map(n=>({name:n, weight:1}));
   }
-  return names.map(n=>({name:n, weight:1}));
+  const min = Math.min(...names.map(totalWins));
+  return names.filter(n=>totalWins(n)===min).map(n=>({name:n, weight:1}));
 }
 
-/** 今天到場者裡，累計中獎次數最少的那一群有多少人、中過幾次 */
-function firstPrizeTier(){
+/** 今天到場者裡，累計中獎次數最少的那一群有多少人、中過幾次（第二份用） */
+function fewestWinsTier(){
   const already = new Set(S.history.filter(h=>h.date===S.today.date).map(h=>h.winner));
   const names = attendeeNames().filter(n=>!already.has(n));
   if(!names.length) return {min:0, size:0};
@@ -495,12 +497,12 @@ function renderDraw(){
   if(S.settings.mode === 'weighted'){
     $('#poolInfo').textContent = `獎池 ${poolSize} 人 · 出席 ${att} 人 · 中過的人降低機率`;
   }else if(currentRound === 1){
-    const t = firstPrizeTier();
-    $('#poolInfo').textContent = t.min === 0
-      ? `第一份 · 從還沒中過的 ${t.size} 位裡抽 · 出席 ${att} 人`
-      : `第一份 · 從中獎最少的 ${t.size} 位裡抽（各中過 ${t.min} 次）· 出席 ${att} 人`;
+    $('#poolInfo').textContent = `第一份 · 到場的 ${poolSize} 位一起抽 · 出席 ${att} 人`;
   }else{
-    $('#poolInfo').textContent = `第二份 · 到場的 ${poolSize} 位一起抽 · 出席 ${att} 人`;
+    const t = fewestWinsTier();
+    $('#poolInfo').textContent = t.min === 0
+      ? `第二份 · 從還沒中過的 ${t.size} 位裡抽 · 出席 ${att} 人`
+      : `第二份 · 從中獎最少的 ${t.size} 位裡抽（各中過 ${t.min} 次）· 出席 ${att} 人`;
   }
 
   const tb=$('#todayTbl tbody'); tb.innerHTML='';
