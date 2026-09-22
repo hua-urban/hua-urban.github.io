@@ -7,137 +7,139 @@
 <title>BNI 晨光抽獎</title>
 <style>
 :root{
-  --red:#C8102E; --gold:#C8A04F; --gold-soft:#e8d4a4;
-  --ink:#1A1A1A; --dim:#6b6b6b; --line:#e2ddd2;
-  --paper:#F5F3EE; --white:#fff;
-  --stage:#16130f; --stage2:#241e16;
-  --ok:#2e7d52; --warn:#b4531f;
+  --red:#a51c35;--gold:#e6c181;--gold-soft:#f3dbb3;
+  --ink:#30282b;--dim:#706269;--line:#ded6d3;
+  --paper:#f5f1ec;--white:#fffdfa;--stage:#28171e;--stage2:#382029;
+  --ok:#286044;--warn:#925019;
+  color-scheme:light;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%}
-body{
-  background:var(--paper); color:var(--ink);
-  font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
-  font-size:16px; line-height:1.6;
-}
-button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
-input,select{font:inherit;color:inherit}
-
-/* ---------- 版面 ---------- */
-.wrap{max-width:1100px;margin:0 auto;padding:0 16px 48px}
-header{
-  position:sticky;top:0;z-index:20;background:var(--paper);
-  border-bottom:1px solid var(--line);
-}
-.bar{max-width:1100px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.brand{font-weight:800;letter-spacing:.06em;font-size:18px}
-.brand span{color:var(--red)}
-.today{margin-left:auto;font-size:14px;color:var(--dim)}
-nav{display:flex;gap:4px;max-width:1100px;margin:0 auto;padding:0 16px 8px;flex-wrap:wrap}
-nav button{
-  padding:8px 16px;border-radius:999px;font-size:15px;font-weight:600;color:var(--dim);
-  border:1px solid transparent;
-}
-nav button.on{background:var(--ink);color:var(--white)}
-nav button:not(.on):hover{border-color:var(--line);background:var(--white)}
-.page{display:none;padding-top:20px}
+[hidden]{display:none!important}
+html,body{min-height:100%}
+body{background:var(--paper);color:var(--ink);font-family:"PingFang TC","Microsoft JhengHei","Noto Sans TC",-apple-system,BlinkMacSystemFont,sans-serif;font-size:16px;line-height:1.65}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none;touch-action:manipulation}
+button:disabled{cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible,.tblwrap:focus-visible{outline:3px solid #ad7222;outline-offset:4px}
+button{transition:background-color .18s,color .18s,border-color .18s}
+.wrap{max-width:1440px;margin:auto;padding:0 32px 48px}
+header{background:var(--white);border-top:4px solid var(--red);border-bottom:1px solid var(--line)}
+.bar{max-width:1440px;margin:auto;padding:16px 32px 10px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{font-size:23px;font-weight:900;letter-spacing:.03em;color:var(--red)}
+.brand span{font-size:18px;font-weight:700;color:var(--ink);border-left:1px solid var(--line);padding-left:14px;margin-left:10px;letter-spacing:.12em}
+.today{margin-left:auto;font-size:14px;color:var(--dim);font-variant-numeric:tabular-nums}
+nav{max-width:1440px;margin:auto;padding:0 32px;display:flex;gap:24px}
+nav button{min-height:48px;padding:9px 4px 12px;color:var(--dim);font-size:15px;font-weight:700;border-bottom:3px solid transparent}
+nav button.on{color:var(--red);border-color:var(--red)}
+nav button:not(.on):hover{color:var(--ink);background:#f5f1ec}
+.page{display:none;padding-top:24px}
 .page.on{display:block}
-
-/* ---------- 抽獎舞台 ---------- */
-.stage{
-  background:linear-gradient(160deg,var(--stage) 0%,var(--stage2) 100%);
-  border-radius:20px;padding:28px 20px 32px;color:#f4efe6;text-align:center;
-  box-shadow:0 14px 40px rgba(0,0,0,.22);
-}
-.slot{
-  font-size:14px;letter-spacing:.22em;color:var(--gold);font-weight:700;
-  text-transform:uppercase;
-}
-.giftline{margin-top:10px;font-size:clamp(17px,3.4vw,24px);font-weight:700;color:var(--gold-soft)}
-.sponsorline{margin-top:4px;font-size:14px;color:#9d9285}
-.display{
-  margin:22px auto 8px;min-height:clamp(110px,22vw,168px);
-  display:flex;align-items:center;justify-content:center;
-  border-top:1px solid rgba(200,160,79,.28);border-bottom:1px solid rgba(200,160,79,.28);
-  padding:14px 6px;overflow:hidden;
-}
-.name{
-  font-size:clamp(34px,10vw,84px);font-weight:900;letter-spacing:.02em;line-height:1.15;
-  word-break:break-all;
-}
-.name.rolling{color:#8a8175}
-.name.win{color:var(--gold);text-shadow:0 0 28px rgba(200,160,79,.45);animation:pop .5s ease}
-@keyframes pop{0%{transform:scale(.86);opacity:.3}60%{transform:scale(1.06)}100%{transform:scale(1)}}
-.prof{font-size:clamp(13px,2.4vw,16px);color:#a79c8c;min-height:24px}
-.stagebtns{margin-top:22px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-.big{
-  padding:15px 40px;border-radius:999px;font-size:18px;font-weight:800;letter-spacing:.04em;
-  background:var(--gold);color:#1b1408;
-}
-.big:disabled{opacity:.35;cursor:not-allowed}
-.ghost{padding:15px 26px;border-radius:999px;font-weight:700;border:1px solid rgba(244,239,230,.3);color:#e8e1d5}
-.poolinfo{margin-top:16px;font-size:14px;color:#9d9285}
-
-/* ---------- 卡片與表單 ---------- */
-.card{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:16px}
-.card h2{font-size:16px;font-weight:800;margin-bottom:4px}
-.card .hint{font-size:13px;color:var(--dim);margin-bottom:14px}
-.grid{display:grid;gap:12px}
-@media(min-width:760px){.grid.two{grid-template-columns:1fr 1fr}}
-label.f{display:block;font-size:13px;font-weight:700;color:var(--dim);margin-bottom:5px}
-.in{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--white)}
-.in:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,160,79,.18)}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.btn{padding:9px 16px;border-radius:9px;font-weight:700;font-size:14px;border:1px solid var(--line);background:var(--white)}
-.btn:hover{border-color:var(--gold)}
-.btn.solid{background:var(--ink);color:var(--white);border-color:var(--ink)}
-.btn.danger{color:var(--red);border-color:#f0cfd5}
-.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700}
-.pill.g{background:#e8f2ec;color:var(--ok)}
-.pill.y{background:#fbf0e3;color:var(--warn)}
-.pill.r{background:#fbe9ec;color:var(--red)}
-
-/* ---------- 出席名單 ---------- */
-.people{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:7px;margin-top:12px}
-.person{
-  display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line);
-  border-radius:9px;background:var(--white);cursor:pointer;font-size:14px;
-}
-.person.off{opacity:.42;background:#faf9f6}
-.person input{margin-top:3px;flex:none;width:16px;height:16px;accent-color:var(--gold)}
-.person .nm{font-weight:700;line-height:1.3}
-.person .pf{font-size:11px;color:var(--dim);line-height:1.3}
-.person .tag{font-size:10px;font-weight:800;color:var(--gold);letter-spacing:.04em}
-
-/* ---------- 表格 ---------- */
-.tblwrap{overflow-x:auto;margin-top:12px;border:1px solid var(--line);border-radius:11px}
-table{width:100%;border-collapse:collapse;font-size:14px;background:var(--white);min-width:560px}
-th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
-th{background:#faf8f4;font-size:12px;font-weight:800;color:var(--dim);letter-spacing:.04em}
+.stage{position:relative;isolation:isolate;background:var(--stage);color:#fff5e8;padding:28px 48px 26px;text-align:center;border:1px solid #50333f;border-radius:8px;overflow:hidden}
+.stage::before{content:"";position:absolute;z-index:-1;inset:10px;border:1px solid #725143;border-radius:2px;pointer-events:none}
+.stage-masthead{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px;text-align:left}
+.stage-title{font-size:15px;letter-spacing:.24em;color:#d9bca8;font-weight:600}
+.slot{font-size:16px;letter-spacing:.09em;color:var(--gold);font-weight:700;font-variant-numeric:tabular-nums}
+.giftline{font-size:clamp(22px,2.4vw,34px);font-weight:700;line-height:1.4;overflow-wrap:anywhere;color:var(--gold-soft)}
+.sponsorline{margin-top:6px;font-size:clamp(15px,1.5vw,21px);color:#d5bfca;overflow-wrap:anywhere}
+.display{margin:24px auto 12px;min-height:clamp(176px,17vw,262px);display:flex;align-items:center;justify-content:center;padding:18px 8px;border-top:1px solid #68444e;border-bottom:1px solid #68444e}
+.name{max-width:100%;font-size:clamp(56px,9.5vw,144px);font-weight:900;letter-spacing:.015em;line-height:1.22;word-break:normal;overflow-wrap:anywhere;text-wrap:balance}
+.name.rolling{color:#d7c4cb}
+.name.win{color:#ffe0a6;animation:reveal .55s cubic-bezier(.16,1,.3,1) both}
+@keyframes reveal{from{transform:translateY(10px) scale(.96);opacity:.45}to{transform:translateY(0) scale(1);opacity:1}}
+.prof{font-size:clamp(16px,1.8vw,24px);color:#e1ced7;min-height:32px;overflow-wrap:anywhere}
+.stagebtns{margin-top:22px;display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.big,.ghost{min-height:56px;border-radius:4px;padding:14px 34px;font-size:18px;font-weight:800;letter-spacing:.08em}
+.big,#btnConfirm{background:var(--gold);color:#2f2015;border:1px solid var(--gold)}
+.big:hover:not(:disabled),#btnConfirm:hover{background:#f6d9a6;border-color:#f6d9a6}
+.big:disabled{background:#66524a;border-color:#796157;color:#d9cbbb}
+.ghost{border:1px solid #a28a96;color:#f3e8ed}
+.ghost:hover{background:#50343f}
+.poolinfo{margin-top:16px;color:#d1bcc6;font-size:15px;line-height:1.6}
+.card{background:var(--white);border:1px solid var(--line);border-radius:6px;padding:24px;margin-top:18px}
+.page>.card:first-child{margin-top:0}
+.card h2{font-size:19px;font-weight:800;margin-bottom:8px;letter-spacing:.035em}
+.card .hint{font-size:14px;color:var(--dim);margin-bottom:16px}
+.grid{display:grid;gap:18px;min-width:0}
+.grid>div{min-width:0}
+label.f{display:block;font-size:14px;font-weight:700;color:var(--dim);margin-bottom:7px}
+.in{width:100%;min-width:0;min-height:48px;padding:11px 12px;border:1px solid #bdb0b3;border-radius:4px;background:var(--white);font-size:16px}
+.in:focus{border-color:var(--red)}
+.in::placeholder{color:#81757a}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{min-height:44px;padding:9px 16px;border-radius:4px;font-size:14px;font-weight:700;border:1px solid #c8bcbf;background:var(--white)}
+.btn:hover{background:#f4ede6;border-color:#9d7b66}
+.btn.solid{background:var(--red);color:#fff9f3;border-color:var(--red)}
+.btn.solid:hover{background:#83132b}
+.btn.danger{color:#9d1831;border-color:#dab9c0}
+.pill{display:inline-block;padding:3px 9px;border-radius:4px;font-size:12px;font-weight:700}
+.pill.g{background:#e6efe7;color:var(--ok)}
+.pill.y{background:#f7ead6;color:var(--warn)}
+.pill.r{background:#f7e6ea;color:var(--red)}
+.people{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:10px;margin-top:20px}
+.person{display:flex;gap:12px;align-items:flex-start;padding:14px 12px;min-height:76px;border:1px solid #d4c4bf;border-radius:4px;background:#fbf7f0;cursor:pointer;font-size:16px}
+.person.off{background:#f4f3f1;border-color:#e2dddd;color:#786e72}
+.person input{margin-top:3px;flex:none;width:21px;height:21px;accent-color:var(--red)}
+.person>span{min-width:0;overflow-wrap:anywhere}
+.person .nm{font-weight:700;line-height:1.4}
+.person .pf{display:block;font-size:12px;color:var(--dim);line-height:1.5;margin-top:3px}
+.person .tag{display:block;font-size:11px;font-weight:700;color:#88582c;margin-top:3px}
+.tblwrap{overflow-x:auto;margin-top:14px;border:1px solid var(--line);border-radius:4px}
+table{width:100%;border-collapse:collapse;font-size:15px;background:var(--white);min-width:560px}
+th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{background:#eee8e1;font-size:13px;font-weight:700;color:#67585c;letter-spacing:.04em}
 tr:last-child td{border-bottom:none}
-td.wide{white-space:normal;min-width:150px}
-
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
-.stat{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:14px}
-.stat b{display:block;font-size:26px;font-weight:900;line-height:1.2}
-.stat span{font-size:12px;color:var(--dim);font-weight:700}
-
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.chip{background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 11px;font-size:13px}
-
-.toast{
-  position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
-  background:var(--ink);color:var(--white);padding:11px 20px;border-radius:999px;
-  font-size:14px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:60;
-  max-width:90vw;text-align:center;
-}
+td.wide{white-space:normal;min-width:150px;overflow-wrap:anywhere}
+#todayTbl td:nth-child(4){color:#941f36;font-size:18px}
+#cntTbl{min-width:300px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.stat{background:var(--white);border:1px solid var(--line);border-radius:5px;padding:22px}
+.stat b{display:block;font-size:36px;font-weight:800;line-height:1.2;color:var(--red);font-variant-numeric:tabular-nums}
+.stat span{display:block;margin-top:7px;font-size:13px;color:var(--dim);font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{background:#f7f2ec;border:1px solid var(--line);border-radius:4px;padding:6px 12px;font-size:14px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(12px);background:var(--ink);color:var(--white);padding:14px 22px;border:1px solid #736067;border-radius:6px;font-size:15px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:60;max-width:92vw;width:max-content;text-align:center}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+dialog{border:1px solid var(--line);border-radius:8px;padding:0;max-width:440px;width:92vw;margin:auto;background:var(--white);color:var(--ink)}
+dialog::backdrop{background:rgba(30,16,24,.65)}
+.dlg{padding:26px}
+.dlg h3{font-size:21px;margin-bottom:10px}
+.dlg p{font-size:16px;color:var(--dim);margin-bottom:22px}
+@media(min-width:760px){.grid.two{grid-template-columns:1fr 1fr}#p-setup,#p-log,#p-people{max-width:1120px;margin:auto}}
+@media(min-width:1600px){.wrap,.bar,nav{max-width:1800px}.stage{padding:34px 64px}.display{min-height:290px}.name{font-size:clamp(144px,9vw,176px)}.slot{font-size:22px}.stage-title{font-size:18px}.poolinfo{font-size:20px}}
+@media(max-width:759px){
+  .wrap{padding:0 14px calc(30px + env(safe-area-inset-bottom))}
+  .bar{padding:14px 18px 7px;gap:6px 12px}.brand{font-size:22px}.brand span{font-size:16px;padding-left:10px;margin-left:7px}
+  .today{font-size:12px}nav{padding:0 14px;gap:0}nav button{flex:1;padding:10px 4px;font-size:14px;min-height:48px}
+  .page{padding-top:14px}.stage{padding:22px 20px 24px}.stage::before{inset:7px}
+  .stage-masthead{margin-bottom:24px;gap:8px}.stage-title{font-size:12px;letter-spacing:.15em}.slot{font-size:13px;letter-spacing:.02em}
+  .giftline{font-size:22px}.sponsorline{font-size:14px}.display{min-height:190px;margin:24px auto 12px;padding:20px 0}
+  .name{font-size:clamp(46px,10.5vw,76px);line-height:1.3;letter-spacing:0}
+  .prof{font-size:16px;min-height:26px}.stagebtns{gap:10px;margin-top:20px}.big{width:100%}.big,.ghost{padding:14px 20px;min-height:54px;font-size:17px}
+  #btnConfirm{flex:2}#btnRedraw{flex:1}.poolinfo{font-size:13px;margin-top:16px}
+  .card{padding:18px 16px;margin-top:14px}.card h2{font-size:18px}.card .hint{font-size:13px}
+  .people{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.person{padding:12px 9px;gap:8px;font-size:15px}.person input{width:20px;height:20px}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.stat{padding:18px}.stat b{font-size:32px}
+  #newName,#newProf{max-width:none!important;flex:1 1 100%}
+  #todayTbl{min-width:0;table-layout:fixed;font-size:12px}#todayTbl th,#todayTbl td{padding:10px 5px;white-space:normal;overflow-wrap:anywhere;min-width:0}
+  #todayTbl th:nth-child(1){width:21%}#todayTbl th:nth-child(2){width:23%}#todayTbl th:nth-child(3){width:18%}#todayTbl th:nth-child(4){width:23%}#todayTbl th:nth-child(5){width:15%}
+  #todayTbl td:nth-child(4){font-size:14px}#todayTbl .btn{font-size:12px;padding:8px 2px;min-width:0;width:100%}
+}
+@media(max-width:360px){.today{margin-left:0;width:100%}.people{grid-template-columns:1fr}.stage{padding-left:16px;padding-right:16px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
-dialog{border:none;border-radius:16px;padding:0;max-width:440px;width:92vw}
-dialog::backdrop{background:rgba(20,16,10,.5)}
-.dlg{padding:22px}
-.dlg h3{font-size:17px;margin-bottom:8px}
-.dlg p{font-size:14px;color:var(--dim);margin-bottom:16px}
+/* 中獎彩帶：只使用既有 .name.win 狀態，不介入抽獎流程。 */
+.confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:2;border-radius:inherit}
+.confetti i{position:absolute;left:var(--x);top:-30px;width:var(--w);height:var(--h);background:var(--c);opacity:0;border-radius:1px;will-change:auto}
+.stage:has(.name.win) .confetti i{animation:confetti-fall var(--duration) var(--delay) cubic-bezier(.16,.45,.5,1) both}
+@keyframes confetti-fall{
+  0%{transform:translate3d(0,-30px,0) rotate(0deg);opacity:0}
+  5%{opacity:1}
+  35%{transform:translate3d(calc(var(--drift) * -.35),220px,0) rotate(calc(var(--spin) * .35));opacity:.95}
+  75%{opacity:.9}
+  100%{transform:translate3d(var(--drift),900px,0) rotate(var(--spin));opacity:0}
+}
+@media(max-width:759px){.confetti i:nth-child(3n){display:none}}
+@media(prefers-reduced-motion:reduce){.confetti{display:none}}
 </style>
 </head>
 <body>
@@ -147,7 +149,7 @@ dialog::backdrop{background:rgba(20,16,10,.5)}
     <div class="brand">BNI <span>晨光抽獎</span></div>
     <div class="today" id="todayLabel"></div>
   </div>
-  <nav>
+  <nav aria-label="主要分頁">
     <button data-tab="draw" class="on">抽獎</button>
     <button data-tab="setup">今日設定</button>
     <button data-tab="log">紀錄</button>
@@ -160,7 +162,8 @@ dialog::backdrop{background:rgba(20,16,10,.5)}
 <!-- ============ 抽獎 ============ -->
 <section class="page on" id="p-draw">
   <div class="stage">
-    <div class="slot" id="slotLabel">第一輪 · 6:45</div>
+    <div class="confetti" aria-hidden="true"><i style="--x:0%;--w:6px;--h:7px;--c:#ffe0a6;--drift:-80px;--spin:360deg;--duration:2.70s;--delay:0.000s"></i><i style="--x:37%;--w:8px;--h:10px;--c:#e6c181;--drift:-51px;--spin:-540deg;--duration:2.88s;--delay:0.095s"></i><i style="--x:74%;--w:10px;--h:13px;--c:#ed637c;--drift:-22px;--spin:720deg;--duration:3.06s;--delay:0.190s"></i><i style="--x:11%;--w:12px;--h:16px;--c:#f8f0db;--drift:7px;--spin:-900deg;--duration:3.24s;--delay:0.285s"></i><i style="--x:48%;--w:6px;--h:19px;--c:#82bbae;--drift:36px;--spin:1080deg;--duration:3.42s;--delay:0.380s"></i><i style="--x:85%;--w:8px;--h:7px;--c:#ffe0a6;--drift:65px;--spin:-360deg;--duration:3.60s;--delay:0.475s"></i><i style="--x:22%;--w:10px;--h:10px;--c:#e6c181;--drift:-67px;--spin:540deg;--duration:3.78s;--delay:0.570s"></i><i style="--x:59%;--w:12px;--h:13px;--c:#ed637c;--drift:-38px;--spin:-720deg;--duration:2.70s;--delay:0.665s"></i><i style="--x:96%;--w:6px;--h:16px;--c:#f8f0db;--drift:-9px;--spin:900deg;--duration:2.88s;--delay:0.760s"></i><i style="--x:33%;--w:8px;--h:19px;--c:#82bbae;--drift:20px;--spin:-1080deg;--duration:3.06s;--delay:0.000s"></i><i style="--x:70%;--w:10px;--h:7px;--c:#ffe0a6;--drift:49px;--spin:360deg;--duration:3.24s;--delay:0.095s"></i><i style="--x:7%;--w:12px;--h:10px;--c:#e6c181;--drift:78px;--spin:-540deg;--duration:3.42s;--delay:0.190s"></i><i style="--x:44%;--w:6px;--h:13px;--c:#ed637c;--drift:-54px;--spin:720deg;--duration:3.60s;--delay:0.285s"></i><i style="--x:81%;--w:8px;--h:16px;--c:#f8f0db;--drift:-25px;--spin:-900deg;--duration:3.78s;--delay:0.380s"></i><i style="--x:18%;--w:10px;--h:19px;--c:#82bbae;--drift:4px;--spin:1080deg;--duration:2.70s;--delay:0.475s"></i><i style="--x:55%;--w:12px;--h:7px;--c:#ffe0a6;--drift:33px;--spin:-360deg;--duration:2.88s;--delay:0.570s"></i><i style="--x:92%;--w:6px;--h:10px;--c:#e6c181;--drift:62px;--spin:540deg;--duration:3.06s;--delay:0.665s"></i><i style="--x:29%;--w:8px;--h:13px;--c:#ed637c;--drift:-70px;--spin:-720deg;--duration:3.24s;--delay:0.760s"></i><i style="--x:66%;--w:10px;--h:16px;--c:#f8f0db;--drift:-41px;--spin:900deg;--duration:3.42s;--delay:0.000s"></i><i style="--x:3%;--w:12px;--h:19px;--c:#82bbae;--drift:-12px;--spin:-1080deg;--duration:3.60s;--delay:0.095s"></i><i style="--x:40%;--w:6px;--h:7px;--c:#ffe0a6;--drift:17px;--spin:360deg;--duration:3.78s;--delay:0.190s"></i><i style="--x:77%;--w:8px;--h:10px;--c:#e6c181;--drift:46px;--spin:-540deg;--duration:2.70s;--delay:0.285s"></i><i style="--x:14%;--w:10px;--h:13px;--c:#ed637c;--drift:75px;--spin:720deg;--duration:2.88s;--delay:0.380s"></i><i style="--x:51%;--w:12px;--h:16px;--c:#f8f0db;--drift:-57px;--spin:-900deg;--duration:3.06s;--delay:0.475s"></i><i style="--x:88%;--w:6px;--h:19px;--c:#82bbae;--drift:-28px;--spin:1080deg;--duration:3.24s;--delay:0.570s"></i><i style="--x:25%;--w:8px;--h:7px;--c:#ffe0a6;--drift:1px;--spin:-360deg;--duration:3.42s;--delay:0.665s"></i><i style="--x:62%;--w:10px;--h:10px;--c:#e6c181;--drift:30px;--spin:540deg;--duration:3.60s;--delay:0.760s"></i><i style="--x:99%;--w:12px;--h:13px;--c:#ed637c;--drift:59px;--spin:-720deg;--duration:3.78s;--delay:0.000s"></i><i style="--x:36%;--w:6px;--h:16px;--c:#f8f0db;--drift:-73px;--spin:900deg;--duration:2.70s;--delay:0.095s"></i><i style="--x:73%;--w:8px;--h:19px;--c:#82bbae;--drift:-44px;--spin:-1080deg;--duration:2.88s;--delay:0.190s"></i><i style="--x:10%;--w:10px;--h:7px;--c:#ffe0a6;--drift:-15px;--spin:360deg;--duration:3.06s;--delay:0.285s"></i><i style="--x:47%;--w:12px;--h:10px;--c:#e6c181;--drift:14px;--spin:-540deg;--duration:3.24s;--delay:0.380s"></i><i style="--x:84%;--w:6px;--h:13px;--c:#ed637c;--drift:43px;--spin:720deg;--duration:3.42s;--delay:0.475s"></i><i style="--x:21%;--w:8px;--h:16px;--c:#f8f0db;--drift:72px;--spin:-900deg;--duration:3.60s;--delay:0.570s"></i><i style="--x:58%;--w:10px;--h:19px;--c:#82bbae;--drift:-60px;--spin:1080deg;--duration:3.78s;--delay:0.665s"></i><i style="--x:95%;--w:12px;--h:7px;--c:#ffe0a6;--drift:-31px;--spin:-360deg;--duration:2.70s;--delay:0.760s"></i><i style="--x:32%;--w:6px;--h:10px;--c:#e6c181;--drift:-2px;--spin:540deg;--duration:2.88s;--delay:0.000s"></i><i style="--x:69%;--w:8px;--h:13px;--c:#ed637c;--drift:27px;--spin:-720deg;--duration:3.06s;--delay:0.095s"></i><i style="--x:6%;--w:10px;--h:16px;--c:#f8f0db;--drift:56px;--spin:900deg;--duration:3.24s;--delay:0.190s"></i><i style="--x:43%;--w:12px;--h:19px;--c:#82bbae;--drift:-76px;--spin:-1080deg;--duration:3.42s;--delay:0.285s"></i><i style="--x:80%;--w:6px;--h:7px;--c:#ffe0a6;--drift:-47px;--spin:360deg;--duration:3.60s;--delay:0.380s"></i><i style="--x:17%;--w:8px;--h:10px;--c:#e6c181;--drift:-18px;--spin:-540deg;--duration:3.78s;--delay:0.475s"></i><i style="--x:54%;--w:10px;--h:13px;--c:#ed637c;--drift:11px;--spin:720deg;--duration:2.70s;--delay:0.570s"></i><i style="--x:91%;--w:12px;--h:16px;--c:#f8f0db;--drift:40px;--spin:-900deg;--duration:2.88s;--delay:0.665s"></i><i style="--x:28%;--w:6px;--h:19px;--c:#82bbae;--drift:69px;--spin:1080deg;--duration:3.06s;--delay:0.760s"></i><i style="--x:65%;--w:8px;--h:7px;--c:#ffe0a6;--drift:-63px;--spin:-360deg;--duration:3.24s;--delay:0.000s"></i><i style="--x:2%;--w:10px;--h:10px;--c:#e6c181;--drift:-34px;--spin:540deg;--duration:3.42s;--delay:0.095s"></i><i style="--x:39%;--w:12px;--h:13px;--c:#ed637c;--drift:-5px;--spin:-720deg;--duration:3.60s;--delay:0.190s"></i><i style="--x:76%;--w:6px;--h:16px;--c:#f8f0db;--drift:24px;--spin:900deg;--duration:3.78s;--delay:0.285s"></i><i style="--x:13%;--w:8px;--h:19px;--c:#82bbae;--drift:53px;--spin:-1080deg;--duration:2.70s;--delay:0.380s"></i><i style="--x:50%;--w:10px;--h:7px;--c:#ffe0a6;--drift:-79px;--spin:360deg;--duration:2.88s;--delay:0.475s"></i><i style="--x:87%;--w:12px;--h:10px;--c:#e6c181;--drift:-50px;--spin:-540deg;--duration:3.06s;--delay:0.570s"></i><i style="--x:24%;--w:6px;--h:13px;--c:#ed637c;--drift:-21px;--spin:720deg;--duration:3.24s;--delay:0.665s"></i><i style="--x:61%;--w:8px;--h:16px;--c:#f8f0db;--drift:8px;--spin:-900deg;--duration:3.42s;--delay:0.760s"></i><i style="--x:98%;--w:10px;--h:19px;--c:#82bbae;--drift:37px;--spin:1080deg;--duration:3.60s;--delay:0.000s"></i><i style="--x:35%;--w:12px;--h:7px;--c:#ffe0a6;--drift:66px;--spin:-360deg;--duration:3.78s;--delay:0.095s"></i></div>
+    <div class="stage-masthead"><span class="stage-title">晨光好禮</span><div class="slot" id="slotLabel">第一輪 · 6:45</div></div>
     <div class="giftline" id="giftLabel">尚未設定禮品</div>
     <div class="sponsorline" id="sponsorLabel">到「今日設定」填寫禮品與贊助人</div>
     <div class="display"><div class="name" id="nameBox">準備好了</div></div>
@@ -168,14 +171,14 @@ dialog::backdrop{background:rgba(20,16,10,.5)}
     <div class="stagebtns">
       <button class="big" id="btnDraw">開始抽獎</button>
       <button class="ghost" id="btnConfirm" hidden>確認送出</button>
-      <button class="ghost" id="btnRedraw" hidden>重抽</button>
+      <button class="ghost" id="btnRedraw" hidden>人不在 · 換一位</button>
     </div>
     <div class="poolinfo" id="poolInfo"></div>
   </div>
 
   <div class="card">
     <h2>今天的兩輪</h2>
-    <div class="hint">抽完會自動記錄，不用另外存。</div>
+    <div class="hint">按「確認送出」後，中獎結果才會記錄。</div>
     <div class="tblwrap">
       <table id="todayTbl"><thead><tr>
         <th>輪次</th><th>禮品</th><th>贊助人</th><th>中獎</th><th></th>
@@ -190,8 +193,8 @@ dialog::backdrop{background:rgba(20,16,10,.5)}
     <h2>今天的場次</h2>
     <div class="hint">日期預設帶今天。每週三晨光時間兩輪：6:45、6:50。</div>
     <div class="grid two">
-      <div><label class="f">日期</label><input type="date" class="in" id="sDate"></div>
-      <div><label class="f">抽獎規則</label>
+      <div><label class="f" for="sDate">日期</label><input type="date" class="in" id="sDate"></div>
+      <div><label class="f" for="sMode">抽獎規則</label>
         <select class="in" id="sMode">
           <option value="fair">第一份大家抽，第二份給中最少的（建議）</option>
           <option value="weighted">兩份都照機率，中過的人機率低</option>
@@ -203,16 +206,16 @@ dialog::backdrop{background:rgba(20,16,10,.5)}
   <div class="card">
     <h2>第一輪 · 6:45</h2>
     <div class="grid two">
-      <div><label class="f">禮品</label><input class="in" id="g1" placeholder="例如：眼睛的保健食品"></div>
-      <div><label class="f">贊助人</label><input class="in" id="s1" list="memberList" placeholder="輸入姓名"></div>
+      <div><label class="f" for="g1">禮品</label><input class="in" id="g1" placeholder="例如：眼睛的保健食品"></div>
+      <div><label class="f" for="s1">贊助人</label><input class="in" id="s1" list="memberList" placeholder="輸入姓名"></div>
     </div>
   </div>
 
   <div class="card">
     <h2>第二輪 · 6:50</h2>
     <div class="grid two">
-      <div><label class="f">禮品</label><input class="in" id="g2" placeholder="同一份禮品就填一樣的"></div>
-      <div><label class="f">贊助人</label><input class="in" id="s2" list="memberList" placeholder="輸入姓名"></div>
+      <div><label class="f" for="g2">禮品</label><input class="in" id="g2" placeholder="同一份禮品就填一樣的"></div>
+      <div><label class="f" for="s2">贊助人</label><input class="in" id="s2" list="memberList" placeholder="輸入姓名"></div>
     </div>
     <div class="row" style="margin-top:12px">
       <button class="btn" id="btnSameAs1">跟第一輪一樣</button>
@@ -243,7 +246,7 @@ dialog::backdrop{background:rgba(20,16,10,.5)}
 
   <div class="card">
     <h2>還沒中過獎的夥伴</h2>
-    <div class="hint">這些人目前在獎池裡。</div>
+    <div class="hint">以下為尚未中獎的在會夥伴；實際抽獎資格依當日出席與模式決定。</div>
     <div class="chips" id="neverBox"></div>
   </div>
 
@@ -276,8 +279,8 @@ dialog::backdrop{background:rgba(20,16,10,.5)}
     <h2>分會名單</h2>
     <div class="hint">離會的人請按「設為離會」，歷史紀錄會保留，但不再進獎池。</div>
     <div class="row">
-      <input class="in" id="newName" placeholder="姓名" style="max-width:190px">
-      <input class="in" id="newProf" placeholder="專業別" style="max-width:260px">
+      <input class="in" id="newName" aria-label="姓名" placeholder="姓名" style="max-width:190px">
+      <input class="in" id="newProf" aria-label="專業別" placeholder="專業別" style="max-width:260px">
       <button class="btn solid" id="btnAddPerson">新增夥伴</button>
     </div>
     <div class="tblwrap">
@@ -290,7 +293,7 @@ dialog::backdrop{background:rgba(20,16,10,.5)}
 
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status"></div>
 
 <dialog id="confirmDlg"><div class="dlg">
   <h3 id="dlgTitle">確認</h3>
@@ -396,7 +399,8 @@ function totalWins(name){ return winCount(name, null); }
  */
 function pool(round){
   const already = new Set(S.history.filter(h=>h.date===S.today.date).map(h=>h.winner));
-  const names = attendeeNames().filter(n=>!already.has(n));
+  const skip = new Set(skipped);
+  const names = attendeeNames().filter(n=>!already.has(n) && !skip.has(n));
   if(!names.length) return [];
 
   if(S.settings.mode==='weighted'){
@@ -416,7 +420,8 @@ function pool(round){
 /** 今天到場者裡，累計中獎次數最少的那一群有多少人、中過幾次（第二份用） */
 function fewestWinsTier(){
   const already = new Set(S.history.filter(h=>h.date===S.today.date).map(h=>h.winner));
-  const names = attendeeNames().filter(n=>!already.has(n));
+  const skip = new Set(skipped);
+  const names = attendeeNames().filter(n=>!already.has(n) && !skip.has(n));
   if(!names.length) return {min:0, size:0};
   const min = Math.min(...names.map(totalWins));
   return {min, size: names.filter(n=>totalWins(n)===min).length};
@@ -459,6 +464,9 @@ $$('nav button').forEach(b=>b.onclick=()=>{
    抽獎頁
    ============================================================ */
 let currentRound = 1, rolling=false, pendingWinner=null;
+// 這一份獎抽到但人不在現場的人，換一位時要排除掉，不要再抽到他。
+// 只在當下這一份獎有效，確認送出或換輪次就清掉。
+let skipped = [];
 
 function nextRound(){
   for(const r of ROUNDS){ if(!drawnToday(r.n)) return r.n; }
@@ -494,15 +502,16 @@ function renderDraw(){
   if(pendingWinner) $('#btnDraw').hidden = true;
 
   const att = attendeeNames().length;
+  const skipNote = skipped.length ? ` · 已跳過 ${skipped.length} 位不在場` : '';
   if(S.settings.mode === 'weighted'){
-    $('#poolInfo').textContent = `獎池 ${poolSize} 人 · 出席 ${att} 人 · 中過的人降低機率`;
+    $('#poolInfo').textContent = `獎池 ${poolSize} 人 · 出席 ${att} 人 · 中過的人降低機率${skipNote}`;
   }else if(currentRound === 1){
-    $('#poolInfo').textContent = `第一份 · 到場的 ${poolSize} 位一起抽 · 出席 ${att} 人`;
+    $('#poolInfo').textContent = `第一份 · 到場的 ${poolSize} 位一起抽 · 出席 ${att} 人${skipNote}`;
   }else{
     const t = fewestWinsTier();
     $('#poolInfo').textContent = t.min === 0
-      ? `第二份 · 從還沒中過的 ${t.size} 位裡抽 · 出席 ${att} 人`
-      : `第二份 · 從中獎最少的 ${t.size} 位裡抽（各中過 ${t.min} 次）· 出席 ${att} 人`;
+      ? `第二份 · 從還沒中過的 ${t.size} 位裡抽 · 出席 ${att} 人${skipNote}`
+      : `第二份 · 從中獎最少的 ${t.size} 位裡抽（各中過 ${t.min} 次）· 出席 ${att} 人${skipNote}`;
   }
 
   const tb=$('#todayTbl tbody'); tb.innerHTML='';
@@ -531,7 +540,12 @@ function startRoll(){
   if(!cfg.gift){ toast('先到「今日設定」填今天的禮品'); return; }
 
   const p = pool(currentRound);
-  if(!p.length){ toast('獎池沒有人，檢查出席名單'); return; }
+  if(!p.length){
+    toast(skipped.length
+      ? '在場的人都跳過了，請重新整理或調整出席名單'
+      : '獎池沒有人，檢查出席名單');
+    return;
+  }
 
   rolling=true; pendingWinner=null;
   $('#btnDraw').disabled=true; $('#btnConfirm').hidden=true; $('#btnRedraw').hidden=true;
@@ -578,12 +592,17 @@ function confirmWinner(){
   });
   save();
   const w=pendingWinner; pendingWinner=null;
+  skipped = [];
   renderAll(); toast(`已記錄：${w}`);
 }
 
 $('#btnDraw').onclick = startRoll;
 $('#btnConfirm').onclick = confirmWinner;
-$('#btnRedraw').onclick = ()=>{ pendingWinner=null; renderDraw(); startRoll(); };
+$('#btnRedraw').onclick = ()=>{
+  // 唱名沒人回應 → 把他排除，換下一位。他今天仍可被另一份獎抽到。
+  if(pendingWinner && !skipped.includes(pendingWinner)) skipped.push(pendingWinner);
+  pendingWinner=null; renderDraw(); startRoll();
+};
 
 /* ============================================================
    今日設定
