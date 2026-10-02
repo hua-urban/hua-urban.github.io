@@ -622,6 +622,13 @@ const CHAPTER = {
   CHAPTER.chapterMonth = CH.chapterMonth || null;
   CHAPTER.chapterStale = !!CH.chapterStale;
   CHAPTER.chapterFetchedAt = CH.chapterFetchedAt || null;
+  // 官方會員紅綠燈還沒出來時，先用 PALMS 摘要換算的暫定版；正式檔上傳後這個欄位就不存在，提示自動消失
+  CHAPTER.provisional = CH.provisional || null;
+  if (CHAPTER.provisional) {
+    const scope = document.querySelector('header .scope');
+    if (scope) scope.insertAdjacentHTML('afterend',
+      `<div class="note note-watch"><b>暫定換算版</b>　${CHAPTER.provisional}</div>`);
+  }
 })();
 
 function rangeFromPeriod(p){
@@ -878,6 +885,7 @@ async function refreshChapter(){
       chapterStale: !!d.stale,
       chapterFetchedAt: new Date().toISOString(),
     });
+    if (CHAPTER.provisional) chapter.provisional = CHAPTER.provisional;   // 只換分會七項，會員仍是暫定版
     const up = await fetch(API, {
       method: 'POST', headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({chapterOnly: true, chapter, uploadedBy: ''}),
