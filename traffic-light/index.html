@@ -545,15 +545,17 @@ const VIEW = {toggle: false, est: false};
     const r = await fetch(DATA_URL + '?t=' + Date.now(), {cache: 'no-store'});
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const d = await r.json();
-    // 官方會員紅綠燈還沒出來時，provisional.json 放 PALMS 換算的暫定版；
-    // 等官方同一個月份上傳後（期間相同）切換鈕就自動消失
-    let p = null;
-    try {
-      const pr = await fetch('provisional.json?t=' + Date.now(), {cache: 'no-store'});
-      if (pr.ok) p = await pr.json();
-    } catch (_) {}
+    // 官方會員紅綠燈還沒出來時，PALMS 換算的暫定版存在 data.json 的 chapter.est。
+    // 用「只更新分會七項」的寫法存進去，所以官方的會員名單與上一期比較基準都不會被動到；
+    // 暫定版的「上一期」就是目前的官方版。官方追上同一個月份後切換鈕自動消失。
+    const est = d.chapter && d.chapter.est;
+    const p = est && Array.isArray(est.members) ? {
+      members: est.members, chapter: est.chapter || {}, updatedAt: est.updatedAt,
+      prev: {updatedAt: d.updatedAt, chapter: d.chapter, members: d.members},
+    } : null;
     const offP = (d.chapter || {}).period, estP = p && (p.chapter || {}).period;
-    VIEW.toggle = !!(estP && estP !== offP);
+    const ym = x => { const m = /(\d{4})\s*年\s*(\d{1,2})\s*月/.exec(x || ''); return m ? +m[1] * 12 + +m[2] : 0; };
+    VIEW.toggle = !!(estP && ym(estP) > ym(offP));   // 官方追上同一個月（或更新）就不再顯示暫定版
     VIEW.est = VIEW.toggle && new URLSearchParams(location.search).get('v') === 'est';
     VIEW.offPeriod = offP; VIEW.estPeriod = estP;
     const u = VIEW.est ? p : d;
@@ -929,7 +931,7 @@ async function refreshChapter(){
       chapterStale: !!d.stale,
       chapterFetchedAt: new Date().toISOString(),
     });
-    if (CHAPTER.provisional) chapter.provisional = CHAPTER.provisional;   // 只換分會七項，會員仍是暫定版
+    if (CH.est) chapter.est = CH.est;   // 只換官方七項，暫定版原樣留著
     const up = await fetch(API, {
       method: 'POST', headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({chapterOnly: true, chapter, uploadedBy: ''}),
@@ -1383,12 +1385,20 @@ document.getElementById('uploadPanel').innerHTML = `
       <div class="step"><span class="step-n">2</span><span class="step-t">在下方選擇該檔<small>畫面會先顯示讀取結果供核對</small></span></div>
       <div class="step"><span class="step-n">3</span><span class="step-t">依《分會紅綠燈報告》填寫七項數字，按更新<small>僅分會七項需手動填寫，會員資料為自動解析</small></span></div>
     </div>
+    <div class="note note-watch" style="margin-top:16px">
+      <b>官方成績表還沒出來？</b>　可以先放 BNI 的 <b>PALMS 摘要報告</b>（.xls），系統會自動換算成「暫定換算版」。
+      <br>・兩種檔都放在下面同一個框，<b>系統會自己認出是哪一種</b>，讀完會先告訴你。
+      <br>・會員成績表 → 更新<b>官方版</b>；PALMS 摘要報告 → 只更新<b>暫定換算版</b>，官方版完全不會被動到。
+      <br>・暫定版會出現在網頁頂端的切換鈕裡，並標明「正式分數以 LTnA 區域領導會議發布為準」。
+      <br>・等官方同一個月的成績表上傳後，暫定版與切換鈕會自動消失。
+      <br>・下載 PALMS 時，期間請選<b>最近 6 個月</b>（例如 4/1–9/30），才會跟官方的算法一致。
+    </div>
   </div>
 
   <div class="drop" id="dropZone">
     <div class="drop-icon">📄</div>
-    <h3>選擇會員成績表</h3>
-    <p>就是 BNI 下載的那個 Excel 檔（.xlsx），也可以直接把檔案拖進這個框</p>
+    <h3>選擇會員成績表或 PALMS 摘要報告</h3>
+    <p>BNI 下載的會員成績表（.xlsx）或 PALMS 摘要報告（.xls）都可以，也可以直接把檔案拖進這個框</p>
     <div class="drop-row">
       <input type="file" id="fileInput" accept=".xlsx,.xls" hidden>
       <button class="btn ghost" id="pickFile">選擇檔案</button>
@@ -1443,6 +1453,9 @@ let pendingPeriod = null;
 let pendingRange = null;
 let periodSource = '';
 let chapterMeta = null;
+let pendingKind = 'official';   // 'official'＝會員成績表，'palms'＝PALMS 摘要報告（換算成暫定版）
+let palmsChapter = null;
+const PROVISIONAL_TEXT = p => `這一版是由 BNI「PALMS 摘要報告」（${p}）換算而成，供提前參考。正式分數以 LTnA 區域領導會議發布的會員紅綠燈為準，屆時會更新。`;
 
 // 從成績表檔名抓計分月份，例如「…(2026-08).xlsx」「…2026年8月…」；抓不到就回上一個月
 function periodFromFilename(name){
@@ -1467,6 +1480,26 @@ function periodFromFilename(name){
 })();
 
 // 那七項去《分會紅綠燈報告》拿。對方晚發佈時端點會自動退回上一期，並回報 stale。
+// PALMS 換算：能算的四項帶推算值，其餘三項沿用目前官方版，分會得分照官方計分表重算
+function fillPalmsChapter(){
+  const off = {score: CHAPTER.score};
+  const MAP = {'分會大小':'size','會員成長':'growth','保留率':'retention',
+               '會員每週引薦數':'ref','每週來賓數':'vis','轉換率':'conv','缺席率':'absent'};
+  CHAPTER.official.forEach(m => { for (const pre in MAP) if (m.k.indexOf(pre) === 0) off[MAP[pre]] = m.v; });
+  const v = Object.assign({}, off, palmsChapter);
+  v.score = chapterScoreOf(v);
+  v.prevScore = off.score;
+  for (const f of CH_FIELDS){
+    const el = document.getElementById('ch-' + f.k);
+    if (el && typeof v[f.k] === 'number') el.value = v[f.k];
+  }
+  chapterMeta = {reportMonth: 'PALMS 推算（' + pendingPeriod + '）', stale: false};
+  document.getElementById('chapterNote').innerHTML =
+    '這七項是<b>推算的</b>：分會大小、每週引薦數、每週來賓數、缺席率由 PALMS 算出；'
+    + '會員成長、保留率、轉換率 PALMS 沒有，<b>沿用官方 ' + CHAPTER.period + '</b> 的數字；'
+    + '分會得分照官方計分表重算，「上月」填的是官方 ' + CHAPTER.period + ' 的分數。都可以手動改。';
+}
+
 async function fetchChapter(period){
   const note = document.getElementById('chapterNote');
   const m = /(\d{4})\s*年\s*(\d{1,2})\s*月/.exec(period || '');
@@ -1503,7 +1536,87 @@ function loadSheetJS(){
 
 const num = v => (typeof v === 'number' && isFinite(v)) ? v : 0;
 
+// PALMS 摘要報告：BNI 匯出的「分會 - PALMS摘要報告」，跟會員成績表欄位不同，要換算。
+// 規則（2026-10-02 拿官方 8 月檔驗過會員分數 57 人零誤差、分會四項全對上）：
+//   週數＝出席＋缺席＋病假＋替代人；提供引薦＝內部＋外部；收到引薦同理
+//   分會指標用「總數」列（含已不在名單的人，官方也算他們）；沒有總數列才用名單加總＋「BNI」列來賓
+function isPalms(rows){
+  return rows.slice(0, 4).some(r => r && r.some(c => typeof c === 'string' && /PALMS/i.test(c)));
+}
+function palmsDate(v){
+  if (v instanceof Date) return v.toISOString().slice(0, 10);
+  if (typeof v === 'number') return new Date(Math.round((v - 25569) * 864e5)).toISOString().slice(0, 10);
+  const m = /(20\d{2})[-/](\d{1,2})[-/](\d{1,2})/.exec(String(v || ''));
+  return m ? pad(m[1], m[2], m[3]) : null;
+}
+function parsePalms(rows){
+  const hi = rows.findIndex(r => r && r[0] === '姓氏' && r[1] === '名字');
+  if (hi < 0) throw new Error('看起來是 PALMS 報告，但找不到「姓氏／名字」那一列');
+  const H = rows[hi].map(h => String(h || '').trim());
+  const col = name => { const i = H.indexOf(name); if (i < 0) throw new Error('PALMS 報告少了「' + name + '」欄'); return i; };
+  const C = {P:col('出席'), A:col('缺席'), L:col('遲到'), Med:col('病假'), S:col('替代人'),
+             RGi:col('提供內部引薦'), RGo:col('提供外部引薦'), RRi:col('收到內部引薦'), RRo:col('收到外部引薦'),
+             V:col('來賓'), O2O:col('一對一會面'), TY:col('交易價值'), CEU:col('分會教育單位')};
+  const n = (r, k) => num(typeof r[C[k]] === 'string' ? parseFloat(r[C[k]]) : r[C[k]]);
+  const list = [];
+  let total = null, bni = null;
+  for (const r of rows.slice(hi + 1)){
+    if (!r || r[0] == null) continue;
+    const a = String(r[0]).trim();
+    if (a === '總數') { total = r; continue; }
+    if (a === 'BNI') { bni = r; continue; }
+    if (a === '來賓') continue;
+    const name = (a + String(r[1] || '').trim()).trim();
+    const W = n(r,'P') + n(r,'A') + n(r,'Med') + n(r,'S');
+    if (!name || W <= 0) continue;
+    list.push([0, name, W, n(r,'P'), n(r,'A'), n(r,'L'), n(r,'Med'), n(r,'S'),
+               n(r,'RGi') + n(r,'RGo'), n(r,'RRi') + n(r,'RRo'), n(r,'V'), n(r,'O2O'), n(r,'CEU'), n(r,'TY')]);
+  }
+  if (!list.length) throw new Error('PALMS 報告裡讀不到會員');
+  // 照分數排名當編號，跟官方成績表一樣
+  const sc = m => Object.values(scoreOf({weeks:m[2], A:m[4], RG:m[8], V:m[10], O2O:m[11], CEU:m[12], TYFCB:m[13]})).reduce((x, y) => x + y, 0);
+  list.sort((x, y) => sc(y) - sc(x) || x[1].localeCompare(y[1]));
+  list.forEach((m, i) => m[0] = i + 1);
+
+  let from = null, to = null;
+  for (const r of rows.slice(0, hi)){
+    if (!r) continue;
+    const v = r.slice(1).find(c => c != null && c !== '');   // 日期放在合併儲存格後面那一格，不一定是第 2 欄
+    if (/^從/.test(String(r[0] || ''))) from = palmsDate(v);
+    if (/^至/.test(String(r[0] || ''))) to = palmsDate(v);
+  }
+  const range = from && to ? {start: from, end: to, endYear: +to.slice(0, 4), endMonth: +to.slice(5, 7)} : null;
+
+  // 分會指標：能從 PALMS 算的四項用推算值，其餘沿用目前官方版（fillPalmsChapter）
+  const W = Math.max(...list.map(m => m[2]));
+  const sum = i => list.reduce((s, m) => s + m[i], 0);
+  const tot = total
+    ? {P: n(total,'P'), A: n(total,'A'), Med: n(total,'Med'), S: n(total,'S'),
+       RG: n(total,'RGi') + n(total,'RGo'), V: n(total,'V')}
+    : {P: sum(3), A: sum(4), Med: sum(6), S: sum(7), RG: sum(8), V: sum(10) + (bni ? n(bni,'V') : 0)};
+  const r2 = v => Math.round(v * 100) / 100;
+  palmsChapter = {size: list.length, ref: r2(tot.RG / list.length / W), vis: r2(tot.V / W),
+                  absent: r2(tot.A / (tot.P + tot.A + tot.Med + tot.S) * 100)};
+  return {sheet: 'PALMS 摘要報告', members: list, range, kind: 'palms'};
+}
+
+// 分會七項 → 分會得分（BNI 官方計分表，與「怎麼上綠燈分會」同一份 tiers）
+function chapterScoreOf(v){
+  const MAP = {'分會大小':'size','會員成長':'growth','保留率':'retention',
+               '會員每週引薦數':'ref','每週來賓數':'vis','轉換率':'conv','缺席率':'absent'};
+  return CHAPTER.official.reduce((s, m) => {
+    const k = MAP[Object.keys(MAP).find(pre => m.k.indexOf(pre) === 0)];
+    const x = v[k];
+    const t = m.low ? m.tiers.find(([th]) => x < th) : m.tiers.find(([th]) => x >= th - 1e-9);
+    return s + (t ? t[1] : 0);
+  }, 0);
+}
+
 function parseWorkbook(wb){
+  {
+    const first = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header: 1, defval: null, raw: true});
+    if (isPalms(first)) return parsePalms(first);
+  }
   const name = wb.SheetNames.find(n => /traffic|紅綠燈/i.test(n)) || wb.SheetNames[0];
   const rows = XLSX.utils.sheet_to_json(wb.Sheets[name], {header: 1, defval: null, raw: true});
   const out = [];
@@ -1514,7 +1627,7 @@ function parseWorkbook(wb){
     out.push([no, nm.trim(), num(r[3]), num(r[12]), num(r[13]), num(r[14]), num(r[15]), num(r[16]),
               num(r[17]), num(r[18]), num(r[19]), num(r[20]), num(r[21]), num(r[22])]);
   }
-  return {sheet: name, members: out, range: findRangeInRows(rows)};
+  return {sheet: name, members: out, range: findRangeInRows(rows), kind: 'official'};
 }
 
 // 成績表表頭有「2026-03-01 - 2026-08-31 (6個月)」這行，優先採用它
@@ -1542,10 +1655,11 @@ async function handleFile(file){
     const members = parsed.members;
     if (members.length < 10) throw new Error('只讀到 ' + members.length + ' 位會員，這可能不是會員成績表');
     parsedMembers = members;
+    pendingKind = parsed.kind;
     if (parsed.range){
       pendingPeriod = parsed.range.endYear + ' 年 ' + parsed.range.endMonth + ' 月';
       pendingRange  = parsed.range.start + ' – ' + parsed.range.end;
-      periodSource  = '成績表內的計分期間';
+      periodSource  = parsed.kind === 'palms' ? 'PALMS 報告內的期間' : '成績表內的計分期間';
     } else {
       pendingPeriod = periodFromFilename(file.name);
       pendingRange  = rangeFromPeriod(pendingPeriod);
@@ -1554,8 +1668,13 @@ async function handleFile(file){
     msg.textContent = '已讀取 ' + file.name;
 
     const top = members.slice(0, 3).map(m => m[1].split(/[\s（(]/)[0] + '（第 ' + m[0] + ' 位）').join('、');
-    document.getElementById('previewBody').innerHTML =
-      '<p class="target-b" style="margin:0 0 12px">從「' + parsed.sheet + '」分頁讀到 <b>'
+    const kindNote = parsed.kind === 'palms'
+      ? '<div class="note note-watch" style="margin:0 0 12px"><b>這是 PALMS 摘要報告</b>，不是官方會員成績表。'
+        + '<br>會換算成「<b>暫定換算版</b>」，放在網頁頂端的切換鈕裡；<b>官方版不會被動到</b>。'
+        + '<br>正式分數仍以 LTnA 區域領導會議發布的會員紅綠燈為準。</div>'
+      : '<div class="note note-ok" style="margin:0 0 12px"><b>這是官方會員成績表</b>，會更新<b>官方版</b>。</div>';
+    document.getElementById('previewBody').innerHTML = kindNote +
+      '<p class="target-b" style="margin:0 0 12px">從「' + parsed.sheet + '」' + (parsed.kind === 'palms' ? '' : '分頁') + '讀到 <b>'
       + members.length + ' 位會員</b>，計分週數 <b>' + members[0][2] + ' 週</b>。<br>前三位是：'
       + top + '。<br>計分月份：<b>' + pendingPeriod + '</b>　計分期間 <b>' + pendingRange + '</b>'
       + '<br><span style="color:var(--text-2)">（月份取自' + periodSource + '）</span>'
@@ -1563,9 +1682,16 @@ async function handleFile(file){
     document.getElementById('previewBox').hidden = false;
     document.getElementById('chapterBox').hidden = false;
     document.getElementById('chapterBox').scrollIntoView({behavior: 'smooth', block: 'start'});
-    fetchChapter(pendingPeriod);
+    const upBtn = document.getElementById('doUpload');
+    if (parsed.kind === 'palms') {
+      upBtn.textContent = '放進暫定換算版';
+      fillPalmsChapter();
+    } else {
+      upBtn.textContent = '確認更新';
+      fetchChapter(pendingPeriod);
+    }
   } catch (e) {
-    parsedMembers = null;
+    parsedMembers = null; pendingKind = 'official';
     pendingPeriod = null; pendingRange = null; periodSource = '';
     msg.textContent = '讀不到：' + e.message;
     document.getElementById('previewBox').hidden = true;
@@ -1652,17 +1778,36 @@ document.getElementById('doUpload').addEventListener('click', async () => {
     chapter.chapterStale = chapterMeta.stale;
   }
   chapter.chapterFetchedAt = new Date().toISOString();
+  const isP = pendingKind === 'palms';
+  const who = document.getElementById('uploaderName').value.trim();
+  let payload;
+  if (isP) {
+    chapter.provisional = PROVISIONAL_TEXT(pendingRange ? pendingRange.replace(' – ', ' 至 ') : chapter.period);
+    // 官方那七項原封不動，暫定版整包掛在 est 底下
+    const official = Object.assign({}, CH);
+    delete official.est;
+    official.est = {updatedAt: new Date().toISOString(), uploadedBy: who, chapter, members: parsedMembers};
+    payload = {chapterOnly: true, chapter: official, uploadedBy: who ? who + '（PALMS 換算版）' : 'PALMS 換算版'};
+  } else {
+    // 官方檔上傳後，比它舊或同月的暫定版就沒用了；比它新的暫定版才留著
+    const ymOf = x => { const m = /(\d{4})\s*年\s*(\d{1,2})\s*月/.exec(x || ''); return m ? +m[1] * 12 + +m[2] : 0; };
+    if (CH.est && CH.est.chapter && ymOf(CH.est.chapter.period) > ymOf(chapter.period)) chapter.est = CH.est;
+    payload = {members: parsedMembers, chapter, uploadedBy: who};
+  }
   btn.disabled = true; btn.textContent = '更新中…';
   msg.textContent = '正在寫入，請不要關掉這一頁…';
   try {
     const r = await fetch(API, {
       method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({members: parsedMembers, chapter,
-                            uploadedBy: document.getElementById('uploaderName').value.trim()})
+      body: JSON.stringify(payload)
     });
     const d = await r.json();
     if (!d.ok) throw new Error(d.error || '未知錯誤');
-    msg.innerHTML = '✅ ' + d.message + '<br>這一頁 30 秒後重新整理就會看到新的數字。';
+    msg.innerHTML = (isP
+      ? '✅ 已放進「暫定換算版」，' + parsedMembers.length + ' 位會員。官方版沒有被動到。'
+        + '<br>30 秒後重新整理，在網頁頂端按「暫定換算版」就看得到。'
+      : '✅ ' + d.message
+        + '<br>這一頁 30 秒後重新整理就會看到新的數字。');
     btn.textContent = '已更新';
   } catch (e) {
     msg.textContent = '更新失敗：' + e.message + '　資料沒有被改動，可以再試一次。';
