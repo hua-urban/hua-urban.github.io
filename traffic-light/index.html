@@ -77,6 +77,11 @@ h1{font-size:clamp(26px,4vw,34px); line-height:1.2; letter-spacing:-.02em; margi
   border-left:3px solid var(--accent); border-radius:0 8px 8px 0;
 }
 .scope b{color:var(--accent)}
+.vtoggle{display:inline-flex; gap:4px; margin-top:12px; padding:4px; border-radius:10px;
+  background:var(--card-2, rgba(0,0,0,.05)); flex-wrap:wrap}
+.vtoggle a{padding:7px 14px; border-radius:7px; font-size:14px; font-weight:600;
+  color:var(--text-2); text-decoration:none}
+.vtoggle a.on{background:var(--card, #fff); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,.12)}
 .demo-tag{
   display:inline-block; margin-left:10px; padding:2px 8px; border-radius:999px;
   background:var(--accent-soft); color:var(--accent); font-size:11.5px; font-weight:700;
@@ -533,6 +538,7 @@ h1{font-size:clamp(26px,4vw,34px); line-height:1.2; letter-spacing:-.02em; margi
 
 <script>
 const DATA_URL = 'data.json';
+const VIEW = {toggle: false, est: false};
 
 (async () => {
   const app = document.querySelector('.wrap');
@@ -540,7 +546,19 @@ const DATA_URL = 'data.json';
     const r = await fetch(DATA_URL + '?t=' + Date.now(), {cache: 'no-store'});
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const d = await r.json();
-    boot(d.members, d.chapter || {}, d.updatedAt, d.prev || null, d.leftMembers || []);
+    // 官方會員紅綠燈還沒出來時，provisional.json 放 PALMS 換算的暫定版；
+    // 等官方同一個月份上傳後（期間相同）切換鈕就自動消失
+    let p = null;
+    try {
+      const pr = await fetch('provisional.json?t=' + Date.now(), {cache: 'no-store'});
+      if (pr.ok) p = await pr.json();
+    } catch (_) {}
+    const offP = (d.chapter || {}).period, estP = p && (p.chapter || {}).period;
+    VIEW.toggle = !!(estP && estP !== offP);
+    VIEW.est = VIEW.toggle && new URLSearchParams(location.search).get('v') === 'est';
+    VIEW.offPeriod = offP; VIEW.estPeriod = estP;
+    const u = VIEW.est ? p : d;
+    boot(u.members, u.chapter || {}, u.updatedAt, u.prev || null, d.leftMembers || []);
   } catch (e) {
     app.innerHTML = '<p style="padding:40px;text-align:center;color:var(--red)">'
       + '讀不到資料（' + e.message + '）。<br>如果是剛更新完，等 30 秒再重新整理。</p>';
@@ -628,6 +646,12 @@ const CHAPTER = {
     const scope = document.querySelector('header .scope');
     if (scope) scope.insertAdjacentHTML('afterend',
       `<div class="note note-watch"><b>暫定換算版</b>　${CHAPTER.provisional}</div>`);
+  }
+  if (VIEW.toggle) {
+    const scope = document.querySelector('header .scope');
+    if (scope) scope.insertAdjacentHTML('afterend', `<nav class="vtoggle" aria-label="切換版本">
+      <a href="./" class="${VIEW.est ? '' : 'on'}">LTnA 官方版 · ${VIEW.offPeriod}</a>
+      <a href="./?v=est" class="${VIEW.est ? 'on' : ''}">暫定換算版 · ${VIEW.estPeriod}</a></nav>`);
   }
 })();
 
@@ -817,7 +841,7 @@ const arrow = d => d > 0 ? `▲ +${d}` : d < 0 ? `▼ ${d}` : '—';
 
 document.getElementById('chapterStats').innerHTML = `
   <div class="stat s-${chapLight}">
-    <p class="stat-label">分會得分 · BNI 官方</p>
+    <p class="stat-label">分會得分 · ${VIEW.est ? 'PALMS 推算' : 'BNI 官方'}</p>
     <div class="stat-value">${CHAPTER.score}<small>分 · ${LIGHT[chapLight].name}</small></div>
     <p class="stat-note">上月 <b>${CHAPTER.prevScore}</b> 分　${arrow(chapDiff)}</p>
     <p class="stat-src" id="chapterSrc"></p>
@@ -844,6 +868,10 @@ function fmtWhen(iso){
 function renderChapterSrc(){
   const box = document.getElementById('chapterSrc');
   if (!box) return;
+  if (VIEW.est) {   // 暫定版的七項是推算的，不提供抓官方報告的按鈕，免得寫進官方資料
+    box.textContent = '由 PALMS 摘要推算，正式分數以 LTnA 公布為準';
+    return;
+  }
   const m = CHAPTER.chapterMonth;
   const when = fmtWhen(CHAPTER.chapterFetchedAt);
   let txt;
@@ -1634,6 +1662,14 @@ document.querySelector('.tabs').addEventListener('click', e => {
     document.getElementById(x.getAttribute('aria-controls')).hidden = !on;
   });
 });
+
+// 暫定版只供瀏覽：更新資料與退會標記都會寫進官方資料，必須在官方版操作
+if (VIEW.est) {
+  const up = document.getElementById('uploadPanel');
+  [...up.children].forEach(el => el.hidden = true);
+  up.insertAdjacentHTML('afterbegin', '<div class="cbox"><p class="sub" style="margin:0">'
+    + '現在看的是<b>暫定換算版</b>。要上傳成績表或標記退會，請先切回 <a href="./">LTnA 官方版</a>。</p></div>');
+}
 
 }
 </script>
