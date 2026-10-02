@@ -481,8 +481,7 @@ h1{font-size:clamp(26px,4vw,34px); line-height:1.2; letter-spacing:-.02em; margi
   <header>
     <p class="eyebrow">BNI 華都更 Hua Urban+</p>
     <h1>會員紅綠燈<span class="demo-tag">2026 年 7 月</span></h1>
-    <p class="period">計分期間 <b>2026-02-01 – 2026-07-31</b>　往前算 6 個月的累計，每月更新一次就往前滾一個月</p>
-    <p class="scope"><b>僅供華都更內部成員使用。</b></p>
+    <p class="period">計分期間 <b>2026-02-01 – 2026-07-31</b>　<span class="period-note">往前算 6 個月的累計，每月更新一次就往前滾一個月</span></p>
 
     <div class="dist">
       <div class="dist-bar" id="distBar"></div>
@@ -643,12 +642,12 @@ const CHAPTER = {
   // 官方會員紅綠燈還沒出來時，先用 PALMS 摘要換算的暫定版；正式檔上傳後這個欄位就不存在，提示自動消失
   CHAPTER.provisional = CH.provisional || null;
   if (CHAPTER.provisional) {
-    const scope = document.querySelector('header .scope');
+    const scope = document.querySelector('header .period');
     if (scope) scope.insertAdjacentHTML('afterend',
       `<div class="note note-watch"><b>暫定換算版</b>　${CHAPTER.provisional}</div>`);
   }
   if (VIEW.toggle) {
-    const scope = document.querySelector('header .scope');
+    const scope = document.querySelector('header .period');
     if (scope) scope.insertAdjacentHTML('afterend', `<nav class="vtoggle" aria-label="切換版本">
       <a href="./" class="${VIEW.est ? '' : 'on'}">LTnA 官方版 · ${VIEW.offPeriod}</a>
       <a href="./?v=est" class="${VIEW.est ? 'on' : ''}">暫定換算版 · ${VIEW.estPeriod}</a></nav>`);
@@ -774,6 +773,23 @@ const LEFT_M = ALL.filter(m => m.hasLeft);
 
 /* 週數最多的人＝待滿整個計分區間；比他少代表這半年才入會 */
 const FULL_WEEKS = Math.max(...M.map(m => m.weeks));
+
+/* 計分期間寫的是 6 個月，但官方只從成會後開始算週數（華都更 3/31 成會，官方從 5/6 第一次例會起算）。
+   用期間最後一個週三往回推「週數 − 1」週，就是實際第一次計入的例會；比期間起日晚才另外註明 */
+(() => {
+  const el = document.querySelector('.period-note');
+  const r = CH.range || rangeFromPeriod(CH.period) || '';
+  const mm = /(\d{4}-\d{2}-\d{2})\s*[–-]\s*(\d{4}-\d{2}-\d{2})/.exec(r);
+  if (!el || !mm || !isFinite(FULL_WEEKS)) return;
+  const MEET_DAY = 3;                                   // 例會在週三
+  const end = new Date(mm[2] + 'T00:00:00');
+  end.setDate(end.getDate() - ((end.getDay() - MEET_DAY + 7) % 7));
+  const first = new Date(end); first.setDate(end.getDate() - (FULL_WEEKS - 1) * 7);
+  const fmt = d => `${d.getMonth() + 1}/${d.getDate()}`;
+  el.textContent = first > new Date(mm[1] + 'T00:00:00')
+    ? `實際從 ${fmt(first)} 第一次例會起算，共 ${FULL_WEEKS} 次例會（分會成會後才開始計分）`
+    : `共 ${FULL_WEEKS} 次例會，往前算 6 個月的累計`;
+})();
 M.forEach(m => {
   m.isNew = m.weeks < FULL_WEEKS;
   m.zeroCount = Object.values(m.sc).filter(v => v === 0).length;
