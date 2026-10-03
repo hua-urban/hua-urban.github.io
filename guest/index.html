@@ -420,7 +420,7 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbwX7BsF7OWcfP2DA5byYQ5C
           </div>
 
           <div class="field-group">
-            <div class="field-label">Email <span class="opt">選填</span></div>
+            <div class="field-label">Email <span class="req">必填</span></div>
             <input class="field-input" type="email" id="fieldEmail" placeholder="your@email.com" autocomplete="email" inputmode="email">
           </div>
 
@@ -487,7 +487,7 @@ function validateForm() {
   if (!name || !expertise || !referrer || !phone || !session) return false;
   if (!/^09\d{8}$/.test(phone)) return false;
   var email = fieldEmail.value.trim();
-  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return false;
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return false;
   return true;
 }
 
