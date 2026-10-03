@@ -292,6 +292,12 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbwX7BsF7OWcfP2DA5byYQ5C
      下次再有特別版：換掉 topic-card-override.png 並改這一行即可。 */
   var OVERRIDE_UNTIL = '202609020900';
 
+  /* 手動雙卡覆蓋：講者臨時交換時間、Canva 還沒改好時用。存在且未過
+     MANUAL_DUAL_UNTIL → 顯示 topic-card-manual-1/2.png，排程同樣碰不到。
+     202610070900 = 10/7 例會散場；Canva 同日有三張卡（王雅慧與人交換時間
+     但卡片日期未改），改由 Joan 指定李瑞雲＋陳品攸兩張。 */
+  var MANUAL_DUAL_UNTIL = '202610070900';
+
   /* 台北時間戳（UTC+8，台灣無日光節約），與來賓裝置的時區設定無關。 */
   function taipeiStamp() {
     var d = new Date();
@@ -336,13 +342,27 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbwX7BsF7OWcfP2DA5byYQ5C
       });
   }
 
+  function runManualOrDual() {
+    if (taipeiStamp() >= MANUAL_DUAL_UNTIL) { runDual(); return; }
+    Promise.all([preload('images/topic-card-manual-1.png'), preload('images/topic-card-manual-2.png')])
+      .then(function (results) {
+        if (results[0] && results[1]) {
+          img1.src = withBust('images/topic-card-manual-1.png');
+          img2.src = withBust('images/topic-card-manual-2.png');
+          topicSec.hidden = false;
+          return;
+        }
+        runDual();
+      });
+  }
+
   if (taipeiStamp() < OVERRIDE_UNTIL) {
     preload('images/topic-card-override.png').then(function (ok) {
       if (ok) { showSingle('images/topic-card-override.png'); return; }
-      runDual();
+      runManualOrDual();
     });
   } else {
-    runDual();
+    runManualOrDual();
   }
 
   /* ── Lightbox：原生 <dialog>，Esc／點背景關閉為瀏覽器內建行為 ── */
