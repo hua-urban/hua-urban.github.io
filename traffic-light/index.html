@@ -63,6 +63,29 @@ body{
 .wrap{max-width:1180px; margin:0 auto; padding:28px 20px 80px}
 .num{font-family:var(--font-mono); font-variant-numeric:tabular-nums}
 
+/* 匯出完整現任會員：跨分頁、捲動時仍可使用 */
+.export-toolbar{
+  position:sticky; top:0; z-index:20; display:flex; flex-wrap:wrap;
+  align-items:center; gap:8px 14px; padding:12px 0; margin-bottom:18px;
+  background:var(--bg); border-bottom:1px solid var(--border);
+}
+.export-button{
+  appearance:none; min-height:44px; padding:10px 16px; border-radius:9px;
+  border:1px solid var(--accent); background:var(--accent-soft); color:var(--accent);
+  font:inherit; font-weight:700; cursor:pointer;
+}
+.export-button:focus-visible{outline:3px solid var(--accent); outline-offset:3px}
+.export-button:disabled{cursor:wait}
+.export-hint,.export-status{font-size:13px; color:var(--text-2)}
+.export-status{flex-basis:100%; margin:0; overflow-wrap:anywhere}
+.export-status:empty{display:none}
+.export-status.is-error{color:var(--red)}
+@media (max-width:540px){
+  .export-button{width:100%}
+  .export-hint{flex-basis:100%}
+}
+@media print{.export-toolbar{display:none}}
+
 /* ---------- header ---------- */
 .eyebrow{
   font-size:11.5px; letter-spacing:.14em; text-transform:uppercase;
@@ -478,6 +501,11 @@ h1{font-size:clamp(26px,4vw,34px); line-height:1.2; letter-spacing:-.02em; margi
 </style>
 
 <div class="wrap">
+  <div class="export-toolbar" aria-label="會員紅綠燈匯出">
+    <button class="export-button" type="button" id="exportWorkbook" aria-describedby="exportHint" disabled>匯出試算表（.xlsx）</button>
+    <span class="export-hint" id="exportHint">資料載入後可下載完整會員數據</span>
+    <p class="export-status" id="exportStatus" role="status" aria-live="polite"></p>
+  </div>
   <header>
     <p class="eyebrow">BNI 華都更 Hua Urban+</p>
     <h1>會員紅綠燈<span class="demo-tag">2026 年 7 月</span></h1>
@@ -535,6 +563,7 @@ h1{font-size:clamp(26px,4vw,34px); line-height:1.2; letter-spacing:-.02em; margi
   <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetName"></div>
 </div>
 
+<script src="export.js?v=20261005"></script>
 <script>
 const DATA_URL = 'data.json';
 const VIEW = {toggle: false, est: false};
@@ -772,6 +801,39 @@ const ALL = RAW.map(r => {
 // 分會現況只算現任會員；退會的另存一份，只在「更新資料」分頁看得到
 const M = ALL.filter(m => !m.hasLeft);
 const LEFT_M = ALL.filter(m => m.hasLeft);
+
+/* 沿用頁面已計算的 M，避免搜尋或燈號篩選讓下載漏掉會員。 */
+const exportButton = document.getElementById('exportWorkbook');
+const exportStatus = document.getElementById('exportStatus');
+const exportVersion = VIEW.est ? 'PALMS 暫定換算版' : 'LTnA 官方版';
+document.getElementById('exportHint').textContent =
+  `${CHAPTER.period || '月份未標'} · ${exportVersion} · 全部 ${M.length} 位現任會員`;
+exportButton.disabled = !M.length;
+exportButton.addEventListener('click', async () => {
+  exportButton.disabled = true;
+  exportButton.textContent = '正在產生試算表…';
+  exportStatus.classList.remove('is-error');
+  exportStatus.textContent = '正在整理完整會員數據…';
+  try {
+    await loadSheetJS();
+    if (!window.TrafficLightExport) throw new Error('匯出功能未載入，請重新整理頁面');
+    const {workbook, filename} = TrafficLightExport.createWorkbook(XLSX, {
+      members: M, chapter: {...CHAPTER, range: CH.range || rangeFromPeriod(CHAPTER.period)},
+      metrics: CHAPTER.official,
+      version: exportVersion, updatedAt, leftMembers: LEFTRAW,
+      sourceUrl: location.origin + location.pathname + (VIEW.est ? '?v=est' : ''),
+      dataUrl: new URL(DATA_URL, location.href).href
+    });
+    XLSX.writeFile(workbook, filename, {compression:true});
+    exportStatus.textContent = `已產生 ${filename}，請查看瀏覽器下載。`;
+  } catch (e) {
+    exportStatus.classList.add('is-error');
+    exportStatus.textContent = `匯出失敗：${e.message}。請稍後再按一次匯出。`;
+  } finally {
+    exportButton.disabled = !M.length;
+    exportButton.textContent = '匯出試算表（.xlsx）';
+  }
+});
 
 /* 週數最多的人＝待滿整個計分區間；比他少代表這半年才入會 */
 const FULL_WEEKS = Math.max(...M.map(m => m.weeks));
@@ -1523,15 +1585,23 @@ async function fetchChapter(period){
   }
 }
 
+let sheetJSPromise = null;
 function loadSheetJS(){
   if (window.XLSX) return Promise.resolve();
-  return new Promise((ok, bad) => {
+  if (sheetJSPromise) return sheetJSPromise;
+  sheetJSPromise = new Promise((ok, bad) => {
     const el = document.createElement('script');
     el.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
-    el.onload = ok;
-    el.onerror = () => bad(new Error('讀取解析工具失敗，請檢查網路'));
+    const timer = setTimeout(() => fail(), 20000);
+    function fail(){
+      clearTimeout(timer); el.remove(); sheetJSPromise = null;
+      bad(new Error('讀取試算表工具失敗，請檢查網路'));
+    }
+    el.onload = () => { if (!window.XLSX) return fail(); clearTimeout(timer); ok(); };
+    el.onerror = fail;
     document.head.appendChild(el);
   });
+  return sheetJSPromise;
 }
 
 const num = v => (typeof v === 'number' && isFinite(v)) ? v : 0;
