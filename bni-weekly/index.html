@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>華都更週會簡報整合｜應用說明</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+<h1>華都更週會簡報整合</h1>
+<p>這是華都更資訊組使用的週會簡報整合工具。由分會指定帳號授權，在 GitHub Actions 雲端排程執行，更新原有 Google 總簡報，並將完成的版本匯出為 PDF 存檔。</p>
+<nav aria-label="應用資訊"><a href="privacy.html">隱私權政策</a><a href="https://hua-urban.github.io/">華都更首頁</a></nav>
+<h2>工具做什麼</h2>
+<ul>
+  <li>執行前檢查來源及目標位置，建立更新前備份。</li>
+  <li>將會員 30 秒簡報及教育協調素材整合到原來源總簡報。</li>
+  <li>教育素材優先選用 Google 簡報或 PPTX；沒有簡報檔時，才辨識投影片 PDF 並轉成逐頁圖片，不把逐字稿當簡報。</li>
+  <li>完成後直接匯出總簡報 PDF，核對頁數、儲存位置與檔案資訊。</li>
+  <li>異常時保留執行紀錄，依既有通知設定提醒資訊組，不改用舊 PDF 拼接。</li>
+</ul>
+<h2>誰可以使用</h2>
+<p>本工具供華都更資訊組維運，不提供公眾自行登入或整合檔案。執行程式核對分會指定帳號，Apps Script 執行入口限制為部署者本人。公開的應用說明不代表公開雲端資料。</p>
+<h2>Google 授權</h2>
+<p>工具使用 Google Drive、Google 簡報及帳號電子郵件授權。Drive 權限可涵蓋授權帳號可存取的檔案；程式的處理目標限制為資訊組指定的來源、總簡報及成果資料夾。電子郵件只用於核對執行身分，不要求 Gmail 郵件內容、通訊錄或密碼。</p>
+<footer>
+  <p>管理與支援：華都更資訊組<br><a href="mailto:hua.urban.renewal@gmail.com">hua.urban.renewal@gmail.com</a></p>
+  <p class="meta">更新日期：2026 年 10 月 6 日。</p>
+</footer>
+</main>
+</body>
+</html>
