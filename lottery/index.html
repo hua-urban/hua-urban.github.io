@@ -181,7 +181,7 @@ dialog::backdrop{background:rgba(30,16,24,.65)}
     <div class="stagebtns">
       <button class="big" id="btnDraw">開始抽獎</button>
       <button class="ghost" id="btnConfirm" hidden>確認送出</button>
-      <button class="ghost" id="btnRedraw" hidden>人不在 · 換一位</button>
+      <button class="ghost" id="btnRedraw" hidden>人不在／捐出 · 換一位</button>
     </div>
     <div class="poolinfo" id="poolInfo"></div>
   </div>
@@ -365,12 +365,18 @@ window.addEventListener('load', ()=>setTimeout(flushQueue, 1500));
  *  回傳新增了幾筆。 */
 function mergeHistory(rows){
   const have = new Set(S.history.map(h=>h.date+'|'+h.round));
-  let n = 0;
+  // 同一天同一輪出現兩筆 = 得主捐出重抽，留時間較晚那筆
+  const latest = {};
   (rows||[]).forEach(r=>{
     const h = Array.isArray(r)
       ? {date:String(r[0]).slice(0,10), round:String(r[1]).trim()==='6:45'?1:2,
          gift:r[2]||'', sponsor:r[3]||'', winner:r[4], ts:r[5]||''}
       : {...r};
+    const k = h.date+'|'+h.round, prev = latest[k];
+    if(!prev || String(h.ts) >= String(prev.ts)) latest[k] = h;
+  });
+  let n = 0;
+  Object.values(latest).forEach(h=>{
     if(!h.date || !h.winner || have.has(h.date+'|'+h.round)) return;
     h.epoch = h.epoch || 1;
     S.history.push(h); have.add(h.date+'|'+h.round); n++;
@@ -603,8 +609,20 @@ function renderDraw(){
       <td class="wide">${esc(rec? rec.gift : (cfg2.gift||'—'))}</td>
       <td>${esc(rec? rec.sponsor : (cfg2.sponsor||'—'))}</td>
       <td><b>${rec? esc(rec.winner) : '<span style="color:#6b6b6b">未抽</span>'}</b></td>
-      <td>${rec? `<button class="btn danger" data-undo="${r.n}">撤銷</button>`:''}</td>`;
+      <td>${rec? `<button class="btn" data-donate="${r.n}">捐出重抽</button>
+                  <button class="btn danger" data-undo="${r.n}">撤銷</button>`:''}</td>`;
     tb.appendChild(tr);
+  });
+  // 得主當場把獎捐出來：同一份獎重抽，捐出的人不算中獎、這份也不會再抽到他。
+  // 以前只能改日期硬抽第三輪，紀錄會掛到隔天（2026-09-30 Hubert 那次）。
+  tb.querySelectorAll('[data-donate]').forEach(b=>b.onclick=async()=>{
+    const rn2=+b.dataset.donate;
+    const rec=drawnToday(rn2);
+    if(!rec || !await ask(`${rec.winner} 捐出來？`,'會把他這次中獎拿掉，同一份獎從其他人重抽。')) return;
+    S.history = S.history.filter(h=>h!==rec);
+    save();
+    skipped = [rec.winner]; pendingWinner=null; currentRound=rn2;
+    renderAll(); startRoll();
   });
   tb.querySelectorAll('[data-undo]').forEach(b=>b.onclick=async()=>{
     const rn2=+b.dataset.undo;
