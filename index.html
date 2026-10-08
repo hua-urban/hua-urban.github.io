@@ -1709,7 +1709,7 @@ section[id]{scroll-margin-top:68px}
     <!-- #activities 錨點（scrollspy + nav「活動」連結沿用，指向議程列表本身，掛在 section[id] 規則外要單獨補 scroll-margin-top） -->
     <span id="activities" class="agenda-anchor"></span>
 
-    <!-- 議程列表（主體，AGENDA_LIST_7QK3）：Sheet 活動，未來在前、已結束沉底；窗口＝過去 14 天＋全部未來（AGENDA_WINDOW_ROLL_2026Q3）。
+    <!-- 議程列表（主體，AGENDA_LIST_7QK3）：未過期活動全部顯示；不足 8 筆時，以最近的過期活動補足。
          組聚場次卡已退役（2026-07-03），不再合併進來。 -->
     <div id="agendaList">
       <div class="ac-loading" style="font-size:14px;color:var(--gray-400);padding:18px 0">活動資料載入中…</div>
@@ -2546,30 +2546,22 @@ function renderAgendaList(activityRows){
     var ka = acDayKey(a), kb = acDayKey(b);
     return ea ? kb.localeCompare(ka) : ka.localeCompare(kb); // 已結束：新→舊；未來：近→遠
   });
-  // 筆數上限：未來活動最多 8 筆，避免哪天一次排滿把首頁撐爆（已結束的不佔額度，本來就只留 14 天）
-  var AGENDA_FUTURE_MAX = 8, futureSeen = 0;
-  acts = acts.filter(function(x){
-    if(x['狀態']==='已結束') return true;
-    futureSeen++; return futureSeen <= AGENDA_FUTURE_MAX;
-  });
+  // 未過期活動不設上限；不足 8 筆時才用過期活動（新→舊）補足。
+  var upcoming = acts.filter(function(x){ return x['狀態'] !== '已結束'; });
+  var expired = acts.filter(function(x){ return x['狀態'] === '已結束'; });
+  acts = upcoming.concat(expired.slice(0, Math.max(0, 8 - upcoming.length)));
   if(!acts.length){ box.innerHTML='<div class="ac-loading" style="font-size:14px;color:var(--gray-400);padding:18px 0">近期暫無活動，請留意分會 LINE 群公告。</div>'; return; }
   box.innerHTML = acts.map(acEventCardHtml).join('');
 }
 // 活動詳情改讀「行事曆」分頁，過濾類型=活動（單一資料源，與月曆同步，不再讀獨立「活動」分頁）
-// 只顯示「本月 + 下月」的活動（前端自動算，過期/太遠的自動不顯示，後台不用加欄/不用觸發器）
+// 保留所有有效日期，交由 renderAgendaList 決定顯示與補足筆數。
 // 行事曆欄位（日期/類型/名稱/連結/備註）→ acRender 要的欄位（活動名稱/日期時間/…）
 // Helper: 從欄位值用 regex 抓 HH:mm，容錯兩種格式：
 //   純時間 "14:00"、舊格式 "1899-12-30 14:00"、日期時間 "2026-07-03 14:00"
 function extractTime(v){ var m = String(v||'').match(/(\d{1,2}:\d{2})/); return m ? m[1] : ''; }
 
 function acMapFromCalendar(rows){
-  var now = new Date();
-  // AGENDA_WINDOW_ROLL_2026Q3（2026-07-25 改）：原本是「本月 1 號 ~ 下月底」的月曆式窗口，
-  // 缺點是月底時未來視野只剩幾天，早就排好的下下個月活動完全看不到（實例：7/25 看不到 9/18 中秋烤肉夜）。
-  // 改成滾動窗口：往回只留 14 天（近期剛辦完的還看得到），往前不設日期上限——
-  // 分會活動本來就稀疏，與其猜幾週，不如「排了就看得到」，只用筆數上限（見 AGENDA_FUTURE_MAX）防爆版。
-  var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-  var winStart = new Date(todayStart.getTime() - 14 * 86400000); // 今天往回 14 天
+  // 不限制歷史日期範圍，讓最近的過期活動可補足列表，即使已超過 14 天。
   return (rows||[]).filter(function(r){
     // AGENDA_TYPE_BLOCKLIST_2026Q3（2026-09-08 改）：原本是白名單（類型或標題要含
     // 活動/聚會/例會/來賓才顯示），缺點是後台每冒出一個新類型就整筆被靜默丟掉，夥伴填了
@@ -2585,7 +2577,7 @@ function acMapFromCalendar(rows){
     if(!String(title).trim()) return false;
     var d = r['日期'] ? new Date(String(r['日期']).substring(0,10)+'T00:00:00') : null;
     if(!d || isNaN(d)) return false;
-    return d >= winStart;   // 過去 14 天內 + 所有未來活動
+    return true;
   }).map(function(r){
     // 活動標題：讀新欄名，fallback 舊欄名
     var title = r['活動標題'] || r['名稱'] || '';
