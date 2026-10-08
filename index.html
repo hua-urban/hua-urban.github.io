@@ -1655,133 +1655,6 @@ section[id]{scroll-margin-top:68px}
 </section>
 
 
-<!-- ── Zoom 例會專區（靜態，不需 fetch）── -->
-<!-- 2026-07-03「← 返回」按鈕移除：來源動線（原本從活動區跳過來）已不存在，選單本來就能到各區 -->
-<section class="zoom-sec" id="zoom">
-  <div class="container">
-    <div style="position:relative;z-index:1;margin-bottom:28px">
-      <div class="zoom-label">每週固定 · Online Meeting Hub</div>
-      <div class="zoom-title">線上例會專區</div>
-      <div class="zoom-subtitle">華都更為線上分會，週三例會時間與簡報更新截止提醒都在這裡。</div>
-    </div>
-    <div class="zoom-panels">
-      <!-- 左：加入 Zoom 例會 -->
-      <div class="zoom-panel">
-        <div class="zoom-panel-label">
-          <svg style="width:13px;height:13px;stroke:rgba(255,255,255,.55);fill:none;stroke-width:2;vertical-align:middle;margin-right:4px" viewBox="0 0 24 24"><path d="M15 10l4.553-2.069A1 1 0 0121 8.853v6.294a1 1 0 01-1.447.894L15 14M3 8h12a2 2 0 012 2v4a2 2 0 01-2 2H3a2 2 0 01-2-2V10a2 2 0 012-2z"/></svg>
-          Zoom 視訊例會
-        </div>
-        <div class="zoom-panel-title">加入 Zoom 例會</div>
-        <div class="zoom-info">
-          <div class="zoom-info-row">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
-            <span>每週三 <strong>07:00 — 09:00</strong>（06:30 起可提早上線交流）</span>
-          </div>
-        </div>
-        <div class="zoom-info-row" style="margin-top:4px">
-          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-          <span>首次加入需輸入會議密碼，密碼請見分會 LINE 群公告</span>
-        </div>
-        <div class="zoom-note">例會前 15 分鐘開放進入，請提早準備音視訊。</div>
-      </div>
-      <!-- 右：30 秒簡報 -->
-      <div class="zoom-panel">
-        <div class="zoom-panel-label">
-          <svg style="width:13px;height:13px;stroke:rgba(255,255,255,.55);fill:none;stroke-width:2;vertical-align:middle;margin-right:4px" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-          Google Slides · 每週更新
-        </div>
-        <div class="zoom-panel-title">本週 30 秒簡報</div>
-        <div class="deadline-badge">&#x23F0; 截止：每週二下午 7:00 前更新完成</div>
-        <div style="font-size:13px;color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:20px">
-          每週三例會輪播的個人 30 秒介紹簡報。<br>
-          請在<strong style="color:#fff">週二下午 7:00</strong>前更新完畢，統一整合，週三例會使用。
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<!-- ── 近期活動（Agenda List，2026-07-03 再瘦身）── -->
-<!-- Joan 拍板：常態卡①（每週三例會）與例會專區完整資訊重複，移除；區塊只剩活動列表，
-     正名「近期活動」。例會資訊入口＝Zoom 例會專區；組聚資訊入口＝Power Team 專區。
-     原獨立的「活動詳情」section 仍併入本區（見下方 #activities 議程列表），nav 兩個錨點都保留。 -->
-<section class="calendar-sec" id="calendar">
-  <div class="container">
-    <div class="sec-head">
-      <span class="red-bar"></span>
-      <h2>近期活動</h2>
-      <p>近期活動一覽・例會請見 Zoom 例會專區・組聚請見 Power Team 專區</p>
-    </div>
-
-    <!-- #activities 錨點（scrollspy + nav「活動」連結沿用，指向議程列表本身，掛在 section[id] 規則外要單獨補 scroll-margin-top） -->
-    <span id="activities" class="agenda-anchor"></span>
-
-    <!-- 議程列表（主體，AGENDA_LIST_7QK3）：未過期活動全部顯示；不足 5 筆時，以最近的過期活動補足。
-         組聚場次卡已退役（2026-07-03），不再合併進來。 -->
-    <div id="agendaList">
-      <div class="ac-loading" style="font-size:14px;color:var(--gray-400);padding:18px 0">活動資料載入中…</div>
-    </div>
-    <div class="admin-edit">
-      <button type="button" class="activity-edit-trigger" id="activityEditOpen">編輯活動資料（活動組）</button>
-    </div>
-    <dialog class="activity-edit-dialog" id="activityEditDialog" aria-labelledby="activityEditTitle">
-      <form id="activityEditForm">
-        <h3 id="activityEditTitle">活動組編輯</h3>
-        <p>輸入密碼後開啟活動試算表，仍需使用有編輯權限的 Google 帳號。</p>
-        <label for="activityEditCode">編輯密碼</label>
-        <input id="activityEditCode" type="password" inputmode="numeric" autocomplete="off" required aria-describedby="activityEditError">
-        <p id="activityEditError" class="activity-edit-error" role="alert"></p>
-        <div class="activity-edit-actions">
-          <button type="button" class="activity-edit-trigger" id="activityEditCancel">取消</button>
-          <button type="submit" class="activity-edit-trigger">確認並開啟</button>
-        </div>
-      </form>
-    </dialog>
-
-  </div>
-</section>
-
-
-<!-- ── MSP 課程（靜態說明卡，2026-06-25 更新）── -->
-<!-- ── 培訓快訊（TRAINING_FEED_7XK2）：自動同步 BNI 官方培訓頁 ──
-     資料源：https://bntw.niiice-design.com/news-category/training/
-     更新方式：Mac Mini 每日爬蟲 → 寫入 Google Sheet「培訓快訊」分頁 → 前端 fetch GAS API
-     接 GAS 前：先用真資料寫死預覽（trainingFallback），給值後改 fetch。 -->
-<section class="msp" id="msp">
-  <div class="container">
-    <div class="sec-head">
-      <span class="red-bar"></span>
-      <h2>培訓快訊</h2>
-      <p>MSP / PSW / 引薦工作坊等地區培訓 — 自動同步官方排程</p>
-    </div>
-
-    <div class="tf-intro">
-      MSP、簡報技巧（PSW）、引薦工作坊、LTnA 等培訓由 <strong>BNI 地區辦公室統一排課</strong>、跨分會共同上課。點任一場可前往官方頁面看詳情與報名。
-      <a href="https://bntw.niiice-design.com/news-category/training/?openExternalBrowser=1" target="_blank" rel="noopener" class="tf-alllink">看全部培訓 →</a>
-    </div>
-    <!-- 線上 / 線下 分頁標籤（第 5 項：形式篩選） -->
-    <div class="tf-tabs" role="tablist">
-      <button class="tf-tab active" data-mode="all" type="button">全部 <span class="tf-tab-count">0</span></button>
-      <button class="tf-tab" data-mode="online" type="button">線上 Zoom <span class="tf-tab-count">0</span></button>
-      <button class="tf-tab" data-mode="offline" type="button">線下實體 <span class="tf-tab-count">0</span></button>
-    </div>
-    <!-- 第 5 項：培訓類型篩選（動態生成，由 JS 掃卡片標題後產生按鈕） -->
-    <div class="tf-type-tabs" id="tfTypeTabs" role="tablist" aria-label="培訓類型篩選"></div>
-
-    <div id="trainingList" class="tf-list">
-      <div class="tf-loading">培訓資訊載入中…</div>
-    </div>
-
-    <div class="tf-note">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-      <span>另可登入 <a href="https://www.mybni.com?openExternalBrowser=1" target="_blank" rel="noopener">www.mybni.com</a>（BNI Connect 帳密）進 BNI Academy 自學線上版 MSP，完成後自動同步培訓記錄。</span>
-    </div>
-    <div class="tf-autonote">系統每日自動同步 BNI 官方培訓頁，無需手動維護</div>
-  </div>
-</section>
-
-
 <!-- ── Power Team 組聚（靜態真資料，2026-06-25 更新）── -->
 <section class="powerteam" id="powerteam">
   <div class="container">
@@ -1859,6 +1732,47 @@ section[id]{scroll-margin-top:68px}
         編輯組聚時間（各鏈組長）
       </a>
     </div>
+  </div>
+</section>
+
+
+<!-- ── 近期活動（Agenda List，2026-07-03 再瘦身）── -->
+<!-- Joan 拍板：常態卡①（每週三例會）與例會專區完整資訊重複，移除；區塊只剩活動列表，
+     正名「近期活動」。例會資訊入口＝Zoom 例會專區；組聚資訊入口＝Power Team 專區。
+     原獨立的「活動詳情」section 仍併入本區（見下方 #activities 議程列表），nav 兩個錨點都保留。 -->
+<section class="calendar-sec" id="calendar">
+  <div class="container">
+    <div class="sec-head">
+      <span class="red-bar"></span>
+      <h2>近期活動</h2>
+      <p>近期活動一覽・例會請見 Zoom 例會專區・組聚請見 Power Team 專區</p>
+    </div>
+
+    <!-- #activities 錨點（scrollspy + nav「活動」連結沿用，指向議程列表本身，掛在 section[id] 規則外要單獨補 scroll-margin-top） -->
+    <span id="activities" class="agenda-anchor"></span>
+
+    <!-- 議程列表（主體，AGENDA_LIST_7QK3）：未過期活動全部顯示；不足 5 筆時，以最近的過期活動補足。
+         組聚場次卡已退役（2026-07-03），不再合併進來。 -->
+    <div id="agendaList">
+      <div class="ac-loading" style="font-size:14px;color:var(--gray-400);padding:18px 0">活動資料載入中…</div>
+    </div>
+    <div class="admin-edit">
+      <button type="button" class="activity-edit-trigger" id="activityEditOpen">編輯活動資料（活動組）</button>
+    </div>
+    <dialog class="activity-edit-dialog" id="activityEditDialog" aria-labelledby="activityEditTitle">
+      <form id="activityEditForm">
+        <h3 id="activityEditTitle">活動組編輯</h3>
+        <p>輸入密碼後開啟活動試算表，仍需使用有編輯權限的 Google 帳號。</p>
+        <label for="activityEditCode">編輯密碼</label>
+        <input id="activityEditCode" type="password" inputmode="numeric" autocomplete="off" required aria-describedby="activityEditError">
+        <p id="activityEditError" class="activity-edit-error" role="alert"></p>
+        <div class="activity-edit-actions">
+          <button type="button" class="activity-edit-trigger" id="activityEditCancel">取消</button>
+          <button type="submit" class="activity-edit-trigger">確認並開啟</button>
+        </div>
+      </form>
+    </dialog>
+
   </div>
 </section>
 
@@ -1952,6 +1866,90 @@ section[id]{scroll-margin-top:68px}
 </section>
 
 <!-- ── FOOTER ── -->
+<!-- ── Zoom 例會專區（靜態，不需 fetch）── -->
+<!-- 2026-07-03「← 返回」按鈕移除：來源動線（原本從活動區跳過來）已不存在，選單本來就能到各區 -->
+<section class="zoom-sec" id="zoom">
+  <div class="container">
+    <div style="position:relative;z-index:1;margin-bottom:28px">
+      <div class="zoom-label">每週固定 · Online Meeting Hub</div>
+      <div class="zoom-title">線上例會專區</div>
+      <div class="zoom-subtitle">華都更為線上分會，週三例會時間與簡報更新截止提醒都在這裡。</div>
+    </div>
+    <div class="zoom-panels">
+      <!-- 左：加入 Zoom 例會 -->
+      <div class="zoom-panel">
+        <div class="zoom-panel-label">
+          <svg style="width:13px;height:13px;stroke:rgba(255,255,255,.55);fill:none;stroke-width:2;vertical-align:middle;margin-right:4px" viewBox="0 0 24 24"><path d="M15 10l4.553-2.069A1 1 0 0121 8.853v6.294a1 1 0 01-1.447.894L15 14M3 8h12a2 2 0 012 2v4a2 2 0 01-2 2H3a2 2 0 01-2-2V10a2 2 0 012-2z"/></svg>
+          Zoom 視訊例會
+        </div>
+        <div class="zoom-panel-title">加入 Zoom 例會</div>
+        <div class="zoom-info">
+          <div class="zoom-info-row">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+            <span>每週三 <strong>07:00 — 09:00</strong>（06:30 起可提早上線交流）</span>
+          </div>
+        </div>
+        <div class="zoom-info-row" style="margin-top:4px">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          <span>首次加入需輸入會議密碼，密碼請見分會 LINE 群公告</span>
+        </div>
+        <div class="zoom-note">例會前 15 分鐘開放進入，請提早準備音視訊。</div>
+      </div>
+      <!-- 右：30 秒簡報 -->
+      <div class="zoom-panel">
+        <div class="zoom-panel-label">
+          <svg style="width:13px;height:13px;stroke:rgba(255,255,255,.55);fill:none;stroke-width:2;vertical-align:middle;margin-right:4px" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          Google Slides · 每週更新
+        </div>
+        <div class="zoom-panel-title">本週 30 秒簡報</div>
+        <div class="deadline-badge">&#x23F0; 截止：每週二下午 7:00 前更新完成</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:20px">
+          每週三例會輪播的個人 30 秒介紹簡報。<br>
+          請在<strong style="color:#fff">週二下午 7:00</strong>前更新完畢，統一整合，週三例會使用。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ── MSP 課程（靜態說明卡，2026-06-25 更新）── -->
+<!-- ── 培訓快訊（TRAINING_FEED_7XK2）：自動同步 BNI 官方培訓頁 ──
+     資料源：https://bntw.niiice-design.com/news-category/training/
+     更新方式：Mac Mini 每日爬蟲 → 寫入 Google Sheet「培訓快訊」分頁 → 前端 fetch GAS API
+     接 GAS 前：先用真資料寫死預覽（trainingFallback），給值後改 fetch。 -->
+<section class="msp" id="msp">
+  <div class="container">
+    <div class="sec-head">
+      <span class="red-bar"></span>
+      <h2>培訓快訊</h2>
+      <p>MSP / PSW / 引薦工作坊等地區培訓 — 自動同步官方排程</p>
+    </div>
+
+    <div class="tf-intro">
+      MSP、簡報技巧（PSW）、引薦工作坊、LTnA 等培訓由 <strong>BNI 地區辦公室統一排課</strong>、跨分會共同上課。點任一場可前往官方頁面看詳情與報名。
+      <a href="https://bntw.niiice-design.com/news-category/training/?openExternalBrowser=1" target="_blank" rel="noopener" class="tf-alllink">看全部培訓 →</a>
+    </div>
+    <!-- 線上 / 線下 分頁標籤（第 5 項：形式篩選） -->
+    <div class="tf-tabs" role="tablist">
+      <button class="tf-tab active" data-mode="all" type="button">全部 <span class="tf-tab-count">0</span></button>
+      <button class="tf-tab" data-mode="online" type="button">線上 Zoom <span class="tf-tab-count">0</span></button>
+      <button class="tf-tab" data-mode="offline" type="button">線下實體 <span class="tf-tab-count">0</span></button>
+    </div>
+    <!-- 第 5 項：培訓類型篩選（動態生成，由 JS 掃卡片標題後產生按鈕） -->
+    <div class="tf-type-tabs" id="tfTypeTabs" role="tablist" aria-label="培訓類型篩選"></div>
+
+    <div id="trainingList" class="tf-list">
+      <div class="tf-loading">培訓資訊載入中…</div>
+    </div>
+
+    <div class="tf-note">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      <span>另可登入 <a href="https://www.mybni.com?openExternalBrowser=1" target="_blank" rel="noopener">www.mybni.com</a>（BNI Connect 帳密）進 BNI Academy 自學線上版 MSP，完成後自動同步培訓記錄。</span>
+    </div>
+    <div class="tf-autonote">系統每日自動同步 BNI 官方培訓頁，無需手動維護</div>
+  </div>
+</section>
 <footer class="footer">
   <div class="container">
     <div class="footer-inner">
@@ -2777,20 +2775,20 @@ window.addEventListener('scroll',function(){
     <a class="side-nav-item" data-target="about" href="#about">
       <span class="sn-dot"></span><span class="sn-label">分會簡介</span>
     </a>
-    <a class="side-nav-item" data-target="zoom" href="#zoom">
-      <span class="sn-dot"></span><span class="sn-label">線上例會</span>
+    <a class="side-nav-item" data-target="powerteam" href="#powerteam">
+      <span class="sn-dot"></span><span class="sn-label">Power Team</span>
     </a>
     <a class="side-nav-item" data-target="calendar" href="#calendar">
       <span class="sn-dot"></span><span class="sn-label">近期活動</span>
     </a>
-    <a class="side-nav-item" data-target="msp" href="#msp">
-      <span class="sn-dot"></span><span class="sn-label">培訓快訊</span>
-    </a>
-    <a class="side-nav-item" data-target="powerteam" href="#powerteam">
-      <span class="sn-dot"></span><span class="sn-label">Power Team</span>
-    </a>
     <a class="side-nav-item" data-target="roster" href="#roster">
       <span class="sn-dot"></span><span class="sn-label">夥伴名冊</span>
+    </a>
+    <a class="side-nav-item" data-target="zoom" href="#zoom">
+      <span class="sn-dot"></span><span class="sn-label">線上例會</span>
+    </a>
+    <a class="side-nav-item" data-target="msp" href="#msp">
+      <span class="sn-dot"></span><span class="sn-label">培訓快訊</span>
     </a>
   </div>
 </nav>
