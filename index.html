@@ -2538,8 +2538,6 @@ function acEventCardHtml(x){
   var btn = '';
   if(rawLink && isUrl && !done){
     btn = '<div style="display:flex;gap:12px;flex-wrap:wrap"><a href="'+acEsc(rawLink)+'?openExternalBrowser=1" target="_blank" rel="noopener" class="btn btn-primary">立即報名</a></div>';
-  } else if(rawLink && isUrl && done){
-    btn = '<div style="display:flex;gap:12px;flex-wrap:wrap"><a href="'+acEsc(rawLink)+'?openExternalBrowser=1" target="_blank" rel="noopener" class="btn btn-outline" style="border-color:var(--gray-200);color:var(--gray-500)">查看報名表單</a></div>';
   } else if(rawLink && !isUrl && !done){
     btn = '<div style="display:flex;gap:12px;flex-wrap:wrap"><span class="btn btn-outline" style="border-color:var(--gray-200);color:var(--gray-600);cursor:default;pointer-events:none">報名方式：'+acEsc(rawLink)+'</span></div>';
   }
