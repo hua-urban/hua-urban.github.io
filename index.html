@@ -1416,9 +1416,8 @@ section[id]{scroll-margin-top:68px}
         <li><a href="#calendar">近期活動</a></li>
         <li><a href="#msp">培訓快訊</a></li>
         <li><a href="#powerteam">組聚</a></li>
-        <li><a href="#zoom">Zoom 例會</a></li>
         <li><a href="#roster">名冊</a></li>
-        <li><a href="#" class="nav-cta">加入詢問</a></li>
+        <li><a href="guest/" target="_blank" rel="noopener" class="nav-cta">加入詢問</a></li>
       </ul>
       <button class="hamburger" onclick="toggleMNav()" aria-label="選單">
         <span></span><span></span><span></span>
@@ -1431,10 +1430,9 @@ section[id]{scroll-margin-top:68px}
     <li><a href="#calendar" onclick="closeMNav()">近期活動</a></li>
     <li><a href="#msp" onclick="closeMNav()">培訓快訊</a></li>
     <li><a href="#powerteam" onclick="closeMNav()">Power Team 組聚</a></li>
-    <li><a href="#zoom" onclick="closeMNav()">Zoom 例會</a></li>
     <li><a href="#roster" onclick="closeMNav()">夥伴名冊</a></li>
   </ul>
-  <a href="#" class="m-cta">加入詢問</a>
+  <a href="guest/" target="_blank" rel="noopener" class="m-cta" onclick="closeMNav()">加入詢問</a>
 </div>
 
 <!-- ── HERO ── -->
@@ -1656,7 +1654,7 @@ section[id]{scroll-margin-top:68px}
     <div style="position:relative;z-index:1;margin-bottom:28px">
       <div class="zoom-label">每週固定 · Online Meeting Hub</div>
       <div class="zoom-title">線上例會專區</div>
-      <div class="zoom-subtitle">華都更為線上分會，週三例會相關的所有入口與截止提醒都在這裡。</div>
+      <div class="zoom-subtitle">華都更為線上分會，週三例會時間與簡報更新截止提醒都在這裡。</div>
     </div>
     <div class="zoom-panels">
       <!-- 左：加入 Zoom 例會 -->
@@ -1676,10 +1674,6 @@ section[id]{scroll-margin-top:68px}
           <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
           <span>首次加入需輸入會議密碼，密碼請見分會 LINE 群公告</span>
         </div>
-        <a href="https://us06web.zoom.us/j/87453536034?openExternalBrowser=1" target="_blank" rel="noopener" class="zoom-btn" style="font-size:15px">
-          <svg viewBox="0 0 24 24"><path d="M15 10l4.553-2.069A1 1 0 0121 8.853v6.294a1 1 0 01-1.447.894L15 14M3 8h12a2 2 0 012 2v4a2 2 0 01-2 2H3a2 2 0 01-2-2V10a2 2 0 012-2z"/></svg>
-          加入 Zoom 例會
-        </a>
         <div class="zoom-note">例會前 15 分鐘開放進入，請提早準備音視訊。</div>
       </div>
       <!-- 右：30 秒簡報 -->
@@ -1694,11 +1688,6 @@ section[id]{scroll-margin-top:68px}
           每週三例會輪播的個人 30 秒介紹簡報。<br>
           請在<strong style="color:#fff">週二下午 7:00</strong>前更新完畢，統一整合，週三例會使用。
         </div>
-        <a href="https://docs.google.com/presentation/d/1azcS-3wmDD087CM6vSymBeqTJuXHfN-SrY1iE2wLrY4/edit?openExternalBrowser=1" target="_blank" rel="noopener" class="slides-btn">
-          <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-          更新我的簡報
-        </a>
-        <div class="zoom-note">點擊後開啟 Google Slides 個人頁面（需 Google 帳號）。</div>
       </div>
     </div>
   </div>
@@ -1726,22 +1715,6 @@ section[id]{scroll-margin-top:68px}
       <div class="ac-loading" style="font-size:14px;color:var(--gray-400);padding:18px 0">活動資料載入中…</div>
     </div>
 
-    <!-- 新增/編輯活動按鈕（原在迷你月曆內，月曆退役後搬到議程列表下方） -->
-    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-top:20px">
-      <a href="https://docs.google.com/spreadsheets/d/1XcSJ_U6i6kIHruHObblZEVQEd7d4M0X8LNGG9Oftgd0/edit?openExternalBrowser=1" target="_blank" rel="noopener" class="btn btn-outline" style="font-size:13px;padding:9px 18px;display:inline-flex;align-items:center;gap:6px;border-color:var(--red);color:var(--red)" data-open-external-browser="1">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        新增 / 編輯活動
-      </a>
-      <span style="font-size:12px;color:var(--gray-400);line-height:1.5">點此在共用試算表新增活動，新增後列表會自動更新</span>
-    </div>
-
-    <!-- 第 4c 項留存：編輯活動資料入口 -->
-    <div class="admin-edit">
-      <a href="https://docs.google.com/spreadsheets/d/1XcSJ_U6i6kIHruHObblZEVQEd7d4M0X8LNGG9Oftgd0/edit" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        編輯活動資料（活動組）
-      </a>
-    </div>
 
   </div>
 </section>
@@ -1970,7 +1943,6 @@ section[id]{scroll-margin-top:68px}
           <li><a href="#calendar">近期活動</a></li>
           <li><a href="#msp">培訓快訊</a></li>
           <li><a href="#powerteam">Power Team</a></li>
-          <li><a href="#zoom">Zoom 例會</a></li>
           <li><a href="#roster">夥伴名冊</a></li>
         </ul>
       </div>
