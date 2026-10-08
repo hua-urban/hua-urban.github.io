@@ -462,6 +462,14 @@ tr.hidden{display:none}
 }
 .admin-edit a:hover{color:var(--red);text-decoration:underline;}
 .admin-edit a svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
+.activity-edit-trigger{background:#fff;color:#5A6472;border:1px solid #5A6472;border-radius:6px;padding:10px 16px;font:inherit;cursor:pointer}
+.activity-edit-dialog{background:#fff;color:#202630;border:0;border-radius:12px;padding:24px;width:min(400px,calc(100% - 32px));box-sizing:border-box}
+.activity-edit-dialog::backdrop{background:rgba(0,0,0,.5)}
+.activity-edit-dialog input{display:block;box-sizing:border-box;width:100%;font:inherit;padding:10px;margin-top:8px;border:1px solid #5A6472;border-radius:6px}
+.activity-edit-dialog p{color:#5A6472;font-size:14px}
+.activity-edit-dialog .activity-edit-error{color:#A8192A;min-height:1.5em}
+.activity-edit-actions{display:flex;justify-content:flex-end;gap:12px}
+.activity-edit-trigger:focus-visible,.activity-edit-dialog input:focus-visible{outline:3px solid #005FCC;outline-offset:3px}
 
 /* ── RWD ── */
 @media(max-width:1024px){
@@ -1714,7 +1722,22 @@ section[id]{scroll-margin-top:68px}
     <div id="agendaList">
       <div class="ac-loading" style="font-size:14px;color:var(--gray-400);padding:18px 0">活動資料載入中…</div>
     </div>
-
+    <div class="admin-edit">
+      <button type="button" class="activity-edit-trigger" id="activityEditOpen">編輯活動資料（活動組）</button>
+    </div>
+    <dialog class="activity-edit-dialog" id="activityEditDialog" aria-labelledby="activityEditTitle">
+      <form id="activityEditForm">
+        <h3 id="activityEditTitle">活動組編輯</h3>
+        <p>輸入密碼後開啟活動試算表，仍需使用有編輯權限的 Google 帳號。</p>
+        <label for="activityEditCode">編輯密碼</label>
+        <input id="activityEditCode" type="password" inputmode="numeric" autocomplete="off" required aria-describedby="activityEditError">
+        <p id="activityEditError" class="activity-edit-error" role="alert"></p>
+        <div class="activity-edit-actions">
+          <button type="button" class="activity-edit-trigger" id="activityEditCancel">取消</button>
+          <button type="submit" class="activity-edit-trigger">確認並開啟</button>
+        </div>
+      </form>
+    </dialog>
 
   </div>
 </section>
@@ -2720,6 +2743,28 @@ window.addEventListener('scroll',function(){
     var cls = goldRoles.test(role) ? 'm-role m-role-gold' : 'm-role m-role-chief';
     var pill = '<span class="'+cls+'">'+role+'</span>';
     nameTd.innerHTML += pill;
+  });
+})();
+// 活動編輯碼僅防誤觸；真正存取權由 Google 試算表分享權限管理。
+(function(){
+  var dialog=document.getElementById('activityEditDialog');
+  var form=document.getElementById('activityEditForm');
+  var code=document.getElementById('activityEditCode');
+  var error=document.getElementById('activityEditError');
+  document.getElementById('activityEditOpen').addEventListener('click',function(){
+    form.reset(); error.textContent=''; code.removeAttribute('aria-invalid');
+    dialog.showModal(); code.focus();
+  });
+  document.getElementById('activityEditCancel').addEventListener('click',function(){dialog.close();});
+  dialog.addEventListener('close',function(){form.reset();error.textContent='';});
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    if(code.value.trim() !== '47'){
+      error.textContent='密碼不正確，請再試一次。';
+      code.setAttribute('aria-invalid','true'); code.select(); return;
+    }
+    dialog.close();
+    window.open('https://docs.google.com/spreadsheets/d/1XcSJ_U6i6kIHruHObblZEVQEd7d4M0X8LNGG9Oftgd0/edit','_blank','noopener,noreferrer');
   });
 })();
 </script>
