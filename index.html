@@ -1717,7 +1717,7 @@ section[id]{scroll-margin-top:68px}
     <!-- #activities 錨點（scrollspy + nav「活動」連結沿用，指向議程列表本身，掛在 section[id] 規則外要單獨補 scroll-margin-top） -->
     <span id="activities" class="agenda-anchor"></span>
 
-    <!-- 議程列表（主體，AGENDA_LIST_7QK3）：未過期活動全部顯示；不足 8 筆時，以最近的過期活動補足。
+    <!-- 議程列表（主體，AGENDA_LIST_7QK3）：未過期活動全部顯示；不足 5 筆時，以最近的過期活動補足。
          組聚場次卡已退役（2026-07-03），不再合併進來。 -->
     <div id="agendaList">
       <div class="ac-loading" style="font-size:14px;color:var(--gray-400);padding:18px 0">活動資料載入中…</div>
@@ -2569,10 +2569,10 @@ function renderAgendaList(activityRows){
     var ka = acDayKey(a), kb = acDayKey(b);
     return ea ? kb.localeCompare(ka) : ka.localeCompare(kb); // 已結束：新→舊；未來：近→遠
   });
-  // 未過期活動不設上限；不足 8 筆時才用過期活動（新→舊）補足。
+  // 未過期活動不設上限；不足 5 筆時才用過期活動（新→舊）補足。
   var upcoming = acts.filter(function(x){ return x['狀態'] !== '已結束'; });
   var expired = acts.filter(function(x){ return x['狀態'] === '已結束'; });
-  acts = upcoming.concat(expired.slice(0, Math.max(0, 8 - upcoming.length)));
+  acts = upcoming.concat(expired.slice(0, Math.max(0, 5 - upcoming.length)));
   if(!acts.length){ box.innerHTML='<div class="ac-loading" style="font-size:14px;color:var(--gray-400);padding:18px 0">近期暫無活動，請留意分會 LINE 群公告。</div>'; return; }
   box.innerHTML = acts.map(acEventCardHtml).join('');
 }
