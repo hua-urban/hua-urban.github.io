@@ -1,0 +1,83 @@
+華都更正式網域交接紀錄
+切換日期：2026-10-12（台灣時間）
+狀態：已切換、HTTPS 已啟用，主要頁面已驗證。
+
+一、管理責任與入口
+正式網址：https://hua-urban.com/
+別名網址：https://www.hua-urban.com/（轉向正式網址）
+原網址：https://hua-urban.github.io/（轉向正式網址）
+網域註冊與 DNS：GoDaddy；使用者已完成網域接收。
+DNS 管理：https://dcc.godaddy.com/control/portfolio/hua-urban.com/settings?tab=dns
+網站程式：https://github.com/hua-urban/hua-urban.github.io
+Pages 設定：https://github.com/hua-urban/hua-urban.github.io/settings/pages
+網域驗證：https://github.com/settings/pages（登入 hua-urban 個人帳號）
+網站仍由 GitHub Pages 提供，不是搬到 GoDaddy 主機，也不是使用 GoDaddy 網址轉寄。
+本次未新增付費主機、未更換名稱伺服器、未改動帳號授權。
+切換時 GoDaddy 顯示到期日為 2027-05-05；續約與付款狀態須由帳號管理人定期確認。
+帳號密碼、驗證碼、復原碼不寫入本公開交接檔。
+
+二、目前正式設定
+GitHub 帳號：hua-urban（個人帳號，非 Organization）。
+Pages 發布來源：master 分支，根目錄 /。
+Custom domain：hua-urban.com。
+master 根目錄 CNAME：hua-urban.com。後續部署不得移除或覆寫為舊網址。
+GitHub 帳號的網域所有權驗證：Verified。
+HTTPS：憑證已核發，包含 hua-urban.com、www.hua-urban.com；Enforce HTTPS 已啟用。
+
+GoDaddy DNS 網站紀錄：
+A     @     185.199.108.153
+A     @     185.199.109.153
+A     @     185.199.110.153
+A     @     185.199.111.153
+CNAME www   hua-urban.github.io.
+TXT   _github-pages-challenge-hua-urban   保留 GitHub 產生並已驗證的值
+
+保留的其他紀錄：
+NS    @               ns57.domaincontrol.com.
+NS    @               ns58.domaincontrol.com.
+CNAME _domainconnect  _domainconnect.gd.domaincontrol.com.
+SOA   @               由 GoDaddy 管理，不手動變更。
+TXT   _dmarc          v=DMARC1; p=quarantine; adkim=r; aspf=r; rua=mailto:dmarc_rua@onsecureserver.net;
+
+GitHub 驗證 TXT 不要刪除，以保留網域所有權保護。
+不新增萬用字元 DNS。郵件、防偽及其他服務紀錄不因網站搬遷而清除。
+切換前未列出 MX、AAAA 或 CAA；此為當次盤點，不代表日後不能新增。
+
+三、切換前設定（供受控還原參考）
+原網站由 Manus 提供，使用者表示原由愛莉老師建置。
+原 A @：104.18.26.246、104.18.27.246。
+原 CNAME www：cname.manus.space.。
+原上述紀錄 TTL：1 小時。
+原 GitHub Pages Custom domain：未設定，網址為 https://hua-urban.github.io/。
+本次僅將網站 DNS 及 Pages 綁定切換，沒有刪除 Manus 內容或取消其服務。
+未驗證原 Manus 專案目前的管理權限及未來可恢復性；不能只憑舊 DNS 保證復原。
+
+四、已完成的驗證（2026-10-12）
+權威 DNS 回傳四筆 GitHub Pages A 紀錄，www 回傳 hua-urban.github.io.。
+HTTPS 首頁、/guest/、/traffic-light/、/bni-pt-groups/ 全部回應 HTTP 200。
+首頁標題：BNI 華都更分會 — 夥伴資訊入口。
+www 與舊 github.io 首頁轉向正式網址；舊 /bni-pt-groups/ 轉向新網域相同路徑。
+http://hua-urban.com/ 回應 301，導向 https://hua-urban.com/。
+內建瀏覽器確認：首頁活動、來賓場次與預告卡、會員紅綠燈及匯出按鈕、PowerTeam 分組資料可載入。
+未提交測試報名、未測試會員或組長寫入，避免產生正式測試資料。
+
+五、日後維護
+首頁與同庫子頁面繼續更新本專案 master，再確認 Pages 部署成功即可。
+PowerTeam 為獨立專案：https://github.com/hua-urban/bni-pt-groups ，不得誤認其程式在主站庫內。
+Google 試算表、Apps Script、LINE 小幫手、總簡報整合及 PDF 匯出排程均未因本次網域切換而更動。
+網站更新後至少確認首頁、來賓頁、分組頁、紅綠燈頁的 HTTPS 與資料讀取。
+瀏覽器出現憑證警告時不要略過；先查 Pages 的 DNS 與 HTTPS 狀態。
+部分回首頁連結及社群預覽 metadata 仍使用舊 github.io 網址；當次已確認舊網址可轉址，尚未統一改寫。
+未來可再統一為正式網址；不要因此更改 Google/LINE 的授權回呼或擴大分享權限。
+DNS 變更可能有快取時間；當次驗證成功不保證所有網路在同一秒更新。
+
+六、必要時的還原步驟（本次未執行）
+1. 先確認 Manus 原站仍存在、網域綁定及 HTTPS 可用，取得管理人的切換決定。
+2. 記錄當下完整 DNS 與 GitHub Pages 設定，安排切換時段。
+3. 將網站 A 紀錄還原為上述兩筆舊位址，移除四筆 GitHub A；將 www 還原為 cname.manus.space.。
+   保留 NS、SOA、郵件 TXT、GitHub 驗證 TXT 及所有非網站服務紀錄。
+4. 確認正式網域由原站提供正確內容後，協調移除 Pages Custom domain 與根目錄 CNAME，
+   讓 github.io 恢復獨立網址。避免 DNS 仍指向 GitHub 時先解除綁定。
+5. 驗證正式網域與 github.io、HTTPS、主要入口及重新導向；必要時依紀錄恢復 GitHub 新站設定。
+
+本紀錄只保存網域及網站交接資訊；不包含帳號密碼、權杖、私人聯絡資料或會員資料。
