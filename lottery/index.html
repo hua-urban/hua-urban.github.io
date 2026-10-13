@@ -104,7 +104,26 @@ dialog::backdrop{background:rgba(30,16,24,.65)}
 .dlg{padding:26px}
 .dlg h3{font-size:21px;margin-bottom:10px}
 .dlg p{font-size:16px;color:var(--dim);margin-bottom:22px}
-@media(min-width:760px){.grid.two{grid-template-columns:1fr 1fr}#p-setup,#p-log,#p-people{max-width:1120px;margin:auto}}
+/* 送禮追蹤／贊助登記（2026-10-13）。整頁不放地址電話：抽獎畫面會在 Zoom 分享螢幕。 */
+.gfilters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.gchip{border:1px solid var(--line);background:var(--white);border-radius:4px;padding:6px 12px;font-size:14px;font-weight:700;color:var(--dim)}
+.gchip.on{border-color:var(--red);color:var(--red);background:#fbf3f0}
+.gcard{border:1px solid var(--line);border-radius:6px;background:var(--white);padding:16px 18px;margin-top:12px;display:grid;gap:12px}
+.gtop{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start}
+.gwho{font-size:19px;font-weight:800}
+.gmeta{font-size:13px;color:var(--dim);overflow-wrap:anywhere}
+.gsteps{display:flex;gap:6px;flex-wrap:wrap}
+.gstep{display:flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:4px;padding:7px 11px;font-size:14px;cursor:pointer;background:#fbf7f0;user-select:none}
+.gstep input{width:19px;height:19px;accent-color:var(--ok);margin:0}
+.gstep.done{border-color:#9cc3ab;background:#e6efe7}
+.gstep.locked{opacity:.45;cursor:not-allowed}
+.gmsg{background:#fbf7f0;border:1px dashed #cdbfb9;border-radius:4px;padding:10px 12px;font-size:14px;white-space:pre-line;overflow-wrap:anywhere}
+.gmsg small{display:block;color:var(--dim);font-size:12px;font-weight:700;margin-bottom:2px}
+.ghow{font-size:13px;min-height:36px;padding:4px 8px;border:1px solid #c8bcbf;border-radius:4px;background:var(--white)}
+.safe-note{background:#e6efe7;color:var(--ok);border-radius:4px;padding:10px 14px;font-size:14px;font-weight:700;margin-bottom:18px}
+#spTbl td.empty{color:var(--red);font-weight:700}
+#spCntTbl{min-width:300px}
+@media(min-width:760px){.grid.two{grid-template-columns:1fr 1fr}#p-setup,#p-log,#p-people,#p-gift,#p-sponsor{max-width:1120px;margin:auto}}
 @media(min-width:1600px){.wrap,.bar,nav{max-width:1800px}.stage{padding:34px 64px}.display{min-height:290px}.name{font-size:clamp(144px,9vw,176px)}.slot{font-size:22px}.stage-title{font-size:18px}.poolinfo{font-size:20px}}
 @media(max-width:759px){
   .wrap{padding:0 14px calc(30px + env(safe-area-inset-bottom))}
@@ -124,6 +143,7 @@ dialog::backdrop{background:rgba(30,16,24,.65)}
   #todayTbl th:nth-child(1){width:21%}#todayTbl th:nth-child(2){width:23%}#todayTbl th:nth-child(3){width:18%}#todayTbl th:nth-child(4){width:23%}#todayTbl th:nth-child(5){width:15%}
   #todayTbl td:nth-child(4){font-size:14px}#todayTbl .btn{font-size:12px;padding:8px 2px;min-width:0;width:100%}
 }
+@media(max-width:520px){nav button{font-size:13px;padding:10px 2px}}
 @media(max-width:360px){.today{margin-left:0;width:100%}.people{grid-template-columns:1fr}.stage{padding-left:16px;padding-right:16px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
@@ -163,6 +183,8 @@ dialog::backdrop{background:rgba(30,16,24,.65)}
     <button data-tab="draw" class="on">抽獎</button>
     <button data-tab="setup">今日設定</button>
     <button data-tab="log">紀錄</button>
+    <button data-tab="gift">送禮</button>
+    <button data-tab="sponsor">贊助</button>
     <button data-tab="people">名單</button>
   </nav>
 </header>
@@ -283,6 +305,52 @@ dialog::backdrop{background:rgba(30,16,24,.65)}
   </div>
 </section>
 
+<!-- ============ 送禮追蹤 ============ -->
+<section class="page" id="p-gift">
+  <div class="safe-note">這一頁不收、也不顯示任何人的地址或電話，Zoom 分享螢幕時點開也沒關係。</div>
+  <div class="card">
+    <h2>禮物到手了沒</h2>
+    <div class="hint">每張卡會列出下一則要傳的訊息（照接待組 Notion 的罐頭文字），按「複製這段」貼到 LINE，傳完自動打勾。得主回的地址只在 LINE 私訊裡轉給贊助夥伴，不要貼進這裡。換台裝置也看得到進度。</div>
+    <div class="gfilters" id="gFilters"></div>
+    <div id="gCards"></div>
+  </div>
+</section>
+
+<!-- ============ 贊助登記 ============ -->
+<section class="page" id="p-sponsor">
+  <div class="card">
+    <h2>登記一份贊助</h2>
+    <div class="hint">登記好的場次，當天打開抽獎機會自動帶入禮品與贊助人。</div>
+    <div class="grid two">
+      <div><label class="f" for="spDate">哪一場</label><select class="in" id="spDate"></select></div>
+      <div><label class="f" for="spWho">贊助人</label><input class="in" id="spWho" list="memberList" placeholder="輸入姓名"></div>
+      <div><label class="f" for="spGift">禮品</label><input class="in" id="spGift" placeholder="例如：手工皂禮盒"></div>
+      <div><label class="f" for="spHow">怎麼給得主</label>
+        <select class="in" id="spHow"><option value="ship">寄送</option><option value="ecard">電子券</option></select></div>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn solid" id="btnSpAdd">登記</button>
+      <button class="btn danger" id="btnSpClear">清空這一場</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>接下來幾場</h2>
+    <div class="hint">還沒人認領的場次標紅。</div>
+    <div class="tblwrap">
+      <table id="spTbl"><thead><tr><th>日期</th><th>贊助人</th><th>禮品</th><th>怎麼給</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>贊助次數</h2>
+    <div class="hint">照抽獎紀錄算，同一天贊助兩份算一次。</div>
+    <div class="tblwrap">
+      <table id="spCntTbl"><thead><tr><th>贊助人</th><th>次數</th><th>最近一次</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+</section>
+
 <!-- ============ 名單 ============ -->
 <section class="page" id="p-people">
   <div class="card">
@@ -329,6 +397,7 @@ const ROUNDS = [{n:1,label:'第一輪 · 6:45'},{n:2,label:'第二輪 · 6:50'}]
 // 送不出去就排進待送佇列，下次有網路再補，現場不會因為沒網路卡住。
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzgnbB3dpFEnyFir3L0rIRGXF6TbsZeiiYMAnO7yflhxNpEGaFJsm94uCMjgQGKKUbZ/exec';
 const QUEUE_KEY = 'bni-lottery-queue';
+const QUEUE2_KEY = 'bni-lottery-queue-gifts';   // 送禮進度與贊助登記的待送佇列
 
 function queued(){
   try{ return JSON.parse(localStorage.getItem(QUEUE_KEY)) || []; }catch(e){ return []; }
@@ -343,18 +412,35 @@ function syncRow(row){
   flushQueue();
 }
 /** 送出待送佇列。失敗就留著，下次再試，不打擾操作者。 */
+function queued2(){
+  try{ return JSON.parse(localStorage.getItem(QUEUE2_KEY)) || []; }catch(e){ return []; }
+}
+/** 送禮進度或贊助登記改了一筆，排進佇列送出。同一個鍵只留最新的那筆。 */
+function syncOp(type, item){
+  const q = queued2().filter(o=>!(o.type===type && o.key===item.key));
+  q.push({type, key:item.key, item});
+  try{ localStorage.setItem(QUEUE2_KEY, JSON.stringify(q)); }catch(e){}
+  flushQueue();
+}
 function flushQueue(){
-  const q = queued();
-  if(!q.length || !SHEET_URL) return;
+  const q = queued(), q2 = queued2();
+  if((!q.length && !q2.length) || !SHEET_URL) return;
   // Apps Script 會轉址到別的網域，瀏覽器讀不到回應內容，所以用 no-cors 送。
   // 送出去就算數：後端本來就會擋掉重複（同日期＋同輪次＋同中獎人只留一筆），
   // 萬一這次其實沒送成，下次補送也不會寫出兩行。
   fetch(SHEET_URL, {
     method:'POST', mode:'no-cors',
     headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body: JSON.stringify({rows:q})
+    body: JSON.stringify({rows:q,
+      gifts: q2.filter(o=>o.type==='gift').map(o=>o.item),
+      sponsors: q2.filter(o=>o.type==='sponsor').map(o=>o.item)})
   })
-  .then(()=>setQueued([]))
+  .then(()=>{
+    setQueued(queued().slice(q.length));
+    // 送出期間又改了的那幾筆留著下次送
+    const sent = new Map(q2.map(o=>[o.type+'|'+o.key, o.item.ts]));
+    try{ localStorage.setItem(QUEUE2_KEY, JSON.stringify(queued2().filter(o=>sent.get(o.type+'|'+o.key)!==o.item.ts))); }catch(e){}
+  })
   .catch(()=>{ /* 沒網路就留著，下次再送 */ });
 }
 // 開頁時把上次沒送成功的補送掉
@@ -384,10 +470,26 @@ function pullSheet(){
   if(!SHEET_URL) return;
   fetch(SHEET_URL+'?action=history')
     .then(r=>r.json())
-    .then(d=>{ if(Array.isArray(d.rows) && mergeHistory(d.rows)){ save(); renderAll(); } })
+    .then(d=>{
+      let changed = Array.isArray(d.rows) && mergeHistory(d.rows) > 0;
+      if(mergeNewer(S.gifts, d.gifts, g=>g.date+'|'+g.round)) changed = true;
+      if(mergeNewer(S.sponsors, d.sponsors, s=>s.date)) changed = true;
+      if(applySponsorPlan()) changed = true;
+      if(changed){ save(); renderAll(); }
+    })
     .catch(()=>{});
 }
 window.addEventListener('load', ()=>setTimeout(pullSheet, 800));
+/** 試算表來的送禮進度／贊助登記併進本機：同一個鍵比更新時間，新的贏。 */
+function mergeNewer(store, list, keyOf){
+  let n = 0;
+  (list||[]).forEach(x=>{
+    if(!x || !x.date) return;
+    const k = keyOf(x), cur = store[k];
+    if(!cur || String(x.ts||'') > String(cur.ts||'')){ store[k] = {...x}; n++; }
+  });
+  return n;
+}
 
 /* ---------- 離線快取 ---------- */
 // 註冊後這個網址斷網也打得開（6:45 現場網路不可靠）。
@@ -409,6 +511,7 @@ function freshState(){
     history: SEED.history.slice(),
     epoch: 1,
     settings: {mode:'fair'},
+    gifts: {}, sponsors: {},
     today: {date: todayStr(), attendees:null, rounds:[{gift:'',sponsor:''},{gift:'',sponsor:''}]}
   };
 }
@@ -423,6 +526,7 @@ function load(){
 function migrate(){
   S.members ||= []; S.history ||= []; S.epoch ||= 1;
   S.settings ||= {mode:'fair'};
+  S.gifts ||= {}; S.sponsors ||= {};
   S.today ||= {date:todayStr(), attendees:null, rounds:[{gift:'',sponsor:''},{gift:'',sponsor:''}]};
   // 換日一律把日期推到今天，出席重新來過。
   // 但前一晚先填好隔天的禮品與贊助人是規格上的正常流程（現場流程第 1 步），
@@ -811,6 +915,174 @@ $('#fileIn').onchange=e=>{
 };
 
 /* ============================================================
+   送禮追蹤（2026-10-13）
+   只記做到哪一步。地址由得主直接私訊贊助人，網站不經手：
+   抽獎畫面會在 Zoom 分享螢幕，這裡出現的東西全分會都看得到。
+   ============================================================ */
+const TRACK_FROM = '2026-10-07';   // 這天以前的禮物都已送完，不追蹤
+const plainName = s => String(s||'').split('/')[0].replace(/[（(].*$/,'').trim();
+function giftOf(h){
+  const k = h.date+'|'+h.round;
+  return S.gifts[k] || {date:h.date, round:h.round, winner:h.winner,
+    how:(S.sponsors[h.date]||{}).how || 'ship', told:false, addr:false, relayed:false, shipped:false, got:false, thanked:false, ts:''};
+}
+// 步驟與文字照接待組 Notion 罐頭訊息⑩～⑬（2026-10-13）：
+// 配送禮物的人私訊得主收資料 → 轉給贊助夥伴 → 贊助夥伴寄出 → 通知得主 → 得主回報收到。
+// 地址只在 LINE 私訊裡流動，網站只記打勾。
+function giftSteps(g){
+  return g.how==='ecard'
+    ? [['已恭喜得主','told'],['贊助夥伴已傳券','shipped'],['得主收到','got']]
+    : [['已私訊得主收資料','told'],['得主已回資料','addr'],['已轉給贊助夥伴','relayed'],['贊助夥伴已寄出','shipped'],['得主收到','got']];
+}
+function giftStatus(g){
+  const st = giftSteps(g), i = st.findIndex(([,k])=>!g[k]);
+  if(i<0) return ['完成','g','done'];
+  const k = st[i][1];
+  const mine = {told:'要做：私訊得主', relayed:'要做：轉給贊助夥伴'}[k];
+  if(mine) return [mine,'r','todo'];
+  const wait = {addr:'等得主回資料', shipped:g.how==='ecard'?'等贊助夥伴傳券':'等贊助夥伴寄出', got:'等得主回報收到'}[k];
+  return [wait,'y','wait'];
+}
+const profOf = n => ((S.members.find(m=>m.name===n)||{}).profession||'＿＿');
+/** 這張卡現在該傳的訊息：[標題, 內文, 傳完要打勾的步驟或 null] */
+function giftMsgs(h, g){
+  const sp = plainName(h.sponsor) || '贊助夥伴', w = h.winner, gift = h.gift || '＿＿';
+  const out = [];
+  if(!g.told) out.push(g.how==='ecard'
+    ? ['⑩ 恭喜得主（私訊得主）',
+       `🎉 恭喜 ${w} 抽中晨光抽抽樂！\n\n這次的獎品是「${gift}」，感謝 ${sp} 熱情贊助 🎁\n\n電子券會由 ${sp} 直接傳給您，\n收到後麻煩回覆一聲讓我們知道 🙏\n再次恭喜，祝您好運連連 ✨`, 'told']
+    : ['⑩ 恭喜得主＋收寄件資料（私訊得主）',
+       `🎉 恭喜 ${w} 抽中晨光抽抽樂！\n\n這次的獎品是「${gift}」，感謝 ${sp} 熱情贊助 🎁\n\n為了把禮物寄給您，麻煩回覆以下資料：\n📦 收件人姓名：\n📞 聯絡電話：\n🏠 收件地址：\n\n收到後會盡快幫您安排寄出，\n再次恭喜，祝您好運連連 ✨`, 'told']);
+  if(g.how==='ship' && g.addr && !g.relayed) out.push(['⑫ 請贊助夥伴寄出（私訊贊助夥伴）',
+       `${sp} 您好 😊\n\n再次謝謝您贊助本週的晨光抽抽樂 🎁\n得主 ${w} 的收件資料如下：\n\n📦 收件人姓名：\n📞 聯絡電話：\n🏠 收件地址：\n\n再麻煩您方便時幫忙寄出，\n寄出後回覆一聲（有物流單號更好），\n我們會通知得主留意收件 🙏\n\n辛苦您了，感謝支持！`, 'relayed',
+       '貼上後，把得主回覆的姓名、電話、地址補進去再送出。']);
+  if(g.how==='ship' && g.shipped && !g.got) out.push(['⑬ 通知得主留意收件（私訊得主）',
+       `${w} 您好 😊\n\n抽抽樂的禮物「${gift}」已經由 ${sp} 寄出囉 📦\n（物流單號：＿＿）\n\n收到後麻煩回覆一聲讓我們知道 🙏\n如果方便的話，也歡迎拍張照片或心得\n分享到大群，謝謝贊助夥伴的心意 💛\n\n有任何問題都可以跟我說喔～`, null,
+       '有物流單號就填上，沒有就刪掉那一行。']);
+  if(!g.thanked) out.push(['⑪ 在大群感謝贊助夥伴（貼大群）',
+       `🙏 感謝 ${sp} 贊助本週晨光抽抽樂！\n\n這次的獎品「${gift}」已由 ${w} 幸運抽中 🎉\n\n${sp} 的專業是 ${profOf(sp)}，\n有相關需求或想認識的朋友，\n都歡迎引薦給 ${sp} 喔 🤝\n\n謝謝您讓週三早上多了一份驚喜，\n也歡迎更多夥伴一起加入贊助行列 🎁`, 'thanked']);
+  return out;
+}
+function saveGift(h, g){
+  g.ts = new Date().toISOString(); g.winner = h.winner;
+  S.gifts[h.date+'|'+h.round] = g; save();
+  syncOp('gift', {key:h.date+'|'+h.round, date:h.date, round:h.round, winner:h.winner, how:g.how,
+                  told:g.told, addr:g.addr, relayed:!!g.relayed, shipped:g.shipped, got:g.got, thanked:!!g.thanked, ts:g.ts});
+}
+function copyText(text, done){
+  const fallback = ()=>{
+    const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    let ok=false; try{ ok=document.execCommand('copy'); }catch(e){}
+    ta.remove(); done(ok);
+  };
+  try{ navigator.clipboard.writeText(text).then(()=>done(true), fallback); }catch(e){ fallback(); }
+}
+let giftFilter = 'open';
+function renderGift(){
+  const list = S.history.filter(h=>h.date>=TRACK_FROM && h.winner)
+    .sort((a,b)=>b.date.localeCompare(a.date)||a.round-b.round);
+  const F=[['open','還沒完成'],['todo','要我動手'],['done','已完成'],['all','全部']];
+  const match=(h,f)=>{ const s=giftStatus(giftOf(h))[2]; return f==='all'||(f==='open'?s!=='done':s===f); };
+  $('#gFilters').innerHTML = F.map(([k,t])=>`<button class="gchip${giftFilter===k?' on':''}" data-gf="${k}">${t} ${list.filter(h=>match(h,k)).length}</button>`).join('');
+  $$('#gFilters [data-gf]').forEach(b=>b.onclick=()=>{ giftFilter=b.dataset.gf; renderGift(); });
+  const box=$('#gCards'); box.innerHTML='';
+  const shown = list.filter(h=>match(h,giftFilter));
+  if(!shown.length){ box.innerHTML='<div class="hint" style="margin-top:12px">這一類目前沒有。</div>'; return; }
+  shown.forEach(h=>{
+    const g = giftOf(h), [label,pc] = giftStatus(g), st = giftSteps(g);
+    const firstOpen = st.findIndex(([,k])=>!g[k]);
+    const msgs = giftMsgs(h, g);
+    const el=document.createElement('article'); el.className='gcard';
+    el.innerHTML = `<div class="gtop"><div><div class="gwho">${esc(h.winner)}</div>
+        <div class="gmeta">${esc(h.date)} ${h.round===1?'6:45':'6:50'}｜${esc(h.gift||'—')}｜${esc(plainName(h.sponsor)||'—')} 贊助</div></div>
+        <div class="row"><select class="ghow" aria-label="怎麼給得主"><option value="ship">寄送</option><option value="ecard">電子券</option></select>
+        <span class="pill ${pc}">${label}</span></div></div>
+      <div class="gsteps">${st.map(([t,k],i)=>{ const d=!!g[k], lk=!d&&i>firstOpen;
+        return `<label class="gstep${d?' done':''}${lk?' locked':''}"><input type="checkbox" data-k="${k}" ${d?'checked':''} ${lk?'disabled':''}>${t}</label>`; }).join('')}
+        <label class="gstep${g.thanked?' done':''}"><input type="checkbox" data-k="thanked" ${g.thanked?'checked':''}>已在大群感謝</label></div>
+      ${msgs.map(([title,body,tick,tip],i)=>`<div class="gmsg"><small>${title}</small>${esc(body)}</div>
+        <div class="row">${tip?`<span class="hint" style="margin:0">${tip}</span>`:''}<button class="btn solid" data-copy="${i}">複製這段</button></div>`).join('')}`;
+    el.querySelector('.ghow').value = g.how;
+    el.querySelector('.ghow').onchange = e=>{ g.how=e.target.value; if(g.how==='ecard'){ g.addr=false; g.relayed=false; } saveGift(h,g); renderGift(); };
+    el.querySelectorAll('input[data-k]').forEach(c=>c.onchange=()=>{
+      g[c.dataset.k]=c.checked;
+      const i=st.findIndex(([,k])=>k===c.dataset.k);
+      if(!c.checked && i>=0) st.slice(i+1).forEach(([,k])=>g[k]=false);
+      saveGift(h,g); renderGift(); toast(c.checked?'已打勾':'已取消勾選');
+    });
+    el.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>{
+      const [title, body, tick] = msgs[+b.dataset.copy];
+      copyText(body, ok=>{
+        if(!ok){ toast('這台裝置不能自動複製，請長按上面那段文字複製'); return; }
+        if(tick){ g[tick]=true; saveGift(h,g); renderGift(); }
+        toast('已複製，貼到 LINE');
+      });
+    });
+    box.appendChild(el);
+  });
+}
+
+/* ============================================================
+   贊助登記（2026-10-13）
+   ============================================================ */
+function ymdLocal(d){ const p=x=>String(x).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; }
+function nextWednesdays(n){
+  const d=new Date(); d.setHours(12,0,0,0);
+  d.setDate(d.getDate() + ((3 - d.getDay() + 7) % 7));
+  const out=[];
+  for(let i=0;i<n;i++){ out.push(ymdLocal(d)); d.setDate(d.getDate()+7); }
+  return out;
+}
+/** 今天有登記贊助、而今日設定還空著 → 自動帶入兩輪的禮品與贊助人。回傳有沒有改。 */
+function applySponsorPlan(){
+  const sp = S.sponsors[S.today.date];
+  if(!sp || !sp.who) return false;
+  if(S.today.rounds.some(x=>x && (x.gift||x.sponsor))) return false;
+  S.today.rounds = [{gift:sp.gift, sponsor:sp.who},{gift:sp.gift, sponsor:sp.who}];
+  return true;
+}
+function renderSponsor(){
+  const dates = nextWednesdays(6);
+  const sel=$('#spDate'), keep=sel.value;
+  sel.innerHTML = dates.map(d=>{ const s=S.sponsors[d]; return `<option value="${d}">${d.slice(5).replace('-','/')}（週三）${s&&s.who?'· 已有 '+esc(s.who):'· 空'}</option>`; }).join('');
+  sel.value = dates.includes(keep) ? keep : (dates.find(d=>!(S.sponsors[d]&&S.sponsors[d].who)) || dates[0]);
+  const tb=$('#spTbl tbody'); tb.innerHTML='';
+  dates.forEach(d=>{
+    const s=S.sponsors[d], md=d.slice(5).replace('-','/');
+    tb.insertAdjacentHTML('beforeend', s&&s.who
+      ? `<tr><td>${md}</td><td>${esc(s.who)}</td><td class="wide">${esc(s.gift||'—')}</td><td>${s.how==='ecard'?'電子券':'寄送'}</td></tr>`
+      : `<tr><td>${md}</td><td colspan="3" class="empty">還沒有人認領</td></tr>`);
+  });
+  const cnt={};
+  S.history.forEach(h=>{ const n=plainName(h.sponsor); if(!n) return; (cnt[n] ||= new Set()).add(h.date); });
+  const ct=$('#spCntTbl tbody'); ct.innerHTML='';
+  Object.entries(cnt).map(([n,set])=>[n,set.size,[...set].sort().pop()])
+    .sort((a,b)=>b[1]-a[1]||b[2].localeCompare(a[2]))
+    .forEach(([n,k,last])=>ct.insertAdjacentHTML('beforeend',`<tr><td>${esc(n)}</td><td><b>${k}</b></td><td>${last}</td></tr>`));
+}
+function saveSponsor(date, who, gift, how){
+  const ts = new Date().toISOString();
+  S.sponsors[date] = {date, who, gift, how, ts};
+  // 登記的是今天、今天又還沒抽 → 今日設定一起換掉
+  if(date===S.today.date && !S.history.some(h=>h.date===date)){
+    S.today.rounds = [{gift, sponsor:who},{gift, sponsor:who}];
+  }
+  save(); syncOp('sponsor', {key:date, date, who, gift, qty:2, how, ts});
+}
+$('#btnSpAdd').onclick=()=>{
+  const d=$('#spDate').value, who=$('#spWho').value.trim(), gift=$('#spGift').value.trim();
+  if(!who || !gift){ toast('請填贊助人和禮品'); return; }
+  saveSponsor(d, who, gift, $('#spHow').value);
+  $('#spWho').value=''; $('#spGift').value=''; renderAll(); toast(`已登記：${d.slice(5).replace('-','/')} ${who}`);
+};
+$('#btnSpClear').onclick=async()=>{
+  const d=$('#spDate').value;
+  if(!(S.sponsors[d]&&S.sponsors[d].who)){ toast('這一場本來就是空的'); return; }
+  if(await ask('清空這一場？', `${d} 的贊助登記會刪掉。`)){ saveSponsor(d,'','','ship'); renderAll(); toast('已清空'); }
+};
+
+/* ============================================================
    名單
    ============================================================ */
 function renderPeople(){
@@ -842,9 +1114,9 @@ $('#btnAddPerson').onclick=()=>{
 function esc(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function renderAll(){
   $('#todayLabel').textContent = `${S.today.date} · 名單 ${activeMembers().length} 人`;
-  renderDraw(); renderSetup(); renderLog(); renderPeople();
+  renderDraw(); renderSetup(); renderLog(); renderPeople(); renderGift(); renderSponsor();
 }
-load(); renderAll();
+load(); if(applySponsorPlan()) save(); renderAll();
 </script>
 </body>
 </html>
