@@ -199,11 +199,10 @@
     <section id="weeklyView" aria-labelledby="weeklyHeading" hidden>
       <div class="weekly-panel">
         <h2 id="weeklyHeading">最新週期統計</h2>
-        <p>此頁呈現目前的每週暫定資料。月份、資料期間與更新狀態以檢視內標示為準。</p>
+        <p>依 PALMS 六個月報告換算，每週四更新；正式分數以 LTNA 公布為準。</p>
         <p><a href="./dashboard.html">上傳最新 PALMS 報告</a></p>
         <p id="weeklyActual" role="status">正在確認現有 PALMS 統計期間…</p>
         <p id="weeklyCutoff" class="action-note">本週預期資料截止日：計算中</p>
-        <p><a href="./dashboard.html?v=est">在新分頁開啟最新週期統計</a></p>
         <div class="frame-wrap">
           <iframe id="weeklyFrame" class="weekly-frame" title="華都更會員紅綠燈最新週期統計" loading="lazy" referrerpolicy="no-referrer"></iframe>
         </div>
@@ -245,6 +244,8 @@
         monthlyNav.removeAttribute('aria-current');
         weeklyNav.setAttribute('aria-current', 'page');
         document.title = '華都更會員紅綠燈｜最新週期統計';
+        document.querySelector('.lead').textContent = '最新六個月 PALMS 統計與會員紅綠燈。';
+        document.querySelector('.foot p:nth-child(2)').hidden = true;
         var cutoff = document.getElementById('weeklyCutoff');
         if (window.WeeklyPeriod && typeof window.WeeklyPeriod.latestWednesday === 'function') {
           var expectedEnd = window.WeeklyPeriod.latestWednesday(new Date()).split('-');

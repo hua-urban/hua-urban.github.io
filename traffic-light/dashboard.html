@@ -14,6 +14,20 @@
 .hua-home-navigation .hua-home-link:focus-visible { outline: 3px solid #1f4e79; outline-offset: 3px; }
 @media print { .hua-home-navigation { display: none; } }
 </style>
+<script>
+if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embedded-weekly');
+</script>
+<style>
+.embedded-weekly .hua-home-navigation,
+.embedded-weekly header > .eyebrow,
+.embedded-weekly header > h1,
+.embedded-weekly header > .vtoggle,
+.embedded-weekly header > .note,
+.embedded-weekly .wrap > .foot,
+.embedded-weekly #t-upload,
+.embedded-weekly #p-upload { display: none !important; }
+.embedded-weekly .wrap { padding-top: 12px; }
+</style>
 </head>
 <body>
 <div class="hua-home-navigation" role="navigation" aria-label="華都更網站導覽">
