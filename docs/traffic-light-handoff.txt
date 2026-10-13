@@ -1,0 +1,35 @@
+華都更紅綠燈維護（2026-10-13）
+
+正式入口：https://hua-urban.com/traffic-light/
+每週換算：https://hua-urban.com/traffic-light/?v=est
+原始資料管理：https://hua-urban.com/traffic-light/dashboard.html
+
+月報：traffic-light/monthly.json 為 LTNA 官方公開報告所列資料，months[0] 是最新月份。
+來源：https://bninwb.autolab.cloud/YYYYMM/hua-urban.html
+只保留最新月份及前兩個日曆月，月份降冪。最新月預設展開。
+原始來源未提供出缺席、交易價值等完整會員原始欄位，因此月報不反推個別計分項目。
+原始資料 data.json 維持原有上傳格式，不能拿其中 PALMS 暫定會員值冒充官方月報。
+
+GitHub workflow .github/workflows/traffic-light-sync.yml：
+每月第一、第二個週二台北 10:00 執行；其餘週二會通過日期閘門直接略過。
+抓上月及前兩月網址，驗證標題、日期、人數、燈號、得分後寫入 monthly.json。
+同內容不重寫。來源未發布或格式錯誤時保留已驗證資料並讓流程失敗，供追蹤提醒。
+GITHUB_TOKEN 提交不會自動觸發一般 Pages build，所以更新後另呼叫 Pages build API。
+可在 Actions 手動執行，month 選填 YYYY-MM。
+
+週報：沿用 dashboard.html 的既有會員計分規則。
+每週四檢查截至前一天週三的 PALMS 六個月報告。
+開始日為截止日往前六個日曆月再加一天，月底對齊按月份最後一天處理。
+例如 2026-10-14 截止的週報期間為 2026-04-15 至 2026-10-14。
+每位會員的週平均分母為 P+A+Med+S，並非一律固定 26 週。
+必須讀到報告內起訖日；缺日期、非週三截止、期間不滿六個月或未結算日期都不能上傳為週版。
+來源尚未取得時顯示原始截止日和待補件，不替換日期冒充已更新。
+官方月報更新不刪除最新週版；新週報的會員成長、保留率、轉換率沿用最新正式月報並標明。
+
+資料缺口：目前可存取 PALMS 截至 2026-09-30；未取得截至 2026-10-07 的週報。
+Codex 已設定週二／週四台北 10:30 追蹤，週二限每月前兩週。
+資訊組小幫手通路與副主席收件對象待使用者提供；未提供前不發送第三方訊息。
+
+上傳服務為 hua-urban/htl-api 的 Vercel api/upload.js。
+2026-10-13 已提交支援 hua-urban.com origin 的修正，部署尚待 Vercel 存取確認。
+只做 OPTIONS 無副作用驗證，沒有向正式站上傳假會員資料。

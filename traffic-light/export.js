@@ -26,7 +26,7 @@
   function filename(chapter, version){
     const month = /(\d{4})\s*年\s*(\d{1,2})\s*月/.exec(chapter.period || '');
     const dates = String(chapter.range || '').match(/\d{4}-\d{2}-\d{2}/g);
-    const period = month ? month[1] + '-' + month[2].padStart(2,'0')
+    const period = chapter.frequency === 'weekly' && chapter.asOf ? chapter.asOf : month ? month[1] + '-' + month[2].padStart(2,'0')
       : dates && dates.length >= 2 ? dates[dates.length-1].slice(0,7) : '月份未標';
     const safe = text(version).replace(/[\\/:*?"<>|\u0000-\u001f]/g,'_');
     return '華都更_會員紅綠燈_' + period + '_' + safe.replace(/\s+/g,'') + '.xlsx';

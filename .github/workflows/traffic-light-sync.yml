@@ -1,0 +1,131 @@
+name: Official LTnA monthly sync
+
+on:
+  schedule:
+    - cron: '0 2 * * 2'
+  workflow_dispatch:
+    inputs:
+      month:
+        description: Optional deterministic target month in YYYY-MM format
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pages: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Gate scheduled run to the first two weeks
+        id: gate
+        shell: bash
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == "schedule" && "$(date -u +%d | sed 's/^0//')" -gt 14 ]]; then
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "Scheduled sync is outside the first two weeks of the month."
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check out master
+        if: steps.gate.outputs.run == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Import the target and two preceding calendar months
+        id: importer
+        if: steps.gate.outputs.run == 'true'
+        continue-on-error: true
+        shell: bash
+        env:
+          TARGET_MONTH: ${{ github.event.inputs.month || '' }}
+        run: |
+          if [[ -n "$TARGET_MONTH" ]]; then
+            python3 traffic-light/sync_ltna.py --month "$TARGET_MONTH"
+          else
+            python3 traffic-light/sync_ltna.py
+          fi
+
+      - name: Commit and push monthly JSON with rebase retries
+        if: always() && steps.gate.outputs.run == 'true'
+        shell: bash
+        env:
+          TARGET_MONTH: ${{ github.event.inputs.month || '' }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [[ ! -f traffic-light/monthly.json ]]; then
+            echo "No valid monthly data file is available to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- traffic-light/monthly.json
+          if git diff --cached --quiet; then
+            echo "traffic-light/monthly.json has no changes."
+            exit 0
+          fi
+          git commit -m "Update official LTnA monthly data"
+
+          run_importer() {
+            if [[ -n "$TARGET_MONTH" ]]; then
+              python3 traffic-light/sync_ltna.py --month "$TARGET_MONTH" || true
+            else
+              python3 traffic-light/sync_ltna.py || true
+            fi
+          }
+
+          pushed=false
+          committed_change_pushed=false
+          for attempt in 1 2 3; do
+            git fetch origin master
+            if git rebase origin/master; then
+              if git push origin HEAD:master; then
+                pushed=true
+                committed_change_pushed=true
+                break
+              fi
+            else
+              git rebase --abort || true
+              git fetch origin master
+              git reset --hard origin/master
+              run_importer
+              if [[ ! -f traffic-light/monthly.json ]]; then
+                echo "No valid monthly data remains after updating from master."
+                exit 0
+              fi
+              git add -- traffic-light/monthly.json
+              if git diff --cached --quiet; then
+                echo "The current master already contains the available monthly data."
+                pushed=true
+                break
+              fi
+              git commit -m "Update official LTnA monthly data"
+            fi
+            sleep 2
+          done
+          if [[ "$pushed" != true ]]; then
+            echo "Could not push monthly JSON after three fetch/rebase attempts." >&2
+            exit 1
+          fi
+          if [[ "$committed_change_pushed" == true ]]; then
+            curl --fail-with-body --silent --show-error \
+              --request POST \
+              --header "Accept: application/vnd.github+json" \
+              --header "Authorization: Bearer $GH_TOKEN" \
+              --header "X-GitHub-Api-Version: 2026-03-10" \
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/pages/builds"
+            echo "Requested a GitHub Pages build for the updated master branch."
+          fi
+
+      - name: Fail the run when the requested latest report is delayed
+        if: always() && steps.gate.outputs.run == 'true' && steps.importer.outcome == 'failure'
+        shell: bash
+        run: |
+          echo "The target report could not be imported. Any valid fetched or existing monthly stats were preserved and committed when changed." >&2
+          exit 1

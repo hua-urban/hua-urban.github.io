@@ -9,7 +9,7 @@ const vm = require('node:vm');
 const {buildTables, createWorkbook} = require('./export.js');
 const here = __dirname;
 const data = JSON.parse(fs.readFileSync(path.join(here, 'data.json'), 'utf8'));
-const html = fs.readFileSync(path.join(here, 'index.html'), 'utf8');
+const html = fs.readFileSync(path.join(here, 'dashboard.html'), 'utf8');
 
 // Pull the page's actual scoring constants and functions into a small VM context.
 // This keeps the fixture grounded in the page while avoiding DOM boot side effects.
