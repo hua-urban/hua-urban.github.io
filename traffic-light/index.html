@@ -254,7 +254,7 @@
           cutoff.textContent = '本週預期截止日無法計算；實際期間以 PALMS 報告日期為準。';
         }
         var weeklyFrame = document.getElementById('weeklyFrame');
-        weeklyFrame.src = './dashboard.html?v=est&embed=1';
+        weeklyFrame.src = './dashboard.html?v=est&embed=1&ui=20261013-clean';
         weeklyFrame.addEventListener('load', resizeWeeklyFrame);
         fetch('data.json', {cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(function(d){
           var est=d.chapter && d.chapter.est;
