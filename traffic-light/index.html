@@ -158,7 +158,7 @@
 
     <nav class="view-nav" aria-label="選擇檢視方式">
       <a id="monthlyNav" href="./" aria-current="page">LTNA 官方月報</a>
-      <a id="weeklyNav" href="./?v=est">暫定週檢視（PALMS）</a>
+      <a id="weeklyNav" href="./?v=est">最新週期統計</a>
     </nav>
 
     <section id="monthlyView" aria-labelledby="monthlyHeading">
@@ -198,14 +198,14 @@
 
     <section id="weeklyView" aria-labelledby="weeklyHeading" hidden>
       <div class="weekly-panel">
-        <h2 id="weeklyHeading">暫定週檢視（PALMS）</h2>
+        <h2 id="weeklyHeading">最新週期統計</h2>
         <p>此頁呈現目前的每週暫定資料。月份、資料期間與更新狀態以檢視內標示為準。</p>
         <p><a href="./dashboard.html">上傳最新 PALMS 報告</a></p>
         <p id="weeklyActual" role="status">正在確認現有 PALMS 統計期間…</p>
         <p id="weeklyCutoff" class="action-note">本週預期資料截止日：計算中</p>
-        <p><a href="./dashboard.html?v=est">在新分頁開啟暫定週檢視</a></p>
+        <p><a href="./dashboard.html?v=est">在新分頁開啟最新週期統計</a></p>
         <div class="frame-wrap">
-          <iframe id="weeklyFrame" class="weekly-frame" title="華都更會員紅綠燈暫定週檢視（PALMS）" loading="lazy" referrerpolicy="no-referrer"></iframe>
+          <iframe id="weeklyFrame" class="weekly-frame" title="華都更會員紅綠燈最新週期統計" loading="lazy" referrerpolicy="no-referrer"></iframe>
         </div>
       </div>
     </section>
@@ -244,7 +244,7 @@
       if (weeklyMode) {
         monthlyNav.removeAttribute('aria-current');
         weeklyNav.setAttribute('aria-current', 'page');
-        document.title = '華都更會員紅綠燈｜暫定週檢視';
+        document.title = '華都更會員紅綠燈｜最新週期統計';
         var cutoff = document.getElementById('weeklyCutoff');
         if (window.WeeklyPeriod && typeof window.WeeklyPeriod.latestWednesday === 'function') {
           var expectedEnd = window.WeeklyPeriod.latestWednesday(new Date()).split('-');
