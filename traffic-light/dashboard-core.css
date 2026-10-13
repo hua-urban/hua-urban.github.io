@@ -1,0 +1,498 @@
+
+.traffic-dashboard .hua-home-navigation { box-sizing: border-box; display: block; position: relative; width: 100%; margin: 0; padding: 10px 16px; background: #fff; border-bottom: 1px solid #ded6d3; text-align: left; }
+.traffic-dashboard .hua-home-navigation .hua-home-link { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; max-width: 100%; padding: 9px 16px; border: 1px solid #a51c35; border-radius: 6px; background: #fff; color: #a51c35; font: 700 15px/1.5 -apple-system, BlinkMacSystemFont, "Noto Sans TC", "Microsoft JhengHei", sans-serif; text-decoration: none; }
+.traffic-dashboard .hua-home-navigation .hua-home-link:hover { background: #a51c35; color: #fff; }
+.traffic-dashboard .hua-home-navigation .hua-home-link:focus-visible { outline: 3px solid #1f4e79; outline-offset: 3px; }
+@media print { .traffic-dashboard .hua-home-navigation { display: none; } }
+
+
+.traffic-dashboard {
+  --bg:#F6F7F9; --surface:#FFFFFF; --surface-2:#EFF1F4; --border:#DDE2E8;
+  --text:#181B1F; --text-2:#565E67; --text-3:#58616B;
+  --accent:#1F4E79; --accent-soft:#E7EEF5;
+  --green:#0E684C; --green-bg:#E0F0E9; --green-line:#0E684C;
+  --amber:#765000; --amber-bg:#F8EED4; --amber-line:#765000;
+  --red:#B23A2E; --red-bg:#F8E4E1; --red-line:#A53228;
+  --grey:#3C444C; --grey-bg:#E3E6EA; --grey-line:#525B64;
+  --shadow:0 1px 2px rgba(20,26,33,.05), 0 8px 24px -12px rgba(20,26,33,.16);
+  --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI Variable Text","Segoe UI","PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  --font-mono:ui-monospace,"Cascadia Mono","SF Mono",Consolas,"Roboto Mono",monospace;
+}
+@media (prefers-color-scheme:dark){
+  .traffic-dashboard:not([data-theme="light"]) {
+    --bg:#131619; --surface:#1B1F24; --surface-2:#22272D; --border:#2C333A;
+    --text:#E9EDF1; --text-2:#A6AEB7; --text-3:#A6AEB7;
+    --accent:#7FB0DC; --accent-soft:#1B2A38;
+    --green:#48C795; --green-bg:#122C23; --green-line:#2E9E74;
+    --amber:#DFAA2C; --amber-bg:#2E2510; --amber-line:#B98B18;
+    --red:#E87C6E; --red-bg:#301A17; --red-line:#C25547;
+    --grey:#B9C1C9; --grey-bg:#1E2329; --grey-line:#8B949D;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+.traffic-dashboard[data-theme="dark"] {
+  --bg:#131619; --surface:#1B1F24; --surface-2:#22272D; --border:#2C333A;
+  --text:#E9EDF1; --text-2:#A6AEB7; --text-3:#A6AEB7;
+  --accent:#7FB0DC; --accent-soft:#1B2A38;
+  --green:#48C795; --green-bg:#122C23; --green-line:#2E9E74;
+  --amber:#DFAA2C; --amber-bg:#2E2510; --amber-line:#B98B18;
+  --red:#E87C6E; --red-bg:#301A17; --red-line:#C25547;
+  --grey:#B9C1C9; --grey-bg:#1E2329; --grey-line:#8B949D;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+}
+.traffic-dashboard * {box-sizing:border-box}
+.traffic-dashboard {
+  box-sizing:border-box;
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:var(--font-sans); font-size:15px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.traffic-dashboard .wrap {max-width:1180px; margin:0 auto; padding:28px 20px 80px}
+.traffic-dashboard .num {font-family:var(--font-mono); font-variant-numeric:tabular-nums}
+
+/* 匯出完整現任會員：跨分頁、捲動時仍可使用 */
+.traffic-dashboard .export-toolbar {
+  position:sticky; top:0; z-index:20; display:flex; flex-wrap:wrap;
+  align-items:center; gap:8px 14px; padding:12px 0; margin-bottom:18px;
+  background:var(--bg); border-bottom:1px solid var(--border);
+}
+.traffic-dashboard .export-button {
+  appearance:none; min-height:44px; padding:10px 16px; border-radius:9px;
+  border:1px solid var(--accent); background:var(--accent-soft); color:var(--accent);
+  font:inherit; font-weight:700; cursor:pointer;
+}
+.traffic-dashboard .export-button:focus-visible {outline:3px solid var(--accent); outline-offset:3px}
+.traffic-dashboard .export-button:disabled {cursor:wait}
+.traffic-dashboard .export-hint, .traffic-dashboard .export-status {font-size:13px; color:var(--text-2)}
+.traffic-dashboard .export-status {flex-basis:100%; margin:0; overflow-wrap:anywhere}
+.traffic-dashboard .export-status:empty {display:none}
+.traffic-dashboard .export-status.is-error {color:var(--red)}
+@media (max-width:540px){
+  .traffic-dashboard .export-button {width:100%}
+  .traffic-dashboard .export-hint {flex-basis:100%}
+}
+@media print{.traffic-dashboard .export-toolbar {display:none}}
+
+/* ---------- header ---------- */
+.traffic-dashboard .eyebrow {
+  font-size:11.5px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--text-3); font-weight:600; margin:0 0 6px;
+}
+.traffic-dashboard h1 {font-size:clamp(26px,4vw,34px); line-height:1.2; letter-spacing:-.02em; margin:0; font-weight:700; text-wrap:balance}
+.traffic-dashboard .period {color:var(--text-2); font-size:14px; margin:6px 0 0}
+.traffic-dashboard .period b {color:var(--text); font-weight:600}
+.traffic-dashboard .scope {
+  margin:12px 0 0; padding:9px 14px; font-size:13px; line-height:1.55;
+  color:var(--text-2); background:var(--accent-soft);
+  border-left:3px solid var(--accent); border-radius:0 8px 8px 0;
+}
+.traffic-dashboard .scope b {color:var(--accent)}
+.traffic-dashboard .vtoggle {display:inline-flex; gap:4px; margin-top:12px; padding:4px; border-radius:10px;
+  background:var(--card-2, rgba(0,0,0,.05)); flex-wrap:wrap}
+.traffic-dashboard .vtoggle a {padding:7px 14px; border-radius:7px; font-size:14px; font-weight:600;
+  color:var(--text-2); text-decoration:none}
+.traffic-dashboard .vtoggle a.on {background:var(--card, #fff); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.traffic-dashboard .demo-tag {
+  display:inline-block; margin-left:10px; padding:2px 8px; border-radius:999px;
+  background:var(--accent-soft); color:var(--accent); font-size:11.5px; font-weight:700;
+  letter-spacing:.06em; vertical-align:3px;
+}
+
+/* ---------- distribution bar ---------- */
+.traffic-dashboard .dist {margin:26px 0 0; display:flex; flex-direction:column; gap:10px}
+.traffic-dashboard .dist-bar {display:flex; height:32px; border-radius:8px; overflow:hidden; border:1px solid var(--border)}
+.traffic-dashboard .dist-seg {display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:700; color:#fff; min-width:0}
+.traffic-dashboard .dist-legend {display:flex; flex-wrap:wrap; gap:8px 22px; font-size:13px; color:var(--text-2)}
+.traffic-dashboard .dist-legend span {display:inline-flex; align-items:center; gap:7px}
+.traffic-dashboard .dot {width:10px; height:10px; border-radius:3px; flex:none}
+.traffic-dashboard .goal {
+  font-size:13px; color:var(--text-2); background:var(--surface); border:1px solid var(--border);
+  border-radius:8px; padding:10px 14px; margin-top:2px;
+}
+.traffic-dashboard .goal b {color:var(--text)}
+.traffic-dashboard .stats {display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; margin-top:4px}
+.traffic-dashboard .stat {
+  background:var(--surface); border:1px solid var(--border); border-radius:10px;
+  padding:13px 16px; border-left:4px solid var(--s-line);
+}
+.traffic-dashboard .stat-label {
+  font-size:11.5px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--text-3); font-weight:700; margin:0 0 3px;
+}
+.traffic-dashboard .stat-value {
+  font-family:var(--font-mono); font-variant-numeric:tabular-nums;
+  font-size:27px; font-weight:700; line-height:1.1; letter-spacing:-.02em; color:var(--s-line);
+}
+.traffic-dashboard .stat-value small {font-size:13px; font-weight:600; color:var(--text-3); letter-spacing:0; margin-left:3px}
+.traffic-dashboard .leave-list {
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr));
+  gap:6px 14px; margin-top:14px; max-height:340px; overflow-y:auto;
+  padding:12px; border:1px solid var(--border); border-radius:10px;
+}
+.traffic-dashboard .leave-item {display:flex; align-items:center; gap:8px; font-size:14px; cursor:pointer; padding:3px 0}
+.traffic-dashboard .leave-item input {width:16px; height:16px; cursor:pointer; flex:none}
+.traffic-dashboard .leave-item.on {color:var(--text-2); text-decoration:line-through}
+.traffic-dashboard .leave-item .lno {color:var(--text-3); font-size:12px; font-family:var(--font-mono)}
+.traffic-dashboard .stat-src {margin:6px 0 0; font-size:12px; color:var(--text-2); line-height:1.5}
+.traffic-dashboard .stat-src button {
+  border:1px solid var(--border); background:transparent; color:var(--text-2);
+  font:inherit; font-size:11.5px; padding:2px 8px; border-radius:999px;
+  cursor:pointer; margin-left:6px;
+}
+.traffic-dashboard .stat-src button:hover {background:var(--card-2, rgba(0,0,0,.04)); color:var(--text)}
+.traffic-dashboard .stat-src button[disabled] {opacity:.55; cursor:default}
+.traffic-dashboard .stat-note {font-size:12.5px; color:var(--text-2); margin:4px 0 0}
+.traffic-dashboard .stat-note b {color:var(--text); font-family:var(--font-mono)}
+.traffic-dashboard .s-green {--s-line:var(--green-line)}
+.traffic-dashboard .s-amber {--s-line:var(--amber-line)}
+.traffic-dashboard .s-red {--s-line:var(--red-line)}
+.traffic-dashboard .s-grey {--s-line:var(--grey-line)}
+
+
+/* ---------- tabs ---------- */
+.traffic-dashboard .tabs {display:flex; gap:4px; margin:30px 0 0; border-bottom:1px solid var(--border); flex-wrap:wrap}
+.traffic-dashboard .tab {
+  appearance:none; background:none; border:0; border-bottom:2px solid transparent;
+  padding:10px 14px; font:inherit; font-size:14.5px; font-weight:600; color:var(--text-2);
+  cursor:pointer; margin-bottom:-1px;
+}
+.traffic-dashboard .tab:hover {color:var(--text)}
+.traffic-dashboard .tab[aria-selected="true"] {color:var(--accent); border-bottom-color:var(--accent)}
+.traffic-dashboard .tab:focus-visible {outline:2px solid var(--accent); outline-offset:2px; border-radius:4px}
+.traffic-dashboard .panel {padding-top:22px}
+.traffic-dashboard .panel[hidden] {display:none}
+
+/* ---------- search ---------- */
+.traffic-dashboard .searchrow {display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:18px}
+.traffic-dashboard .search {
+  flex:1 1 260px; max-width:380px; padding:10px 14px; font:inherit; font-size:15px;
+  border:1px solid var(--border); border-radius:9px; background:var(--surface); color:var(--text);
+}
+.traffic-dashboard .search:focus {outline:2px solid var(--accent); outline-offset:-1px; border-color:transparent}
+.traffic-dashboard .filters {display:flex; gap:6px; flex-wrap:wrap}
+.traffic-dashboard .chip {
+  appearance:none; font:inherit; font-size:13px; font-weight:600; cursor:pointer;
+  padding:7px 13px; border-radius:999px; border:1px solid var(--border);
+  background:var(--surface); color:var(--text-2);
+}
+.traffic-dashboard .chip[aria-pressed="true"] {background:var(--text); color:var(--bg); border-color:var(--text)}
+.traffic-dashboard .chip:focus-visible {outline:2px solid var(--accent); outline-offset:2px}
+.traffic-dashboard .count {font-size:13px; color:var(--text-3); margin-left:auto}
+
+/* ---------- member cards ---------- */
+.traffic-dashboard .grid {display:grid; grid-template-columns:repeat(auto-fill,minmax(212px,1fr)); gap:12px}
+.traffic-dashboard .card {
+  position:relative; text-align:left; font:inherit; cursor:pointer;
+  background:var(--surface); border:1px solid var(--border); border-radius:11px;
+  padding:14px 15px 14px 19px; overflow:hidden; color:var(--text);
+  transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+.traffic-dashboard .card::before {content:""; position:absolute; left:0; top:0; bottom:0; width:5px; background:var(--tone-line)}
+.traffic-dashboard .card:hover {transform:translateY(-2px); box-shadow:var(--shadow); border-color:var(--tone-line)}
+.traffic-dashboard .card:focus-visible {outline:2px solid var(--accent); outline-offset:2px}
+.traffic-dashboard .card-top {display:flex; align-items:baseline; justify-content:space-between; gap:10px}
+.traffic-dashboard .name {font-weight:650; font-size:15.5px; letter-spacing:-.01em; line-height:1.3}
+.traffic-dashboard .rank {font-size:11.5px; color:var(--text-3)}
+.traffic-dashboard .score {font-size:32px; font-weight:700; line-height:1.05; letter-spacing:-.03em; color:var(--tone)}
+.traffic-dashboard .score small {font-size:14px; font-weight:600; color:var(--text-3); letter-spacing:0}
+.traffic-dashboard .card-bot {display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px}
+.traffic-dashboard .pill {
+  font-size:12px; font-weight:700; padding:3px 9px; border-radius:999px;
+  background:var(--tone-bg); color:var(--tone);
+}
+.traffic-dashboard .gap {font-size:12.5px; color:var(--text-2)}
+.traffic-dashboard .gap b {color:var(--text); font-family:var(--font-mono)}
+.traffic-dashboard .tone-green {--tone:var(--green); --tone-bg:var(--green-bg); --tone-line:var(--green-line)}
+.traffic-dashboard .tone-amber {--tone:var(--amber); --tone-bg:var(--amber-bg); --tone-line:var(--amber-line)}
+.traffic-dashboard .tone-red {--tone:var(--red); --tone-bg:var(--red-bg); --tone-line:var(--red-line)}
+.traffic-dashboard .tone-grey {--tone:var(--grey); --tone-bg:var(--grey-bg); --tone-line:var(--grey-line)}
+
+/* ---------- modal ---------- */
+.traffic-dashboard .overlay {
+  position:fixed; inset:0; background:rgba(12,16,20,.55); backdrop-filter:blur(2px);
+  display:flex; align-items:flex-start; justify-content:center; padding:24px 16px; overflow-y:auto; z-index:50;
+}
+.traffic-dashboard .overlay[hidden] {display:none}
+.traffic-dashboard .sheet {
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  width:100%; max-width:660px; box-shadow:var(--shadow); overflow:hidden;
+}
+.traffic-dashboard .sheet-head {padding:20px 22px 18px; border-bottom:1px solid var(--border); background:var(--tone-bg)}
+.traffic-dashboard .sheet-head .row {display:flex; align-items:flex-start; justify-content:space-between; gap:14px}
+.traffic-dashboard .sheet-name {font-size:21px; font-weight:700; letter-spacing:-.02em; margin:0}
+.traffic-dashboard .sheet-sub {font-size:13px; color:var(--text-2); margin:3px 0 0}
+.traffic-dashboard .sheet-score {font-size:44px; font-weight:700; line-height:1; letter-spacing:-.03em; color:var(--tone); text-align:right}
+.traffic-dashboard .sheet-score small {display:block; font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--tone); margin-top:5px}
+.traffic-dashboard .closebtn {
+  appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--text-2);
+  width:30px; height:30px; border-radius:8px; cursor:pointer; font-size:17px; line-height:1; flex:none;
+}
+.traffic-dashboard .closebtn:focus-visible {outline:2px solid var(--accent); outline-offset:2px}
+.traffic-dashboard .sheet-body {padding:20px 22px 24px; display:flex; flex-direction:column; gap:22px}
+.traffic-dashboard .sec-title {
+  font-size:11.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--text-3);
+  font-weight:700; margin:0 0 12px;
+}
+
+/* metric rows — 每一項自己判狀態，不吃整體燈號 */
+.traffic-dashboard .mgroup + .mgroup {margin-top:22px}
+.traffic-dashboard .mgroup-title {
+  display:flex; align-items:center; gap:10px; margin:0 0 13px;
+  font-size:12.5px; font-weight:700; color:var(--text-2);
+}
+.traffic-dashboard .mgroup-title::after {content:""; flex:1; height:1px; background:var(--border)}
+.traffic-dashboard .metric {display:grid; grid-template-columns:1fr auto; gap:3px 12px; margin-bottom:15px}
+.traffic-dashboard .metric:last-child {margin-bottom:0}
+.traffic-dashboard .metric-name {font-size:14px; font-weight:600}
+.traffic-dashboard .metric-val {font-size:13px; color:var(--text-2); text-align:right; white-space:nowrap}
+.traffic-dashboard .metric-val b {color:var(--text); font-family:var(--font-mono); font-variant-numeric:tabular-nums}
+.traffic-dashboard .mstat {
+  display:inline-block; margin-left:7px; padding:1px 7px; border-radius:999px;
+  font-size:11.5px; font-weight:700; font-family:var(--font-mono);
+  background:var(--m-bg); color:var(--m);
+}
+.traffic-dashboard .track {
+  grid-column:1/-1; position:relative; height:8px; border-radius:4px;
+  background:var(--surface-2); margin-top:4px;
+}
+.traffic-dashboard .track i {display:block; height:100%; background:var(--m); border-radius:4px}
+.traffic-dashboard .track u {
+  position:absolute; top:-3px; bottom:-3px; width:2px; border-radius:1px;
+  background:var(--text-3); text-decoration:none;
+}
+.traffic-dashboard .metric-note {grid-column:1/-1; font-size:12.5px; color:var(--text-3); margin-top:4px}
+.traffic-dashboard .metric-note b {color:var(--m); font-weight:600}
+.traffic-dashboard .is-max {--m:var(--green-line); --m-bg:var(--green-bg)}
+.traffic-dashboard .is-part {--m:var(--amber-line); --m-bg:var(--amber-bg)}
+.traffic-dashboard .is-zero {--m:var(--red-line);   --m-bg:var(--red-bg)}
+.traffic-dashboard .is-lost {--m:var(--grey-line);  --m-bg:var(--grey-bg)}
+.traffic-dashboard .is-zero .track {background:var(--red-bg)}
+
+/* 到綠燈的階梯 */
+.traffic-dashboard .actions {background:var(--surface-2); border-radius:11px; padding:16px 18px}
+.traffic-dashboard .ladder {position:relative; display:flex; flex-direction:column}
+.traffic-dashboard .ladder::before {
+  content:""; position:absolute; left:11px; top:24px; bottom:24px;
+  width:2px; background:var(--border);
+}
+.traffic-dashboard .rung {
+  display:grid; grid-template-columns:24px 1fr auto; gap:13px;
+  align-items:center; padding:9px 0;
+}
+.traffic-dashboard .rung-mark {
+  position:relative; z-index:1; width:24px; height:24px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-mono); font-size:12px; font-weight:700;
+  background:var(--surface); border:2px solid var(--border); color:var(--text-3);
+}
+.traffic-dashboard .rung-body {font-size:14px; line-height:1.45}
+.traffic-dashboard .rung-body small {display:block; color:var(--text-3); font-size:12.5px}
+.traffic-dashboard .rung-after {
+  text-align:right; white-space:nowrap; font-size:13px; color:var(--text-2);
+  display:flex; align-items:center; gap:7px;
+}
+.traffic-dashboard .rung-after b {
+  font-family:var(--font-mono); font-variant-numeric:tabular-nums;
+  font-size:16px; font-weight:700; color:var(--text);
+}
+.traffic-dashboard .rung-pill {
+  font-size:11.5px; font-weight:700; padding:2px 8px; border-radius:999px;
+  background:var(--r-bg); color:var(--r);
+}
+.traffic-dashboard .rung-now .rung-body {color:var(--text-2)}
+.traffic-dashboard .rung-step .rung-mark {background:var(--accent); border-color:var(--accent); color:#fff}
+.traffic-dashboard .rung-goal .rung-mark {background:var(--green-line); border-color:var(--green-line); color:#fff}
+.traffic-dashboard .rung-goal .rung-after b {color:var(--green-line)}
+.traffic-dashboard .r-green {--r:var(--green); --r-bg:var(--green-bg)}
+.traffic-dashboard .r-amber {--r:var(--amber); --r-bg:var(--amber-bg)}
+.traffic-dashboard .r-red {--r:var(--red);   --r-bg:var(--red-bg)}
+.traffic-dashboard .r-grey {--r:var(--grey);  --r-bg:var(--grey-bg)}
+.traffic-dashboard .ladder-note {
+  margin:13px 0 0; padding-top:13px; border-top:1px solid var(--border);
+  font-size:13px; color:var(--text-2);
+}
+.traffic-dashboard .ladder-note b {color:var(--text)}
+.traffic-dashboard .ok-note {font-size:14px; color:var(--text-2); margin:0}
+.traffic-dashboard .note {
+  margin-top:12px; font-size:13.5px; color:var(--text-2);
+  background:var(--n-bg); border-left:3px solid var(--n-line);
+  border-radius:0 8px 8px 0; padding:10px 14px;
+}
+.traffic-dashboard .note b {color:var(--n-line); font-weight:700}
+.traffic-dashboard .note-ok {--n-bg:var(--green-bg); --n-line:var(--green-line)}
+.traffic-dashboard .note-watch {--n-bg:var(--amber-bg); --n-line:var(--amber-line)}
+.traffic-dashboard .note-warn {--n-bg:var(--red-bg);   --n-line:var(--red-line)}
+
+/* ---------- watchlist ---------- */
+.traffic-dashboard .lists {display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px}
+.traffic-dashboard .list {background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden}
+.traffic-dashboard .list-head {padding:14px 17px; border-bottom:1px solid var(--border)}
+.traffic-dashboard .list-head h3 {margin:0; font-size:15.5px; font-weight:700; letter-spacing:-.01em}
+.traffic-dashboard .list-head p {margin:3px 0 0; font-size:12.5px; color:var(--text-2)}
+.traffic-dashboard .list-body {padding:6px 0}
+.traffic-dashboard .li {
+  display:grid; grid-template-columns:auto 1fr auto; gap:3px 12px; align-items:baseline;
+  padding:11px 17px; width:100%;
+  background:none; border:0; font:inherit; text-align:left; cursor:pointer; color:var(--text);
+}
+.traffic-dashboard .li + .li {border-top:1px solid var(--border)}
+.traffic-dashboard .li:hover {background:var(--surface-2)}
+.traffic-dashboard .li:focus-visible {outline:2px solid var(--accent); outline-offset:-2px}
+.traffic-dashboard .li-score {font-family:var(--font-mono); font-size:14px; font-weight:700; color:var(--tone)}
+.traffic-dashboard .li-name {font-size:14.5px; font-weight:650}
+.traffic-dashboard .li-tag {
+  font-size:12px; font-weight:700; padding:2px 9px; border-radius:999px;
+  background:var(--tone-bg); color:var(--tone); white-space:nowrap;
+}
+.traffic-dashboard .li-how {grid-column:2/-1; font-size:12.5px; color:var(--text-2); line-height:1.5}
+.traffic-dashboard .li-how b {color:var(--text); font-weight:600}
+.traffic-dashboard .empty {padding:16px 17px; font-size:13.5px; color:var(--text-3)}
+.traffic-dashboard .hint {
+  grid-column:1/-1; margin:0; padding:44px 24px; text-align:center; line-height:1.9;
+  background:var(--surface); border:1px dashed var(--border); border-radius:12px;
+}
+.traffic-dashboard .hint b {display:block; font-size:15px; font-weight:600; color:var(--text)}
+.traffic-dashboard .hint span {font-size:13px; color:var(--text-3)}
+
+/* ---------- rules ---------- */
+.traffic-dashboard .rules {display:grid; grid-template-columns:repeat(auto-fit,minmax(272px,1fr)); gap:14px}
+.traffic-dashboard .rule {background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px 18px}
+.traffic-dashboard .rule h3 {margin:0 0 2px; font-size:15.5px; font-weight:700; letter-spacing:-.01em}
+.traffic-dashboard .rule .sub {margin:0 0 12px; font-size:12.5px; color:var(--text-3)}
+.traffic-dashboard .rule table {width:100%; border-collapse:collapse; font-size:13.5px}
+.traffic-dashboard .rule td {padding:5px 0; border-bottom:1px solid var(--border)}
+.traffic-dashboard .rule tr:last-child td {border-bottom:0}
+.traffic-dashboard .rule td:last-child {text-align:right; font-family:var(--font-mono); font-weight:700; font-variant-numeric:tabular-nums}
+.traffic-dashboard .rule-foot {
+  grid-column:1/-1; font-size:13.5px; color:var(--text-2); background:var(--surface);
+  border:1px solid var(--border); border-radius:12px; padding:15px 18px; line-height:1.65;
+}
+.traffic-dashboard .rule-foot b {color:var(--text)}
+.traffic-dashboard .rule-foot code {font-family:var(--font-mono); font-size:12.5px; background:var(--surface-2); padding:1px 5px; border-radius:4px}
+.traffic-dashboard .mtable-wrap {overflow-x:auto; margin-top:12px}
+.traffic-dashboard .mtable {width:100%; border-collapse:collapse; font-size:13.5px; min-width:340px}
+.traffic-dashboard .mtable th {
+  text-align:left; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--text-3); font-weight:700; padding:0 10px 6px 0; border-bottom:1px solid var(--border);
+}
+.traffic-dashboard .mtable th:nth-child(2), .traffic-dashboard .mtable th:nth-child(3) {text-align:right}
+.traffic-dashboard .mtable td {padding:6px 10px 6px 0; border-bottom:1px solid var(--border)}
+.traffic-dashboard .mtable td.num {text-align:right; font-family:var(--font-mono); font-variant-numeric:tabular-nums}
+.traffic-dashboard .mtable tbody tr:last-child td {border-bottom:0; font-weight:700}
+.traffic-dashboard .mtable tbody tr:last-child td.num {color:var(--text)}
+.traffic-dashboard .mdir {width:22px; text-align:center; font-size:11px; color:var(--text-3)}
+.traffic-dashboard .mdir.up {color:var(--green-line)}
+.traffic-dashboard .mdir.down {color:var(--red-line)}
+
+/* ---------- 怎麼上綠燈分會 ---------- */
+.traffic-dashboard .cbox {background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:16px}
+.traffic-dashboard .cbox h3 {margin:0 0 4px; font-size:16px; font-weight:700; letter-spacing:-.01em}
+.traffic-dashboard .cbox .sub {margin:0 0 14px; font-size:13px; color:var(--text-2); line-height:1.6}
+.traffic-dashboard .cbox .sub b {color:var(--text)}
+.traffic-dashboard .ctable-wrap {overflow-x:auto}
+.traffic-dashboard .ctable {width:100%; border-collapse:collapse; font-size:13.5px; min-width:520px}
+.traffic-dashboard .ctable th {
+  text-align:left; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--text-3); font-weight:700; padding:0 12px 7px 0; border-bottom:1px solid var(--border); white-space:nowrap;
+}
+.traffic-dashboard .ctable td {padding:9px 12px 9px 0; border-bottom:1px solid var(--border); vertical-align:middle}
+.traffic-dashboard .ctable tr:last-child td {border-bottom:0}
+.traffic-dashboard .ctable td.n {font-family:var(--font-mono); font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap}
+.traffic-dashboard .ctable .verdict {font-size:12px; font-weight:700; padding:2px 9px; border-radius:999px; white-space:nowrap}
+.traffic-dashboard .v-good {background:var(--green-bg); color:var(--green)}
+.traffic-dashboard .v-mid {background:var(--surface-2); color:var(--text-2)}
+.traffic-dashboard .v-bad {background:var(--red-bg); color:var(--red)}
+.traffic-dashboard .target {
+  display:grid; grid-template-columns:auto 1fr; gap:12px 15px; align-items:start;
+  padding:14px 0; border-bottom:1px dashed var(--border);
+}
+.traffic-dashboard .target:last-of-type {border-bottom:0; padding-bottom:0}
+.traffic-dashboard .target-num {
+  width:28px; height:28px; border-radius:50%; background:var(--accent); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-mono); font-size:13px; font-weight:700;
+}
+.traffic-dashboard .target-h {margin:0 0 3px; font-size:15px; font-weight:700; line-height:1.4}
+.traffic-dashboard .target-b {margin:0; font-size:13.5px; color:var(--text-2); line-height:1.6}
+.traffic-dashboard .target-b b {color:var(--text)}
+.traffic-dashboard .caveat {
+  font-size:13px; color:var(--text-2); line-height:1.65;
+  background:var(--amber-bg); border-left:3px solid var(--amber-line);
+  border-radius:0 8px 8px 0; padding:12px 15px;
+}
+.traffic-dashboard .caveat b {color:var(--amber)}
+
+/* ---------- 更新資料 ---------- */
+.traffic-dashboard .fgrid {display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px}
+.traffic-dashboard .fitem {display:flex; flex-direction:column; gap:5px}
+.traffic-dashboard .flabel {font-size:13px; font-weight:600; color:var(--text)}
+.traffic-dashboard .flabel small {display:block; font-weight:400; font-size:11.5px; color:var(--text-3); margin-top:1px}
+.traffic-dashboard .finput {
+  padding:9px 12px; font:inherit; font-size:14.5px; font-family:var(--font-mono);
+  border:1px solid var(--border); border-radius:8px; background:var(--surface); color:var(--text);
+}
+.traffic-dashboard .finput:focus {outline:2px solid var(--accent); outline-offset:-1px; border-color:transparent}
+.traffic-dashboard .pw {
+  padding:10px 14px; font:inherit; font-size:14px;
+  border:1px solid var(--border); border-radius:9px; background:var(--surface); color:var(--text);
+}
+.traffic-dashboard .pw:focus {outline:2px solid var(--accent); outline-offset:-1px}
+
+.traffic-dashboard .drop {
+  border:2px dashed var(--border); border-radius:12px; background:var(--surface);
+  padding:34px 24px; text-align:center;
+}
+.traffic-dashboard .drop-icon {font-size:34px; line-height:1; margin-bottom:10px}
+.traffic-dashboard .drop h3 {margin:0 0 5px; font-size:16.5px; font-weight:700}
+.traffic-dashboard .drop p {margin:0; font-size:13.5px; color:var(--text-2)}
+.traffic-dashboard .drop-row {display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:18px}
+.traffic-dashboard .btn {
+  appearance:none; font:inherit; font-size:14px; font-weight:650; cursor:pointer;
+  padding:10px 20px; border-radius:9px; border:1px solid var(--accent);
+  background:var(--accent); color:#fff;
+}
+.traffic-dashboard .btn.ghost {background:var(--surface); color:var(--accent)}
+.traffic-dashboard .btn:focus-visible {outline:2px solid var(--accent); outline-offset:2px}
+.traffic-dashboard .steps {display:grid; gap:0; margin-top:6px}
+.traffic-dashboard .step {display:grid; grid-template-columns:auto 1fr; gap:12px 14px; padding:12px 0; border-bottom:1px dashed var(--border)}
+.traffic-dashboard .step:last-child {border-bottom:0}
+.traffic-dashboard .step-n {
+  width:26px; height:26px; border-radius:50%; border:2px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-mono); font-size:12px; font-weight:700; color:var(--text-3);
+}
+.traffic-dashboard .step-t {font-size:14px; line-height:1.5}
+.traffic-dashboard .step-t small {display:block; color:var(--text-3); font-size:12.5px; margin-top:1px}
+.traffic-dashboard .fake {
+  margin-top:14px; font-size:13px; color:var(--text-2); text-align:center;
+  padding:10px; background:var(--surface-2); border-radius:8px;
+}
+
+.traffic-dashboard .foot {
+  margin-top:46px; padding-top:20px; border-top:1px solid var(--border);
+  font-size:12.5px; color:var(--text-3); line-height:1.7;
+}
+.traffic-dashboard .foot p {margin:0}
+.traffic-dashboard .foot .warn-line {color:var(--red); font-weight:600; margin-top:6px}
+
+@media (max-width:560px){
+  .traffic-dashboard .wrap {padding:22px 14px 60px}
+  .traffic-dashboard .grid {grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px}
+  .traffic-dashboard .score {font-size:27px}
+  .traffic-dashboard .sheet-score {font-size:36px}
+  .traffic-dashboard .dist-seg {font-size:11px}
+}
+@media (prefers-reduced-motion:reduce){
+  .traffic-dashboard * {transition:none !important; animation:none !important}
+}
+
+/* Compact mode embeds the dashboard inside the monthly LTNA page. */
+.traffic-dashboard.is-compact .hua-home-navigation,
+.traffic-dashboard.is-compact header > .eyebrow,
+.traffic-dashboard.is-compact header > h1,
+.traffic-dashboard.is-compact header > .vtoggle,
+.traffic-dashboard.is-compact header > .note,
+.traffic-dashboard.is-compact .wrap > .foot,
+.traffic-dashboard.is-compact #t-upload,
+.traffic-dashboard.is-compact #p-upload { display: none !important; }
+.traffic-dashboard.is-compact .wrap { padding-top: 12px; }

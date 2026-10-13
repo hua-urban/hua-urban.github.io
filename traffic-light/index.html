@@ -115,9 +115,7 @@
     .empty-month { margin: 0; padding: 18px 0; color: var(--muted); }
     .weekly-panel { padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--paper); box-shadow: var(--shadow); }
     .weekly-panel h2 { margin: 0; font-size: 23px; }
-    .weekly-panel p { color: var(--muted); }
-    .frame-wrap { overflow: hidden; border: 1px solid var(--line); border-radius: 9px; background: var(--paper); }
-    .weekly-frame { display: block; width: 100%; min-height: 900px; border: 0; background: var(--paper); }
+    .weekly-panel > p { color: var(--muted); }
     .foot { margin-top: 28px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
     .foot p { margin: 6px 0; }
     .privacy { color: #414141; font-weight: 650; }
@@ -127,7 +125,6 @@
       .overview { grid-template-columns: 1fr; }
       .light-counts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .chapter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .weekly-frame { min-height: 1100px; }
     }
     @media (max-width: 520px) {
       .filters { grid-template-columns: 1fr; }
@@ -143,6 +140,11 @@
       .month-card { box-shadow: none; break-inside: avoid; }
       details:not([open]) > :not(summary) { display: block !important; }
     }
+  </style>
+  <link rel="stylesheet" href="dashboard-core.css?v=20261013-flat">
+  <style>
+    #weeklyDashboard { background: transparent; }
+    #weeklyDashboard > .wrap { width: 100%; padding: 12px 0 0; }
   </style>
 </head>
 <body>
@@ -194,9 +196,7 @@
         <p><a href="./dashboard.html">上傳最新 PALMS 報告</a></p>
         <p id="weeklyActual" role="status">正在確認現有 PALMS 統計期間…</p>
         <p id="weeklyCutoff" class="action-note">本週預期資料截止日：計算中</p>
-        <div class="frame-wrap">
-          <iframe id="weeklyFrame" class="weekly-frame" title="華都更會員紅綠燈最新週期統計" loading="lazy" referrerpolicy="no-referrer"></iframe>
-        </div>
+        <div id="weeklyDashboard" class="traffic-dashboard" data-theme="light" aria-label="最新週期會員統計"></div>
       </div>
     </section>
 
@@ -208,6 +208,9 @@
   </main>
 
   <script src="./weekly-period.js?v=20261013"></script>
+  <script src="export.js?v=20261005"></script>
+  <script src="dashboard-template.js?v=20261013-flat"></script>
+  <script src="dashboard-core.js?v=20261013-flat"></script>
   <script>
     (function () {
       'use strict';
@@ -244,36 +247,37 @@
         } else {
           cutoff.textContent = '本週預期截止日無法計算；實際期間以 PALMS 報告日期為準。';
         }
-        var weeklyFrame = document.getElementById('weeklyFrame');
-        weeklyFrame.src = './dashboard.html?v=est&embed=1&ui=20261013-clean';
-        weeklyFrame.addEventListener('load', resizeWeeklyFrame);
-        fetch('data.json', {cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(function(d){
-          var est=d.chapter && d.chapter.est;
-          var end=est && est.chapter && WeeklyPeriod.rangeEnd(est.chapter.range);
-          var current=end===WeeklyPeriod.latestWednesday() && est.chapter.frequency==='weekly';
-          document.getElementById('weeklyActual').textContent=end ? '現有報告截止：'+end+'。'+(current?'已取得本週統計。':'待補最新六個月 PALMS 週報；以下為既有資料。') : '尚無 PALMS 報告，請上傳截至週三的六個月資料。';
-        }).catch(function(){document.getElementById('weeklyActual').textContent='無法確認 PALMS 來源，請稍後重試。';});
+        loadWeeklyData();
       }
 
-      function resizeWeeklyFrame() {
-        var frame = document.getElementById('weeklyFrame');
+      async function loadWeeklyData() {
+        var status = document.getElementById('weeklyActual');
+        var root = document.getElementById('weeklyDashboard');
         try {
-          var doc = frame.contentDocument;
-          if (!doc) return;
-          var resize = function () {
-            var height = Math.max(doc.documentElement.scrollHeight, doc.body ? doc.body.scrollHeight : 0);
-            if (height > 0) frame.style.height = Math.min(height + 8, 12000) + 'px';
-          };
-          resize();
-          if (window.ResizeObserver && doc.body) {
-            var observer = new ResizeObserver(resize);
-            observer.observe(doc.body);
-            observer.observe(doc.documentElement);
+          var response = await fetch('data.json?t=' + Date.now(), {cache:'no-store'});
+          if (!response.ok) throw new Error('HTTP ' + response.status);
+          var data = await response.json();
+          var est = data.chapter && data.chapter.est;
+          if (!est || !Array.isArray(est.members) || !est.members.length) {
+            status.textContent = '尚無 PALMS 報告，請上傳截至週三的六個月資料。';
+            return;
           }
-          window.setTimeout(resize, 350);
-          window.setTimeout(resize, 1200);
+          var monthlyResponse = await fetch('monthly.json', {cache:'no-store'});
+          if (!monthlyResponse.ok) throw new Error('LTNA HTTP ' + monthlyResponse.status);
+          var monthlyData = await monthlyResponse.json();
+          var latest = (monthlyData.months || []).slice().sort(function(a,b){return b.month.localeCompare(a.month);})[0] || null;
+          var end = WeeklyPeriod.rangeEnd(est.chapter.range);
+          var current = end === WeeklyPeriod.latestWednesday() && est.chapter.frequency === 'weekly';
+          TrafficDashboard.mount(root, {
+            members: est.members, chapter: est.chapter, updatedAt: est.updatedAt,
+            prev: {updatedAt:data.updatedAt,chapter:data.chapter,members:data.members},
+            leftMembers:data.leftMembers || []
+          }, {view:{est:true,toggle:false}, latestOfficialChapter:latest, compact:true});
+          status.textContent = end ? '現有報告截止：'+end+'。'+(current?'已取得本週統計。':'待補最新六個月 PALMS 週報；以下為既有資料。') : 'PALMS 報告未提供統計日期。';
         } catch (error) {
-          // The CSS minimum height remains as a usable fallback if frame access is unavailable.
+          root.replaceChildren();
+          status.textContent = '無法載入最新週期統計，請重新整理。';
+          console.error(error);
         }
       }
 

@@ -9,22 +9,22 @@ const vm = require('node:vm');
 const {buildTables, createWorkbook} = require('./export.js');
 const here = __dirname;
 const data = JSON.parse(fs.readFileSync(path.join(here, 'data.json'), 'utf8'));
-const html = fs.readFileSync(path.join(here, 'dashboard.html'), 'utf8');
+const core = fs.readFileSync(path.join(here, 'dashboard-core.js'), 'utf8');
 
-// Pull the page's actual scoring constants and functions into a small VM context.
+// Pull the dashboard core's actual scoring constants and functions into a small VM context.
 // This keeps the fixture grounded in the page while avoiding DOM boot side effects.
-const tierDeclaration = html.match(/const TIER = \{[\s\S]*?\n\};/);
-assert.ok(tierDeclaration, 'could not locate page TIER declaration');
-const scoreStart = html.indexOf('const scoreAbsent =');
-const scoreEnd = html.indexOf('\nconst LIGHT', scoreStart);
-assert.ok(scoreStart >= 0 && scoreEnd > scoreStart, 'could not locate page score functions');
+const tierDeclaration = core.match(/const TIER = \{[\s\S]*?\n\};/);
+assert.ok(tierDeclaration, 'could not locate core TIER declaration');
+const scoreStart = core.indexOf('const scoreAbsent =');
+const scoreEnd = core.indexOf('\nconst LIGHT', scoreStart);
+assert.ok(scoreStart >= 0 && scoreEnd > scoreStart, 'could not locate core score functions');
 const pageScoring = vm.runInNewContext(
   `${tierDeclaration[0]}\nconst GREEN = 70, AMBER = 50, RED = 30;\n`+
-  `${html.slice(scoreStart, scoreEnd)}\n({scoreOf, lightOf})`
+  `${core.slice(scoreStart, scoreEnd)}\n({scoreOf, lightOf})`
 );
 
-const chapterDeclaration = html.match(/const CHAPTER = \{[\s\S]*?\n\};/);
-assert.ok(chapterDeclaration, 'could not locate page CHAPTER declaration');
+const chapterDeclaration = core.match(/const CHAPTER = \{[\s\S]*?\n\};/);
+assert.ok(chapterDeclaration, 'could not locate core CHAPTER declaration');
 const pageChapter = vm.runInNewContext(`${chapterDeclaration[0]}\nCHAPTER`);
 
 const rawKeys = ['weeks','P','A','L','Med','S','RG','RR','V','O2O','CEU','TYFCB'];
