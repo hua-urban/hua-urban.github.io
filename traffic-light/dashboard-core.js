@@ -1157,6 +1157,7 @@ async function handleFile(file){
     await loadSheetJS();
     const buf = await file.arrayBuffer();
     const parsed = parseWorkbook(XLSX.read(buf, {type: 'array'}));
+    if (settings.uploadOnly && parsed.kind !== 'palms') throw new Error('請選擇 BNI Connect 下載的 PALMS 概要報告。');
     if (parsed.kind === 'palms') WeeklyPeriod.validate(parsed.range);
     const members = parsed.members;
     if (members.length < 10) throw new Error('只讀到 ' + members.length + ' 位會員，這可能不是會員成績表');
@@ -1185,12 +1186,15 @@ async function handleFile(file){
       + top + '。<br>計分月份：<b>' + pendingPeriod + '</b>　計分期間 <b>' + pendingRange + '</b>'
       + '<br><span style="color:var(--text-2)">（月份取自' + periodSource + '）</span>'
       + '<br>核對無誤後，於下方填寫七項數字並按更新。</p>';
+    if (settings.uploadOnly) {
+      $id('previewBody').textContent = '共 ' + members.length + ' 位會員，' + members[0][2] + ' 週；統計期間 ' + pendingRange + '。';
+    }
     $id('previewBox').hidden = false;
     $id('chapterBox').hidden = false;
     $id('chapterBox').scrollIntoView({behavior: 'smooth', block: 'start'});
     const upBtn = $id('doUpload');
     if (parsed.kind === 'palms') {
-      upBtn.textContent = '放進暫定換算版';
+      upBtn.textContent = settings.uploadOnly ? '確認更新最新週期統計' : '放進暫定換算版';
       fillPalmsChapter();
     } else {
       upBtn.textContent = '確認更新';
@@ -1318,6 +1322,7 @@ $id('doUpload').addEventListener('click', async () => {
         + '<br>30 秒後重新整理，在網頁頂端按「暫定換算版」就看得到。'
       : '✅ ' + d.message
         + '<br>這一頁 30 秒後重新整理就會看到新的數字。');
+    if (settings.uploadOnly) msg.innerHTML = '已更新 ' + parsedMembers.length + ' 位會員的最新週期統計。網站發布約需 1 分鐘。<br><a href="./?v=est">返回最新週期統計</a>';
     btn.textContent = '已更新';
   } catch (e) {
     msg.textContent = '更新失敗：' + e.message + '　資料沒有被改動，可以再試一次。';
@@ -1340,6 +1345,25 @@ if (VIEW.est) {
   [...up.children].forEach(el => el.hidden = true);
   up.insertAdjacentHTML('afterbegin', '<div class="cbox"><p class="sub" style="margin:0">'
     + '現在看的是<b>暫定換算版</b>。要上傳成績表或標記退會，請先切回 <a href="./dashboard.html">原始資料管理</a>。</p></div>');
+}
+
+if (settings.uploadOnly) {
+  const panel = $id('p-upload');
+  panel.hidden = false;
+  panel.removeAttribute('role');
+  panel.removeAttribute('aria-labelledby');
+  root.replaceChildren(panel);
+  $q('#uploadPanel > .cbox').remove();
+  $id('leaveBox').remove();
+  $q('#dropZone h3').textContent = '選擇 PALMS 概要報告';
+  $q('#dropZone > p').textContent = '選擇從 BNI Connect 下載的 .xls 或 .xlsx 檔案，或拖曳到這裡。';
+  $q('#previewBox h3').textContent = '核對資料';
+  $q('#chapterBox h3').textContent = '確認更新';
+  const details = document.createElement('details');
+  const summary = document.createElement('summary');
+  summary.textContent = '查看或調整分會指標';
+  details.append(summary, $id('chapterForm'));
+  $id('chapterNote').after(details);
 }
   }
 
