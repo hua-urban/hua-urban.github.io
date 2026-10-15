@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>追綠光 後台</title>
+<script src="./vendor/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --bg: #f4f8f5; --card: #ffffff; --ink: #17231c; --muted: #5d6f64; --line: #dbe6de;
+    --green: #0b6833; --green-deep: #0b6231; --green-soft: #e3f6ea; --red: #b42318; --error: #b42318; --dirty: #8a3d00;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d1510; --card: #16211a; --ink: #e8f1eb; --muted: #9bb0a2;
+      --line: #273a2e; --green: #196c3a; --green-deep: #4ade80; --green-soft: #173524; --red: #9f1d1d; --error: #ff7b72; --dirty: #ffbf69;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d1510; --card: #16211a; --ink: #e8f1eb; --muted: #9bb0a2;
+    --line: #273a2e; --green: #196c3a; --green-deep: #4ade80; --green-soft: #173524; --red: #9f1d1d; --error: #ff7b72; --dirty: #ffbf69;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--ink); line-height: 1.6;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  h1 span { color: var(--green); }
+  .sub { color: var(--muted); margin: 0 0 20px; font-size: 14px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+  .login { max-width: 360px; display: grid; gap: 10px; }
+  .mode-label { font-size: 18px; font-weight: 700; margin: 0; }
+  input { font: inherit; font-size: 16px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--ink); }
+  button { font: inherit; cursor: pointer; }
+  .primary { padding: 11px 16px; border: 0; border-radius: 12px; background: var(--green); color: #fff; font-weight: 700; }
+  .primary:disabled { opacity: .5; }
+  .err { color: var(--error); font-size: 14px; margin: 0; min-height: 1.4em; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+  .stat { background: var(--green-soft); border-radius: 14px; padding: 12px 14px; }
+  .stat b { display: block; font-size: 28px; color: var(--green-deep); line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .stat span { font-size: 13px; color: var(--muted); }
+  .bar { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+  .bar input { flex: 1; min-width: 160px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 13px; }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; }
+  tr.main { cursor: pointer; }
+  tr.main:hover { background: var(--green-soft); }
+  tr.dup td:first-child::after { content: " 另一支手機"; color: var(--muted); font-size: 11px; }
+  .detail td { background: var(--bg); font-size: 13px; }
+  .detail h4 { margin: 6px 0 4px; font-size: 13px; color: var(--green-deep); }
+  .detail ul { margin: 0 0 8px; padding-left: 18px; }
+  .muted { color: var(--muted); }
+  .scroll { overflow-x: auto; }
+  @media (max-width: 560px) { .stats { grid-template-columns: 1fr 1fr; } .hide-sm { display: none; } }
+  .bulkM { margin: 4px 0 8px; }
+  .bulkM summary { cursor: pointer; color: var(--green-deep); font-weight: 600; padding: 4px 0; }
+  .modal { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: grid; place-items: center; padding: 16px; z-index: 10; }
+  .modal-card { width: min(400px, 100%); }
+  .tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .tabs button { padding: 9px 16px; border-radius: 99px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font-weight: 600; }
+  .tabs button.on { background: var(--green); border-color: var(--green); color: #fff; }
+  .ghost { padding: 9px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--ink); }
+  .x { border: 0; background: none; color: var(--muted); font-size: 20px; line-height: 1; padding: 4px 8px; }
+  .x:hover { color: var(--error); }
+  .cell { width: 100%; padding: 7px 9px; font-size: 15px; }
+  .cell.no { width: 5.5em; }
+  /* 名單：手機上每位夥伴排成兩行（編號＋姓名／專業別） */
+  @media (max-width: 640px) {
+    #mtable thead { display: none; }
+    #mtable tr { display: grid; grid-template-columns: 5.5em 1fr auto; gap: 6px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+    #mtable td { padding: 0; border: 0; }
+    #mtable td.job { grid-column: 1 / span 2; }
+    #mtable td.del { grid-column: 3; grid-row: 1; }
+  }
+  .savebar { position: sticky; bottom: 0; background: var(--bg); padding: 12px 0; display: flex; gap: 10px; align-items: center;
+    flex-wrap: wrap; border-top: 1px solid var(--line); margin-top: 14px; z-index: 2; }
+  .dirty { color: var(--dirty); font-size: 14px; font-weight: 600; }
+  .note { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+  .warn { background: #fff7e0; color: #7a4a00; border-radius: 12px; padding: 10px 12px; font-size: 14px; margin-bottom: 12px; }
+  .ev { margin-bottom: 16px; }
+  .ev-head { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+  .ev-head input[type=text] { flex: 1; min-width: 160px; }
+  .ev h4 { margin: 14px 0 8px; font-size: 14px; color: var(--green-deep); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 6px; max-height: 360px; overflow: auto;
+    padding: 2px; }
+  .grid label { display: flex; gap: 6px; align-items: center; font-size: 14px; padding: 6px 8px; border: 1px solid var(--line);
+    border-radius: 10px; cursor: pointer; }
+  .grid label.on { background: var(--green-soft); border-color: var(--green); }
+  .grid input { accent-color: var(--green); }
+  .grid .no { color: var(--muted); font-size: 12px; }
+  .out { display: grid; grid-template-columns: 1fr 1fr auto; gap: 6px; margin-bottom: 6px; }
+  .mini { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; font-size: 13px; }
+  .mini input[type=search] { flex: 1; min-width: 140px; padding: 7px 10px; font-size: 14px; }
+  textarea { font: inherit; font-size: 14px; width: 100%; min-height: 70px; padding: 8px 10px; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>追<span>綠光</span> 後台</h1>
+  <p class="sub" id="orgName">BNI 分會 · 填答紀錄、名單、活動</p>
+  <main id="app">
+    <form class="card login" id="login">
+      <p class="mode-label" id="modeLabel"></p>
+      <p class="note" id="modeNote"></p>
+      <label for="pw" id="pwLabel">後台密碼</label>
+      <input id="pw" type="password" autocomplete="current-password" required>
+      <button class="primary" id="go">進入後台</button>
+      <p class="err" id="err"></p>
+    </form>
+  </main>
+</div>
+
+<script>
+// ═══════════ 分會設定：填入 Supabase URL 與 publishable key 後啟用雲端模式 ═══════════
+const CHAPTER = "華都更";
+const SB_URL = "";
+const SB_KEY = "";
+const LOCAL_CONFIG_KEY = "hua-urban-greenlight-config-v1";
+const LOCAL_SUBMISSIONS_KEY = "hua-urban-greenlight-submissions-v1";
+const LOCAL_MODE = !SB_URL.trim() && !SB_KEY.trim();
+// ════════════════════════════════════════════════════════════════════════
+document.title = `${CHAPTER} 追綠光 後台`;
+document.getElementById("orgName").textContent = `BNI ${CHAPTER}分會 · 填答紀錄、名單、活動`;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const when = iso => new Date(iso).toLocaleString("zh-TW", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false });
+
+if (LOCAL_MODE) {
+  $("#modeLabel").textContent = "本機測試後台";
+  $("#modeNote").textContent = "名單、活動設定與填答紀錄只保存在目前瀏覽器。";
+  $("#pwLabel").hidden = true;
+  $("#pw").hidden = true;
+  $("#pw").required = false;
+} else {
+  $("#modeLabel").textContent = "雲端後台";
+  $("#modeNote").textContent = "使用 Supabase 後台密碼登入。";
+}
+
+function readLocalJson(key, fallback) {
+  try {
+    const value = JSON.parse(localStorage.getItem(key) || "null");
+    return value === null ? fallback : value;
+  } catch { return fallback; }
+}
+function writeLocalJson(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); }
+  catch { throw new Error("無法寫入目前瀏覽器儲存空間。請檢查瀏覽器設定或可用空間。"); }
+}
+
+async function list(pass) {
+  if (LOCAL_MODE) {
+    const stored = readLocalJson(LOCAL_SUBMISSIONS_KEY, {});
+    if (Array.isArray(stored)) return stored.map(normalizeSubmission);
+    if (stored && typeof stored === "object") {
+      return Object.entries(stored).map(([memberNo, entry]) => normalizeSubmission(entry, memberNo));
+    }
+    throw new Error("本機填答資料格式錯誤，請檢查目前瀏覽器儲存空間。");
+  }
+  if (!SB_URL.trim() || !SB_KEY.trim()) throw new Error("雲端模式需要同時設定 Supabase URL 與 publishable key；本機測試請將兩者都留空。");
+  const r = await fetch(SB_URL + "/rest/v1/rpc/bni_gl_list", {
+    method: "POST",
+    headers: { apikey: SB_KEY, Authorization: "Bearer " + SB_KEY, "Content-Type": "application/json" },
+    body: JSON.stringify({ p_pass: pass }),
+  });
+  if (!r.ok) throw new Error(r.status === 400 ? "密碼不對" : "讀取失敗（HTTP " + r.status + "）");
+  return r.json();
+}
+
+function normalizeSubmission(entry, mapMemberNo = "") {
+  if (!entry || typeof entry !== "object") throw new Error("本機填答資料格式錯誤，請檢查目前瀏覽器儲存空間。");
+  const rows121 = Array.isArray(entry.rows_121) ? entry.rows_121 : Array.isArray(entry.p_rows_121) ? entry.p_rows_121 : [];
+  const rowsRef = Array.isArray(entry.rows_ref) ? entry.rows_ref : Array.isArray(entry.p_rows_ref) ? entry.p_rows_ref : [];
+  return {
+    client_id: String(entry.client_id ?? entry.p_client_id ?? ""),
+    member_no: String(entry.member_no ?? entry.p_member_no ?? mapMemberNo),
+    member_name: String(entry.member_name ?? entry.p_member_name ?? ""),
+    count_121: Number(entry.count_121 ?? rows121.length),
+    count_ref: Number(entry.count_ref ?? rowsRef.length),
+    rows_121: rows121,
+    rows_ref: rowsRef,
+    updated_at: String(entry.updated_at ?? entry.savedAt ?? ""),
+  };
+}
+function removeLocalSubmissionTargets(targets) {
+  const stored = readLocalJson(LOCAL_SUBMISSIONS_KEY, {});
+  const targetIds = new Set(targets.map(x => x.client_id));
+  if (Array.isArray(stored)) {
+    writeLocalJson(LOCAL_SUBMISSIONS_KEY, stored.filter(x => !targetIds.has(String(x?.client_id ?? x?.p_client_id ?? ""))));
+    return;
+  }
+  if (!stored || typeof stored !== "object") throw new Error("本機填答資料格式錯誤，無法刪除。");
+  const next = { ...stored };
+  for (const target of targets) {
+    const key = Object.keys(next).find(k => {
+      const entry = next[k];
+      const id = String(entry?.client_id ?? entry?.p_client_id ?? "");
+      return id === target.client_id || (k === target.member_no && !id);
+    });
+    if (key !== undefined) delete next[key];
+  }
+  writeLocalJson(LOCAL_SUBMISSIONS_KEY, next);
+}
+
+let PASS = "";        // 登入後留在記憶體，存檔時用；不寫進任何儲存空間
+let SUBS = [];        // 填答紀錄
+let tabNow = "sub";
+
+function openAdmin() {
+  $("#app").innerHTML = `${LOCAL_MODE ? `<div class="warn">本機測試後台：設定與填答紀錄只保存在目前瀏覽器，沒有同步至雲端。</div>` : ""}
+      <nav class="tabs" id="tabs">
+        <button data-t="sub" class="on">填答紀錄</button>
+        <button data-t="mem">名單</button>
+        <button data-t="ev">活動</button>
+      </nav>
+      <div id="view"></div>`;
+  $("#tabs").addEventListener("click", e => {
+    const b = e.target.closest("[data-t]");
+    if (!b) return;
+    tabNow = b.dataset.t;
+    document.querySelectorAll("#tabs button").forEach(x => x.classList.toggle("on", x === b));
+    renderTab();
+  });
+  renderTab();
+}
+
+$("#login").addEventListener("submit", async e => {
+  e.preventDefault();
+  $("#go").disabled = true; $("#err").textContent = "";
+  try {
+    SUBS = await list($("#pw").value);
+    PASS = LOCAL_MODE ? "" : $("#pw").value;
+    await loadConfig();
+    openAdmin();
+  }
+  catch (err) { $("#err").textContent = err.message; $("#go").disabled = false; }
+});
+function renderTab() {
+  if (tabNow === "sub") show(SUBS);
+  else if (tabNow === "mem") showMembers();
+  else showEvents();
+}
+
+function show(data) {
+  data.sort((a, b) => a.member_no.localeCompare(b.member_no) || b.updated_at.localeCompare(a.updated_at));
+  const seen = new Set();
+  data.forEach(d => {
+    Object.defineProperty(d, "dup", { value: seen.has(d.member_no), configurable: true });
+    seen.add(d.member_no);
+  });
+  const people = seen.size;
+  const sum = k => data.reduce((a, d) => a + d[k], 0);
+
+  $("#view").innerHTML = `
+    <div class="stats">
+      <div class="stat"><b>${people}</b><span>位夥伴填寫${data.length > people ? `（共 ${data.length} 份）` : ""}</span></div>
+      <div class="stat"><b>${sum("count_121")}</b><span>筆 121</span></div>
+      <div class="stat"><b>${sum("count_ref")}</b><span>筆引薦</span></div>
+    </div>
+    <div class="card">
+      <div class="bar">
+        <input id="q" type="search" placeholder="搜尋編號或名字">
+        <button class="primary" id="dl" ${data.length ? "" : "disabled"}>下載全部 Excel</button>
+      </div>
+      <p class="muted" style="font-size:13px;margin:0 0 8px">${LOCAL_MODE ? "這裡只顯示目前瀏覽器儲存的填答，不會合併其他裝置的資料。" : "點一列看明細。同一位夥伴用不同手機填過，每一份都會列出並算進統計和 Excel，第二份起標「另一支手機」。"}</p>
+      <div class="scroll"><table>
+        <thead><tr><th>編號</th><th>姓名</th><th class="n">121</th><th class="n">引薦</th><th class="hide-sm">最後更新</th><th></th></tr></thead>
+        <tbody id="rows">${data.length ? data.map((d, i) => `
+          <tr class="main ${d.dup ? "dup" : ""}" data-i="${i}" data-k="${esc((d.member_no + " " + d.member_name).toLowerCase())}">
+            <td>${esc(d.member_no)}</td><td>${esc(d.member_name)}</td>
+            <td class="n">${d.count_121}</td><td class="n">${d.count_ref}</td>
+            <td class="hide-sm muted">${d.updated_at ? when(d.updated_at) : "—"}</td>
+            <td><button class="x" data-delsub="${i}" title="刪除這一份">×</button></td>
+          </tr>`).join("") : `<tr><td colspan="6" class="muted">還沒有人填寫</td></tr>`}</tbody>
+      </table></div>
+      <p class="err" id="delMsg"></p>
+    </div>`;
+
+  $("#rows").addEventListener("click", async e => {
+    const del = e.target.closest("[data-delsub], [data-delall]");
+    if (del) {
+      e.stopPropagation();
+      const d = data[+(del.dataset.delsub ?? del.dataset.delall)];
+      const targets = del.dataset.delall !== undefined ? data.filter(x => x.member_no === d.member_no) : [d];
+      const what = targets.length > 1 ? `${d.member_no} ${d.member_name} 的全部 ${targets.length} 份紀錄` : `${d.member_no} ${d.member_name} 這一份紀錄（121 ${d.count_121} 筆、引薦 ${d.count_ref} 筆）`;
+      try {
+        if (LOCAL_MODE) {
+          if (!confirm(`確定要刪除 ${what}？刪除後無法復原。`)) return;
+        } else {
+          const pass = await askPassword(`確定要刪除 ${what}？刪除後無法復原。`);
+          if (pass === null) return;
+          const r = await rpc("bni_gl_delete", { p_pass: pass, p_client_ids: targets.map(x => x.client_id) });
+          if (r.status === 404) throw new Error("資料庫還沒加上刪除功能，請先執行 delete.sql");
+          if (!r.ok) throw new Error((await r.text()).includes("wrong password") ? "密碼不對，沒有刪除" : "刪除失敗（HTTP " + r.status + "）");
+        }
+        const ids = new Set(targets.map(x => x.client_id));
+        if (LOCAL_MODE) removeLocalSubmissionTargets(targets);
+        SUBS = SUBS.filter(x => !ids.has(x.client_id));
+        show(SUBS);
+        $("#delMsg").innerHTML = `<span style="color:var(--green-deep)">✓ 已刪除 ${esc(what)}${LOCAL_MODE ? "（只影響目前瀏覽器）" : ""}</span>`;
+      } catch (err) { $("#delMsg").textContent = err.message; }
+      return;
+    }
+    const tr = e.target.closest("tr.main");
+    if (!tr) return;
+    const next = tr.nextElementSibling;
+    if (next && next.classList.contains("detail")) { next.remove(); return; }
+    const d = data[+tr.dataset.i];
+    const same = data.filter(x => x.member_no === d.member_no).length;
+    tr.insertAdjacentHTML("afterend", `<tr class="detail"><td colspan="6">
+      <h4>121（${d.count_121} 筆）</h4>
+      ${d.rows_121.length ? `<ul>${d.rows_121.map(r => `<li>${esc(r.date)} · ${esc(r.no)} ${esc(r.name)}（${esc(r.chapter)}）· ${esc(r.place || "")} · ${esc(r.kind)}</li>`).join("")}</ul>` : `<p class="muted">—</p>`}
+      <h4>引薦（${d.count_ref} 筆）</h4>
+      ${d.rows_ref.length ? `<ul>${d.rows_ref.map(r => `<li>${esc(r.q)} · ${esc(r.no)} ${esc(r.name)}（${esc(r.chapter)}）· ${esc(r.type)} · ${esc(r.content)} · ${esc(r.phone)} · ${esc(r.contact)}</li>`).join("")}</ul>` : `<p class="muted">—</p>`}
+      ${same > 1 ? `<button class="ghost" data-delall="${tr.dataset.i}" style="color:var(--error)">刪除 ${esc(d.member_name)} 的全部 ${same} 份紀錄</button>` : ""}
+    </td></tr>`);
+  });
+
+  $("#q").addEventListener("input", e => {
+    const q = e.target.value.trim().toLowerCase();
+    document.querySelectorAll("#rows tr.main").forEach(tr => {
+      const hide = q && !tr.dataset.k.includes(q);
+      tr.style.display = hide ? "none" : "";
+      const next = tr.nextElementSibling;
+      if (hide && next && next.classList.contains("detail")) next.remove();
+    });
+  });
+
+  $("#dl").onclick = () => download(data);
+}
+
+// ── 名單與活動設定 ───────────────────────────────────────────────
+let CFG = null;           // { members: [{ no, name, job }], events: [{ id, name, date, members: [no], outside: [{ name, chapter }] }] }
+let CFG_FROM = "";        // local / db / defaults / nodb
+let dirty = false;
+const rpc = (fn, body) => fetch(SB_URL + "/rest/v1/rpc/" + fn, {
+  method: "POST", body: JSON.stringify(body || {}),
+  headers: { apikey: SB_KEY, Authorization: "Bearer " + SB_KEY, "Content-Type": "application/json" },
+});
+async function loadConfig() {
+  let cfg = null;
+  if (LOCAL_MODE) {
+    cfg = readLocalJson(LOCAL_CONFIG_KEY, null);
+    if (cfg) CFG_FROM = "local";
+  } else {
+    try {
+      const r = await rpc("bni_gl_get_config");
+      if (r.status === 404) CFG_FROM = "nodb";
+      else if (r.ok) { cfg = await r.json(); CFG_FROM = cfg ? "db" : "defaults"; }
+    } catch {}
+  }
+  if (!cfg) {
+    const r = await fetch("./defaults.json?t=" + Date.now());
+    if (!r.ok) throw new Error(`無法載入 defaults.json（HTTP ${r.status}）。請確認它與 admin.html 放在同一資料夾後重試。`);
+    cfg = await r.json();
+    if (!CFG_FROM) CFG_FROM = "defaults";
+  }
+  CFG = normalizeConfigData(cfg);
+}
+function normalizeConfigData(cfg) {
+  if (!cfg || typeof cfg !== "object" || !Array.isArray(cfg.members) || !Array.isArray(cfg.events)) {
+    throw new Error("設定 JSON 格式錯誤：需要 members 與 events 陣列。");
+  }
+  return {
+    members: cfg.members.map(m => {
+      if (!m || typeof m !== "object") throw new Error("設定 JSON 的夥伴資料格式錯誤。");
+      return { no: String(m.no ?? ""), name: String(m.name ?? ""), job: String(m.job ?? m.role ?? "") };
+    }),
+    events: cfg.events.map((ev, i) => {
+      if (!ev || typeof ev !== "object") throw new Error("設定 JSON 的活動資料格式錯誤。");
+      return {
+        id: String(ev.id ?? `e${i + 1}`), name: String(ev.name ?? ""), date: String(ev.date ?? ""),
+        members: Array.isArray(ev.members) ? ev.members.map(String) : [],
+        outside: Array.isArray(ev.outside) ? ev.outside.map(o => ({
+          name: String(o?.name ?? ""), chapter: String(o?.chapter ?? ""),
+        })) : [],
+      };
+    }),
+  };
+}
+function markDirty() { dirty = true; const el = $("#dirty"); if (el) el.textContent = "● 有還沒儲存的變更"; }
+addEventListener("beforeunload", e => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
+
+function cfgBanner() {
+  if (LOCAL_MODE && CFG_FROM === "local") return `<div class="warn">目前使用本機儲存的設定；它只存在於目前瀏覽器。</div>`;
+  if (LOCAL_MODE) return `<div class="warn">目前載入華都更 GitHub 官網的完整會員名單；儲存後可在此瀏覽器測試編輯結果。</div>`;
+  if (CFG_FROM === "nodb") return `<div class="warn">資料庫還沒設定好：請先到 Supabase ▸ SQL Editor 執行 <b>config.sql</b>，才能儲存。現在顯示的是網站預設的名單。</div>`;
+  if (CFG_FROM === "defaults") return `<div class="warn">還沒存過名單與活動，現在顯示的是網站預設值。按「儲存」之後，問卷網站就會改用這裡的資料。</div>`;
+  return "";
+}
+function saveBar(label) {
+  return `<div class="savebar">
+    <button class="primary" id="save">${label}</button>
+    <button class="ghost" type="button" id="exportCfg">匯出設定 JSON</button>
+    <label class="ghost file-label" for="importCfg">匯入設定 JSON</label>
+    <input id="importCfg" type="file" accept="application/json,.json" hidden>
+    <span class="dirty" id="dirty">${dirty ? "● 有還沒儲存的變更" : ""}</span>
+    <span class="err" id="saveErr"></span>
+  </div>`;
+}
+function bindConfigFileTools() {
+  $("#exportCfg").onclick = () => {
+    const file = new Blob([JSON.stringify(CFG, null, 2)], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(file);
+    const link = document.createElement("a");
+    link.href = url; link.download = "華都更_名單活動設定.json"; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+  $("#importCfg").addEventListener("change", async e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      CFG = normalizeConfigData(JSON.parse(await file.text()));
+      bulkMembers = "";
+      markDirty();
+      renderTab();
+      $("#saveErr").textContent = "已載入設定 JSON；請按儲存套用。";
+    } catch (err) {
+      $("#saveErr").textContent = err instanceof SyntaxError ? "無法讀取 JSON，請確認檔案內容。" : err.message;
+      e.target.value = "";
+    }
+  });
+}
+async function saveConfig() {
+  const btn = $("#save"); btn.disabled = true; $("#saveErr").textContent = "";
+  // 整理：編號補成三碼、排序；活動裡拿掉已不在名單的人
+  CFG.members = CFG.members.filter(m => m.no.trim() || m.name.trim())
+    .map(m => ({ no: /^\d+$/.test(m.no.trim()) ? m.no.trim().padStart(3, "0") : m.no.trim(), name: m.name.trim(), job: (m.job || "").trim() }))
+    .sort((a, b) => a.no.localeCompare(b.no));
+  const nos = CFG.members.map(m => m.no);
+  const dupNo = nos.find((n, i) => nos.indexOf(n) !== i);
+  const bad = CFG.members.find(m => !m.no || !m.name);
+  if (bad || dupNo) {
+    renderTab();
+    $("#saveErr").textContent = bad ? "每位夥伴都要有編號和姓名" : `編號 ${dupNo} 重複了`;
+    return;
+  }
+  const badEv = CFG.events.find(e => !e.name.trim() || !/^\d{4}-\d{2}-\d{2}$/.test(e.date));
+  if (badEv) { $("#saveErr").textContent = "每個活動都要有名稱和日期"; btn.disabled = false; return; }
+  const valid = new Set(nos);
+  CFG.events = CFG.events.map(e => ({ ...e, name: e.name.trim(), members: e.members.filter(n => valid.has(n)),
+    outside: e.outside.map(o => ({ name: o.name.trim(), chapter: o.chapter.trim() })).filter(o => o.name) }));
+  try {
+    if (LOCAL_MODE) {
+      writeLocalJson(LOCAL_CONFIG_KEY, CFG);
+      dirty = false; CFG_FROM = "local";
+      renderTab();
+      $("#saveErr").textContent = "已儲存到目前瀏覽器；其他裝置不會同步。";
+      return;
+    }
+    const r = await rpc("bni_gl_save_config", { p_pass: PASS, p_data: CFG });
+    if (r.status === 404) throw new Error("資料庫還沒設定好，請先執行 config.sql");
+    if (!r.ok) throw new Error((await r.text()).includes("wrong password") ? "密碼不對，請重新登入" : "儲存失敗（HTTP " + r.status + "）");
+    dirty = false; CFG_FROM = "db";
+    renderTab();
+    $("#saveErr").innerHTML = `<span style="color:var(--green-deep)">✓ 已儲存，夥伴重新整理問卷就會看到</span>`;
+  } catch (err) { $("#saveErr").textContent = err.message; btn.disabled = false; }
+}
+
+let bulkMembers = "";   // 貼上名單時看不懂的行，重畫後放回框裡
+function showMembers() {
+  $("#view").innerHTML = `
+    ${cfgBanner()}
+    <div class="card">
+      <p class="note">${CHAPTER}分會現任夥伴，共 ${CFG.members.length} 位。編號會自動補成三碼（8 → 008）。刪掉的夥伴，也會從活動參加名單裡移除。</p>
+      <div class="mini"><input type="search" id="mq" placeholder="搜尋編號、姓名或專業別"></div>
+      <div class="scroll"><table id="mtable">
+        <thead><tr><th>編號</th><th>姓名（含英文名）</th><th>專業別</th><th></th></tr></thead>
+        <tbody id="mrows">${CFG.members.map((m, i) => `
+          <tr data-i="${i}" data-k="${esc((m.no + " " + m.name + " " + m.job).toLowerCase())}">
+            <td><input class="cell no" data-f="no" value="${esc(m.no)}" inputmode="numeric"></td>
+            <td><input class="cell" data-f="name" value="${esc(m.name)}"></td>
+            <td class="job"><input class="cell" data-f="job" value="${esc(m.job)}" placeholder="專業別"></td>
+            <td class="del"><button class="x" data-del="${i}" title="刪除">×</button></td>
+          </tr>`).join("")}</tbody>
+      </table></div>
+      <p><button class="ghost" id="addM">＋ 新增夥伴</button></p>
+      <details class="bulkM" ${bulkMembers ? "open" : ""}>
+        <summary>一次貼上整份名單</summary>
+        <p class="note" style="margin:6px 0">一行一位：<b>編號 姓名 / 專業別</b>（專業別可不寫）。同編號的會更新，新編號會加進來。</p>
+        <textarea id="bulkM" placeholder="003 劉羿岑">${esc(bulkMembers)}</textarea>
+        <p class="mini"><label><input type="checkbox" id="bulkReplace"> 改成只用這份名單（刪掉不在裡面的人）</label></p>
+        <button class="ghost" id="bulkGo">加入名單</button>
+      </details>
+      ${saveBar("儲存名單")}
+    </div>`;
+  bindConfigFileTools();
+  $("#mrows").addEventListener("input", e => {
+    const f = e.target.dataset.f; if (!f) return;
+    CFG.members[+e.target.closest("tr").dataset.i][f] = e.target.value; markDirty();
+  });
+  $("#mrows").addEventListener("click", e => {
+    const d = e.target.dataset.del; if (d === undefined) return;
+    const m = CFG.members[+d];
+    if (!confirm(`確定要刪除 ${m.no} ${m.name}？`)) return;
+    CFG.members.splice(+d, 1); markDirty(); showMembers();
+  });
+  $("#mq").addEventListener("input", e => {
+    const q = e.target.value.trim().toLowerCase();
+    document.querySelectorAll("#mrows tr").forEach(tr => tr.style.display = !q || tr.dataset.k.includes(q) ? "" : "none");
+  });
+  $("#bulkGo").onclick = () => {
+    const bad = [], got = [];
+    for (const raw of $("#bulkM").value.split("\n").map(s => s.trim()).filter(Boolean)) {
+      const m = raw.match(/^(\d{1,4})[\s.、,，]*([^/／]+?)\s*(?:[/／]\s*(.*))?$/);
+      if (!m) { bad.push(raw); continue; }
+      got.push({ no: m[1].padStart(3, "0"), name: m[2].trim(), job: (m[3] || "").trim() });
+    }
+    if (!got.length) { bulkMembers = bad.join("\n"); showMembers(); $("#saveErr").textContent = "沒有讀到任何一行，格式是「編號 姓名 / 專業別」"; return; }
+    if ($("#bulkReplace").checked) {
+      if (!confirm(`確定要把名單換成這 ${got.length} 位？不在這份名單裡的夥伴會被刪掉。`)) return;
+      CFG.members = got;
+    } else {
+      for (const g of got) {
+        const old = CFG.members.find(x => x.no.padStart(3, "0") === g.no);
+        if (old) Object.assign(old, { name: g.name, job: g.job || old.job }); else CFG.members.push(g);
+      }
+    }
+    CFG.members.sort((a, b) => a.no.localeCompare(b.no));
+    bulkMembers = bad.join("\n");
+    markDirty(); showMembers();
+    $("#saveErr").innerHTML = `<span style="color:var(--green-deep)">讀到 ${got.length} 位，記得按「儲存名單」</span>` + (bad.length ? `；${bad.length} 行看不懂，留在框裡` : "");
+  };
+  $("#addM").onclick = () => {
+    CFG.members.push({ no: "", name: "", job: "" }); markDirty(); showMembers();
+    const rows = document.querySelectorAll("#mrows tr"); rows[rows.length - 1].querySelector("input").focus();
+  };
+  $("#save").onclick = saveConfig;
+}
+
+function showEvents() {
+  const ms = [...CFG.members].sort((a, b) => a.no.localeCompare(b.no));
+  $("#view").innerHTML = `<div id="evwrap">
+    ${cfgBanner()}
+    <p class="note">每個活動會變成問卷上的一題：「你有參加嗎？」→ 有的話，從這裡勾選的${CHAPTER}夥伴和外分會參加者中，選出當天有互動的人。</p>
+    ${CFG.events.map((ev, i) => `
+      <div class="card ev" data-e="${i}">
+        <div class="ev-head">
+          <input type="text" data-ef="name" value="${esc(ev.name)}" placeholder="活動名稱">
+          <input type="date" data-ef="date" value="${esc(ev.date)}">
+          <button class="x" data-delev="${i}" title="刪除活動">×</button>
+        </div>
+        <h4>${CHAPTER}參加者（已勾 <span class="cnt">${ev.members.length}</span> 位）</h4>
+        <div class="mini">
+          <input type="search" class="gq" placeholder="搜尋">
+          <button class="ghost" data-all="1">全選</button><button class="ghost" data-all="0">全不選</button>
+        </div>
+        <div class="grid">${ms.map(m => `
+          <label class="${ev.members.includes(m.no) ? "on" : ""}" data-k="${esc((m.no + " " + m.name).toLowerCase())}">
+            <input type="checkbox" value="${esc(m.no)}" ${ev.members.includes(m.no) ? "checked" : ""}>
+            <span><span class="no">${esc(m.no)}</span> ${esc(m.name)}</span>
+          </label>`).join("")}</div>
+        <h4>外分會參加者（${ev.outside.length} 位）</h4>
+        <div class="outs">${ev.outside.map((o, j) => `
+          <div class="out" data-o="${j}">
+            <input class="cell" data-of="name" value="${esc(o.name)}" placeholder="姓名">
+            <input class="cell" data-of="chapter" value="${esc(o.chapter)}" placeholder="分會名稱">
+            <button class="x" data-delo="${j}" title="刪除">×</button>
+          </div>`).join("")}</div>
+        <p class="mini"><button class="ghost" data-addo="1">＋ 新增一位</button>
+          <span class="muted">或一次貼上多位（一行一位：姓名 / 分會）</span></p>
+        <textarea class="paste" placeholder="參加者姓名 / 分會名稱"></textarea>
+        <p class="mini"><button class="ghost" data-paste="1">加入貼上的名單</button></p>
+      </div>`).join("")}
+    <p><button class="ghost" id="addE">＋ 新增活動</button></p>
+    ${saveBar("儲存活動")}</div>`;
+  bindConfigFileTools();
+
+  const evOf = el => CFG.events[+el.closest(".ev").dataset.e];
+  const view = $("#evwrap");   // 每次重畫都是新的元素，事件不會重複掛
+  view.addEventListener("input", e => {
+    const t = e.target;
+    if (t.dataset.ef) { evOf(t)[t.dataset.ef] = t.value; markDirty(); }
+    else if (t.dataset.of) { evOf(t).outside[+t.closest(".out").dataset.o][t.dataset.of] = t.value; markDirty(); }
+    else if (t.classList.contains("gq")) {
+      const q = t.value.trim().toLowerCase();
+      t.closest(".ev").querySelectorAll(".grid label").forEach(l => l.style.display = !q || l.dataset.k.includes(q) ? "" : "none");
+    }
+  });
+  view.addEventListener("change", e => {
+    const t = e.target;
+    if (t.type !== "checkbox") return;
+    const ev = evOf(t);
+    ev.members = ev.members.filter(n => n !== t.value);
+    if (t.checked) ev.members.push(t.value);
+    t.closest("label").classList.toggle("on", t.checked);
+    t.closest(".ev").querySelector(".cnt").textContent = ev.members.length;
+    markDirty();
+  });
+  view.addEventListener("click", e => {
+    const t = e.target;
+    if (t.dataset.all !== undefined) {
+      const box = t.closest(".ev"), ev = evOf(t);
+      box.querySelectorAll(".grid label").forEach(l => {
+        if (l.style.display === "none") return;
+        const cb = l.querySelector("input"); cb.checked = t.dataset.all === "1"; l.classList.toggle("on", cb.checked);
+        ev.members = ev.members.filter(n => n !== cb.value); if (cb.checked) ev.members.push(cb.value);
+      });
+      box.querySelector(".cnt").textContent = ev.members.length; markDirty();
+    } else if (t.dataset.delev !== undefined) {
+      const ev = CFG.events[+t.dataset.delev];
+      if (!confirm(`確定要刪除「${ev.name || "這個活動"}」？問卷上這一題會消失。`)) return;
+      CFG.events.splice(+t.dataset.delev, 1); markDirty(); showEvents();
+    } else if (t.dataset.delo !== undefined) {
+      evOf(t).outside.splice(+t.dataset.delo, 1); markDirty(); showEvents();
+    } else if (t.dataset.addo) {
+      evOf(t).outside.push({ name: "", chapter: "" }); markDirty(); showEvents();
+    } else if (t.dataset.paste) {
+      const box = t.closest(".ev"), ev = evOf(t);
+      const lines = box.querySelector(".paste").value.split("\n").map(s => s.trim()).filter(Boolean);
+      for (const l of lines) { const [name, ...rest] = l.split(/[\/／,，\t]/); ev.outside.push({ name: name.trim(), chapter: rest.join(" ").trim() }); }
+      if (lines.length) { markDirty(); showEvents(); }
+    }
+  });
+  $("#addE").onclick = () => {
+    CFG.events.push({ id: "e" + Date.now().toString(36), name: "", date: "", members: [], outside: [] });
+    markDirty(); showEvents();
+    const evs = document.querySelectorAll(".ev"); evs[evs.length - 1].scrollIntoView({ behavior: "smooth" });
+    evs[evs.length - 1].querySelector("input").focus();
+  };
+  $("#save").onclick = saveConfig;
+}
+
+// 刪除前再輸入一次後台密碼；按取消回傳 null
+function askPassword(message) {
+  return new Promise(resolve => {
+    const box = document.createElement("div");
+    box.className = "modal";
+    box.innerHTML = `<form class="card modal-card">
+        <p style="margin:0 0 10px;font-weight:600">${esc(message)}</p>
+        <label for="delPw" class="muted" style="font-size:14px">請再輸入一次後台密碼</label>
+        <input id="delPw" type="password" autocomplete="current-password" required style="width:100%;margin:6px 0 12px">
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button type="button" class="ghost" id="delCancel">取消</button>
+          <button class="primary" style="background:var(--red)">確定刪除</button>
+        </div>
+      </form>`;
+    document.body.appendChild(box);
+    const done = v => { box.remove(); resolve(v); };
+    box.querySelector("#delCancel").onclick = () => done(null);
+    box.addEventListener("click", e => { if (e.target === box) done(null); });
+    box.addEventListener("keydown", e => { if (e.key === "Escape") done(null); });
+    box.querySelector("form").addEventListener("submit", e => { e.preventDefault(); done(box.querySelector("#delPw").value); });
+    box.querySelector("#delPw").focus();
+  });
+}
+
+function download(data) {
+  const serial = s => {
+    const [y, m, d] = String(s).split("/").map(Number);
+    return (Date.UTC(y, m - 1, d) - Date.UTC(1899, 11, 30)) / 864e5;
+  };
+  const wb = XLSX.utils.book_new();
+
+  const s0 = XLSX.utils.aoa_to_sheet([["編號", "姓名", "121 筆數", "引薦筆數", "最後更新"],
+    ...data.map(d => [d.member_no, d.member_name, d.count_121, d.count_ref, new Date(d.updated_at).toLocaleString("zh-TW", { hour12: false })])]);
+  s0["!cols"] = [8, 16, 10, 10, 20].map(wch => ({ wch }));
+  XLSX.utils.book_append_sheet(wb, s0, "總覽");
+
+  const r121 = data.flatMap(d => d.rows_121.map(r => [d.member_name, r.name, r.chapter, d.member_name, r.place || "", null, r.kind, r.date]));
+  const s1 = XLSX.utils.aoa_to_sheet([["我的姓名", "121 對象姓名", "分會", "發起人", "地點", "日期", "會談主題"],
+    ...r121.map(r => r.slice(0, 7))]);
+  r121.forEach((r, i) => { s1[XLSX.utils.encode_cell({ r: i + 1, c: 5 })] = { t: "n", v: serial(r[7]), z: "yyyy/mm/dd" }; });
+  s1["!cols"] = [14, 18, 12, 14, 8, 12, 14].map(wch => ({ wch }));
+  XLSX.utils.book_append_sheet(wb, s1, "121");
+
+  const s2 = XLSX.utils.aoa_to_sheet([["我的姓名", "引薦對象姓名", "分會", "內部／外部", "引薦內容", "電話", "聯絡方式"],
+    ...data.flatMap(d => d.rows_ref.map(r => [d.member_name, r.name, r.chapter, r.type, r.content, r.phone, r.contact]))]);
+  s2["!cols"] = [14, 18, 12, 10, 40, 14, 18].map(wch => ({ wch }));
+  XLSX.utils.book_append_sheet(wb, s2, "引薦");
+
+  const t = new Date();
+  XLSX.writeFile(wb, `追綠光_全體_${t.getMonth() + 1}月${t.getDate()}日.xlsx`);
+}
+</script>
+</body>
+</html>

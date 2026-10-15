@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="追綠光 BNI Connect 測試版：建立實際 121 與引薦草稿，手動填入或親自啟動自動送出。">
+  <title>追綠光 · BNI Connect 填表測試</title>
+  <style>
+    :root{color-scheme:light;--ink:#1c2822;--muted:#40544a;--green:#0b5d3b;--burgundy:#6b1735;--line:#c8d8ce;--paper:#fff;--cream:#f5f8f4;--rose:#f8f1f3}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 90% 0%,#e1ece3 0,transparent 34%),var(--cream);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif}
+    .wrap{max-width:1080px;margin:auto;padding:0 22px}.topbar{border-bottom:1px solid var(--line);background:#fffdfde8}.topbar .wrap{min-height:62px;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{font-weight:850;color:var(--burgundy);letter-spacing:.04em}.topbar a{color:var(--green);font-weight:750;text-underline-offset:3px}
+    .hero{padding:47px 0 28px}.eyebrow{color:var(--burgundy);font-size:13px;font-weight:850;letter-spacing:.16em;text-transform:uppercase;margin:0 0 8px}h1{font-size:clamp(29px,4vw,47px);line-height:1.18;letter-spacing:-.035em;color:var(--burgundy);margin:0 0 14px}.hero p{max-width:780px;font-size:18px;margin:0}.hero strong{color:var(--green)}
+    .notice{display:flex;gap:13px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-left:6px solid var(--green);border-radius:12px;padding:15px 18px;margin:0 0 24px;box-shadow:0 6px 18px #142d1c0b}.notice b{color:var(--green)}
+    .grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(275px,.85fr);gap:22px;align-items:start;padding-bottom:42px}.card{background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:0 12px 35px #173d2810;padding:24px}.card h2{font-size:23px;color:var(--burgundy);line-height:1.3;margin:0 0 7px}.card h3{font-size:18px;color:var(--green);margin:0 0 12px}.intro{color:var(--muted);font-size:14px;margin:0 0 18px}
+    label{display:block;font-weight:700;color:var(--ink);font-size:14px;margin:0 0 6px}.hint{font-weight:400;color:var(--muted);font-size:13px}.field{margin:0 0 16px}input,select,textarea{width:100%;border:1.5px solid #6a8172;background:white;color:var(--ink);border-radius:10px;padding:10px 12px;font:inherit;min-height:44px}textarea{min-height:86px;resize:vertical}input::placeholder,textarea::placeholder{color:#52665a}input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #a44364;outline-offset:2px}
+    .tabs{display:flex;gap:8px;padding:5px;background:#f0f5f0;border-radius:13px;margin:22px 0 18px}.tabs button{flex:1;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--green);font:inherit;font-weight:800;padding:8px;cursor:pointer}.tabs button[aria-selected="true"]{background:var(--green);color:#fff;box-shadow:0 3px 9px #0b5d3b30}
+    .draft-card{border:1px solid var(--line);border-radius:14px;background:#fbfdfb;padding:18px;margin:0 0 14px}.draft-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 15px}.draft-head strong{color:var(--burgundy);font-size:16px}.two{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.empty{border:1px dashed #7a9883;border-radius:13px;background:#fbfdfb;color:var(--muted);padding:22px;text-align:center;margin:0 0 14px}
+    button,.button{font:inherit;cursor:pointer}.primary{border:1px solid var(--green);background:var(--green);color:#fff;border-radius:10px;padding:11px 16px;font-weight:800}.primary:hover{background:#084a30}.secondary{border:1.5px solid var(--green);background:#fff;color:var(--green);border-radius:10px;padding:10px 15px;font-weight:800}.secondary:hover{background:#eef5ef}.quiet{border:0;background:transparent;color:var(--burgundy);font-weight:800;text-decoration:underline;text-underline-offset:3px;padding:5px}.primary:disabled,.secondary:disabled{opacity:.55;cursor:not-allowed}.wide{width:100%}.stack{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.divider{height:1px;background:var(--line);margin:22px 0}.status{background:var(--rose);border-left:4px solid var(--burgundy);color:var(--ink);padding:11px 13px;border-radius:7px;margin:0 0 15px;font-size:14px}.status.ready{background:#e9f4eb;border-left-color:var(--green)}
+    .steps{counter-reset:step;list-style:none;padding:0;margin:15px 0 21px}.steps li{counter-increment:step;display:grid;grid-template-columns:27px 1fr;gap:10px;margin:0 0 15px}.steps li:before{content:counter(step);display:grid;place-items:center;background:var(--green);color:#fff;border-radius:50%;width:27px;height:27px;font-size:13px;font-weight:800}.steps b{color:var(--burgundy)}.bookmark{display:inline-block;text-align:center;text-decoration:none;background:var(--burgundy);color:#fff;padding:11px 16px;border-radius:10px;font-weight:800;max-width:100%}.bookmark.disabled{opacity:.6;pointer-events:none}.copy-area{margin-top:10px}.code{font:12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;max-height:105px;min-height:72px;overflow:auto;word-break:break-all}.privacy{font-size:13px;color:var(--muted);margin:17px 0 0}.side-note{background:#f4f7f3;border:1px solid var(--line);padding:14px;border-radius:11px;margin-top:17px;font-size:14px}.side-note b{color:var(--green)}footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:13px;color:var(--muted)}
+    @media(max-width:760px){.grid{grid-template-columns:1fr}.hero{padding-top:32px}.card{padding:19px}.two{grid-template-columns:1fr}.topbar .wrap{align-items:flex-start;flex-direction:column;gap:4px;padding-top:11px;padding-bottom:11px}}
+  </style>
+</head>
+<body>
+  <nav class="topbar" aria-label="網站導覽"><div class="wrap"><span class="brand">追綠光 · Connect 測試站</span><a href="../">回華都更完整追綠光</a></div></nav>
+  <header class="hero wrap"><p class="eyebrow">BNI Connect · 真實填表測試</p><h1 id="connect-test">把自己的 121 與引薦紀錄填進 Connect</h1><p>建立你自己的 <strong>121 與引薦草稿</strong>。書籤小工具可單筆填入讓你核對，也可在你檢視清單並親自開始後，嘗試逐筆自動送出。</p></header>
+  <main class="wrap">
+    <div class="notice"><span aria-hidden="true">●</span><div><b>這是獨立測試站。</b>所有欄位從空白開始。資料只在這台裝置的瀏覽器中，按「準備帶入」才儲存；本站不要求 BNI 密碼。只有你在 Connect 面板確認開始自動批次後，小工具才會按提交。</div></div>
+    <div class="grid">
+      <section class="card" aria-labelledby="draft-heading">
+        <h2 id="draft-heading">1. 建立自己的實際紀錄草稿</h2><p class="intro">請用你自己的 BNI 帳號資料填寫。接收會員、分會和登入身分會由你在 Connect 最後核對。</p>
+        <div class="two"><div class="field"><label for="member-code">華都更會員編號 <span class="hint">（選填，只供查姓名）</span></label><input id="member-code" inputmode="numeric" autocomplete="off" placeholder="輸入會員編號"><button type="button" class="secondary" id="lookup-member" style="margin-top:8px">查詢已確認姓名</button></div>
+        <div class="field"><label for="me">你的 BNI Connect 姓名 <span class="hint">（必填，請核對登入帳號）</span></label><input id="me" autocomplete="name" placeholder="請填你的姓名"></div></div>
+        <p class="hint" id="lookup-status" role="status">會員編號只用於查已確認的姓名對照，不是 BNI Connect 身分驗證。</p>
+        <div class="tabs" role="tablist" aria-label="草稿類型"><button type="button" id="tab-121" role="tab" aria-selected="true" aria-controls="panel-121">121 草稿 <span id="count-121">0</span></button><button type="button" id="tab-ref" role="tab" aria-selected="false" aria-controls="panel-ref">引薦草稿 <span id="count-ref">0</span></button></div>
+        <div id="panel-121" role="tabpanel" aria-labelledby="tab-121"><div id="rows-121"></div><button type="button" class="secondary" data-add="121">＋ 新增 121 紀錄</button><datalist id="place-options"><option value="線上（Zoom）"><option value="線上（Google Meet）"><option value="咖啡廳"><option value="例會場地"><option value="公司辦公室"></datalist></div>
+        <div id="panel-ref" role="tabpanel" aria-labelledby="tab-ref" hidden><div id="rows-ref"></div><button type="button" class="secondary" data-add="ref">＋ 新增引薦紀錄</button></div>
+        <div class="divider"></div>
+        <p class="status" id="draft-status" role="status">尚未準備草稿。先新增至少一筆紀錄。</p>
+        <div class="stack"><button type="button" class="primary" id="prepare">準備帶入</button><button type="button" class="secondary" id="copy-json" disabled>複製草稿 JSON</button><button type="button" class="quiet" id="clear-drafts">清除本機草稿</button></div>
+        <details class="copy-area"><summary>查看已準備的 JSON</summary><textarea id="json-output" class="code" readonly aria-label="已準備草稿 JSON"></textarea></details>
+        <p class="privacy">改動草稿後，請重新按「準備帶入」，BNI 面板才會讀到新版。你也可以用 JSON 貼上，避開瀏覽器的小視窗限制。</p>
+      </section>
+      <aside class="card" aria-labelledby="use-heading">
+        <h2 id="use-heading">2. 在 BNI Connect 填入</h2>
+        <ol class="steps">
+          <li><span>在左邊填好資料，按 <b>準備帶入</b>。</span></li>
+          <li><span>把下方 <b>填表書籤</b>拖到瀏覽器書籤列。請在電腦版瀏覽器操作。</span></li>
+          <li><span>登入你自己的 <a href="https://www.bniconnectglobal.com/login" target="_blank" rel="noopener noreferrer">BNI Connect</a>，核對登入帳號，再點書籤。</span></li>
+          <li><span>讀取草稿後，可手動開表單，點「<b>填入，停在提交前</b>」逐欄核對；或按「<b>檢視並自動送出草稿</b>」，看完收件清單再親自開始批次。</span></li>
+        </ol>
+        <a id="bookmarklet" class="bookmark disabled" href="#" aria-disabled="true" draggable="true">正在建立填表書籤…</a>
+        <p class="privacy">書籤可重複使用。點擊書籤只顯示填表面板；自動批次須在面板另行確認。若 Connect 沒有明確成功通知，面板只記「已操作提交，待核對」。</p>
+        <div class="stack" style="margin-top:12px"><button type="button" class="secondary" id="copy-bookmarklet" disabled>複製書籤程式碼</button></div>
+        <div class="side-note"><b>請注意：</b>單筆模式中，收件會員與 121 邀請人須自行選。自動批次只在姓名與邀請人能唯一核對時繼續；遇到不明對象、重複或新確認訊息會停止。引薦的其他說明請在 Connect 手動補齊。BNI 若更新表單，欄位定位可能需要調整。</div>
+      </aside>
+    </div>
+  </main>
+  <footer><div class="wrap">追綠光 Connect 測試站 · 草稿保存在你的瀏覽器；沒有後端儲存。自動提交只在你確認批次後執行。</div></footer>
+  <script>
+  (() => {
+    "use strict";
+    const KEY = "hua-greenlight-test-drafts-v1";
+    const APP = "hua-greenlight-connect-test";
+    const blank121 = () => ({ lookup:"", name:"", chapter:"", ext:null, date:"", place:"", topic:"" });
+    const blankRef = () => ({ lookup:"", name:"", chapter:"", ext:null, type:"", content:"", details:"", phone:"", contact:"" });
+    const esc = value => String(value ?? "").replace(/[&<>\"]/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[char]));
+    const saved = (() => { try { const obj = JSON.parse(localStorage.getItem(KEY) || "null"); return obj?.app === APP && obj.version === 1 && Array.isArray(obj.rows121) && Array.isArray(obj.refs) ? obj : null; } catch { return null; } })();
+    const state = { memberCode: typeof saved?.memberCode === "string" ? saved.memberCode : "", me: typeof saved?.me === "string" ? saved.me : "", rows121: saved ? saved.rows121.map(row => ({ ...blank121(), ...row })) : [], refs: saved ? saved.refs.map(row => ({ ...blankRef(), ...row })) : [] };
+    let active = "121";
+    let prepared = !!saved;
+    let bookmarklet = "";
+    const status = (text, ready = false) => { const node = document.getElementById("draft-status"); node.textContent = text; node.classList.toggle("ready", ready); };
+    function markDirty() {
+      prepared = false;
+      document.getElementById("copy-json").disabled = true;
+      status(localStorage.getItem(KEY) ? "目前內容尚未準備帶入；BNI 面板仍會讀到上一次已準備的版本。請按「準備帶入」更新。" : "目前內容尚未準備帶入。填完後請按「準備帶入」。", false);
+    }
+    function field(label, name, value, opts = "") {
+      return `<div class="field"><label>${label}<input data-field="${name}" value="${esc(value)}" ${opts}></label></div>`;
+    }
+    function renderRows(kind) {
+      const list = kind === "121" ? state.rows121 : state.refs;
+      const container = document.getElementById(kind === "121" ? "rows-121" : "rows-ref");
+      document.getElementById(kind === "121" ? "count-121" : "count-ref").textContent = String(list.length);
+      container.innerHTML = list.length ? list.map((row, index) => `<article class="draft-card" data-kind="${kind}" data-index="${index}">
+        <div class="draft-head"><strong>${kind === "121" ? "121" : "引薦"} ${index + 1}</strong><button type="button" class="quiet" data-remove="${kind}" data-index="${index}" aria-label="刪除第 ${index + 1} 筆${kind === "121" ? " 121" : "引薦"}草稿">刪除</button></div>
+        <div class="field"><label>查找對方會員 <span class="hint">（輸入已確認會員編號或姓名；其他人可直接在下方手填）</span><input data-field="lookup" value="${esc(row.lookup)}" placeholder="會員編號或姓名"></label><button type="button" class="secondary" data-lookup="${kind}" data-index="${index}" style="margin-top:8px">查詢已確認會員</button><p class="hint" data-lookup-result="${kind}-${index}" role="status"></p></div>
+        <div class="two">${field("對方 BNI 會員姓名 *", "name", row.name, 'placeholder="請填會員姓名" required')}${field("對方分會（跨分會必填）", "chapter", row.chapter, 'placeholder="請填分會名稱"')}</div>
+        <div class="field"><label>與對方的分會關係 *<select data-field="ext" required><option value="">請選擇</option><option value="same" ${row.ext === false ? "selected" : ""}>同分會</option><option value="external" ${row.ext === true ? "selected" : ""}>跨分會</option></select></label></div>
+        ${kind === "121" ? `<div class="two">${field("會面日期 *", "date", row.date, 'type="date" required')}${field("會面地點 *（可選常用地點或自填）", "place", row.place, 'list="place-options" required')}</div>${field("會談主題 *", "topic", row.topic, 'required')}` : `
+          <div class="field"><label>引薦類型 *<select data-field="type" required><option value="">請選擇</option><option value="內部" ${row.type === "內部" ? "selected" : ""}>內部</option><option value="外部" ${row.type === "外部" ? "selected" : ""}>外部</option></select></label></div>
+          ${field("被引薦人姓名 *（填入 Connect 對應欄位）", "content", row.content, 'required')}
+          <div class="field"><label>其他引薦說明 <span class="hint">（留在草稿供你手動核對，不自動填到未知欄位）</span><textarea data-field="details">${esc(row.details)}</textarea></label></div>
+          <div class="two">${field("電話（可留空）", "phone", row.phone, 'type="tel"')}
+            <div class="field"><label>後續聯絡選項<select data-field="contact"><option value="">不指定</option><option value="card" ${row.contact === "card" ? "selected" : ""}>已提供名片</option><option value="call" ${row.contact === "call" ? "selected" : ""}>需要致電</option></select></label></div></div>`}
+      </article>`).join("") : `<p class="empty">還沒有${kind === "121" ? " 121" : "引薦"}紀錄。按下方按鈕新增，所有欄位會從空白開始。</p>`;
+    }
+    function setTab(kind) {
+      active = kind;
+      for (const value of ["121", "ref"]) {
+        document.getElementById(`tab-${value}`).setAttribute("aria-selected", String(value === kind));
+        document.getElementById(`panel-${value}`).hidden = value !== kind;
+      }
+    }
+    function validate() {
+      if (!state.me.trim()) return "請先填寫你的 BNI Connect 姓名。";
+      if (!state.rows121.length && !state.refs.length) return "請先新增至少一筆 121 或引薦紀錄。";
+      const ownName = state.me.trim().replace(/\s+/g, "");
+      for (const [index, row] of state.rows121.entries()) {
+        if (row.name.trim().replace(/\s+/g, "") === ownName) return `第 ${index + 1} 筆 121 的對方會員不能是你自己。`;
+        if (!row.name.trim() || typeof row.ext !== "boolean" || row.ext && !row.chapter.trim() ||
+            !row.date || !row.place.trim() || !row.topic.trim()) return `第 ${index + 1} 筆 121 缺少必填欄位。`;
+      }
+      for (const [index, row] of state.refs.entries()) {
+        if (row.name.trim().replace(/\s+/g, "") === ownName) return `第 ${index + 1} 筆引薦的接收會員不能是你自己。`;
+        if (!row.name.trim() || typeof row.ext !== "boolean" || row.ext && !row.chapter.trim() ||
+            !["內部","外部"].includes(row.type) || !row.content.trim()) return `第 ${index + 1} 筆引薦缺少必填欄位。`;
+      }
+      return "";
+    }
+    function prepare() {
+      const error = validate();
+      if (error) { status(error); return false; }
+      const clean = value => String(value || "").trim();
+      const payload = {
+        app: APP, version: 1, memberCode: clean(state.memberCode), me: clean(state.me), preparedAt: new Date().toISOString(),
+        rows121: state.rows121.map(row => ({ name:clean(row.name), chapter:clean(row.chapter), ext:row.ext, date:row.date, place:clean(row.place), topic:clean(row.topic) })),
+        refs: state.refs.map(row => ({ name:clean(row.name), chapter:clean(row.chapter), ext:row.ext, type:row.type, content:clean(row.content), details:clean(row.details), phone:clean(row.phone), contact:row.contact }))
+      };
+      let stored = true;
+      try { localStorage.setItem(KEY, JSON.stringify(payload)); }
+      catch { stored = false; }
+      document.getElementById("json-output").value = JSON.stringify(payload, null, 2);
+      document.getElementById("copy-json").disabled = false;
+      prepared = true;
+      status(stored
+        ? `已準備 ${payload.rows121.length} 筆 121、${payload.refs.length} 筆引薦草稿。尚未填入 BNI Connect，也尚未提交。`
+        : "草稿已產生，但瀏覽器無法儲存。請複製 JSON 並手動貼到 BNI Connect 面板。", stored);
+      return true;
+    }
+    async function copy(text, success) {
+      try { await navigator.clipboard.writeText(text); status(success, true); }
+      catch { status("瀏覽器無法直接複製。請展開下方 JSON 後手動全選複製，或改用拖曳書籤。", false); }
+    }
+    document.addEventListener("click", event => {
+      const target = event.target.closest("button");
+      if (!target) return;
+      if (target.role === "tab") { setTab(target.id === "tab-121" ? "121" : "ref"); return; }
+      if (target.id === "lookup-member") {
+        const raw = state.memberCode.trim();
+        const code = /^\d+$/.test(raw) ? raw.padStart(3,"0") : raw;
+        const result = document.getElementById("lookup-status");
+        if (code === "003") {
+          state.memberCode = "003"; state.me = "劉羿岑";
+          document.getElementById("member-code").value = "003";
+          document.getElementById("me").value = state.me;
+          result.textContent = "已找到已確認對照：003＝劉羿岑。請再核對你目前登入的 BNI Connect 帳號。";
+          markDirty();
+        } else result.textContent = "目前沒有此編號的已確認姓名對照。請手動填寫姓名，並核對 Connect 登入帳號。";
+        return;
+      }
+      if (target.dataset.lookup) {
+        const kind = target.dataset.lookup, index = Number(target.dataset.index);
+        const list = kind === "121" ? state.rows121 : state.refs;
+        const row = list[index], raw = row.lookup.trim();
+        const value = /^\d+$/.test(raw) ? raw.padStart(3,"0") : raw.replace(/\s+/g, "");
+        const result = document.querySelector(`[data-lookup-result="${kind}-${index}"]`);
+        if (value === "003" || value === "劉羿岑") {
+          row.lookup = raw; row.name = "劉羿岑"; row.chapter = "華都更"; row.ext = false;
+          renderRows(kind); markDirty();
+          document.querySelector(`[data-lookup-result="${kind}-${index}"]`).textContent = "已找到已確認對照：003＝劉羿岑，華都更。請在 Connect 再核對收件會員。";
+        } else if (/^\d+$/.test(raw)) {
+          result.textContent = "找不到已確認的會員編號。沒有把數字當成姓名；請手動填寫會員姓名與分會。";
+        } else {
+          result.textContent = "目前沒有此姓名的已確認對照。可在下方手動填會員姓名與分會。";
+        }
+        return;
+      }
+      if (target.dataset.add) {
+        const kind = target.dataset.add;
+        (kind === "121" ? state.rows121 : state.refs).push(kind === "121" ? blank121() : blankRef());
+        renderRows(kind); markDirty();
+        document.querySelector(`#rows-${kind} .draft-card:last-of-type [data-field="name"]`)?.focus();
+        return;
+      }
+      if (target.dataset.remove) {
+        const kind = target.dataset.remove;
+        (kind === "121" ? state.rows121 : state.refs).splice(Number(target.dataset.index), 1);
+        renderRows(kind); markDirty(); return;
+      }
+      if (target.id === "prepare") { prepare(); return; }
+      if (target.id === "clear-drafts") {
+        if (!window.confirm("確定清除這台瀏覽器中的追綠光測試草稿？")) return;
+        localStorage.removeItem(KEY);
+        state.me = ""; state.memberCode = ""; state.rows121 = []; state.refs = [];
+        document.getElementById("me").value = ""; document.getElementById("member-code").value = "";
+        document.getElementById("lookup-status").textContent = "會員編號只用於查已確認的姓名對照，不是 BNI Connect 身分驗證。";
+        document.getElementById("json-output").value = "";
+        document.getElementById("copy-json").disabled = true;
+        prepared = false; renderRows("121"); renderRows("ref"); setTab("121");
+        status("已清除本機追綠光測試草稿。BNI Connect 中已送出的紀錄不受影響。");
+        return;
+      }
+      if (target.id === "copy-json") { if (prepared) copy(document.getElementById("json-output").value, "已複製草稿 JSON，可貼到 BNI Connect 面板。尚未提交。"); return; }
+      if (target.id === "copy-bookmarklet" && bookmarklet) copy(bookmarklet, "已複製書籤程式碼。請在瀏覽器新增書籤並貼上網址欄。");
+    });
+    document.addEventListener("input", event => {
+      const target = event.target;
+      if (target.id === "me") { state.me = target.value; markDirty(); return; }
+      if (target.id === "member-code") { state.memberCode = target.value; markDirty(); return; }
+      if (!target.dataset?.field) return;
+      const card = target.closest(".draft-card");
+      if (!card) return;
+      const list = card.dataset.kind === "121" ? state.rows121 : state.refs;
+      list[Number(card.dataset.index)][target.dataset.field] = target.value;
+      markDirty();
+    });
+    document.addEventListener("change", event => {
+      if (!event.target.matches("select[data-field]")) return;
+      const card = event.target.closest(".draft-card");
+      const list = card.dataset.kind === "121" ? state.rows121 : state.refs;
+      list[Number(card.dataset.index)][event.target.dataset.field] = event.target.dataset.field === "ext" ? event.target.value === "external" : event.target.value;
+      markDirty();
+    });
+    async function buildBookmarklet() {
+      try {
+        const response = await fetch(new URL("keyin.js", location.href), { credentials: "same-origin" });
+        if (!response.ok) throw new Error("無法載入填表程式");
+        const source = await response.text();
+        if (!source.includes('"__SITE_URL__"')) throw new Error("填表程式版本不符");
+        const script = source.replace('"__SITE_URL__"', JSON.stringify(new URL("./", location.href).href));
+        bookmarklet = "javascript:" + encodeURIComponent(script);
+        const link = document.getElementById("bookmarklet");
+        link.href = bookmarklet;
+        link.textContent = "追綠光 · 填入 Connect";
+        link.classList.remove("disabled");
+        link.removeAttribute("aria-disabled");
+        document.getElementById("copy-bookmarklet").disabled = false;
+      } catch {
+        document.getElementById("bookmarklet").textContent = "填表書籤暫時無法建立";
+        document.getElementById("bookmarklet").setAttribute("aria-disabled", "true");
+      }
+    }
+    document.getElementById("me").value = state.me;
+    document.getElementById("member-code").value = state.memberCode;
+    renderRows("121"); renderRows("ref"); setTab("121");
+    if (saved) {
+      document.getElementById("json-output").value = JSON.stringify(saved, null, 2);
+      document.getElementById("copy-json").disabled = false;
+      status(`已載入上次準備的 ${saved.rows121.length} 筆 121、${saved.refs.length} 筆引薦草稿。尚未提交。`, true);
+    }
+    buildBookmarklet();
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>追綠光 · 傳送資料</title>
+<style>
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #f4f8f5; color: #17231c;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+  p { margin: 0; padding: 24px; text-align: center; line-height: 1.6; }
+  a { color: #0f7a37; }
+</style>
+</head>
+<body>
+<p id="msg">正在把資料傳給 BNI Connect…</p>
+<script>
+// 由 BNI Connect 上的「追綠光 key 單」面板開啟：讀這個瀏覽器裡、完成頁存下的 key 單資料，
+// 只傳給開啟它的 BNI Connect 頁面（指定對方網域），然後自己關掉。
+(() => {
+  const BNI_ORIGINS = new Set(["https://www.bniconnectglobal.com", "https://bniconnectglobal.com"]);
+  const nonce = decodeURIComponent(location.hash.slice(1));
+  let data = null;
+  try { data = JSON.parse(localStorage.getItem("hua-urban-greenlight-keyin-v1") || "null"); } catch {}
+  const msg = document.getElementById("msg");
+  if (!window.opener || !/^[0-9a-f-]{36}$/i.test(nonce)) {
+    msg.innerHTML = '這個視窗要從 BNI Connect 上的「追綠光 key 單」面板開啟。<br><a href="./">回追綠光網站</a>';
+    return;
+  }
+  // 先送可驗證的準備訊號；收到同一 opener、正確來源和 nonce 的請求才回傳資料。
+  for (const origin of BNI_ORIGINS) window.opener.postMessage({ type: "hua-urban-greenlight-ready", nonce }, origin);
+  window.addEventListener("message", event => {
+    if (event.source !== window.opener || !BNI_ORIGINS.has(event.origin)
+      || event.data?.type !== "hua-urban-greenlight-request" || event.data?.nonce !== nonce) return;
+    window.opener.postMessage({ type: "hua-urban-greenlight-data", nonce, data }, event.origin);
+    msg.textContent = data ? "✓ 已把資料傳給 BNI Connect，這個視窗會自動關閉。" : "這個瀏覽器還沒有 key 單資料；請先完成問卷。";
+    setTimeout(() => window.close(), data ? 700 : 5000);
+  });
+})();
+</script>
+</body>
+</html>

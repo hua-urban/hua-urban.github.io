@@ -1,0 +1,407 @@
+{
+  "source": {
+    "repositoryPath": "BNI/output/hua-github-source",
+    "commit": "b4a3594a00abce612de03c50e463810abc6b684b",
+    "commitDate": "2026-10-14T17:26:55+08:00",
+    "file": "index.html",
+    "selector": "tr[data-n][data-p]",
+    "mapping": {
+      "no": "text from span.m-num",
+      "name": "text from span.m-name",
+      "dataName": "tr @data-n",
+      "job": "tr @data-p",
+      "role": "tr @data-role"
+    },
+    "noMeaning": "Displayed roster number; no BNI Connect member ID is inferred.",
+    "repository": "https://github.com/hua-urban/hua-urban.github.io",
+    "url": "https://github.com/hua-urban/hua-urban.github.io/blob/b4a3594a00abce612de03c50e463810abc6b684b/index.html"
+  },
+  "members": [
+    {
+      "no": "001",
+      "name": "王常殷 Hubert",
+      "dataName": "王常殷Hubert",
+      "job": "都更危老建設-新竹地區",
+      "role": "副主席"
+    },
+    {
+      "no": "002",
+      "name": "藍堂嘉",
+      "dataName": "藍堂嘉",
+      "job": "包租代管平台",
+      "role": ""
+    },
+    {
+      "no": "003",
+      "name": "劉羿岑",
+      "dataName": "劉羿岑",
+      "job": "節能減碳顧問",
+      "role": "資訊組長"
+    },
+    {
+      "no": "004",
+      "name": "陳向柔 Naomi",
+      "dataName": "陳向柔Naomi",
+      "job": "商業空間室內設計-新竹以北",
+      "role": "成長協調"
+    },
+    {
+      "no": "005",
+      "name": "劉恩秀 Joan",
+      "dataName": "劉恩秀Joan",
+      "job": "人力派遣",
+      "role": ""
+    },
+    {
+      "no": "006",
+      "name": "周以仁",
+      "dataName": "周以仁",
+      "job": "仲介經紀人-台北市大安區",
+      "role": ""
+    },
+    {
+      "no": "007",
+      "name": "張瓊安",
+      "dataName": "張瓊安",
+      "job": "仲介經紀人-新北市三重蘆洲新莊",
+      "role": "接待組長"
+    },
+    {
+      "no": "008",
+      "name": "高翊書 Eason",
+      "dataName": "高翊書Eason",
+      "job": "都更危老建設-台北市信義區",
+      "role": ""
+    },
+    {
+      "no": "009",
+      "name": "王寶佳 Renee",
+      "dataName": "王寶佳Renee",
+      "job": "置產投資客-台北市萬華區",
+      "role": ""
+    },
+    {
+      "no": "010",
+      "name": "王春雄 Jayson",
+      "dataName": "王春雄Jayson",
+      "job": "理財規劃顧問-雙北",
+      "role": "主席"
+    },
+    {
+      "no": "011",
+      "name": "陳靖薇",
+      "dataName": "陳靖薇",
+      "job": "包租代管-台北市內湖松山區",
+      "role": "教育協調"
+    },
+    {
+      "no": "012",
+      "name": "蘇瓜雅",
+      "dataName": "蘇瓜雅",
+      "job": "財務管理-不動產聯合開發-台北市",
+      "role": ""
+    },
+    {
+      "no": "013",
+      "name": "施宜妏",
+      "dataName": "施宜妏",
+      "job": "金融業-法務顧問",
+      "role": ""
+    },
+    {
+      "no": "014",
+      "name": "莊大永",
+      "dataName": "莊大永",
+      "job": "地主召集人-台東市-自主更新",
+      "role": ""
+    },
+    {
+      "no": "015",
+      "name": "莊涵勝",
+      "dataName": "莊涵勝",
+      "job": "仲介經紀人-台北市信義區",
+      "role": ""
+    },
+    {
+      "no": "016",
+      "name": "黃冠霖",
+      "dataName": "黃冠霖",
+      "job": "證券交易系統-軟體工程師",
+      "role": ""
+    },
+    {
+      "no": "017",
+      "name": "諸紀平",
+      "dataName": "諸紀平",
+      "job": "住宅室內設計裝修-台北市",
+      "role": ""
+    },
+    {
+      "no": "018",
+      "name": "陳秒螢 Emma",
+      "dataName": "陳秒螢Emma",
+      "job": "房屋貸款-新竹以北",
+      "role": ""
+    },
+    {
+      "no": "019",
+      "name": "李艾莉 Aili",
+      "dataName": "李艾莉Aili",
+      "job": "工業蒸氣熱能系統",
+      "role": ""
+    },
+    {
+      "no": "021",
+      "name": "吳翊辰",
+      "dataName": "吳翊辰",
+      "job": "地政士-中彰投雲嘉南",
+      "role": ""
+    },
+    {
+      "no": "022",
+      "name": "黃郁婷",
+      "dataName": "黃郁婷",
+      "job": "金融業-財務",
+      "role": ""
+    },
+    {
+      "no": "023",
+      "name": "林必涵",
+      "dataName": "林必涵",
+      "job": "農地廠房收租-台中",
+      "role": ""
+    },
+    {
+      "no": "024",
+      "name": "蔡明璋",
+      "dataName": "蔡明璋",
+      "job": "合法隔套置產投資-台北市大安中正區",
+      "role": ""
+    },
+    {
+      "no": "025",
+      "name": "王佳筠",
+      "dataName": "王佳筠",
+      "job": "建案代銷專案管理-北部",
+      "role": ""
+    },
+    {
+      "no": "026",
+      "name": "楊之慧",
+      "dataName": "楊之慧",
+      "job": "金融業-後台交割",
+      "role": ""
+    },
+    {
+      "no": "027",
+      "name": "陳黎玲 Jossie",
+      "dataName": "陳黎玲Jossie",
+      "job": "會展空間裝修設計-新竹以北",
+      "role": ""
+    },
+    {
+      "no": "028",
+      "name": "林佩君",
+      "dataName": "林佩君",
+      "job": "仲介經紀人-台北市中山區",
+      "role": ""
+    },
+    {
+      "no": "029",
+      "name": "林媜媁 Wei",
+      "dataName": "林媜媁Wei",
+      "job": "資通訊業-財務分析師",
+      "role": ""
+    },
+    {
+      "no": "030",
+      "name": "李慧如 Eva",
+      "dataName": "李慧如Eva",
+      "job": "再造回收過濾鐵網太空包",
+      "role": ""
+    },
+    {
+      "no": "031",
+      "name": "凃馨文 Wen",
+      "dataName": "凃馨文Wen",
+      "job": "家電B2B",
+      "role": ""
+    },
+    {
+      "no": "032",
+      "name": "柳慧燕",
+      "dataName": "柳慧燕",
+      "job": "危老都更推動建築師-台北市",
+      "role": ""
+    },
+    {
+      "no": "033",
+      "name": "宋馨巧",
+      "dataName": "宋馨巧",
+      "job": "韓語線上家教",
+      "role": ""
+    },
+    {
+      "no": "034",
+      "name": "張瑜晏",
+      "dataName": "張瑜晏",
+      "job": "不動產估價與鑑定-雙北桃園",
+      "role": ""
+    },
+    {
+      "no": "035",
+      "name": "陳昭男 Johnny",
+      "dataName": "陳昭男Johnny",
+      "job": "都更土地開發-台北市",
+      "role": ""
+    },
+    {
+      "no": "036",
+      "name": "包育翎",
+      "dataName": "包育翎",
+      "job": "地主召集人-高雄市鳳山區",
+      "role": ""
+    },
+    {
+      "no": "037",
+      "name": "蔡岱達",
+      "dataName": "蔡岱達",
+      "job": "磁磚經銷商-台中以北",
+      "role": ""
+    },
+    {
+      "no": "038",
+      "name": "蔡淯思 Mina",
+      "dataName": "蔡淯思Mina",
+      "job": "ERP專案管理",
+      "role": ""
+    },
+    {
+      "no": "039",
+      "name": "詹媛婷",
+      "dataName": "詹媛婷",
+      "job": "房貸減壓-台北市",
+      "role": ""
+    },
+    {
+      "no": "040",
+      "name": "王雅慧 Peggy",
+      "dataName": "王雅慧Peggy",
+      "job": "置產投資客-台北市中山大同區",
+      "role": ""
+    },
+    {
+      "no": "041",
+      "name": "何俊彥",
+      "dataName": "何俊彥",
+      "job": "老屋翻新包租代管-台北市",
+      "role": ""
+    },
+    {
+      "no": "042",
+      "name": "周育慈 Anna",
+      "dataName": "周育慈Anna",
+      "job": "包租代管-台北市大安區",
+      "role": ""
+    },
+    {
+      "no": "043",
+      "name": "洪嘉璿左左",
+      "dataName": "洪嘉璿左左",
+      "job": "MMT天賦諮詢師",
+      "role": "導師協調"
+    },
+    {
+      "no": "044",
+      "name": "鍾智媛 Fiona",
+      "dataName": "鍾智媛Fiona",
+      "job": "商務中心-台北市大安中山區",
+      "role": ""
+    },
+    {
+      "no": "046",
+      "name": "林中群",
+      "dataName": "林中群",
+      "job": "鋼結構防蝕工程",
+      "role": ""
+    },
+    {
+      "no": "047",
+      "name": "蔡馨葳 Mandy",
+      "dataName": "蔡馨葳Mandy",
+      "job": "人壽財務規劃-桃園",
+      "role": "活動協調"
+    },
+    {
+      "no": "048",
+      "name": "林晏伃",
+      "dataName": "林晏伃",
+      "job": "都更長照建築師-台北市",
+      "role": ""
+    },
+    {
+      "no": "049",
+      "name": "李瑞雲 Grace",
+      "dataName": "李瑞雲Grace",
+      "job": "置產投資客-台北市松山區",
+      "role": ""
+    },
+    {
+      "no": "050",
+      "name": "謝夢瑰 Dian",
+      "dataName": "謝夢瑰Dian",
+      "job": "高資產房地產顧問-台北",
+      "role": ""
+    },
+    {
+      "no": "052",
+      "name": "張怡蘋 April",
+      "dataName": "張怡蘋April",
+      "job": "工程顧問",
+      "role": ""
+    },
+    {
+      "no": "053",
+      "name": "張耕豪",
+      "dataName": "張耕豪",
+      "job": "大板磚工程-連工帶料",
+      "role": ""
+    },
+    {
+      "no": "054",
+      "name": "陳品攸",
+      "dataName": "陳品攸",
+      "job": "商業法律顧問",
+      "role": "秘書財務"
+    },
+    {
+      "no": "055",
+      "name": "吳念鎧",
+      "dataName": "吳念鎧",
+      "job": "仲介經紀人-大新竹區",
+      "role": ""
+    },
+    {
+      "no": "056",
+      "name": "沈瑞婷",
+      "dataName": "沈瑞婷",
+      "job": "智慧物流導入顧問",
+      "role": ""
+    },
+    {
+      "no": "057",
+      "name": "古育瑋",
+      "dataName": "古育瑋",
+      "job": "廠房建築師與營造-桃竹苗",
+      "role": ""
+    },
+    {
+      "no": "058",
+      "name": "王振伊（喬王）",
+      "dataName": "王振伊喬王",
+      "job": "房產財經教育",
+      "role": ""
+    }
+  ],
+  "events": []
+}

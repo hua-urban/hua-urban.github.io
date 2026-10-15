@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>追綠光 · 傳送已準備草稿</title>
+  <style>
+    body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f5f8f4;color:#1c2822;font:16px/1.6 -apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei",sans-serif}
+    main{max-width:420px;margin:20px;padding:24px;background:#fff;border:2px solid #0b5d3b;border-radius:14px;box-shadow:0 10px 30px #193b2d22}
+    h1{margin:0 0 10px;color:#6b1735;font-size:21px}p{margin:0}a{color:#0b5d3b;font-weight:700}a:focus-visible{outline:3px solid #a44364;outline-offset:3px}
+  </style>
+</head>
+<body>
+  <main><h1>傳送已準備草稿</h1><p id="message" role="status">正在確認 BNI Connect 視窗…</p><p><a href="./">返回測試頁</a></p></main>
+  <script>
+  (() => {
+    "use strict";
+    const STORAGE_KEY = "hua-greenlight-test-drafts-v1";
+    const nonce = new URLSearchParams(location.search).get("nonce") || "";
+    const BNI_ORIGINS = new Set([
+      "https://www.bniconnectglobal.com", "https://bniconnectglobal.com", "https://connect.bniconnectglobal.com"
+    ]);
+    const message = document.getElementById("message");
+    const ready = "hua-greenlight-test-ready";
+    const request = "hua-greenlight-test-request";
+    const data = "hua-greenlight-test-data";
+    if (!window.opener || !/^[0-9a-f-]{36}$/i.test(nonce)) {
+      message.textContent = "請從 BNI Connect 上的追綠光測試面板開啟這個視窗。";
+      return;
+    }
+    window.addEventListener("message", event => {
+      if (event.source !== window.opener || !BNI_ORIGINS.has(event.origin) ||
+          event.data?.type !== request || event.data?.nonce !== nonce) return;
+      let drafts = null;
+      try { drafts = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null"); } catch {}
+      // 僅傳本站使用者明確「準備帶入」後儲存的格式。資料仍需由接收端再次驗證。
+      if (!drafts || drafts.app !== "hua-greenlight-connect-test" || drafts.version !== 1) drafts = null;
+      window.opener.postMessage({ type: data, nonce, drafts }, event.origin);
+      message.textContent = drafts ? "草稿已傳回 BNI Connect 面板。請回原頁核對後再填入。" : "測試頁還沒有已準備的草稿，請先返回測試頁按「準備帶入」。";
+      if (drafts) setTimeout(() => window.close(), 900);
+    });
+    // 只對明確允許的 BNI Connect 來源發出握手；其他頁面無法收到資料。
+    for (const origin of BNI_ORIGINS) window.opener.postMessage({ type: ready, nonce }, origin);
+  })();
+  </script>
+</body>
+</html>
