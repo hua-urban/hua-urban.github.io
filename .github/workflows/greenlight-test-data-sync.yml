@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  pages: write
 
 concurrency:
   group: greenlight-test-data-sync
@@ -37,6 +38,8 @@ jobs:
       - name: Commit and publish changed snapshots
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
@@ -50,4 +53,11 @@ jobs:
           git fetch origin master
           git rebase origin/master
           git push origin HEAD:master
-          echo "Pushed the weekly snapshots; the Pages source-branch update triggers publication."
+          # GITHUB_TOKEN pushes do not trigger a Pages build automatically.
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "X-GitHub-Api-Version: 2026-03-10" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/pages/builds"
+          echo "Requested publication of the weekly snapshots."
