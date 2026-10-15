@@ -1,5 +1,7 @@
 # Greenlight 測試版資料同步
 
+公開入口 `/greenlight-test/` 在同一分頁導向 Cloud Run 完整服務 `https://hua-greenlight-umydisxveq-de.a.run.app`，保留查詢參數與 hash。此目錄的 JSON 仍提供官網每週同步資料，Cloud Run 會讀取這些公開快照。BNI 帳密只送到 Cloud Run 同源 API。
+
 GitHub Actions 每週三 10:00（台灣時間）執行 `greenlight-test-data-sync.yml`，從華都更公開網站更新測試版快照：
 
 - 會員名冊：讀取官網首頁 `tr[data-n][data-p]` 名冊表格。
