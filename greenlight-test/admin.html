@@ -123,6 +123,7 @@
 const CHAPTER = "華都更";
 const SB_URL = "";
 const SB_KEY = "";
+const OFFICIAL_CONFIG_URL = "https://hua-urban.com/greenlight-test/defaults.json";
 const LOCAL_CONFIG_KEY = "hua-urban-greenlight-config-v1";
 const LOCAL_SUBMISSIONS_KEY = "hua-urban-greenlight-submissions-v1";
 const LOCAL_MODE = !SB_URL.trim() && !SB_KEY.trim();
@@ -135,7 +136,7 @@ const when = iso => new Date(iso).toLocaleString("zh-TW", { month: "numeric", da
 
 if (LOCAL_MODE) {
   $("#modeLabel").textContent = "本機測試後台";
-  $("#modeNote").textContent = "名單、活動設定與填答紀錄只保存在目前瀏覽器。";
+  $("#modeNote").textContent = "名單與活動每週三從華都更官網同步；此頁的試編資料仍只保存在目前瀏覽器。";
   $("#pwLabel").hidden = true;
   $("#pw").hidden = true;
   $("#pw").required = false;
@@ -347,8 +348,14 @@ const rpc = (fn, body) => fetch(SB_URL + "/rest/v1/rpc/" + fn, {
 async function loadConfig() {
   let cfg = null;
   if (LOCAL_MODE) {
-    cfg = readLocalJson(LOCAL_CONFIG_KEY, null);
-    if (cfg) CFG_FROM = "local";
+    try {
+      const r = await fetch(OFFICIAL_CONFIG_URL + "?t=" + Date.now(), { cache: "no-store" });
+      if (r.ok) { cfg = await r.json(); CFG_FROM = "official"; }
+    } catch {}
+    if (!cfg) {
+      cfg = readLocalJson(LOCAL_CONFIG_KEY, null);
+      if (cfg) CFG_FROM = "local";
+    }
   } else {
     try {
       const r = await rpc("bni_gl_get_config");
@@ -390,7 +397,8 @@ addEventListener("beforeunload", e => { if (dirty) { e.preventDefault(); e.retur
 
 function cfgBanner() {
   if (LOCAL_MODE && CFG_FROM === "local") return `<div class="warn">目前使用本機儲存的設定；它只存在於目前瀏覽器。</div>`;
-  if (LOCAL_MODE) return `<div class="warn">目前載入華都更 GitHub 官網的完整會員名單；儲存後可在此瀏覽器測試編輯結果。</div>`;
+  if (LOCAL_MODE && CFG_FROM === "official") return `<div class="warn">名單與活動載入自華都更官網的每週同步資料；此頁儲存的試編結果不會更新官網或其他裝置。</div>`;
+  if (LOCAL_MODE) return `<div class="warn">目前載入網站內建的會員名單；儲存後可在此瀏覽器測試編輯結果。</div>`;
   if (CFG_FROM === "nodb") return `<div class="warn">資料庫還沒設定好：請先到 Supabase ▸ SQL Editor 執行 <b>config.sql</b>，才能儲存。現在顯示的是網站預設的名單。</div>`;
   if (CFG_FROM === "defaults") return `<div class="warn">還沒存過名單與活動，現在顯示的是網站預設值。按「儲存」之後，問卷網站就會改用這裡的資料。</div>`;
   return "";

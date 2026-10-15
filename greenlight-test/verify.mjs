@@ -28,16 +28,23 @@ assert(!bookmarklet.includes("/keyin.js"), "bookmarklet does not load an externa
 const defaults = JSON.parse(read("defaults.json"));
 const palms = JSON.parse(read("palms.json"));
 const training = JSON.parse(read("training.json"));
-assert.equal(defaults.members.length, 55);
-assert.equal(palms.members.length, 55);
+assert(defaults.members.length >= 40, "official roster contains a plausible chapter roster");
+assert(palms.members.length >= 40 && palms.members.length <= defaults.members.length, "PALMS contains current-member rows");
 assert.equal(training.records.length, 191);
 assert(defaults.members.every(m => /^\d{3}$/.test(m.no) && m.name && m.job && !/範例|小明|小華|大同/.test(m.name)));
-assert.equal(new Set(defaults.members.map(m => m.no)).size, 55);
+assert.equal(new Set(defaults.members.map(m => m.no)).size, defaults.members.length);
 const zh3 = s => String(s).replace(/\s+/g, "").match(/^[\u4e00-\u9fa5]+/)?.[0]?.slice(0, /^(張簡|歐陽|司馬|諸葛|上官|東方|皇甫|范姜|司徒|夏侯)/.test(s) ? 4 : 3);
-assert.deepEqual(new Set(defaults.members.map(m => zh3(m.name))), new Set(palms.members.map(r => zh3(r[1]))));
-assert(index.includes('const LIGHT_DATA = "./palms.json"'));
+const rosterKeys = new Set(defaults.members.map(m => zh3(m.name)));
+assert(palms.members.every(r => Array.isArray(r) && rosterKeys.has(zh3(r[1]))), "PALMS rows belong to current members");
+assert(defaults.events.every(e => e.name && /^\d{4}-\d{2}-\d{2}$/.test(e.date) && e.members.length), "official activity events are valid interaction prompts");
+assert(index.includes('const LIGHT_DATA = `${OFFICIAL_DATA_ROOT}/palms.json`'));
+assert(index.includes('const ROSTER_DATA = `${OFFICIAL_DATA_ROOT}/defaults.json`'));
 assert(index.includes('const SB_URL = ""'));
 assert(index.includes('Math.ceil(2 * m.weeks)') && index.includes('Math.ceil(1.5 * m.weeks)'));
+assert(index.includes('data-gap-flow="${k}"') && index.includes('還差 ${remaining} ${goal.unit}'));
+assert(!index.includes('href="admin.html"'), "public main page does not expose the admin link");
+assert(index.indexOf('portalCard("121", true)') < index.indexOf('id="memberTraining"')
+  && index.indexOf('id="memberTraining"') < index.indexOf('portalCard("ref", true)'), "training records appear before the referral flow");
 assert(index.includes('hua-urban-greenlight-submissions-v1'));
 assert(index.includes('已保存在此瀏覽器'));
 assert(index.includes('data-f="referredName"'));
@@ -54,4 +61,4 @@ assert(keyin.includes('e.source !== bridgeWindow') && keyin.includes('e.data?.no
 assert(bridge.includes('event.source !== window.opener') && bridge.includes('BNI_ORIGINS.has(event.origin)'));
 assert(bridge.includes('event.data?.nonce !== nonce'));
 assert(fs.existsSync(path.join(dir, "vendor/xlsx.full.min.js")));
-console.log("PASS: scripts and bundled bookmarklet parse; 55 verified roster/PALMS members, 191 real training records; local storage, score targets, referral fields, and bridge guards are present.");
+console.log(`PASS: scripts and bundled bookmarklet parse; ${defaults.members.length} roster members, ${palms.members.length} current PALMS rows, ${defaults.events.length} official activities, and ${training.records.length} training registrations validated.`);

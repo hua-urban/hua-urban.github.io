@@ -196,6 +196,9 @@
   .del { border: 0; background: none; color: var(--muted); font-size: 22px; line-height: 1; padding: 0 4px; }
   .field { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 15px; white-space: nowrap; }
   .field span { width: 4.2em; flex: none; }
+  .referral-person-field .field-name { width: 4.2em; flex: none; }
+  .referral-person-field .self-check { display: inline-flex; align-items: center; gap: 5px; flex: none; cursor: pointer; color: var(--ink); font-weight: 600; }
+  .referral-person-field .self-check input[type="checkbox"] { accent-color: var(--green); width: 18px; height: 18px; flex: none; margin: 0; padding: 0; }
   .field input {
     flex: 1; min-width: 0; padding: 8px 10px; border-radius: 9px; border: 1px solid var(--line);
     background: var(--card); color: var(--ink); font: inherit; font-size: 16px;
@@ -265,6 +268,8 @@
   .portal:active { transform: scale(.99); }
   .portal .pt { font-size: 19px; font-weight: 800; }
   .portal .ps { grid-column: 1; font-size: 13px; opacity: .9; }
+  .portal .portal-count { grid-column: 1; font-size: 15px; font-weight: 700; }
+  .portal.has-gap .pg { grid-row: 1 / span 3; }
   .portal .pg { grid-column: 2; grid-row: 1 / span 2; font-size: 22px; font-weight: 800; }
   /* 提示詞：手機浮在右下角（下一題按鈕上方），寬螢幕固定在問卷右邊 */
   .tipbox { position: fixed; right: 12px; bottom: 92px; z-index: 4; width: min(300px, calc(100vw - 24px));
@@ -343,7 +348,7 @@
 
   <div class="progress"><div id="bar"></div></div>
   <main id="app"><p class="hint" style="text-align:center">載入中…</p></main>
-  <footer class="foot"><a href="./training.html" target="_blank" rel="noopener">教育培訓查詢</a> · <a href="https://bni-train.autolab.cloud/explorer/" target="_blank" rel="noopener">培訓原始查詢</a> · <a href="admin.html" target="_blank" rel="noopener">管理後台</a></footer>
+  <footer class="foot"><a href="./training.html" target="_blank" rel="noopener">教育培訓查詢</a> · <a href="https://bni-train.autolab.cloud/explorer/" target="_blank" rel="noopener">培訓原始查詢</a></footer>
 </div>
 <div class="toast" id="toast"></div>
 <datalist id="meeting-locations">
@@ -357,7 +362,9 @@
 const CHAPTER = "華都更";                                    // 分會名稱（不含「分會」兩字）
 const SB_URL = "";   // 尚未設定後台連線
 const SB_KEY = "";
-const LIGHT_DATA = "./palms.json";
+const OFFICIAL_DATA_ROOT = "https://hua-urban.com/greenlight-test";
+const ROSTER_DATA = `${OFFICIAL_DATA_ROOT}/defaults.json`;
+const LIGHT_DATA = `${OFFICIAL_DATA_ROOT}/palms.json`;
 const LIGHT_SITE = "https://hua-urban.com/traffic-light/?v=est";
 const GUIDE_PDF = "";                   // BNI Connect 教學講義；沒有就設成 ""
 const VIDEO_URL = "";            // 第一頁的教學影片（YouTube）；沒有就設成 ""
@@ -365,11 +372,11 @@ const VIDEO_URL = "";            // 第一頁的教學影片（YouTube）；沒�
 document.title = `${CHAPTER} 追綠光`;
 document.getElementById("orgName").textContent = `BNI ${CHAPTER}分會`;
 
-// 成員與活動由已核對的 defaults.json 提供；不使用範例名單。
+// 成員與活動每週由官方網站同步至公開測試資料；本機 JSON 只作網路故障時的備援。
 const ROSTER = new Map();
 
 // ── 流程：每一段是「有參加嗎？ → 有的話勾選互動夥伴」 ─────────
-// 名單和活動平常由後台（admin.html）編輯、存在 Supabase；讀不到時才用下面寫死的預設值
+// 名單和活動由華都更官網同步，不把管理者瀏覽器的手動編輯當作共用資料來源。
 let EVENTS = [];
 
 // 後台存的設定：{ members: [{ no, name, job }], events: [{ id, name, date: "2026-07-04", members: ["008"], outside: [{ name, chapter }] }] }
@@ -395,8 +402,7 @@ function applyConfig(cfg) {
 }
 
 
-// ── 我的燈號：讀本分會紅綠燈網站的會員資料，照它的規則算「到綠燈的差距」 ──
-// 對方網站若不讓別的網域直接讀，可以在 Netlify 的 _redirects 設一條轉送，LIGHT_DATA 填轉送的路徑。
+// ── 我的燈號：讀每週同步到華都更測試目錄的 PALMS 資料，計算「到綠燈的差距」 ──
 const HUA_SITE = LIGHT_SITE;
 const HUA_DATA = LIGHT_DATA;
 let huaData = null;
@@ -555,7 +561,11 @@ function refForm(r, n, ph, ext) {
     ${ext ? `
       <label class="field"><span>對象姓名</span><input data-f="name" value="${esc(r.name)}" placeholder="請輸入會員姓名"></label>
       <label class="field"><span>分會名</span><input data-f="chapter" value="${esc(r.chapter)}" placeholder="例：華都更"></label>` : ""}
-    <label class="field"><span>被引薦人姓名</span><input data-f="referredName" value="${esc(r.referredName || "")}" placeholder="請填真實姓名"></label>
+    <div class="field referral-person-field">
+      <label class="field-name" for="referred-${r.id}">被引薦人</label>
+      <input id="referred-${r.id}" data-f="referredName" aria-label="被引薦人姓名" value="${esc(r.referredName || "")}" placeholder="請填真實姓名">
+      <label class="self-check"><input type="checkbox" data-self-referral aria-label="被引薦人是我自己" ${ROSTER.get(state.me)?.name === String(r.referredName || "").trim() ? "checked" : ""}>自己</label>
+    </div>
     <div class="seg"><span class="seg-label">類型</span>
       ${REF_TYPES.map(x => `<button type="button" data-type="${x}" class="${r.type === x ? "sel" : ""}">${x}</button>`).join("")}
     </div>
@@ -576,7 +586,24 @@ function wireRefs(box, list, onDelete) {
     if (!f || !e.target.closest(".ref")) return;
     find(e.target)[f] = e.target.value;
     if (f === "phone") state.lastPhone = e.target.value;   // 下一筆自動帶入
+    if (f === "referredName") {
+      const self = e.target.closest(".ref").querySelector("[data-self-referral]");
+      if (self) self.checked = String(e.target.value).trim() === (ROSTER.get(state.me)?.name || "");
+    }
     e.target.closest(".ref").classList.remove("bad");
+    save();
+  });
+  box.addEventListener("change", e => {
+    const self = e.target.closest?.("[data-self-referral]");
+    if (!self) return;
+    const row = self.closest(".ref");
+    const input = row?.querySelector('[data-f="referredName"]');
+    const memberName = ROSTER.get(state.me)?.name || "";
+    if (!input || !memberName) { self.checked = false; return; }
+    const value = self.checked ? memberName : "";
+    input.value = value;
+    find(self).referredName = value;
+    row.classList.remove("bad");
     save();
   });
   box.addEventListener("click", e => {
@@ -601,7 +628,7 @@ function flagBad(box, list, ext) {
   });
   if (first) {
     first.scrollIntoView({ behavior: "smooth", block: "center" });
-    toast(`還有 ${n} 筆引薦的${ext ? "對象姓名、分會、" : ""}被引薦人姓名、內容或電話沒填好`);
+    toast(`還有 ${n} 筆引薦的${ext ? "對象姓名、分會、" : ""}被引薦人、內容或電話沒填好`);
   }
   return !first;
 }
@@ -847,13 +874,14 @@ function render() {
     app.innerHTML = `
       <p class="portal-h first">${esc(ROSTER.get(state.me)?.name || "")}，要先補哪一個？</p>
       ${VIDEO_URL ? `<p class="vlink"><a href="${VIDEO_URL}" target="_blank" rel="noopener">▶ 第一次用？看 10 分鐘影片教學</a></p>` : ""}
-      ${portals()}
+      ${portalCard("121", true)}
+      <div id="memberTraining" aria-live="polite"><p class="hint">正在查詢實際培訓報名紀錄…</p></div>
+      ${portalCard("ref", true)}
       ${HUA_DATA ? `<p class="portal-h">你目前的燈號</p>
       <section class="card" id="lightCard">
         <p class="step">查詢中…</p>
         <p class="hint">正在到${CHAPTER}紅綠燈網站查你的分數</p>
       </section>` : ""}
-      <div id="memberTraining" aria-live="polite"><p class="hint">正在查詢實際培訓報名紀錄…</p></div>
       <div class="actions"><button class="ghost" id="back">← 重新選人</button></div>`;
     $("#back").onclick = () => go(at - 1);
     const me = ROSTER.get(state.me);
@@ -865,12 +893,14 @@ function render() {
     if (HUA_DATA) loadHua().then(d => {
       if (steps[at] !== s) return;
       const m = findMember(d, me.name, me.no);
+      updatePortalGaps(m);
       $("#lightCard").innerHTML = m ? scoreCard(m, d) : `
         <p class="step">查不到</p>
         <p class="q">紅綠燈資料裡找不到「${esc(nameKey(me.name))}」</p>
         <p class="hint">可能是新入會、資料還沒更新。可以到 <a href="${HUA_SITE}" target="_blank" rel="noopener">${CHAPTER}紅綠燈</a> 自己查。</p>`;
     }).catch(() => {
       if (steps[at] !== s) return;
+      updatePortalGaps(null);
       $("#lightCard").innerHTML = `
         <p class="step">暫時讀不到</p>
         <p class="hint">紅綠燈資料暫時讀不到，可以到 <a href="${HUA_SITE}" target="_blank" rel="noopener">${CHAPTER}紅綠燈</a> 查會員，或直接從下面開始補 key。</p>`;
@@ -1562,13 +1592,32 @@ function videoBlock() {
 
 // 分流入口：在同一分頁切換到 121 或引薦流程
 const PORTALS = {
-  "121": { t: "補 key 121", s: "" },
-  ref:   { t: "補 key 引薦", s: `${CHAPTER}夥伴、外分會夥伴` },
+  "121": { t: "補 Key 121", s: "" },
+  ref:   { t: "補 Key 引薦", s: `${CHAPTER}夥伴、外分會夥伴` },
 };
+const PORTAL_GAPS = {
+  "121": { key: "O2O", target: m => Math.ceil(2 * m.weeks), unit: "次" },
+  ref: { key: "RG", target: m => Math.ceil(1.5 * m.weeks), unit: "件" },
+};
+function portalCard(k, showGap = false) {
+  const p = PORTALS[k];
+  if (!p) return "";
+  const gap = PORTAL_GAPS[k];
+  const gapLabel = showGap && gap ? `<span class="portal-count" data-gap-flow="${k}" aria-live="polite">讀取本期差距中…</span>` : "";
+  return `<a class="portal${showGap ? " has-gap" : ""}" href="?flow=${k}">
+    <span class="pt">${p.t}</span><span class="ps">${k === "121" ? [...EVENTS.map(e => e.title.replace(/^\S+\s/, "")), "其他活動／組聚", `${CHAPTER}會員`, "外分會會員"].join("、") : p.s}</span>
+    ${gapLabel}<span class="pg" aria-hidden="true">↗</span></a>`;
+}
+function updatePortalGaps(m) {
+  document.querySelectorAll("[data-gap-flow]").forEach(el => {
+    const goal = PORTAL_GAPS[el.dataset.gapFlow];
+    if (!m || !goal) { el.textContent = "目前無法取得成績"; return; }
+    const remaining = Math.max(0, goal.target(m) - m[goal.key]);
+    el.textContent = `還差 ${remaining} ${goal.unit}`;
+  });
+}
 function portals(only) {
-  return `<div class="portals">${Object.entries(PORTALS).filter(([k]) => !only || k === only).map(([k, p]) => `
-    <a class="portal" href="?flow=${k}">
-      <span class="pt">${p.t}</span><span class="ps">${k === "121" ? [...EVENTS.map(e => e.title.replace(/^\S+\s/, "")), "其他活動／組聚", `${CHAPTER}會員`, "外分會會員"].join("、") : p.s}</span><span class="pg">↗</span></a>`).join("")}</div>`;
+  return `<div class="portals">${Object.keys(PORTALS).filter(k => !only || k === only).map(k => portalCard(k)).join("")}</div>`;
 }
 
 const CONNECT_LINKS = [
@@ -1703,24 +1752,17 @@ function toast(msg) {
   toast.t = setTimeout(() => t.classList.remove("show"), 2400);
 }
 
-// 先讀核對過的分會預設名單，再套用此瀏覽器的管理設定；完成前不讀取答案。
+// 優先讀官網每週同步資料，官網暫時無法連線時才用隨版本附帶的備援檔。
 (async () => {
   try {
-    const defaults = await fetch("./defaults.json", { cache: "no-store" });
-    if (!defaults.ok || !applyConfig(await defaults.json())) throw new Error("名單格式不正確");
-    try {
-      const custom = JSON.parse(localStorage.getItem("hua-urban-greenlight-config-v1") || "null");
-      if (custom) applyConfig(custom);
-    } catch {}
-    if (SB_URL && SB_KEY) {
+    let configLoaded = false;
+    for (const url of [ROSTER_DATA, "./defaults.json"]) {
       try {
-        const r = await fetch(SB_URL + "/rest/v1/rpc/bni_gl_get_config", {
-          method: "POST", body: "{}",
-          headers: { apikey: SB_KEY, Authorization: "Bearer " + SB_KEY, "Content-Type": "application/json" },
-        });
-        if (r.ok) applyConfig(await r.json());
+        const response = await fetch(url + (url.includes("?") ? "&" : "?") + "t=" + Date.now(), { cache: "no-store" });
+        if (response.ok && applyConfig(await response.json())) { configLoaded = true; break; }
       } catch {}
     }
+    if (!configLoaded) throw new Error("名單格式不正確");
     Object.assign(state, readStored());
   } catch {
     $("#app").innerHTML = `<section class="card"><p class="q">會員名單暫時讀不到</p><p class="hint">請稍後重新整理，或到 <a href="${LIGHT_SITE}" target="_blank" rel="noopener">華都更紅綠燈</a> 查詢。尚未載入經核對的名單，無法開始問卷。</p></section>`;

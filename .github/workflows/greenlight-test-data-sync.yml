@@ -1,0 +1,53 @@
+name: Weekly Greenlight test data sync
+
+on:
+  schedule:
+    # Wednesday 10:00 in Taipei (GitHub Actions cron uses UTC).
+    - cron: '0 2 * * 3'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: greenlight-test-data-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Refresh official roster, activity calendar, and PALMS snapshots
+        run: node scripts/sync-greenlight-test.mjs
+
+      - name: Verify synchronized data
+        run: node greenlight-test/verify.mjs
+
+      - name: Commit and publish changed snapshots
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- greenlight-test/defaults.json greenlight-test/palms.json greenlight-test/monthly.json greenlight-test/data-provenance.json
+          if git diff --cached --quiet; then
+            echo "Official snapshots are already current."
+            exit 0
+          fi
+          git commit -m "Sync Greenlight test data from official site"
+          git fetch origin master
+          git rebase origin/master
+          git push origin HEAD:master
+          echo "Pushed the weekly snapshots; the Pages source-branch update triggers publication."
