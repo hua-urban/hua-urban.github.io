@@ -216,6 +216,8 @@
   .tag { font-size: 11px; padding: 1px 7px; border-radius: 99px; background: var(--green); color: #fff; vertical-align: 2px; }
   .ref { border: 1px solid var(--line); background: var(--card); border-radius: 12px; padding: 10px 12px; margin-top: 10px; }
   .ref.bad { border-color: var(--red); background: var(--red-soft); }
+  .ref-validation { margin: 0 0 10px; color: var(--red); font-size: 14px; white-space: normal; overflow-wrap: anywhere; }
+  .ref [data-f][aria-invalid="true"] { border-color: var(--red); }
   .list .ref .field { border: 0; padding: 0; border-radius: 0; background: none; cursor: default; user-select: auto; }
   .field.col { flex-direction: column; align-items: stretch; gap: 4px; white-space: normal; }
   .field.col span { width: auto; }
@@ -554,7 +556,26 @@ const CONTACTS = { card: "給對方你的名片", call: "告訴他們你會打�
 const newRef = extra => ({ id: Math.random().toString(36).slice(2, 9), type: "外部", referredName: "", content: "",
   phone: state.lastPhone || "", contact: "card", ...extra });
 const phoneOk = s => (s.match(/\d/g) || []).length >= 8;
-const refBad = (r, ext) => !String(r.referredName || "").trim() || !r.content.trim() || !phoneOk(r.phone) || (ext && (!r.name.trim() || !r.chapter.trim()));
+const refMissing = (r, ext) => [
+  ...(ext ? [["name", "對象姓名"], ["chapter", "分會名"]] : []),
+  ["referredName", "被引薦人"], ["content", "引薦內容"], ["phone", "電話（至少 8 碼數字）"],
+].filter(([key]) => key === "phone" ? !phoneOk(String(r[key] || "")) : !String(r[key] || "").trim());
+const refBad = (r, ext) => refMissing(r, ext).length > 0;
+
+function showRefValidation(row, r, ext) {
+  const missing = refMissing(r, ext);
+  row.classList.toggle("bad", missing.length > 0);
+  row.querySelectorAll("[data-f]").forEach(input => {
+    const invalid = missing.some(([key]) => key === input.dataset.f);
+    input.setAttribute("aria-invalid", String(invalid));
+    if (invalid) input.setAttribute("aria-describedby", `ref-error-${r.id}`);
+    else input.removeAttribute("aria-describedby");
+  });
+  const message = row.querySelector(".ref-validation");
+  message.hidden = missing.length === 0;
+  message.textContent = missing.length ? `尚缺：${missing.map(([, label]) => label).join("、")}。補齊後才能進入 BNI 登入與送出步驟。` : "";
+  return missing;
+}
 
 function refForm(r, n, ph, ext) {
   return `<div class="ref" data-id="${r.id}">
@@ -562,6 +583,7 @@ function refForm(r, n, ph, ext) {
       <span class="entry-n">引薦 ${n}</span>
       <button type="button" class="del" data-del="${r.id}" aria-label="刪除引薦 ${n}">×</button>
     </div>
+    <p class="ref-validation" id="ref-error-${r.id}" role="status" hidden></p>
     ${ext ? `
       <label class="field"><span>對象姓名</span><input data-f="name" value="${esc(r.name)}" placeholder="請輸入會員姓名"></label>
       <label class="field"><span>分會名</span><input data-f="chapter" value="${esc(r.chapter)}" placeholder="例：華都更"></label>` : ""}
@@ -594,7 +616,8 @@ function wireRefs(box, list, onDelete) {
       const self = e.target.closest(".ref").querySelector("[data-self-referral]");
       if (self) self.checked = String(e.target.value).trim() === (ROSTER.get(state.me)?.name || "");
     }
-    e.target.closest(".ref").classList.remove("bad");
+    const row = e.target.closest(".ref");
+    if (row.classList.contains("bad")) showRefValidation(row, find(e.target), !!row.querySelector('[data-f="chapter"]'));
     save();
   });
   box.addEventListener("change", e => {
@@ -607,7 +630,7 @@ function wireRefs(box, list, onDelete) {
     const value = self.checked ? memberName : "";
     input.value = value;
     find(self).referredName = value;
-    row.classList.remove("bad");
+    if (row.classList.contains("bad")) showRefValidation(row, find(self), !!row.querySelector('[data-f="chapter"]'));
     save();
   });
   box.addEventListener("click", e => {
@@ -624,15 +647,15 @@ function wireRefs(box, list, onDelete) {
 
 function flagBad(box, list, ext) {
   let first = null, n = 0;
+  const labels = new Set();
   box.querySelectorAll(".ref").forEach(el => {
     const r = list.find(x => x.id === el.dataset.id);
-    const bad = refBad(r, ext);
-    el.classList.toggle("bad", bad);
-    if (bad) { n++; first ||= el; }
+    const missing = showRefValidation(el, r, ext);
+    if (missing.length) { n++; first ||= el; missing.forEach(([, label]) => labels.add(label)); }
   });
   if (first) {
     first.scrollIntoView({ behavior: "smooth", block: "center" });
-    toast(`還有 ${n} 筆引薦的${ext ? "對象姓名、分會、" : ""}被引薦人、內容或電話沒填好`);
+    toast(`還有 ${n} 筆引薦待補：${[...labels].join("、")}`);
   }
   return !first;
 }
