@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { selectFullCyclePalms } from "./greenlight-palms.mjs";
 
 const ROOT = resolve(import.meta.dirname, "..");
 const TEST_DIR = resolve(ROOT, "greenlight-test");
@@ -144,9 +145,7 @@ const [homepage, officialPalms, monthly, oldProvenance, oldDefaults] = await Pro
 ]);
 
 const members = parseRoster(homepage);
-if (!officialPalms || !Array.isArray(officialPalms.members) || !officialPalms.chapter) {
-  throw new Error("Official PALMS source does not match the expected data shape.");
-}
+const fullCyclePalms = selectFullCyclePalms(officialPalms);
 if (!monthly || !Array.isArray(monthly.months)) throw new Error("Official monthly source does not match the expected data shape.");
 
 const gasUrlMatch = homepage.match(/\bGAS_CAL_URL\s*=\s*["']([^"']+)["']/);
@@ -159,7 +158,7 @@ if (activityPayload?.ok !== true || !Array.isArray(activityPayload.data)) {
 }
 
 const activeNames = new Set(members.map(member => nameKey(member.name)));
-const activePalmsRows = officialPalms.members.filter(row => Array.isArray(row) && activeNames.has(nameKey(row[1])));
+const activePalmsRows = fullCyclePalms.members.filter(row => Array.isArray(row) && activeNames.has(nameKey(row[1])));
 if (activePalmsRows.length < 40) throw new Error(`Refusing to sync only ${activePalmsRows.length} matching PALMS rows.`);
 const palmsNames = activePalmsRows.map(row => nameKey(row[1]));
 if (new Set(palmsNames).size !== activePalmsRows.length) throw new Error("Official PALMS has ambiguous matching member names.");
@@ -203,9 +202,9 @@ const defaults = {
   events: mapEvents(activityPayload.data, members),
 };
 const palms = {
-  updatedAt: officialPalms.updatedAt,
-  uploadedBy: officialPalms.uploadedBy,
-  chapter: officialPalms.chapter,
+  updatedAt: fullCyclePalms.updatedAt,
+  uploadedBy: fullCyclePalms.uploadedBy,
+  chapter: fullCyclePalms.chapter,
   members: activePalmsRows,
 };
 
@@ -232,8 +231,8 @@ const provenance = {
     source: PALMS_URL,
     path: "chapter.est",
     members: activePalmsRows.length,
-    range: officialPalms.chapter.range || "",
-    asOf: officialPalms.chapter.asOf || officialPalms.chapter.range?.split("–").pop()?.trim() || "",
+    range: fullCyclePalms.chapter.range,
+    asOf: fullCyclePalms.chapter.asOf,
   },
   activities: {
     source: activityUrl.origin + activityUrl.pathname,

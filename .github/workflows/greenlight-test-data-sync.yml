@@ -29,6 +29,9 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Check full-cycle PALMS selection
+        run: node --test scripts/greenlight-palms.test.mjs
+
       - name: Refresh official roster, activity calendar, and PALMS snapshots
         run: node scripts/sync-greenlight-test.mjs
 

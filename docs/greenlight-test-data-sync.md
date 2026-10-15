@@ -5,7 +5,7 @@
 GitHub Actions 每週三 10:00（台灣時間）執行 `greenlight-test-data-sync.yml`，從華都更公開網站更新測試版快照：
 
 - 會員名冊：讀取官網首頁 `tr[data-n][data-p]` 名冊表格。
-- PALMS 與月報：讀取官網 `/traffic-light/data.json`、`/traffic-light/monthly.json`，PALMS 只保留與現任名冊相符的會員列。
+- PALMS 與月報：讀取官網 `/traffic-light/data.json` 的 `chapter.est` 完整六個月週期資料及 `/traffic-light/monthly.json`。PALMS 的會員列與期間必須一起取自 `chapter.est`，不可使用最外層舊基準；驗證六個月起訖與 asOf 後，只保留與現任名冊相符的會員列。缺少完整週期時停止同步，不退回舊版或單月資料。
 - 活動：使用官網首頁設定的 Apps Script「行事曆」資料來源，排除官網另有專區的例會與組聚，保留所有未來活動及最近五筆過去活動。
 
 活動來源只提供活動資料，沒有實際出席者名單。同步時會把現任會員列為問卷候選人，填寫者自行勾選曾互動的會員；這些候選人不代表已確認出席。
