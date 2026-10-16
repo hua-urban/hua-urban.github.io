@@ -181,7 +181,7 @@
         : "登入已逾時，請重新登入後再預覽資料。";
       if (error?.status === 409) {
         if (action === "login") return "BNI Connect 要求額外驗證，這批資料尚未送出。請先完成驗證，再回到本頁登入。";
-        if (action === "prepare") return "登入會員與填答會員不符，請改用本人帳號。";
+        if (action === "prepare") return "BNI 已登入成功，但登入會員與本次填寫會員的中文姓名不同。請核對上方姓名，或回首頁重新選擇會員；括號綽號與英文不影響比對。";
         return "BNI Connect 要求額外驗證。請先確認這筆是否已送出；系統不會自動重送。";
       }
       if (error?.status === 429) return action === "submit"
