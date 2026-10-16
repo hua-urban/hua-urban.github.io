@@ -487,6 +487,13 @@ function applyConfig(cfg) {
 // ── 我的燈號：讀每週同步到華都更測試目錄的 PALMS 資料，計算「到綠燈的差距」 ──
 const HUA_SITE = LIGHT_SITE;
 const HUA_DATA = LIGHT_DATA;
+const usesMonthlyChapterLight = person => !!person?.ext && chapterKey(person.chapter).startsWith("華");
+async function loadChapterLight(person) {
+  const query = new URLSearchParams({ name: person.name, chapter: person.chapter });
+  const response = await fetch(`/api/chapter-light?${query}`, { cache: "no-store" });
+  if (!response.ok) throw new Error("無法取得外分會燈號資料");
+  return response.json();
+}
 let huaData = null;
 const loadHua = () => huaData ||= fetch(HUA_DATA + (HUA_DATA.includes("?") ? "&" : "?") + "t=" + Date.now(), { cache: "no-store" })
   .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
@@ -553,6 +560,39 @@ function findMember(d, rosterName, memberNo) {
   m.attend = Math.round((m.P + m.S) / (m.weeks || 1) * 100);
   return m;
 }
+
+// 外分會月報使用來源已計算的分數；沒有計入週數時不推算 121／引薦件數目標。
+function updateMonthlyPortalCounts(member) {
+  document.querySelectorAll("[data-gap-flow]").forEach(el => {
+    if (!member) { el.textContent = "目前無法取得成績"; return; }
+    const is121 = el.dataset.gapFlow === "121";
+    const count = member.counts[is121 ? "oneToOne" : "referralsGiven"];
+    el.textContent = count == null ? "月報未提供完成件數" : `本期已完成 ${Number(count).toLocaleString("zh-TW")} ${is121 ? "次" : "件"}`;
+  });
+}
+function monthlyScoreCard(member, data) {
+  const score = member.reportedScore;
+  const light = Object.hasOwn(LIGHTS, member.reportedLight) ? member.reportedLight : lightOf(score);
+  const items = [
+    ["出席", "absence", member.counts.absence, "次缺席"],
+    ["引薦", "referral", member.counts.referralsGiven, "件"],
+    ["來賓", "visitor", member.counts.visitors, "位"],
+    ["一對一", "oneToOne", member.counts.oneToOne, "次"],
+    ["教育培訓", "education", member.counts.ceu, "單位"],
+    ["交易價值", "tyfcb", member.counts.tyfcb, "元"],
+  ];
+  const fmt = value => value == null ? "未提供" : Number(value).toLocaleString("zh-TW");
+  return `<div class="score-head t-${light}">
+    <div><h2>${esc(member.name)}</h2><p>${esc(data.chapter.name)} · ${esc(data.month.slice(0,4))}/${esc(data.month.slice(4))} 月報</p></div>
+    <div class="score-num">${fmt(score)}<small>${LIGHTS[light]}</small></div>
+    </div>
+    <p class="sec">到綠燈還需 ${fmt(Math.max(0, GREEN - score))} 分（70 分門檻）</p>
+    <p class="sec">本期六項紀錄與月報得分</p>
+    ${items.map(([label,key,count,unit]) => `<div class="metric"><strong>${label}</strong> <span class="points">${fmt(member.points[key])} 分</span> · ${fmt(count)} ${unit}</div>`).join("")}
+    <p class="note">以上分數直接採用來源月報。月報未提供計入週數，121 與引薦顯示已完成件數；教育單位採月報已入帳紀錄。</p>
+    <p class="src">資料：<a href="${esc(data.source)}" target="_blank" rel="noopener">${esc(data.chapter.name)}個人燈號月報</a> · ${esc(data.chapter.period || "")}${data.chapter.range ? `（${esc(data.chapter.range)}）` : ""}</p>`;
+}
+
 // 用 PALMS 實際計入週數計算目標；不可把固定 26 週套到不同期間。
 const GOALS = [
   { key: "O2O", name: "一對一", unit: "次", goal: m => Math.ceil(2 * m.weeks) },
@@ -1088,8 +1128,10 @@ function render() {
       </div>
       ${HUA_DATA ? `<p class="portal-h">你目前的燈號</p>
       <section class="card" id="lightCard">
-        ${me.ext ? `<p class="step">其他分會資料</p><p class="hint">此頁沒有${esc(me.chapter)}的 PALMS 與燈號資料，因此無法計算分數或到綠燈的差距。你仍可填寫 121、引薦並查詢教育培訓紀錄。</p>`
-                 : `<p class="step">查詢中…</p><p class="hint">正在到${CHAPTER}紅綠燈網站查你的分數</p>`}
+        ${me.ext ? usesMonthlyChapterLight(me)
+          ? `<p class="step">查詢中…</p><p class="hint">正在查詢${esc(me.chapter)}最新月份的個人燈號資料…</p>`
+          : `<p class="step">其他分會資料</p><p class="hint">目前只查詢華字輩分會的月報；${esc(me.chapter)}暫時略過燈號查詢。你仍可填寫 121、引薦並查詢教育培訓紀錄。</p>`
+          : `<p class="step">查詢中…</p><p class="hint">正在到${CHAPTER}紅綠燈網站查你的分數</p>`}
       </section>` : ""}
       <div class="actions"><button class="ghost" id="back">← 重新選人</button></div>`;
     $("#back").onclick = () => go(at - 1);
@@ -1097,6 +1139,18 @@ function render() {
       if (steps[at] === s && $("#memberTraining")) $("#memberTraining").innerHTML = HuaTraining.renderFor(me.name, me.chapter);
     }).catch(() => {
       if (steps[at] === s && $("#memberTraining")) $("#memberTraining").innerHTML = `<p class="hint">培訓紀錄暫時讀不到。<a href="https://bni-train.autolab.cloud/explorer/" target="_blank" rel="noopener">查看原始查詢</a></p>`;
+    });
+    if (usesMonthlyChapterLight(me)) loadChapterLight(me).then(d => {
+      if (steps[at] !== s) return;
+      const m = d.status === "found" ? d.member : null;
+      updateMonthlyPortalCounts(m);
+      $("#lightCard").innerHTML = m ? monthlyScoreCard(m, d) : `<p class="step">尚無相符資料</p>
+        <p class="hint">${d.month ? `${esc(d.month.slice(0,4) + "/" + d.month.slice(4))} 月報中找不到「${esc(me.chapter)}／${esc(me.name)}」的唯一個人紀錄，暫不計算燈號與差距。` : "當月與前一個月尚無可讀取的月報，暫不計算燈號與差距。"}</p>
+        ${d.source ? `<p class="hint"><a href="${esc(d.source)}" target="_blank" rel="noopener">查看來源月報</a></p>` : ""}`;
+    }).catch(() => {
+      if (steps[at] !== s) return;
+      updatePortalGaps(null);
+      $("#lightCard").innerHTML = `<p class="step">月報暫時無法取得</p><p class="hint">當月與前一個月的華字輩月報目前無法讀取，請稍後再試；121 與引薦仍可繼續填寫。</p>`;
     });
     if (HUA_DATA && !me.ext) loadHua().then(d => {
       if (steps[at] !== s) return;
@@ -1821,8 +1875,8 @@ function portalCard(k, showGap = false) {
   const p = PORTALS[k];
   if (!p) return "";
   const gap = PORTAL_GAPS[k];
-  const gapLabel = showGap && gap ? currentPerson()?.ext
-    ? `<span class="portal-count">其他分會差距資料未提供</span>`
+  const gapLabel = showGap && gap ? currentPerson()?.ext && !usesMonthlyChapterLight(currentPerson())
+    ? `<span class="portal-count">此分會暫不查詢燈號</span>`
     : `<span class="portal-count" data-gap-flow="${k}" aria-live="polite">讀取本期差距中…</span>` : "";
   return `<a class="portal${showGap ? " has-gap" : ""}" href="?flow=${k}">
     <span class="pt">${p.t}</span><span class="ps">${k === "121" ? [`${CHAPTER}會員`, "其他活動／組聚", "其他／手動輸入會員", "已舉辦活動"].join("、") : p.s}</span>
