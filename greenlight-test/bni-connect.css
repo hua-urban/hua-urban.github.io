@@ -268,10 +268,84 @@
 }
 
 .bc-actions {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 7px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
   margin-top: 10px;
+}
+
+.bc-login-connected {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+}
+
+.bc-login-connected .bc-member {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.bc-login-connected > .bc-button {
+  flex: none;
+  padding: 8px 12px;
+}
+
+.bc-actions > .bc-button {
+  flex: 1 1 220px;
+}
+
+.bc-actions > .bc-full {
+  flex-basis: 100%;
+}
+
+.bc-bulk-confirm {
+  flex: 1 1 100%;
+  border: 1px solid var(--bc-warn);
+  border-radius: 12px;
+  padding: 10px;
+  background: var(--bc-warn-bg);
+  color: var(--bc-warn);
+}
+
+.bc-bulk-confirm-message {
+  margin: 0 0 9px;
+  color: var(--bc-warn);
+  font-weight: 700;
+}
+
+.bc-bulk-confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bc-bulk-confirm-actions > .bc-button {
+  flex: 1 1 160px;
+}
+
+.bc-identity-warning {
+  color: var(--bc-bad);
+}
+
+.bc-clear-drafts {
+  display: grid;
+  gap: 6px;
+  margin-top: 16px;
+  border-top: 1px solid var(--bc-line);
+  padding-top: 12px;
+}
+
+.bc-clear-drafts > .bc-button {
+  width: 100%;
+}
+
+.bc-clear-drafts .bc-help {
+  margin: 0;
 }
 
 .bc-full {
@@ -577,6 +651,16 @@
 @media (max-width: 520px) {
   .bni-export {
     flex-basis: 100%;
+  }
+
+  .bc-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .bc-actions > .bc-button,
+  .bc-bulk-confirm-actions > .bc-button {
+    width: 100%;
   }
 
   .bc-item-head {

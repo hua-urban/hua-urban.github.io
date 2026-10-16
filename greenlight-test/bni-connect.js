@@ -25,6 +25,21 @@
     return text;
   }
 
+  function identityNameKey(value) {
+    let name = String(value || "").normalize("NFKC").trim().replace(/\s+/g, " ").toLocaleLowerCase();
+    let previous;
+    do { previous = name; name = name.replace(/\([^()]*\)/gu, ""); } while (name !== previous);
+    if (/[()]/u.test(name)) return "";
+    const han = (name.match(/\p{Script=Han}/gu) || []).join("");
+    return han || name.replace(/\s+/gu, "");
+  }
+
+  function identityChapterKey(value) {
+    const key = String(value || "").normalize("NFKC").trim()
+      .replace(/^BNI\s*/i, "").replace(/\s+/g, "").replace(/分會$/u, "").toLocaleLowerCase();
+    return { "華都更huaurban+": "華都更", "華地產huarealestate": "華地產" }[key] || key;
+  }
+
   function diagnosticMessage(code, diagnostic = {}) {
     const http = Number(diagnostic.httpStatus);
     if (http === 429) return 'BNI 回應操作過於頻繁。請先查官方紀錄，稍候再處理，勿立即重送。';
@@ -32,7 +47,7 @@
     if (http === 405) return 'BNI 不接受這次送出方式（HTTP 405）。請保留草稿並通知管理者，不要反覆重送。';
     const messages = {
       BNI_DUPLICATE_OR_CONFIRMATION: "BNI Connect 回應重複或要求額外確認，請先檢查這筆是否已建立。",
-      BNI_VALIDATION_REJECTED: "BNI 未接受填寫資料。請按「編輯草稿」檢查會員、分會、日期與必填欄位，再重新配對；BNI 未指出具體錯誤欄位。",
+      BNI_VALIDATION_REJECTED: "BNI 未接受填寫資料。請按「編輯草稿」檢查會員、分會、日期與必填欄位，再配對單據會員；BNI 未指出具體錯誤欄位。",
       BNI_RESPONSE_UNCONFIRMED: "BNI 有回應，但沒有可判讀的成功結果，原因尚未確認。請先查看官方紀錄；確認沒有這筆後，再編輯或重試。",
       BNI_RESPONSE_ERROR: "BNI 回傳錯誤，但未提供可安全顯示的具體欄位原因。請先核對官方紀錄，再檢查日期、會員、分會與必填內容。",
       BNI_RESPONSE_WARNING: "BNI Connect 回傳警告，請先核對這筆資料是否已建立。",
@@ -85,7 +100,8 @@
       reviewedSourceKey: null,
       reviewConfirmItemId: null,
       reviewAbsenceChecked: false,
-      panelCollapsed: false,
+      planMember: null,
+      bulkConfirm: null,
       message: "正在確認 BNI 登入服務狀態…",
       messageKind: "info",
     };
@@ -106,8 +122,52 @@
       } catch { cleanupFailed = true; }
     }
 
+    function identityMatchesTarget() {
+      const loggedName = identityNameKey(state.member?.name);
+      const targetName = identityNameKey(payload?.me);
+      if (!loggedName || !targetName || loggedName !== targetName) return false;
+      const targetChapter = identityChapterKey(payload?.meChapter);
+      if (!targetChapter) return true;
+      const loggedChapter = identityChapterKey(state.member?.chapter);
+      return !!loggedChapter && loggedChapter === targetChapter;
+    }
+
+    function samePlanMember() {
+      if (!state.planMember || !state.member || !identityMatchesTarget()) return false;
+      const plannedId = String(state.planMember.id || "");
+      const currentId = String(state.member.id || "");
+      if (plannedId && currentId) return plannedId === currentId;
+      return identityNameKey(state.planMember.name) === identityNameKey(state.member.name)
+        && identityChapterKey(state.planMember.chapter) === identityChapterKey(state.member.chapter);
+    }
+
+    function canSubmitItem(item) {
+      if (item?.status !== "ready" || item.id == null || !String(item.id).trim() || !samePlanMember()) return false;
+      const kind = item.kind === "referral" ? "ref" : item.kind;
+      if (!(["121", "ref"].includes(kind))) return false;
+      const sourceRows = sourceRowsFor(kind);
+      const sourceIndex = sourceIndexFor(item);
+      if (sourceIndex < 0 || sourceIndex >= sourceRows.length || !sourceRows[sourceIndex]) return false;
+      if (Array.isArray(item.candidates) && item.candidates.length && !state.resolvedMembers[`${kind}:${sourceIndex}`]) return false;
+      return true;
+    }
+
+    function eligibleReadyItems() {
+      const idCounts = new Map();
+      state.items.forEach(item => {
+        if (item?.id == null || !String(item.id).trim()) return;
+        const id = String(item.id);
+        idCounts.set(id, (idCounts.get(id) || 0) + 1);
+      });
+      return state.items.filter(item => canSubmitItem(item) && idCounts.get(String(item.id)) === 1);
+    }
+
+    function isSelectableReadyItem(item) {
+      return eligibleReadyItems().includes(item);
+    }
+
     function currentReadyItems() {
-      return state.items.filter(item => item.status === "ready" && state.selected.has(String(item.id)));
+      return eligibleReadyItems().filter(item => state.selected.has(String(item.id)));
     }
 
     function invitersComplete() {
@@ -124,11 +184,13 @@
       state.items.forEach(item => rememberSubmissionResult(planId, item));
     }
 
-    function invalidatePlan(message = "資料已更新。請重新查詢配對後再送出。", matchingChanged = true) {
+    function invalidatePlan(message = "資料已更新。請重新配對單據會員後再送出。", matchingChanged = true) {
       archiveSubmissionResults();
       state.planId = null;
+      state.planMember = null;
       state.items = [];
       state.selected.clear();
+      state.bulkConfirm = null;
       state.reviewConfirmItemId = null;
       state.reviewAbsenceChecked = false;
       state.matchingChanged = matchingChanged;
@@ -141,7 +203,7 @@
       if (!button) return;
       const count = currentReadyItems().length;
       button.textContent = `確認送出已勾選 ${count} 筆`;
-      button.disabled = !count || !!state.busy || !state.available || !state.authenticated || !state.planId;
+      button.disabled = !count || !!state.busy || !!state.bulkConfirm || !state.available || !state.authenticated || !state.planId;
       const counter = host.querySelector("[data-selection-count]");
       if (counter) counter.textContent = `已勾選 ${count} 筆可送出的資料`;
     }
@@ -201,7 +263,7 @@
         : "登入已逾時，請重新登入後再預覽資料。";
       if (error?.status === 409) {
         if (action === "login") return "BNI Connect 要求額外驗證，這批資料尚未送出。請先完成驗證，再回到本頁登入。";
-        if (action === "prepare") return "BNI 已登入成功，但登入會員與本次填寫會員的姓名或分會不符。請核對上方姓名與分會，或回首頁重新選擇會員；括號綽號與英文不影響比對。";
+        if (action === "prepare") return "登入會員與本次填寫會員的姓名或分會不符。請核對上方姓名與分會，或回首頁重新選擇會員；括號綽號與英文不影響比對。";
         return "BNI Connect 要求額外驗證。請先確認這筆是否已送出；系統不會自動重送。";
       }
       if (error?.status === 429) return action === "submit"
@@ -235,6 +297,8 @@
       state.member = null;
       state.csrfToken = "";
       state.planId = null;
+      state.planMember = null;
+      state.bulkConfirm = null;
       state.selected.clear();
       setMessage(message, "error");
     }
@@ -259,9 +323,8 @@
       const details = node("details", "bc-details");
       details.dataset.inviterDetails = "true";
       details.open = state.inviterDetailsOpen;
-      section.append(node("p", "bc-help bc-inviter-default", "預設由我邀請對方；若實際由對方邀請，請展開逐筆更改。"));
       details.append(node("summary", "bc-summary", `逐筆更改邀請方（預設 ${rows121.length} 筆都由我邀請）`));
-      details.append(node("p", "bc-help", "請依實際會面情況選擇。更新後要重新預覽，才會套用到本批資料。"));
+      details.append(node("p", "bc-help", "依實際會面情況選擇；變更後請重新「配對單據會員」。"));
 
       const list = node("div", "bc-inviter-list");
       rows121.forEach((row, index) => {
@@ -298,20 +361,20 @@
 
     function renderLogin() {
       const section = node("section", "bc-login");
-      section.append(node("h3", "bc-section-title", state.authenticated ? "目前登入會員" : "登入 BNI Connect"));
       if (state.authenticated && state.member) {
+        section.className += " bc-login-connected";
         const member = node("div", "bc-member");
         member.setAttribute("aria-label", "BNI Connect 登入會員");
         member.append(node("span", "bc-member-mark", "已登入"));
         member.append(node("strong", "bc-member-name", state.member.name));
         if (state.member.chapter) member.append(node("span", "bc-member-chapter", state.member.chapter));
         section.append(member);
-        section.append(node("p", "bc-help bc-account-reminder", "請確認好BNI帳密，小追只能代發無法驗證喔！"));
         const logout = createButton("登出", "logout", "bc-button bc-secondary", !!state.busy);
         section.append(logout);
         return section;
       }
 
+      section.append(node("h3", "bc-section-title", "登入 BNI Connect"));
       const form = node("form", "bc-login-form");
       form.dataset.loginForm = "true";
       const locked = !state.statusLoaded || !state.available || !state.csrfToken || !!state.busy;
@@ -384,12 +447,12 @@
       const index = sourceIndexFor(item);
       const wrap = node("div", "bc-candidate-pairing");
       if (!Number.isInteger(index) || index < 0 || index >= sourceRows.length || !["121", "ref", "referral"].includes(item.kind)) {
-        wrap.append(node("p", "bc-help", "這筆資料無法安全配對，請重新查詢會員配對。"));
+        wrap.append(node("p", "bc-help", "這筆資料無法安全配對，請再次配對單據會員。"));
         return wrap;
       }
       const key = `${kind}:${index}`;
       const label = node("label", "bc-inviter-label");
-      label.append(node("span", "", "候選會員配對（選擇後需重新配對）"));
+      label.append(node("span", "", "候選會員（選擇後需配對單據會員）"));
       const select = node("select", "bc-select");
       select.dataset.candidateKind = kind;
       select.dataset.sourceIndex = String(index);
@@ -485,7 +548,7 @@
       if (item?.status === "blocked" && item?.retryReviewAllowed === true) {
         const review = node("div", "bc-item-review");
         if (state.reviewConfirmItemId === String(item.id)) {
-          review.append(node("p", "bc-help", "請先在 BNI Connect 搜尋這筆資料。勾選確認後，只會記錄人工核對並重新配對；之後仍需你手動勾選並送出。"));
+          review.append(node("p", "bc-help", "請先在 BNI Connect 搜尋這筆資料。勾選確認後只記錄人工核對，再配對單據會員；仍需你手動勾選送出。"));
           const label = node("label", "bc-review-confirm-label");
           const checkbox = node("input", "bc-review-confirm-checkbox");
           checkbox.type = "checkbox";
@@ -498,7 +561,7 @@
 
           const actions = node("div", "bc-review-confirm-actions");
           const confirm = createButton(
-            "確認解除鎖定並重新配對",
+            "確認解除鎖定並配對單據會員",
             "confirm-review-absent",
             "bc-button bc-primary",
             !!state.busy || !state.available || !state.authenticated || !state.planId || !state.reviewAbsenceChecked,
@@ -509,7 +572,7 @@
           actions.append(confirm, cancel);
           review.append(actions);
         } else {
-          review.append(node("p", "bc-help", "若你已在 BNI Connect 確認這筆沒有建立，可記錄人工核對並重新配對。這個操作不會送出資料。"));
+          review.append(node("p", "bc-help", "若已確認這筆沒有建立，可記錄人工核對並配對單據會員；此操作不會送出資料。"));
           const button = createButton(
             "檢查後解除重試鎖定",
             "review-absent",
@@ -531,7 +594,7 @@
         input.type = "checkbox";
         input.dataset.itemId = String(item.id);
         input.checked = state.selected.has(String(item.id));
-        input.disabled = !!state.busy || !state.authenticated || !state.planId;
+        input.disabled = !!state.busy || !!state.bulkConfirm || !isSelectableReadyItem(item) || !state.authenticated || !state.planId;
         input.setAttribute("aria-label", `選取第 ${index + 1} 筆 ${textFromServer(item.name, "資料")} 送出`);
         label.append(input, node("span", "", "選取此筆送出"));
         card.append(label);
@@ -541,43 +604,20 @@
 
     function render() {
       const shell = node("div", "bc-shell");
-      shell.append(node("div", "bc-filled-member", `本次填寫會員：${textFromServer(payload?.me, "資料未提供")}${payload?.meChapter ? " · " + textFromServer(payload.meChapter) : ""}`));
-
-      const status = node("div", `bc-message bc-message-${state.messageKind}`, state.message);
-      status.setAttribute("role", "status");
-      status.setAttribute("aria-live", "polite");
-      shell.append(status);
-
-      const panelControls = node("div", "bc-panel-controls");
-      panelControls.append(createButton(
-        "重新檢查登入狀態（只讀）",
-        "refresh",
-        "bc-button bc-secondary",
-        !!state.busy,
-      ));
-      if (state.items.length || state.submissionResults.size) {
-        panelControls.append(createButton("收合 BNI Connect 結果面板", "collapse-panel", "bc-button bc-secondary", !!state.busy));
-        if (document.querySelector("#back")) {
-          panelControls.append(createButton("回去修改填寫資料", "return-edit", "bc-button bc-secondary", !!state.busy));
-        }
+      if (!state.authenticated || !identityMatchesTarget()) {
+        shell.append(node("div", "bc-filled-member", `本次填寫會員：${textFromServer(payload?.me, "資料未提供")}${payload?.meChapter ? " · " + textFromServer(payload.meChapter) : ""}`));
       }
-      if ((rows121.length || payload?.refs?.length) && typeof options.onClearDrafts === 'function') {
-        panelControls.append(createButton('清除Key單', 'clear-drafts', 'bc-button bc-primary', !!state.busy));
-        panelControls.append(node('p', 'bc-help', cleanupFailed
-          ? 'BNI 已確認完成，但本機清除未完成。請按「清除Key單」移除本頁草稿，勿重送。'
-          : '清除本頁 121 與引薦草稿，包含失敗或待確認項目；不會刪除 BNI 官方單據。已確認成功的項目會自動從待辦移除。'));
-      }
-      shell.append(panelControls);
 
-      if (state.panelCollapsed) {
-        const collapsed = node("section", "bc-collapsed-panel");
-        collapsed.append(node("h3", "bc-section-title", "BNI Connect 結果面板已收合"));
-        collapsed.append(node("p", "bc-help", resultSummary()));
-        collapsed.append(node("p", "bc-help", "本頁結果仍保留。收合面板不會登出、清除結果或重新送出。"));
-        collapsed.append(createButton("重新開啟結果面板", "expand-panel", "bc-button bc-primary"));
-        shell.append(collapsed);
-        host.replaceChildren(shell);
-        return;
+      if (state.message) {
+        const status = node("div", `bc-message bc-message-${state.messageKind}`, state.message);
+        status.setAttribute("role", "status");
+        status.setAttribute("aria-live", "polite");
+        shell.append(status);
+      }
+      if (state.messageKind === "error") {
+        const recovery = node("div", "bc-panel-controls");
+        recovery.append(createButton("重新檢查登入狀態", "refresh", "bc-button bc-secondary", !!state.busy));
+        shell.append(recovery);
       }
 
       const inviters = renderInviters();
@@ -587,14 +627,32 @@
       if (state.authenticated && state.member) {
         const actions = node("div", "bc-actions");
         const preview = createButton(
-          state.busy === "prepare" ? "查詢配對中…" : (state.hasPrepared || state.matchingChanged ? "重新配對" : "查詢配對"),
+          state.busy === "prepare" ? "配對單據會員中…" : "配對單據會員",
           "prepare",
-          "bc-button bc-primary",
-          !!state.busy || !invitersComplete() || !state.csrfToken,
+          "bc-button bc-secondary",
+          !!state.busy || !!state.bulkConfirm || !invitersComplete() || !state.csrfToken || !identityMatchesTarget(),
         );
         actions.append(preview);
+        if (state.planId && state.items.length) {
+          if (state.bulkConfirm) {
+            const confirm = node("div", "bc-bulk-confirm");
+            const count = state.bulkConfirm.ids.length;
+            confirm.append(node("p", "bc-bulk-confirm-message", `將依序送出 ${count} 筆可送出單據。請確認實際筆數後開始。`));
+            const confirmActions = node("div", "bc-bulk-confirm-actions");
+            confirmActions.append(createButton("取消", "cancel-send-all", "bc-button bc-secondary", !!state.busy));
+            confirmActions.append(createButton(`確認送出 ${count} 筆`, "confirm-send-all", "bc-button bc-primary", !!state.busy));
+            confirm.append(confirmActions);
+            actions.append(confirm);
+          } else {
+            const eligibleCount = eligibleReadyItems().length;
+            actions.append(createButton("一鍵奔綠燈", "send-all", "bc-button bc-primary bc-send-all",
+              !eligibleCount || !!state.busy || !state.available || !state.authenticated || !identityMatchesTarget()));
+          }
+        }
         if (!invitersComplete() && rows121.length) {
-          actions.append(node("p", "bc-help bc-full", "請先為每筆 121 設定邀請方；不會自動代填。"));
+          actions.append(node("p", "bc-help bc-full", "請先設定 121 邀請方。"));
+        } else if (!identityMatchesTarget()) {
+          actions.append(node("p", "bc-help bc-full bc-identity-warning", "登入會員與本次填寫會員不符，請確認帳號後再配對。"));
         }
         shell.append(actions);
       }
@@ -603,15 +661,12 @@
         const preview = node("section", "bc-preview");
         const heading = node("h3", "bc-section-title", "會員配對預覽");
         preview.append(heading);
-        preview.append(node("p", "bc-help", "BNI Connect 已確認登入會員與本次填寫會員相符。請逐筆檢查完整內容；只有標示「可送出」的資料能勾選。候選會員需要先選擇配對，再按「重新配對」。"));
+        preview.append(node("p", "bc-help", "逐筆確認單據內容；只有「可送出」項目能勾選。"));
         const list = node("div", "bc-items");
         state.items.forEach((item, index) => list.append(renderItem(item, index)));
         preview.append(list);
         if (state.matchingChanged || !state.planId) {
-          const recheck = createButton("重新配對", "prepare", "bc-button bc-primary bc-send",
-            !!state.busy || !state.authenticated || !state.csrfToken || !invitersComplete());
-          preview.append(recheck);
-          preview.append(node("p", "bc-selection-count", "配對資料已變更，請重新查詢後再送出；送出功能暫停。"));
+          preview.append(node("p", "bc-selection-count", "配對資料已變更；請先按上方「配對單據會員」。"));
         } else {
           const send = createButton("確認送出已勾選 0 筆", "send-batch", "bc-button bc-primary bc-send", true);
           preview.append(send);
@@ -628,28 +683,24 @@
       if (visibleJournal.length) {
         const history = node("section", "bc-preview bc-result-history");
         history.append(node("h3", "bc-section-title", "本頁先前的送出結果"));
-        history.append(node("p", "bc-help", "這些結果保留在目前頁面中。只讀檢查、重新配對或收合面板不會重新送出。"));
+        history.append(node("p", "bc-help", "保留本頁先前的送出結果。"));
         const list = node("div", "bc-items");
         visibleJournal.forEach(item => list.append(renderItem(item, sourceIndexFor(item) >= 0 ? sourceIndexFor(item) : 0)));
         history.append(list);
         shell.append(history);
       }
 
+      if ((rows121.length || payload?.refs?.length) && typeof options.onClearDrafts === "function") {
+        const clear = node("section", "bc-clear-drafts");
+        clear.append(createButton("清除Key單", "clear-drafts", "bc-button bc-secondary", !!state.busy || !!state.bulkConfirm));
+        clear.append(node("p", "bc-help", cleanupFailed
+          ? "BNI 已確認完成，但本機清除未完成。請按「清除Key單」移除本頁草稿，勿重送。"
+          : "清除本機 121 與引薦草稿，不會刪除 BNI 官方單據。"));
+        shell.append(clear);
+      }
+
       host.replaceChildren(shell);
       updateBatchButton();
-    }
-
-    function resultSummary() {
-      const currentIds = new Set(state.items.map(item => String(item.id)));
-      const values = [
-        ...[...state.submissionResults.values()].filter(item => !currentIds.has(String(item.id))),
-        ...state.items.filter(item => ["success", "failed", "uncertain", "already_sent"].includes(item.status)),
-      ];
-      if (!values.length) return "目前配對與送出資料仍保留在本頁。";
-      const confirmed = values.filter(item => item.status === "success" || item.status === "already_sent").length;
-      const failed = values.filter(item => item.status === "failed").length;
-      const uncertain = values.filter(item => item.status === "uncertain").length;
-      return `本頁保留送出結果：確認 ${confirmed} 筆、失敗 ${failed} 筆、待確認 ${uncertain} 筆。`;
     }
 
     async function refreshStatus({ initial = false } = {}) {
@@ -667,13 +718,21 @@
         state.csrfToken = result.csrfToken;
         if (result.authenticated === true) {
           if (setAuthenticated(result.member)) {
-            setMessage(initial
-              ? "已恢復登入狀態。設定好 121 邀請方後即可查看會員配對。"
-              : "登入狀態已確認。本頁送出結果仍保留，這次只讀檢查沒有重新送出資料。");
+            if (!identityMatchesTarget()) {
+              if (state.planId) invalidatePlan("登入會員已變更，請重新配對單據會員。", true);
+              setMessage("登入會員與本次填寫會員不符，請確認帳號後再配對。", "error");
+            } else if (state.planId && !samePlanMember()) {
+              invalidatePlan("登入會員已變更，請重新配對單據會員。", true);
+              setMessage("登入會員已變更，請重新配對單據會員。", "error");
+            } else {
+              setMessage(invitersComplete() ? "" : "請先設定 121 邀請方，再配對單據會員。");
+            }
           } else {
             state.authenticated = false;
             state.member = null;
             state.planId = null;
+            state.planMember = null;
+            state.bulkConfirm = null;
             state.selected.clear();
             setMessage("登入狀態缺少會員資料，請重新登入。", "error");
           }
@@ -681,13 +740,15 @@
           state.authenticated = false;
           state.member = null;
           state.planId = null;
+          state.planMember = null;
+          state.bulkConfirm = null;
           state.selected.clear();
           setMessage(state.items.length || state.submissionResults.size
-            ? "目前服務可用，但 BNI Connect 尚未登入。本頁結果仍保留；登入後請重新配對。"
+            ? "BNI Connect 尚未登入。本頁送出結果仍保留。"
             : "服務可用。請在同一頁登入 BNI Connect。");
         }
         render();
-        if (initial && state.authenticated && invitersComplete()) await prepare();
+        if (initial && state.authenticated && identityMatchesTarget() && invitersComplete()) await prepare();
       } catch (error) {
         state.statusLoaded = true;
         state.busy = null;
@@ -696,6 +757,8 @@
         state.csrfToken = "";
         state.member = null;
         state.planId = null;
+        state.planMember = null;
+        state.bulkConfirm = null;
         state.selected.clear();
         setMessage(state.items.length || state.submissionResults.size
           ? "無法確認目前的登入狀態。本頁送出結果仍保留；這次只讀檢查沒有重新送出資料。請稍後再試。"
@@ -745,10 +808,15 @@
         }
         state.busy = null;
         invalidatePlan(invitersComplete()
-          ? "登入成功，正在查詢會員配對…"
-          : "登入成功。請設定每筆 121 的邀請方，再查詢配對。", state.hasPrepared);
+          ? ""
+          : "請先設定 121 邀請方，再配對單據會員。", state.hasPrepared);
         render();
-        if (invitersComplete()) await prepare();
+        if (!identityMatchesTarget()) {
+          setMessage("登入會員與本次填寫會員不符，請確認帳號後再配對。", "error");
+          render();
+        } else if (invitersComplete()) {
+          await prepare();
+        }
       } catch (error) {
         state.busy = null;
         if (error?.status === 401) {
@@ -782,24 +850,32 @@
 
     async function prepare() {
       if (!state.available || !state.authenticated || !state.csrfToken || state.busy) return;
+      if (!identityMatchesTarget()) {
+        setMessage("登入會員與本次填寫會員不符，請確認帳號後再配對。", "error");
+        render();
+        return;
+      }
       if (!invitersComplete()) {
-        setMessage("請先設定每筆 121 的邀請方；不會自動代填。", "error");
+        setMessage("請先設定 121 邀請方。", "error");
         render();
         return;
       }
       state.busy = "prepare";
       archiveSubmissionResults();
       state.planId = null;
+      state.planMember = null;
+      state.bulkConfirm = null;
       state.selected.clear();
       state.reviewConfirmItemId = null;
       state.reviewAbsenceChecked = false;
       const reviewedSourceKey = state.reviewedSourceKey;
-      setMessage("正在查詢本次填寫資料的會員配對…");
+      setMessage("正在配對單據會員…");
       render();
       try {
         const result = await postJson(API.prepare, { payload: payloadForPrepare() });
         if (!result.planId || !Array.isArray(result.items)) throw new ApiError(502);
         state.planId = String(result.planId);
+        state.planMember = { ...state.member };
         const preparedRows = payloadForPrepare().rows121;
         let reviewedItemFound = false;
         state.items = result.items.filter(item => item && item.id != null).map(item => {
@@ -819,9 +895,9 @@
             initiatedBy,
             status: ["ready", "blocked", "already_sent"].includes(item.status) ? item.status : "blocked",
             resultMessage: reviewed
-              ? "已記錄你在 BNI Connect 的人工核對，並重新查詢配對。請再次檢查內容，再手動勾選並送出。"
+                ? "已記錄你在 BNI Connect 的人工核對，並再次配對單據會員。請檢查內容，再手動勾選送出。"
               : item.retryReviewAllowed === true
-                ? "先前送出結果待確認。請到 BNI Connect 核對；如已確認沒有此單，可記錄人工核對後重新配對。"
+                ? "先前送出結果待確認。請到 BNI Connect 核對；如已確認沒有此單，可記錄人工核對後再次配對單據會員。"
                 : "",
           };
         });
@@ -835,14 +911,16 @@
         state.matchingChanged = false;
         setMessage(reviewedSourceKey
           ? (reviewedItemFound
-            ? "人工核對已記錄，重新配對完成。請檢查內容，再手動勾選要送出的項目。"
-            : "人工核對已記錄，但重新配對沒有回傳這筆資料。請檢查目前結果。")
-          : "預覽已完成。請確認每筆完整資料，再選擇要送出的項目。",
+            ? "人工核對已記錄，會員配對完成。"
+            : "人工核對已記錄，但配對結果沒有回傳這筆資料。請檢查目前結果。")
+          : "",
         reviewedSourceKey ? (reviewedItemFound ? "info" : "error") : "success");
         render();
       } catch (error) {
         state.busy = null;
         state.planId = null;
+        state.planMember = null;
+        state.bulkConfirm = null;
         state.selected.clear();
         if (error?.status === 401) {
           expireSession(postFailureMessage(error, "prepare"));
@@ -857,13 +935,45 @@
       return ["success", "failed", "uncertain", "already_sent"].includes(status) ? status : "uncertain";
     }
 
-    async function sendBatch() {
-      if (!state.planId || !state.authenticated || state.busy) return;
-      const selected = currentReadyItems();
+    function beginSendAll() {
+      if (!state.planId || !state.authenticated || state.busy || state.bulkConfirm || !identityMatchesTarget()) return;
+      const eligible = eligibleReadyItems();
+      if (!eligible.length) return;
+      state.bulkConfirm = {
+        ids: eligible.map(item => String(item.id)),
+        previousSelection: [...state.selected],
+      };
+      state.selected = new Set(state.bulkConfirm.ids);
+      setMessage("");
+      render();
+    }
+
+    function cancelSendAll() {
+      if (!state.bulkConfirm) return;
+      const previous = state.bulkConfirm.previousSelection;
+      state.selected = new Set(previous.filter(id => eligibleReadyItems().some(item => String(item.id) === id)));
+      state.bulkConfirm = null;
+      render();
+    }
+
+    async function sendBatch(expectedIds = null) {
+      if (!state.planId || !state.authenticated || state.busy || (state.bulkConfirm && !expectedIds)) return;
+      const ready = currentReadyItems();
+      const expected = expectedIds ? new Set(expectedIds) : null;
+      const selected = expected ? ready.filter(item => expected.has(String(item.id))) : ready;
+      if (expected && selected.length !== expected.size) {
+        const previous = state.bulkConfirm?.previousSelection || [];
+        state.selected = new Set(previous.filter(id => eligibleReadyItems().some(item => String(item.id) === id)));
+        state.bulkConfirm = null;
+        setMessage("可送出資料已變更，請重新確認筆數後再送出。", "error");
+        render();
+        return;
+      }
       if (!selected.length) return;
       const planId = state.planId;
+      state.bulkConfirm = null;
       state.busy = "submit";
-      setMessage(`開始依序送出 ${selected.length} 筆已勾選資料。`, "info");
+      setMessage(`開始依序送出 ${selected.length} 筆已確認資料。`, "info");
       render();
 
       for (let index = 0; index < selected.length; index += 1) {
@@ -943,13 +1053,13 @@
         state.reviewedSourceKey = `${item.kind}:${sourceIndexFor(item)}`;
         state.busy = null;
         setMessage(textFromServer(result.message,
-          "已記錄人工核對，正在重新配對。仍需由你檢查並手動送出。"));
+          "已記錄人工核對，正在配對單據會員。仍需由你檢查並手動送出。"));
         render();
         await prepare();
       } catch (error) {
         state.busy = null;
         if (error?.status === 401) {
-          expireSession("登入已逾時，人工核對未完成。請重新登入並重新配對。");
+          expireSession("登入已逾時，人工核對未完成。請重新登入並配對單據會員。");
         } else {
           setMessage("無法記錄人工核對。送出狀態未變，請到 BNI Connect 核對後再試。", "error");
         }
@@ -969,6 +1079,8 @@
         state.authenticated = false;
         state.member = null;
         state.planId = null;
+        state.planMember = null;
+        state.bulkConfirm = null;
         state.items = [];
         state.selected.clear();
         if (typeof result.csrfToken !== "string" || !result.csrfToken) state.csrfToken = "";
@@ -981,6 +1093,8 @@
         state.member = null;
         state.csrfToken = "";
         state.planId = null;
+        state.planMember = null;
+        state.bulkConfirm = null;
         state.items = [];
         state.selected.clear();
         setMessage(error?.status === 401 ? "登入狀態已結束。" : "無法確認登出狀態，請重新檢查服務。", "error");
@@ -1002,7 +1116,7 @@
         if (!Number.isInteger(index) || index < 0 || index >= state.inviterByRow.length) return;
         state.inviterByRow[index] = select.value === "me" || select.value === "other" ? select.value : "";
         state.reviewedSourceKey = null;
-        invalidatePlan("邀請方已更新。請重新查詢配對後再送出。", state.hasPrepared);
+        invalidatePlan("邀請方已更新。請重新配對單據會員後再送出。", state.hasPrepared);
         render();
         return;
       }
@@ -1015,9 +1129,11 @@
         else delete state.resolvedMembers[key];
         state.reviewedSourceKey = null;
         state.planId = null;
+        state.planMember = null;
+        state.bulkConfirm = null;
         state.selected.clear();
         state.matchingChanged = true;
-        setMessage("候選配對已更新。請按「重新配對」再次確認會員；此項目目前不能送出。", "info");
+        setMessage("候選配對已更新。請按「配對單據會員」再次確認；此項目目前不能送出。", "info");
         render();
         return;
       }
@@ -1046,25 +1162,28 @@
       if (!button || button.disabled) return;
       const action = button.dataset.action;
       if (action === "refresh") void refreshStatus();
-      else if (action === "collapse-panel") { state.panelCollapsed = true; render(); }
-      else if (action === "expand-panel") { state.panelCollapsed = false; render(); }
-      else if (action === "return-edit") document.querySelector("#back")?.click();
       else if (action === "edit-draft") {
         if (state.busy) return;
         const sourceIndex = Number(button.dataset.editSourceIndex);
         const kind = button.dataset.editKind;
         if (!Number.isInteger(sourceIndex) || sourceIndex < 0 || !['121', 'ref'].includes(kind)) return;
-        invalidatePlan('草稿已開啟編輯；修改後請重新配對。');
+        invalidatePlan('草稿已開啟編輯；修改後請配對單據會員。');
         options.onEditDraft?.({kind, sourceIndex});
       }
       else if (action === "clear-drafts") {
-        if (state.busy) return;
+        if (state.busy || state.bulkConfirm) return;
         try {
           if (options.onClearDrafts?.() === false) throw Error('Draft cleanup failed');
         } catch { setMessage('本機清除尚未完成，請保留本頁結果，勿重送。', 'error'); render(); }
       }
       else if (action === "prepare") void prepare();
       else if (action === "send-batch") void sendBatch();
+      else if (action === "send-all") beginSendAll();
+      else if (action === "cancel-send-all") cancelSendAll();
+      else if (action === "confirm-send-all") {
+        const ids = state.bulkConfirm?.ids;
+        if (ids) void sendBatch(ids);
+      }
       else if (action === "review-absent") {
         const item = state.items.find(candidate => String(candidate.id) === button.dataset.itemId);
         state.reviewConfirmItemId = item && item.retryReviewAllowed === true ? String(item.id) : null;
