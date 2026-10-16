@@ -249,7 +249,14 @@
   .seg button.sel { background: var(--green); border-color: var(--green); color: #fff; font-weight: 600; }
   .add.small { margin-top: 10px; padding: 9px; font-size: 14px; border-width: 1.5px; }
   .bigs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
-  .bigs > div { background: var(--green-soft); border-radius: 14px; padding: 12px 14px; }
+  .bigs > .draft-summary-toggle { display: flex; flex-direction: column; align-items: center; gap: 4px; background: var(--green-soft); border: 1px solid var(--green-deep); border-radius: 14px; padding: 14px; color: var(--green-deep); font: inherit; cursor: pointer; }
+  .draft-summary-toggle:focus-visible { outline: 3px solid var(--green-deep); outline-offset: 3px; }
+  .draft-summary-toggle[aria-expanded="true"] { box-shadow: inset 0 0 0 2px var(--green-deep); }
+  .draft-summary-toggle:disabled { cursor: default; border-color: var(--line); }
+  .draft-summary-toggle .draft-count-number { font-size: 44px; color: var(--green-deep); font-weight: 800; }
+  .draft-toggle-hint { font-size: 13px; color: var(--green-deep); }
+  .draft-summary-toggle[aria-expanded="true"] .draft-toggle-hint::after { content: " ▴"; }
+  .draft-summary-toggle[aria-expanded="false"] .draft-toggle-hint::after { content: " ▾"; }
   .big span { font-size: 18px; color: var(--muted); font-weight: 600; }
   .big-l { margin: 4px 0 0; color: var(--green-deep); font-weight: 700; }
   .part { font-size: 18px; margin: 24px 0 0; padding-top: 16px; border-top: 1px solid var(--line); }
@@ -1054,12 +1061,12 @@ function render() {
         <p class="step">首先</p>
         <p class="q">請問你是哪一位夥伴？</p>
         <p class="hint">選好之後，後面的名單就不會出現你自己。其他分會夥伴請在下方填寫姓名與分會。</p>
+        <div class="tools"><input id="filter" type="search" placeholder="搜尋編號或名字" aria-label="搜尋會員編號或名字"></div>
         <div class="who-roster-head">
           <h2 class="who-group"><button type="button" class="who-roster-toggle" id="toggleRoster" aria-expanded="false" aria-controls="whoRoster">${CHAPTER}分會名單</button></h2>
           <label class="who-external-switch"><input type="checkbox" id="chooseExternal" aria-controls="externalMemberForm">外分會</label>
         </div>
         <div id="whoRoster" hidden>
-        <div class="tools"><input id="filter" type="search" placeholder="搜尋編號或名字"></div>
         <div class="list one" id="list">
           ${all.map(p => `
             <label data-k="${key(p)}" class="${p.no === state.me ? "on" : ""}">
@@ -1790,31 +1797,35 @@ function render() {
         <p class="step">完成 🟢</p>
         <p class="q">你的 121 與引薦</p>
         <div class="bigs">
-          <div><p class="big"><span id="draft-count-121">${rows.length}</span><span> 筆</span></p><p class="big-l">121 待辦</p></div>
-          <div><p class="big"><span id="draft-count-ref">${refRows.length}</span><span> 筆</span></p><p class="big-l">引薦待辦</p></div>
+          <button type="button" class="draft-summary-toggle" data-draft-toggle="121" aria-expanded="false" aria-controls="draft-details-121" ${rows.length ? "" : "disabled"}><span class="big"><span class="draft-count-number" id="draft-count-121">${rows.length}</span><span> 筆</span></span><span class="big-l">121 待辦</span><span class="draft-toggle-hint">${rows.length ? "點擊查看" : "目前沒有待辦"}</span></button>
+          <button type="button" class="draft-summary-toggle" data-draft-toggle="ref" aria-expanded="false" aria-controls="draft-details-ref" ${refRows.length ? "" : "disabled"}><span class="big"><span class="draft-count-number" id="draft-count-ref">${refRows.length}</span><span> 筆</span></span><span class="big-l">引薦待辦</span><span class="draft-toggle-hint">${refRows.length ? "點擊查看" : "目前沒有待辦"}</span></button>
         </div>
         <p class="sent" id="sent"></p>
         <p class="hint">「清除Key單」只移除這台裝置的待辦草稿，不會刪除 BNI Connect 上的紀錄。</p>
         ${FLOW === "121" && !refRows.length ? `<p class="portal-h">還沒補 key 引薦？</p>${portals("ref")}` : ""}
         ${FLOW === "ref" && !rows.length ? `<p class="portal-h">還沒補 key 121？</p>${portals("121")}` : ""}
-        <h2 class="part">121</h2>
-        ${[...EVENTS.map(ev => ev.title), "gather", "121", "outside"].map(src => {
+        <section id="draft-details-121" aria-label="121 待辦明細" hidden>
+        <h2 class="part">121 待辦明細</h2>
+        ${[...EVENTS.map(ev => ev.title), "gather", "121", "outside"].filter(src => rows.some(r => r.src === src)).map(src => {
           const rs = rows.map((r, index) => ({ r, index })).filter(({ r }) => r.src === src);
           const title = src === "121" ? `${CHAPTER}夥伴 121` : src === "outside" ? "其他／手動輸入夥伴 121" : src === "gather" ? "其他活動／組聚" : src;
           const chip = r => src === "outside"
             ? `${esc(r.name)}<small>${esc(r.chapter)} · ${r.m}/${r.d}</small>`
             : `${r.ext ? "" : r.no + " "}${esc(r.name)}${r.ext ? `<small>${esc(r.chapter)}</small>` : ""}${src === "121" ? `<small>${r.m}/${r.d}</small>` : ""}${src === "gather" ? `<small>${esc(r.kind)} ${r.m}/${r.d}</small>` : ""}`;
-          return `<h3>${title}</h3>
+          return `<section data-draft-group><h3>${esc(title)}</h3>
             ${rs.length ? `<div class="chips">${rs.map(({ r, index }) => `<span class="chip" data-draft-kind="121" data-draft-index="${index}">${chip(r)}<button type="button" class="chip-clear" data-clear-draft="121:${index}" aria-label="清除 ${esc(r.name)} 的 121 Key 單">清除Key單</button></span>`).join("")}</div>`
-                        : `<p class="empty">—</p>`}`;
+                        : ""}</section>`;
         }).join("")}
-        <h2 class="part">引薦</h2>
-        ${REF_QS.map((q, i) => {
+        </section>
+        <section id="draft-details-ref" aria-label="引薦待辦明細" hidden>
+        <h2 class="part">引薦待辦明細</h2>
+        ${REF_QS.filter(q => refRows.some(r => r.qid === q.id)).map(q => {
           const refs = refRows.map((r, index) => ({ r, index })).filter(({ r }) => r.qid === q.id);
-          return `<h3>${i + 1}. ${q.short}</h3>
+          return `<section data-draft-group><h3>${esc(q.short)}</h3>
             ${refs.length ? `<div class="chips">${refs.map(({ r, index }) => `<span class="chip" data-draft-kind="ref" data-draft-index="${index}">${esc(r.no ? `${r.no} ${r.name}` : `${r.name}（${r.chapter}）`)}<button type="button" class="chip-clear" data-clear-draft="ref:${index}" aria-label="清除 ${esc(r.name)} 的引薦 Key 單">清除Key單</button></span>`).join("")}</div>`
-                      : `<p class="empty">—</p>`}`;
+                      : ""}</section>`;
         }).join("")}
+        </section>
         <div class="actions">
           <button class="ghost" id="back">←</button>
           <details class="bni-export">
@@ -1850,6 +1861,15 @@ function render() {
       onEditDraft: item => { if (!cleanup.edit(item)) toast("這筆草稿已變更，請重新整理後再編輯。"); },
     });
     app.onclick = e => {
+      const toggle = e.target.closest("[data-draft-toggle]");
+      if (toggle && !toggle.disabled) {
+        const panel = document.getElementById(toggle.getAttribute("aria-controls"));
+        const expanded = toggle.getAttribute("aria-expanded") !== "true";
+        toggle.setAttribute("aria-expanded", String(expanded));
+        panel.hidden = !expanded;
+        toggle.querySelector(".draft-toggle-hint").textContent = expanded ? "點擊收起" : "點擊查看";
+        return;
+      }
       const button = e.target.closest("[data-clear-draft]");
       if (!button) return;
       if (widget?.getStatus().busy) { toast("BNI Connect 處理中，請稍後再清除草稿。"); return; }
@@ -2130,13 +2150,24 @@ function createDraftCleanup(rows, refRows) {
       const count121 = $("#draft-count-121"), countRef = $("#draft-count-ref");
       if (count121) count121.textContent = String(collect().length);
       if (countRef) countRef.textContent = String(collectRefs().length);
+      for (const [kind, count] of [["121", collect().length], ["ref", collectRefs().length]]) {
+        const toggle = document.querySelector(`[data-draft-toggle="${kind}"]`);
+        if (!toggle) continue;
+        toggle.disabled = count === 0;
+        if (!count) {
+          toggle.setAttribute("aria-expanded", "false");
+          const panel = document.getElementById(`draft-details-${kind}`);
+          if (panel) panel.hidden = true;
+          const hint = toggle.querySelector(".draft-toggle-hint");
+          if (hint) hint.textContent = "目前沒有待辦";
+        }
+      }
       for (const item of newlyRemoved) {
         const chip = document.querySelector(`[data-draft-kind="${item.kind}"][data-draft-index="${item.sourceIndex}"]`);
         if (!chip) continue;
-        chip.querySelector("[data-clear-draft]")?.remove();
-        const note = document.createElement("small");
-        note.textContent = "已從待辦移除";
-        chip.append(note);
+        const group = chip.closest("[data-draft-group]");
+        chip.remove();
+        if (group && !group.querySelector("[data-draft-kind]")) group.remove();
       }
     }
     return true;
