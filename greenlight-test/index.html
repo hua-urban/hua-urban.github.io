@@ -268,7 +268,9 @@
   .video-l a, .vlink a { color: var(--green-deep); }
   .vlink { margin: -4px 0 12px; font-size: 15px; font-weight: 600; }
   .portal-h.first { margin-top: 0; font-size: 18px; }
-  .portals { display: grid; gap: 10px; }
+  .portals { display: grid; gap: 20px; }
+  .home-functions { display: grid; gap: 24px; margin: 18px 0 28px; }
+  .home-functions .training-real { margin-top: 0; }
   .portal { display: grid; grid-template-columns: 1fr auto; align-items: center; padding: 16px 18px; border-radius: 16px;
     background: var(--green); color: #fff; text-decoration: none; box-shadow: 0 4px 14px rgba(22,163,74,.3); }
   .portal:active { transform: scale(.99); }
@@ -921,9 +923,11 @@ function render() {
     app.innerHTML = `
       <p class="portal-h first">${esc(ROSTER.get(state.me)?.name || "")}，要先補哪一個？</p>
       ${VIDEO_URL ? `<p class="vlink"><a href="${VIDEO_URL}" target="_blank" rel="noopener">▶ 第一次用？看 10 分鐘影片教學</a></p>` : ""}
-      ${portalCard("121", true)}
-      ${portalCard("ref", true)}
-      <div id="memberTraining" aria-live="polite"><p class="hint">正在查詢實際培訓報名紀錄…</p></div>
+      <div class="home-functions">
+        ${portalCard("121", true)}
+        ${portalCard("ref", true)}
+        <div id="memberTraining" aria-live="polite"><p class="hint">正在查詢實際培訓報名紀錄…</p></div>
+      </div>
       ${HUA_DATA ? `<p class="portal-h">你目前的燈號</p>
       <section class="card" id="lightCard">
         <p class="step">查詢中…</p>
