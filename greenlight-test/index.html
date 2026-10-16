@@ -383,8 +383,8 @@
   </header>
 
   <nav class="quick-nav" aria-label="流程快速導覽">
-    <a class="ghost" href="./">回到追綠光首頁</a>
-    <a class="ghost" href="?step=who">重新選擇 Key 單會員</a>
+    <a class="ghost" href="./">綠燈診斷書</a>
+    <a class="ghost" href="?step=who">我是誰？</a>
   </nav>
 
   <div class="progress"><div id="bar"></div></div>
@@ -876,6 +876,23 @@ function restoreMemberDraft(memberNo) {
   Object.assign(state, restored);
   try { localStorage.setItem(KEY, JSON.stringify(snapshot)); } catch {}
 }
+function clearMemberSelectionAndGoHome() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(KEY) || "null");
+    if (raw?.me) {
+      const drafts = readMemberDrafts();
+      drafts[raw.me] = raw;
+      // 先保留會員草稿，再清除目前選擇；保存失敗時不離開頁面。
+      localStorage.setItem(MEMBER_DRAFTS_KEY, JSON.stringify(drafts));
+    }
+    localStorage.setItem(KEY, JSON.stringify({ me: null, actor: null }));
+    localStorage.removeItem("hua-urban-greenlight-keyin-v1");
+  } catch {
+    toast("目前無法保存會員草稿，請稍後再回首頁。");
+    return;
+  }
+  location.assign("https://hua-greenlight-umydisxveq-de.a.run.app/");
+}
 function returnToMemberPicker() {
   const target = `${location.pathname}?step=who`;
   if (location.pathname + location.search !== target) location.replace(target);
@@ -1158,8 +1175,8 @@ function render() {
           : `<p class="step">其他分會資料</p><p class="hint">目前只查詢華字輩分會的月報；${esc(me.chapter)}暫時略過燈號查詢。你仍可填寫 121、引薦並查詢教育培訓紀錄。</p>`
           : `<p class="step">查詢中…</p><p class="hint">正在到${CHAPTER}紅綠燈網站查你的分數</p>`}
       </section>` : ""}
-      <div class="actions"><button class="ghost" id="back">← 重新選人</button></div>`;
-    $("#back").onclick = () => go(at - 1);
+      <div class="actions"><button class="ghost" id="back">回到追綠燈首頁</button></div>`;
+    $("#back").onclick = clearMemberSelectionAndGoHome;
     if (window.HuaTraining) HuaTraining.load(me.name, me.chapter).then(() => {
       if (steps[at] === s && $("#memberTraining")) $("#memberTraining").innerHTML = HuaTraining.renderFor(me.name, me.chapter);
     }).catch(() => {
