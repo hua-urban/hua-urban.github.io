@@ -77,6 +77,15 @@
   .me-tag { display: inline-block; margin-bottom: 10px; padding: 3px 10px; border-radius: 99px;
     background: var(--green-soft); color: var(--green-deep); font-size: 13px; font-weight: 600; }
   .who-group { margin: 16px 0 8px; font-size: 16px; color: var(--ink); }
+  .who-roster-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; }
+  .who-roster-head .who-group { margin: 0; }
+  .who-roster-toggle { min-height: 48px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; text-align: left; }
+  .who-roster-toggle::after { content: " ▾"; }
+  .who-roster-toggle[aria-expanded="true"]::after { content: " ▴"; }
+  .who-external-switch { display: flex; align-items: center; gap: 8px; min-height: 48px; color: var(--ink); cursor: pointer; white-space: nowrap; }
+  .who-external-switch input { width: 20px; height: 20px; accent-color: var(--green-deep); }
+  .who-roster-toggle:focus-visible, .who-external-switch input:focus-visible { outline: 3px solid var(--green-deep); outline-offset: 3px; }
+  .who-saved-members summary { padding: 12px 0; color: var(--ink); font-weight: 700; cursor: pointer; }
   .who-other { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
   .who-error { color: var(--red); font-weight: 600; margin: 6px 0 0; }
 
@@ -991,7 +1000,11 @@ function render() {
         <p class="step">首先</p>
         <p class="q">請問你是哪一位夥伴？</p>
         <p class="hint">選好之後，後面的名單就不會出現你自己。其他分會夥伴請在下方填寫姓名與分會。</p>
-        <h2 class="who-group">${CHAPTER}分會名單</h2>
+        <div class="who-roster-head">
+          <h2 class="who-group"><button type="button" class="who-roster-toggle" id="toggleRoster" aria-expanded="false" aria-controls="whoRoster">${CHAPTER}分會名單</button></h2>
+          <label class="who-external-switch"><input type="checkbox" id="chooseExternal" aria-controls="externalMemberForm">外分會</label>
+        </div>
+        <div id="whoRoster" hidden>
         <div class="tools"><input id="filter" type="search" placeholder="搜尋編號或名字"></div>
         <div class="list one" id="list">
           ${all.map(p => `
@@ -1000,14 +1013,15 @@ function render() {
               <span class="nm"><span class="no">${p.no}</span> ${esc(p.name)} <span class="en">${esc(p.job)}</span></span>
             </label>`).join("")}
         </div>
-        <div class="who-other">
+        </div>
+        <div class="who-other" id="otherChapterEntry">
           <h2 class="who-group">其他分會／手動輸入</h2>
           <p class="hint">請填寫 BNI Connect 上的完整會員姓名與正式分會名稱；已填過的夥伴可直接選回原草稿。</p>
-          ${external.length ? `<div class="list one" id="externalList">${external.map(p => `
+          ${external.length ? `<details class="who-saved-members"><summary>已填過的外分會會員</summary><div class="list one" id="externalList">${external.map(p => `
             <label class="${p.no === state.me ? "on" : ""}">
               <input type="radio" name="me" value="${esc(p.no)}" ${p.no === state.me ? "checked" : ""}>
               <span class="nm">${esc(p.name)} <span class="en">${esc(p.chapter)}</span></span>
-            </label>`).join("")}</div>` : ""}
+            </label>`).join("")}</div></details>` : ""}
           <form id="externalMemberForm">
             <label class="field"><span>姓名</span><input name="name" autocomplete="name" maxlength="200" required placeholder="例：王小明"></label>
             <label class="field"><span>分會</span><input name="chapter" maxlength="200" required placeholder="請填正式分會名稱"></label>
@@ -1020,6 +1034,19 @@ function render() {
           <button class="primary" id="next" ${state.me ? "" : "disabled"}>下一步 →</button>
         </div>
       </section>`;
+    $("#toggleRoster").onclick = () => {
+      const expanded = $("#toggleRoster").getAttribute("aria-expanded") !== "true";
+      $("#toggleRoster").setAttribute("aria-expanded", String(expanded));
+      $("#whoRoster").hidden = !expanded;
+      if (expanded) $("#chooseExternal").checked = false;
+    };
+    $("#chooseExternal").onchange = e => {
+      if (!e.target.checked) return;
+      $("#whoRoster").hidden = true;
+      $("#toggleRoster").setAttribute("aria-expanded", "false");
+      $("#otherChapterEntry").scrollIntoView({ behavior: "smooth", block: "start" });
+      $("#externalMemberForm input[name=name]").focus({ preventScroll: true });
+    };
     const choose = memberNo => {
       if (memberNo !== state.me) {
         archiveCurrentMemberDraft();
