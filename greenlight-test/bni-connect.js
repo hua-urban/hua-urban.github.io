@@ -53,7 +53,7 @@
     }
   }
 
-  function mount(host, payload) {
+  function mount(host, payload, options = {}) {
     if (!(host instanceof Element)) return null;
     if (document.documentElement.dataset.pagesPreview === "true") {
       host.replaceChildren(node("p", "bc-message bc-message-info", "這個公開介面測試版尚未開放 BNI 登入、會員配對及送單。你填寫的資料仍保存在此瀏覽器。"));
@@ -85,6 +85,22 @@
       message: "正在確認 BNI 登入服務狀態…",
       messageKind: "info",
     };
+
+    const completedSources = new Map();
+    let cleanupFailed = false;
+    function notifyConfirmed(items) {
+      const confirmed = items.filter(item => ['success', 'already_sent'].includes(item.status))
+        .map(item => ({kind: item.kind, sourceIndex: sourceIndexFor(item), status: item.status}))
+        .filter(item => item.sourceIndex >= 0);
+      if (!confirmed.length) return;
+      for (const item of confirmed) completedSources.set(`${item.kind}:${item.sourceIndex}`, item);
+      try {
+        if (typeof options.onConfirmed === 'function') {
+          if (options.onConfirmed([...completedSources.values()]) === false) throw Error('Draft cleanup failed');
+        }
+        cleanupFailed = false;
+      } catch { cleanupFailed = true; }
+    }
 
     function currentReadyItems() {
       return state.items.filter(item => item.status === "ready" && state.selected.has(String(item.id)));
@@ -181,7 +197,7 @@
         : "登入已逾時，請重新登入後再預覽資料。";
       if (error?.status === 409) {
         if (action === "login") return "BNI Connect 要求額外驗證，這批資料尚未送出。請先完成驗證，再回到本頁登入。";
-        if (action === "prepare") return "BNI 已登入成功，但登入會員與本次填寫會員的中文姓名不同。請核對上方姓名，或回首頁重新選擇會員；括號綽號與英文不影響比對。";
+        if (action === "prepare") return "BNI 已登入成功，但登入會員與本次填寫會員的姓名或分會不符。請核對上方姓名與分會，或回首頁重新選擇會員；括號綽號與英文不影響比對。";
         return "BNI Connect 要求額外驗證。請先確認這筆是否已送出；系統不會自動重送。";
       }
       if (error?.status === 429) return action === "submit"
@@ -445,6 +461,14 @@
         detail.append(node("p", "bc-help", "沒有其他資料可顯示。"));
       }
       card.append(detail);
+      if (!['success', 'already_sent'].includes(item?.status) && sourceRow && typeof options.onEditDraft === 'function') {
+        const edit = createButton('編輯草稿', 'edit-draft', 'bc-button bc-secondary', !!state.busy);
+        edit.dataset.editKind = item.kind;
+        edit.dataset.editSourceIndex = String(sourceIndexFor(item));
+        card.append(edit);
+        if (item.status === 'uncertain' || item.retryReviewAllowed === true)
+          card.append(node('p', 'bc-help', '原單送出結果仍待確認；更正後請先到 BNI 核對，再決定是否送出。'));
+      }
 
       const message = textFromServer(item?.resultMessage) || textFromServer(item?.reason);
       if (message) card.append(node("p", "bc-item-message", message));
@@ -511,7 +535,7 @@
 
     function render() {
       const shell = node("div", "bc-shell");
-      shell.append(node("div", "bc-filled-member", `本次填寫會員：${textFromServer(payload?.me, "資料未提供")}`));
+      shell.append(node("div", "bc-filled-member", `本次填寫會員：${textFromServer(payload?.me, "資料未提供")}${payload?.meChapter ? " · " + textFromServer(payload.meChapter) : ""}`));
 
       const status = node("div", `bc-message bc-message-${state.messageKind}`, state.message);
       status.setAttribute("role", "status");
@@ -530,6 +554,12 @@
         if (document.querySelector("#back")) {
           panelControls.append(createButton("回去修改填寫資料", "return-edit", "bc-button bc-secondary", !!state.busy));
         }
+      }
+      if ((rows121.length || payload?.refs?.length) && typeof options.onClearDrafts === 'function') {
+        panelControls.append(createButton('清除Key單', 'clear-drafts', 'bc-button bc-primary', !!state.busy));
+        panelControls.append(node('p', 'bc-help', cleanupFailed
+          ? 'BNI 已確認完成，但本機清除未完成。請按「清除Key單」移除本頁草稿，勿重送。'
+          : '清除本頁 121 與引薦草稿，包含失敗或待確認項目；不會刪除 BNI 官方單據。已確認成功的項目會自動從待辦移除。'));
       }
       shell.append(panelControls);
 
@@ -789,6 +819,10 @@
                 : "",
           };
         });
+        for (const item of state.items) {
+          if (completedSources.has(`${item.kind}:${sourceIndexFor(item)}`)) item.status = 'already_sent';
+        }
+        notifyConfirmed(state.items);
         if (reviewedSourceKey) state.reviewedSourceKey = null;
         state.busy = null;
         state.hasPrepared = true;
@@ -863,6 +897,7 @@
           item.status === "failed" ? "BNI Connect 未確認送出。系統不會自動重試。" :
           "結果待確認。請先到 BNI Connect 查看，系統不會自動重送。");
         rememberSubmissionResult(planId, item);
+        notifyConfirmed([item]);
         state.selected.delete(item.id);
         state.activeItemId = null;
         render();
@@ -1008,6 +1043,20 @@
       else if (action === "collapse-panel") { state.panelCollapsed = true; render(); }
       else if (action === "expand-panel") { state.panelCollapsed = false; render(); }
       else if (action === "return-edit") document.querySelector("#back")?.click();
+      else if (action === "edit-draft") {
+        if (state.busy) return;
+        const sourceIndex = Number(button.dataset.editSourceIndex);
+        const kind = button.dataset.editKind;
+        if (!Number.isInteger(sourceIndex) || sourceIndex < 0 || !['121', 'ref'].includes(kind)) return;
+        invalidatePlan('草稿已開啟編輯；修改後請重新配對。');
+        options.onEditDraft?.({kind, sourceIndex});
+      }
+      else if (action === "clear-drafts") {
+        if (state.busy) return;
+        try {
+          if (options.onClearDrafts?.() === false) throw Error('Draft cleanup failed');
+        } catch { setMessage('本機清除尚未完成，請保留本頁結果，勿重送。', 'error'); render(); }
+      }
       else if (action === "prepare") void prepare();
       else if (action === "send-batch") void sendBatch();
       else if (action === "review-absent") {
@@ -1038,7 +1087,7 @@
     void refreshStatus({ initial: true });
     return {
       refresh: refreshStatus,
-      getStatus: () => ({ available: state.available, authenticated: state.authenticated, itemCount: state.items.length }),
+      getStatus: () => ({ available: state.available, authenticated: state.authenticated, itemCount: state.items.length, busy: state.busy }),
     };
   }
 

@@ -62,7 +62,7 @@ assert(index.includes('已保存在此瀏覽器'));
 assert(index.includes('data-f="referredName"'));
 assert(index.includes('data-f="place" list="meeting-locations"'));
 assert(index.includes('data-gf="venue" list="meeting-locations"'));
-assert(index.includes('HuaTraining.renderFor(me.name)'));
+assert(index.includes('HuaTraining.renderFor(me.name, me.chapter)'));
 assert(keyin.includes('location.hostname') && keyin.includes('www.bniconnectglobal.com'));
 const blocked = [];
 vm.runInNewContext(keyin, { location: { protocol: "https:", hostname: "example.test" }, alert: message => blocked.push(message) });

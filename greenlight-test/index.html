@@ -76,6 +76,9 @@
   .hint { color: var(--muted); font-size: 14px; margin: 0 0 16px; }
   .me-tag { display: inline-block; margin-bottom: 10px; padding: 3px 10px; border-radius: 99px;
     background: var(--green-soft); color: var(--green-deep); font-size: 13px; font-weight: 600; }
+  .who-group { margin: 16px 0 8px; font-size: 16px; color: var(--ink); }
+  .who-other { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .who-error { color: var(--red); font-weight: 600; margin: 6px 0 0; }
 
   .yn { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   button { font: inherit; cursor: pointer; }
@@ -147,6 +150,8 @@
   .chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .chip { padding: 5px 11px; border-radius: 99px; background: var(--green-soft); color: var(--green-deep); font-size: 14px; }
   .chip small { color: var(--muted); margin-left: 4px; }
+  .chip-clear { margin-left: 7px; padding: 2px 7px; border: 1px solid var(--green-deep); border-radius: 99px;
+    background: transparent; color: var(--green-deep); font-size: 13px; font-weight: 700; }
   .big { font-size: 44px; font-weight: 800; color: var(--green-deep); line-height: 1; margin: 6px 0 0; }
   .empty { color: var(--muted); font-size: 14px; margin: 0; }
   .toast {
@@ -368,8 +373,8 @@
 <datalist id="meeting-locations">
   <option value="實體"><option value="線上"><option value="咖啡廳"><option value="辦公室"><option value="會議室">
 </datalist>
-<script src="./training-support.js?v=20261016-ui"></script>
-<script src="./bni-connect.js?v=20261016-name-match"></script>
+<script src="./training-support.js?v=20261016-external"></script>
+<script src="./bni-connect.js?v=20261016-draft-cleanup"></script>
 
 <script>
 // ═══════════ 分會設定：複製給其他分會時，只要改這一段 ═══════════
@@ -388,6 +393,59 @@ document.getElementById("orgName").textContent = `BNI ${CHAPTER}分會`;
 
 // 成員與活動每週由官方網站同步至公開測試資料；本機 JSON 只作網路故障時的備援。
 const ROSTER = new Map();
+const EXTERNAL_MEMBERS_KEY = "hua-urban-greenlight-external-members-v1";
+const EXTERNAL_MEMBERS = new Map();
+const identityText = value => String(value || "").normalize("NFKC").trim().replace(/\s+/g, " ");
+const chapterKey = value => {
+  const key = identityText(value).replace(/^BNI\s*/i, "").replace(/\s+/g, "").replace(/分會$/, "").toLocaleLowerCase();
+  return { "華都更huaurban+": "華都更", "華地產huarealestate": "華地產" }[key] || key;
+};
+const memberNameKey = value => {
+  let name = identityText(value).toLocaleLowerCase();
+  let previous;
+  do { previous = name; name = name.replace(/\([^()]*\)/gu, ""); } while (name !== previous);
+  if (/[()]/u.test(name)) return "";
+  const han = (name.match(/\p{Script=Han}/gu) || []).join("");
+  return han || name.replace(/\s+/gu, "");
+};
+const externalMemberKey = (name, chapter) => `ext:${encodeURIComponent(chapterKey(chapter))}:${encodeURIComponent(memberNameKey(name))}`;
+const samePerson = (aName, aChapter, bName, bChapter) => !!memberNameKey(aName) && !!chapterKey(aChapter)
+  && memberNameKey(aName) === memberNameKey(bName) && chapterKey(aChapter) === chapterKey(bChapter);
+function readExternalMembers() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(EXTERNAL_MEMBERS_KEY) || "{}");
+    if (!saved || typeof saved !== "object" || Array.isArray(saved)) return;
+    for (const [id, value] of Object.entries(saved)) {
+      if (!value || !memberNameKey(value.name) || !chapterKey(value.chapter)) continue;
+      if (id !== externalMemberKey(value.name, value.chapter)) continue;
+      EXTERNAL_MEMBERS.set(id, { no: id, name: identityText(value.name), chapter: identityText(value.chapter), ext: true });
+    }
+  } catch {}
+}
+function rememberExternalMember(name, chapter) {
+  const person = { no: externalMemberKey(name, chapter), name: identityText(name), chapter: identityText(chapter), ext: true };
+  EXTERNAL_MEMBERS.set(person.no, person);
+  try { localStorage.setItem(EXTERNAL_MEMBERS_KEY, JSON.stringify(Object.fromEntries(EXTERNAL_MEMBERS))); } catch {}
+  return person;
+}
+function personFor(id, actor = null) {
+  const rosterMember = ROSTER.get(id);
+  if (rosterMember) return { ...rosterMember, chapter: CHAPTER, ext: false };
+  if (EXTERNAL_MEMBERS.has(id)) return EXTERNAL_MEMBERS.get(id);
+  if (actor?.ext && actor.no === id && externalMemberKey(actor.name, actor.chapter) === id) return actor;
+  return null;
+}
+const currentPerson = () => personFor(state.me, state.actor);
+const isSelfTarget = (name, chapter) => {
+  const actor = currentPerson();
+  return !!actor && !!memberNameKey(name) && memberNameKey(actor.name) === memberNameKey(name)
+    && (!chapterKey(chapter) || chapterKey(actor.chapter) === chapterKey(chapter));
+};
+const recipientCrossChapter = chapter => {
+  const actor = currentPerson();
+  return !actor || !chapterKey(chapter) || chapterKey(actor.chapter) !== chapterKey(chapter);
+};
+readExternalMembers();
 
 // ── 流程：每一段是「有參加嗎？ → 有的話勾選互動夥伴」 ─────────
 // 名單和活動由華都更官網同步，不把管理者瀏覽器的手動編輯當作共用資料來源。
@@ -555,8 +613,8 @@ const REF_QS = [
            "哪些人你曾經提供任何廠商、客戶窗口，或幫忙加群的？",
            "你曾經在例會中，說過你有什麼資源，曾經有哪些夥伴跟你索取過的？",
            "你已經跟哪些夥伴完成 121？121 過程中，你有沒有給過他什麼資源或建議？甚至會後有提供他哪些協助？（有 121 過的夥伴會標「有 121」）"] },
-  { id: "r5", q: "回想一下外分會的夥伴中，曾經跟哪些人互動過，有提供任何專業建議、窗口、客戶、資源、協助給他過？",
-    hint: "一次協助 key 一筆引薦", ph: "提供了什麼建議、窗口、客戶或資源", short: "外分會夥伴", ext: true },
+  { id: "r5", q: "回想一下其他夥伴中，曾經跟哪些人互動過，有提供任何專業建議、窗口、客戶、資源、協助給他過？",
+    hint: "可手動填自己分會或其他分會夥伴；一次協助 key 一筆引薦", ph: "提供了什麼建議、窗口、客戶或資源", short: "其他／手動輸入夥伴", ext: true },
 ];
 const REF_TYPES = ["內部", "外部"];
 // 小提醒框預設打開；手機上收起來會記住
@@ -570,21 +628,22 @@ const phoneOk = s => (s.match(/\d/g) || []).length >= 8;
 const refMissing = (r, ext) => [
   ...(ext ? [["name", "對象姓名"], ["chapter", "分會名"]] : []),
   ["referredName", "被引薦人"], ["content", "引薦內容"], ["phone", "電話（至少 8 碼數字）"],
-].filter(([key]) => key === "phone" ? !phoneOk(String(r[key] || "")) : !String(r[key] || "").trim());
+].filter(([key]) => key === "phone" ? !phoneOk(String(r[key] || "")) : !String(r[key] || "").trim())
+  .concat(ext && isSelfTarget(r.name, r.chapter) ? [["self", "引薦對象不能是自己"]] : []);
 const refBad = (r, ext) => refMissing(r, ext).length > 0;
 
 function showRefValidation(row, r, ext) {
   const missing = refMissing(r, ext);
   row.classList.toggle("bad", missing.length > 0);
   row.querySelectorAll("[data-f]").forEach(input => {
-    const invalid = missing.some(([key]) => key === input.dataset.f);
+    const invalid = missing.some(([key]) => key === input.dataset.f || key === "self" && ["name", "chapter"].includes(input.dataset.f));
     input.setAttribute("aria-invalid", String(invalid));
     if (invalid) input.setAttribute("aria-describedby", `ref-error-${r.id}`);
     else input.removeAttribute("aria-describedby");
   });
   const message = row.querySelector(".ref-validation");
   message.hidden = missing.length === 0;
-  message.textContent = missing.length ? `尚缺：${missing.map(([, label]) => label).join("、")}。補齊後才能進入 BNI 登入與送出步驟。` : "";
+  message.textContent = missing.length ? `請檢查：${missing.map(([, label]) => label).join("、")}。修正後才能進入 BNI 登入與送出步驟。` : "";
   return missing;
 }
 
@@ -601,7 +660,7 @@ function refForm(r, n, ph, ext) {
     <div class="field referral-person-field">
       <label class="field-name" for="referred-${r.id}">被引薦人</label>
       <input id="referred-${r.id}" data-f="referredName" aria-label="被引薦人姓名" value="${esc(r.referredName || "")}" placeholder="請填真實姓名">
-      <label class="self-check"><input type="checkbox" data-self-referral aria-label="被引薦人是我自己" ${ROSTER.get(state.me)?.name === String(r.referredName || "").trim() ? "checked" : ""}>自己</label>
+      <label class="self-check"><input type="checkbox" data-self-referral aria-label="被引薦人是我自己" ${currentPerson()?.name === String(r.referredName || "").trim() ? "checked" : ""}>自己</label>
     </div>
     <div class="seg"><span class="seg-label">類型</span>
       ${REF_TYPES.map(x => `<button type="button" data-type="${x}" class="${r.type === x ? "sel" : ""}">${x}</button>`).join("")}
@@ -625,7 +684,7 @@ function wireRefs(box, list, onDelete) {
     if (f === "phone") state.lastPhone = e.target.value;   // 下一筆自動帶入
     if (f === "referredName") {
       const self = e.target.closest(".ref").querySelector("[data-self-referral]");
-      if (self) self.checked = String(e.target.value).trim() === (ROSTER.get(state.me)?.name || "");
+      if (self) self.checked = String(e.target.value).trim() === (currentPerson()?.name || "");
     }
     const row = e.target.closest(".ref");
     if (row.classList.contains("bad")) showRefValidation(row, find(e.target), !!row.querySelector('[data-f="chapter"]'));
@@ -636,7 +695,7 @@ function wireRefs(box, list, onDelete) {
     if (!self) return;
     const row = self.closest(".ref");
     const input = row?.querySelector('[data-f="referredName"]');
-    const memberName = ROSTER.get(state.me)?.name || "";
+    const memberName = currentPerson()?.name || "";
     if (!input || !memberName) { self.checked = false; return; }
     const value = self.checked ? memberName : "";
     input.value = value;
@@ -681,7 +740,8 @@ function flagBad(box, list, ext) {
   }
   return !first;
 }
-const blankOut = () => ({ name: "", chapter: "", m: "", d: "", place: "", kind: "" });
+const draftId = () => "d" + crypto.randomUUID();
+const blankOut = () => ({ id: draftId(), name: "", chapter: "", m: "", d: "", place: "", kind: "" });
 // 其他活動／組聚：名稱、日期、場地，加上當天互動的本分會夥伴與外分會夥伴
 const blankG = () => ({ id: "g" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
   name: "", m: "", d: "", venue: "", members: [], outside: [] });
@@ -690,7 +750,7 @@ const YEAR = 2026;
 // ── 狀態（存在這支手機上，關掉重開不會不見） ───────────────
 const KEY = "hua-urban-greenlight-questionnaire-v1";
 const MEMBER_DRAFTS_KEY = "hua-urban-greenlight-member-drafts-v1";
-const state = { me: null, attended: {}, picked: {}, meets: {}, outside: [], refs: {}, lastPhone: "" };
+const state = { me: null, actor: null, attended: {}, picked: {}, meets: {}, outside: [], refs: {}, lastPhone: "" };
 // meets[no] = { m, d, place, kind }；outside = [{ name, chapter, m, d, place, kind }]（外分會夥伴）
 // refs[題目 id] = [{ id, no 或 name+chapter, type, content, phone, contact }]
 
@@ -698,6 +758,8 @@ const state = { me: null, attended: {}, picked: {}, meets: {}, outside: [], refs
 const FLOW = ["121", "ref"].includes(new URLSearchParams(location.search).get("flow"))
   ? new URLSearchParams(location.search).get("flow") : null;
 const START_AT_WHO = !FLOW && new URLSearchParams(location.search).get("step") === "who";
+const EDIT_PARAMS = new URLSearchParams(location.search);
+const EDIT_SECTION = EDIT_PARAMS.get("edit");
 const FIELDS = { "121": ["attended", "picked", "meets", "outside", "gatherings", "sec"], ref: ["refs", "lastPhone"] };
 const OTHER = FLOW === "121" ? FIELDS.ref : FLOW === "ref" ? FIELDS["121"] : [...FIELDS["121"], ...FIELDS.ref];
 
@@ -706,6 +768,8 @@ function readStored(raw = undefined) {
   if (raw !== undefined) s = raw;
   else try { s = JSON.parse(localStorage.getItem(KEY) || "null"); } catch {}
   s = { attended: {}, picked: {}, meets: {}, outside: [], gatherings: [], sec: null, refs: {}, lastPhone: "", ...(s || {}) };
+  if (s.actor?.ext && s.actor.no === s.me && externalMemberKey(s.actor.name, s.actor.chapter) === s.me
+      && !EXTERNAL_MEMBERS.has(s.me)) rememberExternalMember(s.actor.name, s.actor.chapter);
   for (const k in s.picked) s.picked[k] = new Set(s.picked[k]);
   // 引薦原本本分會夥伴的四題（r1～r4）合併成一題
   if (s.refs.r2 || s.refs.r3 || s.refs.r4) {
@@ -713,8 +777,10 @@ function readStored(raw = undefined) {
     delete s.refs.r2; delete s.refs.r3; delete s.refs.r4;
   }
   // 名單拿掉的人（例：074）和自己，從舊答案裡清掉，否則完成頁會找不到人
-  if (s.me && !ROSTER.has(s.me)) s.me = null;
-  const gone = no => !ROSTER.has(no) || no === s.me;
+  if (s.me && !personFor(s.me, s.actor)) s.me = null;
+  s.actor = s.me ? personFor(s.me, s.actor) : null;
+  const gone = no => !ROSTER.has(no) || no === s.me
+    || (s.actor && samePerson(s.actor.name, s.actor.chapter, ROSTER.get(no)?.name, CHAPTER));
   for (const k in s.picked) for (const no of s.picked[k]) if (!no.startsWith("o:") && gone(no)) s.picked[k].delete(no);
   for (const no in s.meets) if (gone(no)) delete s.meets[no];
   for (const g of s.gatherings) g.members = (g.members || []).filter(no => !gone(no));
@@ -729,7 +795,7 @@ function storeMemberDraft(memberNo, snapshot) {
   if (!memberNo || !snapshot) return;
   try {
     const drafts = readMemberDrafts();
-    drafts[memberNo] = { ...snapshot, me: memberNo };
+    drafts[memberNo] = { ...snapshot, me: memberNo, actor: personFor(memberNo, snapshot.actor) };
     localStorage.setItem(MEMBER_DRAFTS_KEY, JSON.stringify(drafts));
   } catch {}
 }
@@ -742,6 +808,7 @@ function archiveCurrentMemberDraft() {
 function restoreMemberDraft(memberNo) {
   const saved = readMemberDrafts()[memberNo];
   const snapshot = saved ? JSON.parse(JSON.stringify({ ...saved, me: memberNo })) : { me: memberNo };
+  snapshot.actor = personFor(memberNo, snapshot.actor);
   const restored = readStored(JSON.parse(JSON.stringify(snapshot)));
   for (const key of Object.keys(state)) delete state[key];
   Object.assign(state, restored);
@@ -778,7 +845,7 @@ function save() {
       returnToMemberPicker();
       return false;
     }
-    const out = { ...cur, me: state.me, ["at_" + (FLOW || "main")]: at };
+    const out = { ...cur, me: state.me, actor: currentPerson(), ["at_" + (FLOW || "main")]: at };
     for (const f of FLOW ? FIELDS[FLOW] : []) out[f] = state[f];
     if (state.picked && out.picked === state.picked) {
       out.picked = {};
@@ -827,12 +894,44 @@ function go(i) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+function focusEditedDraft() {
+  if (!EDIT_SECTION) return;
+  const focus = EDIT_PARAMS.get("focus"), index = Number(EDIT_PARAMS.get("focusIndex"));
+  let target = null;
+  if (FLOW === "121" && EDIT_SECTION === "indiv") {
+    const row = [...document.querySelectorAll(".row[data-no]")].find(el => el.dataset.no === focus);
+    target = row?.querySelector('[data-f="m"]') || row?.querySelector("input");
+  } else if (FLOW === "121" && EDIT_SECTION === "ext") {
+    const at = state.outside.findIndex((value, i) => value.id === focus || !focus && i === index);
+    target = [...document.querySelectorAll(".entry[data-i]")].find(el => Number(el.dataset.i) === at)?.querySelector('[data-f="name"]');
+  } else if (FLOW === "121" && EDIT_SECTION === "gather") {
+    const at = state.gatherings.findIndex(value => value.id === EDIT_PARAMS.get("group"));
+    const group = [...document.querySelectorAll(".gather[data-g]")].find(el => Number(el.dataset.g) === at);
+    if (EDIT_PARAMS.get("target") === "member")
+      target = [...(group?.querySelectorAll("[data-gno]") || [])].find(el => el.dataset.gno === focus);
+    else if (EDIT_PARAMS.get("target") === "outside") {
+      const personAt = state.gatherings[at]?.outside.findIndex((value, i) => value.id === focus || !focus && i === index);
+      target = [...(group?.querySelectorAll(".gout[data-o]") || [])].find(el => Number(el.dataset.o) === personAt)?.querySelector('[data-of="name"]');
+    }
+    target ||= group?.querySelector('[data-gf="name"]');
+  } else if (FLOW === "121" && EDIT_SECTION.startsWith("ev:")) {
+    target = [...document.querySelectorAll('#list input[type="checkbox"]')].find(el => el.value === focus) || $("#y");
+  } else if (FLOW === "ref") {
+    const ref = [...document.querySelectorAll(".ref[data-id]")].find(el => el.dataset.id === focus);
+    target = ref?.querySelector('[data-f="name"]') || ref?.querySelector('[data-f="content"]');
+  }
+  if (target) { target.scrollIntoView({ block: "center" }); target.focus({ preventScroll: true }); }
+}
+
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const others = list => list.filter(p => p.no !== state.me);
+const others = list => list.filter(p => p.no !== state.me && !isSelfTarget(p.name, p.chapter || CHAPTER));
 // 本分會現任名單（有專業別的），不含自己
 const members = () => others([...ROSTER.values()]).sort((a, b) => a.no.localeCompare(b.no));
-const meTag = () => state.me ? `<span class="me-tag">${state.me} ${esc(ROSTER.get(state.me).name)}</span>` : "";
+const meTag = () => {
+  const me = currentPerson();
+  return me ? `<span class="me-tag">${me.ext ? "" : `${esc(me.no)} `}${esc(me.name)} · ${esc(me.chapter)}</span>` : "";
+};
 
 function validDate(m, d) {
   m = +m; d = +d;
@@ -886,11 +985,13 @@ function render() {
 
   if (s.kind === "who") {
     const all = [...ROSTER.values()].sort((a, b) => a.no.localeCompare(b.no));
+    const external = [...EXTERNAL_MEMBERS.values()].sort((a, b) => a.chapter.localeCompare(b.chapter) || a.name.localeCompare(b.name));
     app.innerHTML = `
       <section class="card">
         <p class="step">首先</p>
         <p class="q">請問你是哪一位夥伴？</p>
-        <p class="hint">選好之後，後面的名單就不會出現你自己。</p>
+        <p class="hint">選好之後，後面的名單就不會出現你自己。其他分會夥伴請在下方填寫姓名與分會。</p>
+        <h2 class="who-group">${CHAPTER}分會名單</h2>
         <div class="tools"><input id="filter" type="search" placeholder="搜尋編號或名字"></div>
         <div class="list one" id="list">
           ${all.map(p => `
@@ -899,20 +1000,49 @@ function render() {
               <span class="nm"><span class="no">${p.no}</span> ${esc(p.name)} <span class="en">${esc(p.job)}</span></span>
             </label>`).join("")}
         </div>
+        <div class="who-other">
+          <h2 class="who-group">其他分會／手動輸入</h2>
+          <p class="hint">請填寫 BNI Connect 上的完整會員姓名與正式分會名稱；已填過的夥伴可直接選回原草稿。</p>
+          ${external.length ? `<div class="list one" id="externalList">${external.map(p => `
+            <label class="${p.no === state.me ? "on" : ""}">
+              <input type="radio" name="me" value="${esc(p.no)}" ${p.no === state.me ? "checked" : ""}>
+              <span class="nm">${esc(p.name)} <span class="en">${esc(p.chapter)}</span></span>
+            </label>`).join("")}</div>` : ""}
+          <form id="externalMemberForm">
+            <label class="field"><span>姓名</span><input name="name" autocomplete="name" maxlength="200" required placeholder="例：王小明"></label>
+            <label class="field"><span>分會</span><input name="chapter" maxlength="200" required placeholder="請填正式分會名稱"></label>
+            <p class="who-error" id="externalMemberError" role="alert" hidden></p>
+            <button class="add" type="submit">使用這位其他分會夥伴</button>
+          </form>
+        </div>
         <div class="actions sticky">
           <button class="ghost" id="back">←</button>
           <button class="primary" id="next" ${state.me ? "" : "disabled"}>下一步 →</button>
         </div>
       </section>`;
-    $("#list").addEventListener("change", e => {
-      const memberNo = e.target.value;
+    const choose = memberNo => {
       if (memberNo !== state.me) {
         archiveCurrentMemberDraft();
         restoreMemberDraft(memberNo);
       }
-      document.querySelectorAll("#list label").forEach(l => l.classList.toggle("on", l.querySelector("input").checked));
+      document.querySelectorAll('#list label, #externalList label').forEach(l => l.classList.toggle("on", l.querySelector("input").checked));
       $("#next").disabled = false;
       save();
+    };
+    app.querySelectorAll('#list, #externalList').forEach(list => list.addEventListener("change", e => choose(e.target.value)));
+    $("#externalMemberForm").addEventListener("submit", e => {
+      e.preventDefault();
+      const form = e.currentTarget, name = identityText(form.elements.name.value), chapter = identityText(form.elements.chapter.value);
+      const error = $("#externalMemberError");
+      if (!memberNameKey(name) || !chapterKey(chapter)) { error.textContent = "請填寫完整姓名與分會名稱。"; error.hidden = false; return; }
+      if (chapterKey(chapter) === chapterKey(CHAPTER)) {
+        error.textContent = `如果你是${CHAPTER}夥伴，請從上方名單選擇；其他分會請填正式分會名稱。`;
+        error.hidden = false; return;
+      }
+      const member = rememberExternalMember(name, chapter);
+      archiveCurrentMemberDraft();
+      restoreMemberDraft(member.no);
+      go(at + 1);
     });
     filterBox("#list");
     $("#back").onclick = () => go(at - 1);
@@ -920,8 +1050,9 @@ function render() {
   }
 
   if (s.kind === "light") {
+    const me = currentPerson();
     app.innerHTML = `
-      <p class="portal-h first">${esc(ROSTER.get(state.me)?.name || "")}，要先補哪一個？</p>
+      <p class="portal-h first">${esc(me?.name || "")}，要先補哪一個？</p>
       ${VIDEO_URL ? `<p class="vlink"><a href="${VIDEO_URL}" target="_blank" rel="noopener">▶ 第一次用？看 10 分鐘影片教學</a></p>` : ""}
       <div class="home-functions">
         ${portalCard("121", true)}
@@ -930,18 +1061,17 @@ function render() {
       </div>
       ${HUA_DATA ? `<p class="portal-h">你目前的燈號</p>
       <section class="card" id="lightCard">
-        <p class="step">查詢中…</p>
-        <p class="hint">正在到${CHAPTER}紅綠燈網站查你的分數</p>
+        ${me.ext ? `<p class="step">其他分會資料</p><p class="hint">此頁沒有${esc(me.chapter)}的 PALMS 與燈號資料，因此無法計算分數或到綠燈的差距。你仍可填寫 121、引薦並查詢教育培訓紀錄。</p>`
+                 : `<p class="step">查詢中…</p><p class="hint">正在到${CHAPTER}紅綠燈網站查你的分數</p>`}
       </section>` : ""}
       <div class="actions"><button class="ghost" id="back">← 重新選人</button></div>`;
     $("#back").onclick = () => go(at - 1);
-    const me = ROSTER.get(state.me);
-    if (window.HuaTraining) HuaTraining.load().then(() => {
-      if (steps[at] === s && $("#memberTraining")) $("#memberTraining").innerHTML = HuaTraining.renderFor(me.name);
+    if (window.HuaTraining) HuaTraining.load(me.name, me.chapter).then(() => {
+      if (steps[at] === s && $("#memberTraining")) $("#memberTraining").innerHTML = HuaTraining.renderFor(me.name, me.chapter);
     }).catch(() => {
-      if (steps[at] === s && $("#memberTraining")) $("#memberTraining").innerHTML = `<p class="hint">培訓紀錄暫時讀不到。<a href="./training.html?member=${encodeURIComponent(me.no)}">前往培訓查詢</a></p>`;
+      if (steps[at] === s && $("#memberTraining")) $("#memberTraining").innerHTML = `<p class="hint">培訓紀錄暫時讀不到。<a href="https://bni-train.autolab.cloud/explorer/" target="_blank" rel="noopener">查看原始查詢</a></p>`;
     });
-    if (HUA_DATA) loadHua().then(d => {
+    if (HUA_DATA && !me.ext) loadHua().then(d => {
       if (steps[at] !== s) return;
       const m = findMember(d, me.name, me.no);
       updatePortalGaps(m);
@@ -1127,8 +1257,8 @@ function render() {
     app.innerHTML = `
       <section class="card">
         ${meTag()}
-        <p class="step">外分會會員 121</p>
-        <p class="q">你過去半年，曾跟哪些外分會夥伴 121？</p>
+        <p class="step">其他／手動輸入會員 121</p>
+        <p class="q">你過去半年，曾跟哪些其他夥伴 121？</p>
         <p class="hint">一筆填完，按「＋ 再加一筆」可以繼續填；沒有的話按「跳過」</p>
         <div id="outs"></div>
         <button class="add" id="add">＋ 再加一筆</button>
@@ -1147,7 +1277,7 @@ function render() {
             ${state.outside.length > 1 ? `<button type="button" class="del" data-del="${i}" aria-label="刪除第 ${i + 1} 筆">×</button>` : ""}
           </div>
           <label class="field"><span>名字</span><input data-f="name" value="${esc(v.name)}" placeholder="請輸入會員姓名"></label>
-          <label class="field"><span>分會名</span><input data-f="chapter" value="${esc(v.chapter)}" placeholder="選填，例：華都更"></label>
+          <label class="field"><span>分會名</span><input data-f="chapter" value="${esc(v.chapter)}" placeholder="可填自己或其他分會"></label>
           <div class="date">
             <label class="date-manual"><span>手動輸入 ${YEAR} 年</span>
               <input inputmode="numeric" maxlength="2" data-f="m" value="${esc(v.m)}" aria-label="月份"> 月
@@ -1211,13 +1341,13 @@ function render() {
       let first = null, n = 0;
       box.querySelectorAll(".entry").forEach(el => {
         const v = state.outside[+el.dataset.i];
-        const bad = !v.name.trim() || !validDate(v.m, v.d) || !v.place || !v.kind;   // 分會可不填
+        const bad = !v.name.trim() || !validDate(v.m, v.d) || !v.place || !v.kind || isSelfTarget(v.name, v.chapter);
         el.classList.toggle("bad", bad);
         if (bad) { n++; first ||= el; }
       });
       if (first) {
         first.scrollIntoView({ behavior: "smooth", block: "center" });
-        toast(`還有 ${n} 筆的名字、日期、地點或主題沒填好`);
+        toast(`還有 ${n} 筆資料待修正；121 對象不能是自己`);
         return;
       }
       save();
@@ -1357,7 +1487,7 @@ function render() {
         <div class="hub">
           ${btn("indiv", `${CHAPTER}會員 補 key 121`, iStat)}
           ${btn("gather", "其他活動／組聚 補 key 121", gStat)}
-          ${btn("ext", "外分會會員 補 key 121", oStat)}
+          ${btn("ext", "其他／手動輸入會員 補 key 121", oStat)}
           ${EVENTS.map(ev => btn("ev:" + ev.id, `${esc(ev.title)} 補 key 121`, evStat(ev))).join("")}
         </div>
         <div class="actions"><button class="primary" id="next">完成，看我的 121 名單 →</button></div>
@@ -1380,7 +1510,7 @@ function render() {
         ${meTag()}
         <p class="step">其他活動／組聚</p>
         <p class="q">你參加過哪些活動或組聚？當天跟哪些夥伴有互動？</p>
-        <p class="hint">填好名稱、日期、場地，勾選有互動的${CHAPTER}夥伴，外分會的人手動輸入。不只一場的話按「＋ 新增一場」。</p>
+        <p class="hint">填好名稱、日期、場地，勾選有互動的${CHAPTER}夥伴；其他夥伴可手動輸入姓名與分會。不只一場的話按「＋ 新增一場」。</p>
         <div id="gs"></div>
         <button class="add" id="addG">＋ 新增一場活動／組聚</button>
         <div class="actions">
@@ -1420,7 +1550,7 @@ function render() {
             <textarea class="bulkm" placeholder="陳書緯&#10;姚巧玲&#10;008">${esc(bulkLeft[g.id]?.m || "")}</textarea>
             <button type="button" class="add small" data-bulkm="1">勾選這些人</button>
           </details>
-          <p class="gh">外分會夥伴（${g.outside.length} 位）</p>
+          <p class="gh">其他／手動輸入夥伴（${g.outside.length} 位）</p>
           ${g.outside.map((o, j) => `
             <div class="gout" data-o="${j}">
               <input data-of="name" value="${esc(o.name)}" placeholder="姓名">
@@ -1499,14 +1629,14 @@ function render() {
         const g = gOf(t), ls = lines(t);
         for (const l of ls) {
           const [name, ...rest] = l.split(/[\/／,，\t]/);
-          if (name.trim() && !g.outside.some(o => o.name.trim() === name.trim())) g.outside.push({ name: name.trim(), chapter: rest.join(" ").trim() });
+          if (name.trim() && !g.outside.some(o => o.name.trim() === name.trim())) g.outside.push({ id: draftId(), name: name.trim(), chapter: rest.join(" ").trim() });
         }
         draw(); save();
         toast(`加入了 ${ls.length} 位外分會夥伴`);
       }
       else if (t.dataset.addo) {
         const i = +t.closest("[data-g]").dataset.g;
-        state.gatherings[i].outside.push({ name: "", chapter: "" }); draw(); save();
+        state.gatherings[i].outside.push({ id: draftId(), name: "", chapter: "" }); draw(); save();
         const rows = box.querySelectorAll(`[data-g="${i}"] .gout`); rows[rows.length - 1].querySelector("input").focus();
       }
     });
@@ -1525,13 +1655,13 @@ function render() {
       box.querySelectorAll("[data-g]").forEach(el => {
         const g = state.gatherings[+el.dataset.g];
         const bad = !g.name.trim() || !validDate(g.m, g.d) || !g.venue.trim() || !(g.members.length || g.outside.length)
-          || g.outside.some(o => !o.name.trim());   // 外分會的分會可不填
+          || g.outside.some(o => !o.name.trim() || isSelfTarget(o.name, o.chapter));
         el.classList.toggle("bad", bad);
         if (bad) { n++; first ||= el; }
       });
       if (first) {
         first.scrollIntoView({ behavior: "smooth", block: "center" });
-        toast(`還有 ${n} 場的名稱、日期、場地或參加者沒填好`);
+        toast(`還有 ${n} 場資料待修正；參加者不能是自己`);
         return;
       }
       save(); go(at + 1);
@@ -1542,6 +1672,7 @@ function render() {
     if (!refreshOthers()) return;
     const rows = collect();
     const refRows = collectRefs();
+    const cleanup = createDraftCleanup(rows, refRows);
     // 記在這個瀏覽器，BNI Connect 上的「追綠光 key 單」面板會自動來拿（bridge.html）
     try { localStorage.setItem("hua-urban-greenlight-keyin-v1", JSON.stringify({ ...keyinData(rows, refRows), savedAt: Date.now() })); } catch {}
     app.innerHTML = `
@@ -1550,32 +1681,29 @@ function render() {
         <p class="step">完成 🟢</p>
         <p class="q">你的 121 與引薦</p>
         <div class="bigs">
-          <div><p class="big">${rows.length}<span> 筆</span></p><p class="big-l">121</p></div>
-          <div><p class="big">${refRows.length}<span> 筆</span></p><p class="big-l">引薦</p></div>
+          <div><p class="big"><span id="draft-count-121">${rows.length}</span><span> 筆</span></p><p class="big-l">121 待辦</p></div>
+          <div><p class="big"><span id="draft-count-ref">${refRows.length}</span><span> 筆</span></p><p class="big-l">引薦待辦</p></div>
         </div>
         <p class="sent" id="sent"></p>
+        <p class="hint">「清除Key單」只移除這台裝置的待辦草稿，不會刪除 BNI Connect 上的紀錄。</p>
         ${FLOW === "121" && !refRows.length ? `<p class="portal-h">還沒補 key 引薦？</p>${portals("ref")}` : ""}
         ${FLOW === "ref" && !rows.length ? `<p class="portal-h">還沒補 key 121？</p>${portals("121")}` : ""}
         <h2 class="part">121</h2>
         ${[...EVENTS.map(ev => ev.title), "gather", "121", "outside"].map(src => {
-          const rs = rows.filter(r => r.src === src);
-          const title = src === "121" ? `${CHAPTER}夥伴 121` : src === "outside" ? "外分會夥伴 121" : src === "gather" ? "其他活動／組聚" : src;
+          const rs = rows.map((r, index) => ({ r, index })).filter(({ r }) => r.src === src);
+          const title = src === "121" ? `${CHAPTER}夥伴 121` : src === "outside" ? "其他／手動輸入夥伴 121" : src === "gather" ? "其他活動／組聚" : src;
           const chip = r => src === "outside"
             ? `${esc(r.name)}<small>${esc(r.chapter)} · ${r.m}/${r.d}</small>`
             : `${r.ext ? "" : r.no + " "}${esc(r.name)}${r.ext ? `<small>${esc(r.chapter)}</small>` : ""}${src === "121" ? `<small>${r.m}/${r.d}</small>` : ""}${src === "gather" ? `<small>${esc(r.kind)} ${r.m}/${r.d}</small>` : ""}`;
           return `<h3>${title}</h3>
-            ${rs.length ? `<div class="chips">${rs.map(r => `<span class="chip">${chip(r)}</span>`).join("")}</div>`
+            ${rs.length ? `<div class="chips">${rs.map(({ r, index }) => `<span class="chip" data-draft-kind="121" data-draft-index="${index}">${chip(r)}<button type="button" class="chip-clear" data-clear-draft="121:${index}" aria-label="清除 ${esc(r.name)} 的 121 Key 單">清除Key單</button></span>`).join("")}</div>`
                         : `<p class="empty">—</p>`}`;
         }).join("")}
         <h2 class="part">引薦</h2>
         ${REF_QS.map((q, i) => {
-          const by = new Map();
-          refRows.filter(r => r.qid === q.id).forEach(r => {
-            const k = r.no ? `${r.no} ${r.name}` : `${r.name}（${r.chapter}）`;
-            by.set(k, (by.get(k) || 0) + 1);
-          });
+          const refs = refRows.map((r, index) => ({ r, index })).filter(({ r }) => r.qid === q.id);
           return `<h3>${i + 1}. ${q.short}</h3>
-            ${by.size ? `<div class="chips">${[...by].map(([k, n]) => `<span class="chip">${esc(k)}${n > 1 ? `<small>× ${n}</small>` : ""}</span>`).join("")}</div>`
+            ${refs.length ? `<div class="chips">${refs.map(({ r, index }) => `<span class="chip" data-draft-kind="ref" data-draft-index="${index}">${esc(r.no ? `${r.no} ${r.name}` : `${r.name}（${r.chapter}）`)}<button type="button" class="chip-clear" data-clear-draft="ref:${index}" aria-label="清除 ${esc(r.name)} 的引薦 Key 單">清除Key單</button></span>`).join("")}</div>`
                       : `<p class="empty">—</p>`}`;
         }).join("")}
         <div class="actions">
@@ -1606,7 +1734,19 @@ function render() {
           </div>
         </details>
       </section>`;
-    window.BniConnect.mount($("#bni-connect-widget"), keyinData(rows, refRows));
+    const widget = window.BniConnect.mount($("#bni-connect-widget"), keyinData(rows, refRows), {
+      onConfirmed: cleanup.confirmed,
+      onClearCompleted: cleanup.refresh,
+      onClearDrafts: cleanup.clearAll,
+      onEditDraft: item => { if (!cleanup.edit(item)) toast("這筆草稿已變更，請重新整理後再編輯。"); },
+    });
+    app.onclick = e => {
+      const button = e.target.closest("[data-clear-draft]");
+      if (!button) return;
+      if (widget?.getStatus().busy) { toast("BNI Connect 處理中，請稍後再清除草稿。"); return; }
+      const [kind, sourceIndex] = button.dataset.clearDraft.split(":");
+      if (!cleanup.clearOne({ kind, sourceIndex: Number(sourceIndex) })) toast("草稿暫時無法清除，請重新整理後再試。");
+    };
     $("#back").onclick = () => go(at - 1);
     $("#dl").onclick = () => download(rows, refRows);
     syncStatus(rows, refRows);
@@ -1618,13 +1758,13 @@ function render() {
 const KEYIN_SOURCE = "/* 追綠光 · 一鍵帶入 BNI Connect\n *\n * 由書籤載入，在 BNI Connect 網頁版右側開一個小面板：\n *   1. 打開時自動開一個小視窗到追綠光網站（bridge.html），拿回這個瀏覽器在完成頁存下的最新 key 單資料；\n *      讀不到時才用「複製 key 單資料」貼上\n *   2. 夥伴自己打開「一對一」或「引薦單」表單，按面板上某一筆的「填入」\n *   3. 一筆一筆「填入」時，檢查與按「提交」由夥伴自己來\n *   4. 也可以勾選多筆按「自動 key」：每筆填好後讀回檢查，全部對得上才按「提交」，\n *      對不上、表單沒關、跳出提示都會立刻停下來；外分會夥伴要從搜尋結果點人，一律跳過\n *\n * 不碰帳號密碼。資料只存在這台電腦這個瀏覽器（localStorage）。\n */\n(() => {\n  if (location.protocol !== \"https:\" || ![\"www.bniconnectglobal.com\", \"bniconnectglobal.com\"].includes(location.hostname)) {\n    alert(\"請先登入 BNI Connect 網頁版，再點這個書籤。\");\n    return;\n  }\n  const KEY = \"hua-urban-greenlight-bni-keyin-v1\";\n  const SITE = window.__huaGreenlightSite || new URL(\"./\", document.currentScript.src).href;\n  if (window.__huaGreenlight) { window.__huaGreenlight.toggle(); return; }\n\n  // ── 資料 ───────────────────────────────────────────────\n  let data = null;   // { me, rows121: [...], refs: [...], done: { \"121-0\": true, ... } }\n  try { data = JSON.parse(localStorage.getItem(KEY) || \"null\"); } catch {}\n  if (data) data.pending ||= {};\n  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch {} };\n\n  // 新資料取代舊資料時，已完成（含 BNI 已有紀錄）的勾勾照內容對回去，不會重複 key\n  const sig = (kind, r) => kind + \"|\" + (kind === \"121\"\n    ? [r.name, r.chapter, r.date, r.place, r.topic] : [r.name, r.chapter, r.type, r.referredName, r.content, r.phone]).join(\"|\");\n  function merge(next) {\n    if (!data) return next;\n    const keep = {};\n    for (const kind of [\"121\", \"ref\"]) (kind === \"121\" ? data.rows121 : data.refs).forEach((r, i) => {\n      const k = `${kind}-${i}`;\n      if (data.done[k] || data.pending?.[k]) keep[sig(kind, r)] = { done: !!data.done[k], pending: !!data.pending?.[k], dupe: !!data.dupe?.[k], note: data.note?.[k] };\n    });\n    next.dupe = {}; next.note = {}; next.pending = {};\n    for (const kind of [\"121\", \"ref\"]) (kind === \"121\" ? next.rows121 : next.refs).forEach((r, i) => {\n      const old = keep[sig(kind, r)], k = `${kind}-${i}`;\n      if (!old) return;\n      if (old.done) next.done[k] = true;\n      if (old.pending) next.pending[k] = true;\n      if (old.dupe) next.dupe[k] = true;\n      if (old.note) next.note[k] = old.note;\n    });\n    return next;\n  }\n  const parse = txt => {\n    const d = JSON.parse(txt);\n    if (!d || d.app !== \"hua-urban-greenlight\" || !Array.isArray(d.rows121) || !Array.isArray(d.refs)) throw new Error(\"格式不對\");\n    if (d.refs.some(r => !String(r.referredName || \"\").trim() || !String(r.content || \"\").trim())) throw new Error(\"引薦缺少被引薦人姓名或內容\");\n    return { me: d.me, rows121: d.rows121, refs: d.refs, done: {}, pending: {} };\n  };\n\n  // ── 姓名比對：BNI 選單是「丁 乃玉 Margaret Ding」，我們是「丁乃玉 Margrett」 ──\n  // 只看名字的前三個中文字（複姓四個字），後面的英文名、中文小名都不管：\n  //   「陳力羣 娃娃」「陳 力羣 Lily」→ 陳力羣；「張簡筱凡Sarah」→ 張簡筱凡；「王瑀Eva」→ 王瑀\n  const COMPOUND = [\"張簡\", \"歐陽\", \"司馬\", \"諸葛\", \"上官\", \"東方\", \"皇甫\", \"范姜\", \"司徒\", \"夏侯\"];\n  const zhName = s => {\n    const m = String(s || \"\").replace(/\\s+/g, \"\").match(/^[\\u4e00-\\u9fa5]+/);\n    if (!m) return \"\";\n    return m[0].slice(0, COMPOUND.some(c => m[0].startsWith(c)) ? 4 : 3);\n  };\n  const nameKey = s => zhName(s) || String(s || \"\").replace(/\\s+/g, \"\").toLowerCase();\n  const sameName = (a, b) => {\n    if (nameKey(a) === nameKey(b)) return true;\n    // 外籍會員可能姓名顛倒（Josh Hung ↔ Hung Josh）\n    const w = s => String(s || \"\").toLowerCase().split(/\\s+/).filter(Boolean).sort().join(\" \");\n    return !!w(a) && w(a) === w(b);\n  };\n\n  // ── 操作 React（MUI）表單 ─────────────────────────────────\n  const sleep = ms => new Promise(r => setTimeout(r, ms));\n  const dialog = () => [...document.querySelectorAll(\".MuiDialog-root\")].pop() || null;\n  const dialogKind = d => {\n    const t = d ? d.innerText : \"\";\n    return t.includes(\"一對一\") ? \"121\" : t.includes(\"引薦單\") ? \"ref\" : null;\n  };\n  function setText(el, v) {\n    if (!el) return false;\n    const proto = el.tagName === \"TEXTAREA\" ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;\n    Object.getOwnPropertyDescriptor(proto, \"value\").set.call(el, v);\n    el.dispatchEvent(new Event(\"input\", { bubbles: true }));\n    el.dispatchEvent(new Event(\"change\", { bubbles: true }));\n    el.dispatchEvent(new Event(\"blur\", { bubbles: true }));\n    return true;\n  }\n  async function pickOption(combo, match) {\n    if (!combo) return null;\n    combo.dispatchEvent(new MouseEvent(\"mousedown\", { bubbles: true }));\n    await sleep(400);\n    const opts = [...document.querySelectorAll('[role=\"listbox\"] [role=\"option\"]')];\n    const hits = opts.filter(o => match(o.innerText.trim(), o.getAttribute(\"data-value\")));\n    const hit = hits.length === 1 ? hits[0] : null;\n    if (hit) hit.click();\n    else document.activeElement?.dispatchEvent(new KeyboardEvent(\"keydown\", { key: \"Escape\", bubbles: true }));\n    await sleep(300);\n    return hit ? hit.innerText.trim() : null;\n  }\n  function setCheck(el, want) { if (el && el.checked !== want) el.click(); }\n  // 外分會：打開「搜尋分會／跨分會查找」，姓填進「名字」欄、名填進「姓氏」欄（BNI 這兩欄是反的）\n  function splitName(full) {\n    const zh = zhName(full);\n    if (!zh) return null;\n    const n = COMPOUND.some(c => zh.startsWith(c)) ? 2 : 1;\n    return { family: zh.slice(0, n), given: zh.slice(n) };\n  }\n  // BNI 在勾選搜尋結果、關閉表單時會跳出瀏覽器的「您確定嗎？」；自動流程裡暫時代答「確定」\n  // 「系統中已有另一個一對一會員符合，此一對一會面已被記錄，您想要繼續嗎？」→ 一律回答取消，不重複送\n  const isDup = m => /已被記錄|已有另一個|already/i.test(String(m || \"\"));\n  async function withConfirm(fn, seen) {\n    const orig = window.confirm;\n    window.confirm = m => { if (seen) seen.push(String(m || \"\")); return !isDup(m); };\n    try { fn(); await sleep(1200); } finally { window.confirm = orig; }\n  }\n  // 搜尋視窗：主表單以外、有「查找／搜尋」按鈕的那個\n  //   引薦單 → 標題「跨分會查找」、按鈕「查找」；一對一 → 標題「搜尋分會」、按鈕「搜尋」\n  //   （主表單本身也有一顆「跨分會查找／搜尋分會」按鈕，不能只看文字）\n  const SEARCH_BTN = /^(查找|搜尋)$/;\n  const searchDialog = main => [...document.querySelectorAll(\".MuiDialog-root\")].find(x => x !== main && /跨分會查找|搜尋分會/.test(x.innerText)\n    && [...x.querySelectorAll(\"button\")].some(b => SEARCH_BTN.test(b.innerText.trim()))) || null;\n  const chapterKey = s => String(s || \"\").replace(/\\s+|分會/g, \"\").replace(/[A-Za-z].*$/, \"\");\n\n  // 外分會：跨分會查找 → 只有一位「名字＋分會」都對得上的才自動勾選；回傳 null 代表成功，否則是原因\n  async function selectExt(d, r) {\n    const btn = [...d.querySelectorAll(\"button\")].find(b => /搜尋分會|跨分會查找/.test(b.innerText));\n    const nm = splitName(r.name);\n    if (!r.chapter) return `「${r.name}」缺少分會，請手動確認身分後再填入`;\n    if (!btn || !nm) return `找不到搜尋按鈕，請手動找「${r.name}」${r.chapter ? `（${r.chapter}）` : \"\"}`;\n    btn.click();\n    let s = null;\n    for (let i = 0; i \u003c 15 && !s; i++) { await sleep(200); s = searchDialog(d); }\n    if (!s) return `打不開「${btn.innerText.trim()}」，請手動找「${r.name}」${r.chapter ? `（${r.chapter}）` : \"\"}`;\n    const inputs = s.querySelectorAll('input[type=\"text\"]');\n    setText(inputs[0], nm.family);   // 標示「名字」的欄位其實要填姓\n    setText(inputs[1], nm.given);    // 標示「姓氏」的欄位其實要填名\n    await sleep(200);\n    [...s.querySelectorAll(\"button\")].find(b => SEARCH_BTN.test(b.innerText.trim()))?.click();\n    let rows = [];\n    for (let i = 0; i \u003c 25; i++) {\n      await sleep(250);\n      rows = [...s.querySelectorAll('tr, [role=\"row\"]')].filter(x => x.querySelector('input[type=\"checkbox\"]') && !/名稱/.test(x.innerText));\n      if (rows.length) break;\n    }\n    const ck = chapterKey(r.chapter);\n    const hits = rows.filter(x => sameName(x.innerText.trim().split(/\\t|\\n/)[0], r.name) && (!ck || x.innerText.includes(ck)));\n    if (hits.length !== 1) {\n      return `搜尋「${r.name}」${r.chapter ? `（${r.chapter}）` : \"\"}找到 ${hits.length} 位符合的，請在搜尋結果裡自己點選`;\n    }\n    await withConfirm(() => hits[0].querySelector('input[type=\"checkbox\"]').click());\n    for (let i = 0; i \u003c 15 && searchDialog(d); i++) await sleep(200);\n    return pickedName(d, r.name) ? null : `已勾選「${r.name}」，但表單上看不到，請檢查「至／會面」欄`;\n  }\n  // 選好外分會夥伴後，表單會在下拉選單上方顯示他的名字（「劉 政良Cheng-Liang Liu」）\n  const pickedName = (d, name) => d.innerText.split(\"\\n\").some(l => sameName(l.trim(), name));\n\n  // 關掉表單（BNI 會問「您確定嗎？」）\n  async function closeForm(d) {\n    const s = searchDialog(d);\n    if (s) { [...s.querySelectorAll(\"button\")].find(b => b.innerText.trim() === \"返回\")?.click(); await sleep(500); }\n    const b = [...d.querySelectorAll(\"button\")].find(x => x.innerText.trim() === \"關閉\");\n    if (b) await withConfirm(() => b.click());\n  }\n\n  const ddmmyyyy = s => { const [y, m, d] = s.split(\"/\"); return `${d.padStart(2, \"0\")}/${m.padStart(2, \"0\")}/${y}`; };\n\n  async function fill121(d, r) {\n    const notes = [];\n    const combos = d.querySelectorAll('[role=\"combobox\"]');\n    if (r.ext) { const why = await selectExt(d, r); if (why) notes.push(why); }\n    else if (!r._skipPick && !await pickOption(combos[0], t => sameName(t, r.name))) notes.push(`選單裡找不到「${r.name}」，請手動選`);\n    // 邀請人只有自己（value -2）\n    if (!await pickOption(combos[1], (t, v) => v === \"-2\" || sameName(t, data.me))) notes.push(\"請手動選邀請人\");\n    setText(d.querySelector('input[name=\"location\"]'), r.place);\n    setText(d.querySelector('textarea[name=\"comments\"]'), r.topic);\n    const date = d.querySelector('input[placeholder=\"DD/MM/YYYY\"]');\n    setText(date, ddmmyyyy(r.date));\n    if (date && date.value !== ddmmyyyy(r.date)) notes.push(`請手動把日期改成 ${r.date}`);\n    return notes;\n  }\n\n  async function fillRef(d, r) {\n    const notes = [];\n    const combo = d.querySelector('[role=\"combobox\"]');\n    if (r.ext) { const why = await selectExt(d, r); if (why) notes.push(why); }\n    else if (!r._skipPick && !await pickOption(combo, t => sameName(t, r.name))) notes.push(`選單裡找不到「${r.name}」，請手動選`);\n    setText(d.querySelector('input[name=\"referralPersonName\"]'), r.referredName);\n    const description = refDescriptionField(d);\n    if (description) setText(description, r.content);\n    else notes.push(\"找不到 BNI 引薦內容欄位，請手動填入；這筆不會自動送出\");\n    const radio = d.querySelector(`input[name=\"referralType\"][value=\"${r.type === \"內部\" ? \"INSIDE\" : \"OUTSIDE\"}\"]`);\n    if (radio && !radio.checked) radio.click();\n    setCheck(d.querySelector('input[name=\"cardGiven\"]'), [\"card\", \"both\"].includes(r.contact));\n    setCheck(d.querySelector('input[name=\"callRequired\"]'), [\"call\", \"both\"].includes(r.contact));\n    setText(d.querySelector('input[name=\"phoneNumber\"]'), r.phone);\n    return notes;\n  }\n\n  // ── 自動 key：填好後讀回每一欄，對得上才按「提交」 ─────────────────\n  const refDescriptionField = d => d.querySelector('textarea[name=\"referralDescription\"], input[name=\"referralDescription\"], textarea[name=\"comments\"], input[name=\"comments\"]');\n  function verify(kind, d, r) {\n    const bad = [];\n    const val = sel => d.querySelector(sel)?.value ?? \"\";\n    if (kind === \"121\") {\n      const c = d.querySelectorAll('[role=\"combobox\"]');\n      if (r.ext ? !pickedName(d, r.name) : !sameName(c[0]?.innerText, r.name)) bad.push(\"會面對象\");\n      if (/選擇/.test(c[1]?.innerText || \"選擇\")) bad.push(\"邀請人\");\n      if (val('input[name=\"location\"]') !== r.place) bad.push(\"地點\");\n      if (val('textarea[name=\"comments\"]') !== r.topic) bad.push(\"會談主題\");\n      if (val('input[placeholder=\"DD/MM/YYYY\"]') !== ddmmyyyy(r.date)) bad.push(\"日期\");\n    } else {\n      if (r.ext ? !pickedName(d, r.name) : !sameName(d.querySelector('[role=\"combobox\"]')?.innerText, r.name)) bad.push(\"引薦對象\");\n      if (val('input[name=\"referralPersonName\"]') !== r.referredName) bad.push(\"被引薦人姓名\");\n      const description = refDescriptionField(d);\n      if (!description || description.value !== r.content) bad.push(\"引薦內容\");\n      if (d.querySelector('input[name=\"referralType\"]:checked')?.value !== (r.type === \"內部\" ? \"INSIDE\" : \"OUTSIDE\")) bad.push(\"引薦類型\");\n      if (!!d.querySelector('input[name=\"cardGiven\"]')?.checked !== ([\"card\", \"both\"].includes(r.contact))\n          || !!d.querySelector('input[name=\"callRequired\"]')?.checked !== ([\"call\", \"both\"].includes(r.contact))) bad.push(\"引薦狀態\");\n      if (val('input[name=\"phoneNumber\"]') !== r.phone) bad.push(\"電話\");\n    }\n    return bad;\n  }\n  const openForm_ = kind => [...document.querySelectorAll(\".MuiDialog-root\")].reverse().find(x => dialogKind(x) === kind) || null;\n\n  // 用「填入」之後，夥伴自己按「提交」或「提交並新建」：送出成功就自動標記已完成\n  //   提交 → 表單關閉；提交並新建 → 表單清空（會面／至 變回「選擇…」）\n  // BNI 已經有紀錄的：標為完成，另外記一筆「已有紀錄」給上方總覽統計\n  function markDup(k) {\n    data.done[k] = true; sel.delete(k);\n    if (data.pending) delete data.pending[k];\n    data.dupe = data.dupe || {}; data.dupe[k] = true;\n    data.note = data.note || {}; data.note[k] = \"BNI 已經有這筆紀錄，已自動取消（沒有重複送）\";\n    save();\n  }\n\n  // 同一時間只監看一筆：按下一筆「填入」時，取消上一筆的監看，避免把下一筆的送出算到上一筆\n  let watching = null;\n  const alertNodes = () => [...document.querySelectorAll('[role=\"alert\"], [role=\"status\"], .MuiSnackbar-root, .MuiAlert-root')];\n  const alertSnapshot = () => new Map(alertNodes().map(n => [n, n.innerText || \"\"]));\n  const successSignal = before => alertNodes().some(n => /提交成功|成功送出|新增成功|已送出|submitted|success/i.test(n.innerText || \"\")\n    && (!before.has(n) || before.get(n) !== n.innerText));\n  function stopWatch() {\n    if (!watching) return;\n    watching.d.removeEventListener(\"click\", watching.onClick, true);\n    watching.cancelled = true; watching = null;\n  }\n  function watchSubmit(d, kind, k, label) {\n    stopWatch();\n    const me = { d, cancelled: false };\n    const onClick = async e => {\n      const b = e.target.closest(\"button\");\n      const txt = b ? b.innerText.trim() : \"\";\n      if (txt === \"關閉\") { d.removeEventListener(\"click\", onClick, true); return; }\n      if (txt !== \"提交\" && txt !== \"提交並新建\") return;\n      d.removeEventListener(\"click\", onClick, true);\n      const before = alertSnapshot();\n      data.pending ||= {}; data.pending[k] = true;\n      data.note ||= {}; data.note[k] = \"送出結果待確認；先到 BNI Connect 核對紀錄\";\n      sel.delete(k); save(); render();\n      // BNI 若問「已被記錄，要繼續嗎？」：自動回答取消（不重複送），其他問題照常讓夥伴自己回答\n      const orig = window.confirm;\n      let dup = null;\n      window.confirm = m => { if (isDup(m)) { dup = false; return false; } return orig.call(window, m); };\n      setTimeout(() => { if (window.confirm !== orig) window.confirm = orig; }, 15000);\n      for (let w = 0; w \u003c 40; w++) {\n        await sleep(250);\n        if (me.cancelled) { window.confirm = orig; return; }\n        if (dup === false) {\n          window.confirm = orig;\n          markDup(k);\n          await closeForm(d);\n          msg = `✓ 「${esc(label)}」BNI 已經有紀錄，已自動取消、標為完成。`;\n          render(); return;\n        }\n        const gone = !d.isConnected || !openForm_(kind);\n        const reset = txt === \"提交並新建\" && /選擇/.test(d.querySelector('[role=\"combobox\"]')?.innerText || \"\");\n        if (gone || reset) {\n          window.confirm = orig;\n          if (successSignal(before)) {\n            data.done[k] = true; delete data.pending[k]; delete data.note[k];\n            msg = `✓ 「${esc(label)}」已確認送出，標記為已完成。`;\n          } else {\n            msg = `⚠️ 「${esc(label)}」表單已關閉，但沒有讀到明確成功訊息，保留待確認，避免重複送出。`;\n          }\n          save();\n          render(); return;\n        }\n      }\n      window.confirm = orig;\n      msg = `⚠️ 「${esc(label)}」送出結果待確認。請在 BNI Connect 核對後處理這筆。`;\n      render();\n    };\n    me.onClick = onClick;\n    watching = me;\n    d.addEventListener(\"click\", onClick, true);\n  }\n\n  async function runBatch(kind, keys) {\n    stopWatch();\n    const list = kind === \"121\" ? data.rows121 : data.refs;\n    data.note = data.note || {};\n    run = { kind, n: keys.length, i: 0, cur: \"\", paused: false };\n    let ok = 0, skipped = 0, dupN = 0, stop = \"\";\n    render();\n    for (const k of keys) {\n      if (run.paused) { stop = \"已暫停。勾選的還沒送的會留著，按「自動 key」可以繼續。\"; break; }\n      const i = +k.split(\"-\")[1], r = list[i];\n      run.i++; run.cur = r.name; render();\n      if (data.done[k] || data.pending?.[k]) { sel.delete(k); continue; }\n      const d = await formFor(kind);\n      if (!d) { stop = \"打不開表單。請關掉畫面上其他視窗、回到 BNI Connect 首頁，再按「自動 key」繼續。\"; break; }\n      if (r.ext) {\n        const why = await selectExt(d, r);\n        if (why) {\n          data.note[k] = why + \"（已跳過，請按「填入」處理）\"; sel.delete(k); skipped++; save();\n          await closeForm(d); await sleep(800);\n          if (openForm_(kind)) { stop = \"表單關不掉，已停下來，請手動關掉後再按「自動 key」繼續。\"; break; }\n          continue;\n        }\n      }\n      // 外分會的人已經選好，填其他欄位時不要再動下拉選單\n      const fillWith = r.ext ? { ...r, ext: false, _skipPick: true } : r;\n      const notes = await (kind === \"121\" ? fill121(d, fillWith) : fillRef(d, fillWith));\n      if (notes.length) {\n        stop = `第 ${i + 1} 筆「${esc(r.name)}」需要手動確認：${notes.map(esc).join(\"、\")}。表單還開著，請檢查後自己按「提交」或關掉。`;\n        break;\n      }\n      await sleep(400);\n      const bad = verify(kind, d, r);\n      if (bad.length) {\n        stop = `第 ${i + 1} 筆「${esc(r.name)}」的 ${bad.join(\"、\")} 對不上，已停下來。表單還開著，請檢查後自己按「提交」或關掉。`;\n        break;\n      }\n      const submitButtons = [...d.querySelectorAll(\"button\")].filter(b => b.innerText.trim() === \"提交\");\n      if (submitButtons.length !== 1) { stop = `第 ${i + 1} 筆找不到唯一的提交按鈕，已停下來。`; break; }\n      const before = alertSnapshot();\n      data.pending ||= {}; data.pending[k] = true;\n      data.note[k] = \"送出結果待確認；先到 BNI Connect 核對紀錄\";\n      sel.delete(k); save(); render();\n      const asked = [];\n      await withConfirm(() => submitButtons[0].click(), asked);\n      if (asked.some(isDup)) {\n        markDup(k); dupN++; render();\n        await closeForm(d); await sleep(800);\n        if (openForm_(kind)) { stop = \"表單關不掉，已停下來，請手動關掉後再按「自動 key」繼續。\"; break; }\n        continue;\n      }\n      let closed = false;\n      for (let w = 0; w \u003c 40 && !closed; w++) { await sleep(250); closed = !openForm_(kind); }\n      if (!closed) {\n        const err = [...d.querySelectorAll(\".Mui-error, .MuiFormHelperText-root\")].map(x => x.innerText.trim()).filter(Boolean).join(\"、\");\n        stop = `第 ${i + 1} 筆「${esc(r.name)}」送出後表單沒有關閉${err ? `（${esc(err)}）` : \"\"}，已停下來，請看一下畫面。`;\n        break;\n      }\n      await sleep(500);\n      if (!successSignal(before)) {\n        stop = `第 ${i + 1} 筆「${esc(r.name)}」表單已關閉，但沒有讀到明確成功訊息；保留待確認，避免重複送出。`;\n        save(); render(); break;\n      }\n      data.done[k] = true; delete data.pending[k]; delete data.note[k]; sel.delete(k); ok++; save(); render();\n      await sleep(600);\n      if (document.querySelector(\".MuiDialog-root\")) {\n        stop = \"BNI Connect 跳出了提示視窗，已停下來。請看一下內容、關掉後再按「自動 key」繼續。\";\n        break;\n      }\n      await sleep(900);\n    }\n    run = null; save();\n    msg = (stop ? \"⚠️ \" + stop + \"\u003cbr>\" : \"✓ \") + `這次自動送出 ${ok} 筆` + (dupN ? `，${dupN} 筆 BNI 已經有紀錄（沒有重複送，已標為完成）` : \"\") + (skipped ? `，跳過 ${skipped} 筆（原因寫在那一筆下面）` : \"\") + \"。\";\n    render();\n  }\n\n  // ── 面板（Shadow DOM，不受 BNI 頁面樣式影響） ─────────────────\n  const host = document.createElement(\"div\");\n  const root = host.attachShadow({ mode: \"open\" });\n  document.body.appendChild(host);\n  let tab = \"121\";\n  let msg = \"\";\n  let sel = new Set();       // 勾選要自動 key 的（\"121-3\"、\"ref-0\"）\n  let showDone = false;      // 已完成的預設藏起來\n  let confirming = false;    // 按了自動 key，等確認\n  let run = null;            // 自動 key 進行中：{ kind, n, i, cur, paused }\n\n  // 面板位置、縮小狀態記在這個瀏覽器；拖曳標題列可以移動\n  const UI = \"hua-urban-greenlight-keyin-ui-v1\";\n  let ui = { x: null, y: 72, min: false };\n  try { ui = { ...ui, ...JSON.parse(localStorage.getItem(UI) || \"{}\") }; } catch {}\n  const saveUi = () => { try { localStorage.setItem(UI, JSON.stringify(ui)); } catch {} };\n  function place() {\n    const box = root.querySelector(\".box\");\n    const w = box ? box.offsetWidth : 300, h = box ? box.offsetHeight : 60;\n    const x = ui.x == null ? innerWidth - w - 16 : ui.x;\n    host.style.cssText = `position:fixed;z-index:2147483000;left:${Math.max(0, Math.min(x, innerWidth - w))}px;top:${Math.max(0, Math.min(ui.y, innerHeight - Math.min(h, 60)))}px;`;\n  }\n  addEventListener(\"resize\", place);\n\n  // 儀表板上「一對一會面」「提供引薦」卡片的「提交」按鈕（只是打開表單）\n  function openForm(kind) {\n    const label = kind === \"121\" ? \"一對一會面\" : \"提供引薦\";\n    let best = null, bestDepth = 9;\n    for (const el of document.querySelectorAll(\"button, a, div, span\")) {\n      if (el.children.length || el.innerText?.trim() !== \"提交\" || host.contains(el)) continue;\n      let a = el, depth = 0;\n      while (a && depth \u003c 6 && !(a.innerText || \"\").includes(label)) { a = a.parentElement; depth++; }\n      if (a && depth \u003c bestDepth) { best = el; bestDepth = depth; }\n    }\n    if (best) best.click();\n    return !!best;\n  }\n  async function formFor(kind) {\n    const find = () => [...document.querySelectorAll(\".MuiDialog-root\")].reverse().find(x => dialogKind(x) === kind) || null;\n    if (find()) return find();\n    if (document.querySelector(\".MuiDialog-root\") || !openForm(kind)) return null;\n    for (let i = 0; i \u003c 20 && !find(); i++) await sleep(200);\n    await sleep(400);\n    return find();\n  }\n\n  // ── 自動讀取最新資料：開小視窗到追綠光網站，它把資料傳回來就自己關掉 ──\n  const SITE_ORIGIN = new URL(SITE).origin;\n  let fetching = false;\n  let bridgeWindow = null;\n  let bridgeNonce = null;\n  function fetchLatest(auto) {\n    bridgeNonce = crypto.randomUUID();\n    const nonce = bridgeNonce;\n    const w = window.open(SITE + \"bridge.html#\" + encodeURIComponent(nonce), \"hua-urban-greenlight-bridge\", \"width=420,height=260,left=80,top=80\");\n    if (!w) {\n      if (!auto) msg = \"瀏覽器擋住了小視窗：請在網址列右邊允許這個網站「彈出式視窗」，再按「🔄 讀取最新資料」。\";\n      render(); return;\n    }\n    bridgeWindow = w;\n    fetching = true; render();\n    setTimeout(() => { if (fetching && bridgeNonce === nonce) { fetching = false; render(); } }, 8000);\n  }\n  window.addEventListener(\"message\", e => {\n    if (e.origin !== SITE_ORIGIN || e.source !== bridgeWindow || e.data?.nonce !== bridgeNonce) return;\n    if (e.data?.type === \"hua-urban-greenlight-ready\") {\n      bridgeWindow.postMessage({ type: \"hua-urban-greenlight-request\", nonce: bridgeNonce }, SITE_ORIGIN);\n      return;\n    }\n    if (e.data?.type !== \"hua-urban-greenlight-data\") return;\n    fetching = false;\n    if (!e.data.data) { msg = \"追綠光網站上還沒有你的資料：請先在同一個瀏覽器填完問卷、走到完成頁。\"; render(); return; }\n    try {\n      const before = data ? data.rows121.length + data.refs.length : 0;\n      data = merge(parse(JSON.stringify(e.data.data))); save();\n      const doneN = Object.values(data.done).filter(Boolean).length;\n      msg = `✓ 已讀取最新資料：${data.rows121.length} 筆 121、${data.refs.length} 筆引薦` + (before && doneN ? `（其中 ${doneN} 筆之前已完成）` : \"\");\n    } catch { msg = \"資料格式不對，請回追綠光網站重新走到完成頁。\"; }\n    render();\n  });\n\n  const esc = s => String(s ?? \"\").replace(/[&\u003c>\"]/g, c => ({ \"&\": \"&amp;\", \"\u003c\": \"&lt;\", \">\": \"&gt;\", '\"': \"&quot;\" }[c]));\n  function render() {\n    // 重畫前記住清單捲到哪裡，重畫後捲回去（勾選、標記完成時不要跳回最上面）\n    const prevBody = root.querySelector(\".body\");\n    const keepScroll = prevBody ? prevBody.scrollTop : 0;\n    renderInner();\n    const body = root.querySelector(\".body\");\n    if (body) body.scrollTop = keepScroll;\n  }\n  function renderInner() {\n    const list = data ? (tab === \"121\" ? data.rows121 : data.refs) : [];\n    const doneN = k => (data ? (k === \"121\" ? data.rows121 : data.refs).filter((_, i) => data.done[`${k}-${i}`]).length : 0);\n    root.innerHTML = `\n      \u003cstyle>\n        * { box-sizing: border-box; font-family: -apple-system, \"PingFang TC\", \"Microsoft JhengHei\", sans-serif; }\n        .box { width: 300px; max-height: calc(100vh - 100px); display: flex; flex-direction: column; background: #fff; color: #17231c;\n          border-radius: 16px; box-shadow: 0 12px 40px rgba(0,0,0,.25); overflow: hidden; border: 2px solid #107b39; }\n        .hd { background: #107b39; color: #fff; padding: 9px 10px 9px 14px; display: flex; gap: 6px; align-items: center;\n          cursor: move; user-select: none; touch-action: none; }\n        .hd b { font-size: 14px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }\n        .hd button { background: rgba(0,0,0,.18); border: 0; color: #fff; font-size: 15px; cursor: pointer; line-height: 1;\n          width: 26px; height: 26px; border-radius: 8px; flex: none; }\n        .hd button:hover { background: rgba(0,0,0,.32); }\n        .box.min { width: auto; }\n        .box.min .body { display: none; }\n        .body { padding: 12px 14px; overflow: auto; }\n        .tabs { display: flex; gap: 6px; margin-bottom: 10px; }\n        .tabs button { flex: 1; padding: 7px; border-radius: 99px; border: 1px solid #cfe3d5; background: #fff; cursor: pointer; font-size: 13px; }\n        .tabs button.on { background: #107b39; color: #fff; border-color: #107b39; font-weight: 700; }\n        .hint { font-size: 12.5px; color: #5d6f64; margin: 0 0 10px; line-height: 1.5; }\n        .msg { font-size: 13px; background: #fff7e0; border-radius: 10px; padding: 8px 10px; margin: 0 0 10px; line-height: 1.5; }\n        .msg.ok { background: #e3f6ea; }\n        .it { border: 1px solid #dbe6de; border-radius: 12px; padding: 8px 10px; margin-bottom: 8px; font-size: 13px; }\n        .it .t { font-weight: 700; font-size: 14px; }\n        .it .s { color: #5d6f64; margin: 2px 0 6px; line-height: 1.4; word-break: break-all; }\n        .row { display: flex; gap: 6px; align-items: center; }\n        .fill { flex: 1; padding: 7px; border: 0; border-radius: 10px; background: #107b39; color: #fff; font-weight: 700; cursor: pointer; }\n        label { font-size: 12.5px; color: #5d6f64; display: flex; align-items: center; gap: 4px; cursor: pointer; white-space: nowrap; }\n        .big { width: 100%; padding: 10px; border: 0; border-radius: 12px; background: #107b39; color: #fff; font-weight: 700; cursor: pointer; font-size: 14px; }\n        textarea { width: 100%; height: 70px; margin: 8px 0; border-radius: 10px; border: 1px solid #dbe6de; padding: 8px; font-size: 12px; }\n        .link { background: none; border: 0; color: #5d6f64; text-decoration: underline; cursor: pointer; font-size: 12px; padding: 0; }\n        a { color: #0f7a37; }\n        .sum { background: #f4f8f5; border-radius: 12px; padding: 8px 10px; margin-bottom: 10px; font-size: 12.5px; }\n        .st { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline; padding: 3px 0; }\n        .st + .st { border-top: 1px dashed #dbe6de; }\n        .st b { width: 2.6em; color: #0f7a37; }\n        .st em { font-style: normal; font-weight: 700; color: #17231c; }\n        .st em.left { color: #b45309; }\n        .st .tot { color: #5d6f64; margin-left: auto; }\n        .bar { display: flex; align-items: center; justify-content: space-between; margin: 0 0 8px; }\n        .auto { width: 100%; padding: 10px; border: 0; border-radius: 12px; background: #0f7a37; color: #fff; font-weight: 700;\n          cursor: pointer; font-size: 14px; margin-bottom: 10px; }\n        .auto:disabled { background: #53685a; cursor: default; }\n        .panel { border: 2px solid #f2d36b; background: #fffbea; border-radius: 12px; padding: 10px; margin-bottom: 10px; font-size: 13px; line-height: 1.5; }\n        .panel .btns { display: flex; gap: 6px; margin-top: 8px; }\n        .panel .btns button { flex: 1; padding: 8px; border-radius: 10px; border: 1px solid #dbe6de; background: #fff; cursor: pointer; font-weight: 700; }\n        .panel .btns .go { background: #107b39; color: #fff; border-color: #107b39; }\n        .panel.running { border-color: #107b39; background: #e3f6ea; }\n        .it { display: grid; grid-template-columns: auto 1fr; gap: 0 8px; }\n        .it > .pick { grid-row: 1 / span 3; padding-top: 2px; }\n        .it.done { background: #f4f8f5; }\n        :focus-visible { outline: 3px solid #9b5800; outline-offset: 2px; }\n        .badge { color: #0f7a37; font-weight: 700; font-size: 12.5px; margin-left: 6px; }\n        .note { color: #a15c00; font-size: 12px; grid-column: 2; margin-bottom: 4px; }\n      \u003c/style>\n      \u003cdiv class=\"box ${ui.min ? \"min\" : \"\"}\">\n        \u003cdiv class=\"hd\" id=\"hd\" title=\"拖曳可以移動面板\">\n          \u003cb>🟢 追綠光${run ? `　⏳ ${run.i}/${run.n}` : \"\"}${ui.min && data && !run ? `　121 ${doneN(\"121\")}/${data.rows121.length} · 引薦 ${doneN(\"ref\")}/${data.refs.length}` : \" · 一鍵帶入\"}\u003c/b>\n          \u003cbutton id=\"min\" title=\"${ui.min ? \"展開\" : \"縮小\"}\">${ui.min ? \"▢\" : \"－\"}\u003c/button>\n          \u003cbutton id=\"x\" title=\"關閉面板（再點一次書籤會回來）\">×\u003c/button>\n        \u003c/div>\n        \u003cdiv class=\"body\">\n          ${msg ? `\u003cp class=\"msg ${msg.startsWith(\"✓\") ? \"ok\" : \"\"}\">${msg}\u003c/p>` : \"\"}\n          ${data && fetching ? `\u003cp class=\"hint\">⏳ 正在讀取最新資料…\u003c/p>` : \"\"}\n          ${!data ? `\n            \u003cp class=\"hint\">${fetching ? \"⏳ 正在讀取追綠光網站上的資料…\" : `先在同一個瀏覽器到 \u003ca href=\"${SITE}\" target=\"_blank\">追綠光網站\u003c/a> 填完問卷、走到完成頁，再按下面的按鈕。`}\u003c/p>\n            \u003cbutton class=\"big\" id=\"fetch\">🔄 讀取最新資料\u003c/button>\n            \u003cp class=\"hint\" style=\"margin-top:10px\">還是讀不到的話：在完成頁按「複製 key 單資料」，再\u003cbutton class=\"link\" id=\"read\">從剪貼簿讀取\u003c/button>，或貼在這裡：\u003c/p>\n            \u003ctextarea id=\"paste\" placeholder=\"在這裡貼上\">\u003c/textarea>\n            \u003cbutton class=\"big\" id=\"usePaste\">使用貼上的資料\u003c/button>\n          ` : `\n            ${(() => {\n              const stat = kind => {\n                const list = kind === \"121\" ? data.rows121 : data.refs;\n                const keys = list.map((_, i) => `${kind}-${i}`);\n                const done = keys.filter(k => data.done[k]).length, dup = keys.filter(k => data.done[k] && data.dupe?.[k]).length;\n                return `\u003cdiv class=\"st\">\u003cb>${kind === \"121\" ? \"121\" : \"引薦\"}\u003c/b>\n                  \u003cspan>新送出 \u003cem>${done - dup}\u003c/em>\u003c/span>\n                  ${kind === \"121\" ? `\u003cspan>BNI 已有紀錄 \u003cem>${dup}\u003c/em>\u003c/span>` : \"\"}\n                  \u003cspan>還沒完成 \u003cem class=\"${keys.length - done ? \"left\" : \"\"}\">${keys.length - done}\u003c/em>\u003c/span>\n                  \u003cspan class=\"tot\">共 ${keys.length}\u003c/span>\u003c/div>`;\n              };\n              return `\u003cdiv class=\"sum\">${stat(\"121\")}${stat(\"ref\")}\u003c/div>`;\n            })()}\n            \u003cdiv class=\"tabs\">\n              \u003cbutton data-tab=\"121\" class=\"${tab === \"121\" ? \"on\" : \"\"}\">121（${doneN(\"121\")}/${data.rows121.length}）\u003c/button>\n              \u003cbutton data-tab=\"ref\" class=\"${tab === \"ref\" ? \"on\" : \"\"}\">引薦（${doneN(\"ref\")}/${data.refs.length}）\u003c/button>\n            \u003c/div>\n            ${run ? `\u003cdiv class=\"panel running\">⏳ 自動 key 中：第 ${run.i} / ${run.n} 筆「${esc(run.cur)}」…\u003cbr>請不要操作 BNI Connect 畫面。\n                \u003cdiv class=\"btns\">\u003cbutton id=\"pause\">${run.paused ? \"這筆送完就停…\" : \"⏸ 暫停\"}\u003c/button>\u003c/div>\u003c/div>`\n            : confirming ? (() => {\n                const keys = [...sel].filter(k => k.startsWith(tab + \"-\"));\n                const ext = keys.filter(k => list[+k.split(\"-\")[1]].ext).length;\n                return `\u003cdiv class=\"panel\">確定要自動送出 \u003cb>${keys.length}\u003c/b> 筆${tab === \"121\" ? \" 121\" : \"引薦\"}到 BNI Connect 嗎？\n                  ${ext ? `\u003cbr>其中外分會 ${ext} 筆會自動跨分會查找；找不到或找到不只一位的，會跳過留給你處理。` : \"\"}\n                  \u003cbr>每筆會先檢查欄位，對不上就停。送出後要到 BNI Connect「卡片 ▸ 提供的」才能修改或刪除。\n                  \u003cdiv class=\"btns\">\u003cbutton id=\"cancel\">取消\u003c/button>\u003cbutton class=\"go\" id=\"go\">確認，開始\u003c/button>\u003c/div>\u003c/div>`;\n              })() : \"\"}\n            ${(() => {\n              const open = list.map((_, i) => `${tab}-${i}`).filter(k => !data.done[k] && !data.pending?.[k]);\n              const n = open.filter(k => sel.has(k)).length;\n              return `\u003cdiv class=\"bar\">\n                  \u003clabel>\u003cinput type=\"checkbox\" id=\"all\" ${open.length && n === open.length ? \"checked\" : \"\"} ${run || !open.length ? \"disabled\" : \"\"}>全選未完成的\u003c/label>\n                  \u003cspan class=\"hint\" style=\"margin:0\">已選 ${n} 筆\u003c/span>\n                \u003c/div>\n                \u003cbutton class=\"auto\" id=\"auto\" ${!n || run || confirming ? \"disabled\" : \"\"}>▶ 自動 key 已勾選的 ${n} 筆\u003c/button>`;\n            })()}\n            \u003cp class=\"hint\">也可以按某一筆的「填入」，檢查後自己按「提交」，再勾「已完成」。面板擋到畫面時，拖曳綠色標題列移開，或按「－」縮小。\u003c/p>\n            ${(() => {\n              const doneN = list.filter((_, i) => data.done[`${tab}-${i}`]).length;\n              return doneN === list.length && list.length ? `\u003cp class=\"msg ok\">🎉 這一類 ${list.length} 筆全部完成了！\u003c/p>` : \"\";\n            })()}\n            ${list.map((r, i) => {\n              const k = `${tab}-${i}`, done = !!data.done[k], pending = !!data.pending?.[k];\n              if (done && !showDone) return \"\";   // 已完成的不顯示\n              const sub = tab === \"121\"\n                ? `${esc(r.date)} · ${esc(r.place)} · ${esc(r.topic)}${r.ext ? ` · ${esc(r.chapter)}` : \"\"}`\n                : `${esc(r.type)} · 被引薦人 ${esc(r.referredName)} · ${esc(r.content)} · ${esc(r.phone)}${r.ext ? ` · ${esc(r.chapter)}` : \"\"}`;\n              return `\u003cdiv class=\"it ${done ? \"done\" : \"\"}\">\n                \u003cinput type=\"checkbox\" class=\"pick\" data-sel=\"${k}\" ${sel.has(k) && !done && !pending ? \"checked\" : \"\"} ${done || pending || run ? \"disabled\" : \"\"} title=\"勾選要自動 key\">\n                \u003cdiv class=\"t\">${i + 1}. ${esc(r.name)}${done ? `\u003cspan class=\"badge\">✓ 已完成\u003c/span>` : pending ? `\u003cspan class=\"badge\">待確認\u003c/span>` : \"\"}\u003c/div>\n                \u003cdiv class=\"s\">${sub}\u003c/div>\n                ${data.note?.[k] ? `\u003cdiv class=\"note\">${done ? \"ℹ️\" : \"⚠️\"} ${esc(data.note[k])}\u003c/div>` : \"\"}\n                \u003cdiv class=\"row\" style=\"grid-column:2\">\n                  \u003cbutton class=\"fill\" data-fill=\"${i}\" ${run || done || pending ? \"disabled\" : \"\"}>填入\u003c/button>\n                  \u003clabel>\u003cinput type=\"checkbox\" data-done=\"${k}\" ${done ? \"checked\" : \"\"} ${run ? \"disabled\" : \"\"}>已完成\u003c/label>\n                  ${pending && !done ? `\u003cbutton class=\"link\" data-clear-pending=\"${k}\" ${run ? \"disabled\" : \"\"}>確認未送出，重新開放\u003c/button>` : \"\"}\n                \u003c/div>\n              \u003c/div>`;\n            }).join(\"\")}\n            ${!list.length ? `\u003cp class=\"hint\">這一類沒有要 key 的。\u003c/p>` : \"\"}\n            ${(() => {\n              const doneN = list.filter((_, i) => data.done[`${tab}-${i}`]).length;\n              return doneN ? `\u003cp>\u003cbutton class=\"link\" id=\"toggleDone\">${showDone ? \"隱藏\" : \"顯示\"}已完成的 ${doneN} 筆\u003c/button>\u003c/p>` : \"\";\n            })()}\n            \u003cbutton class=\"link\" id=\"fetch\">🔄 讀取最新資料\u003c/button>\n          `}\n        \u003c/div>\n      \u003c/div>`;\n  }\n\n  root.addEventListener(\"click\", async e => {\n    const t = e.target;\n    if (t.id === \"x\") { host.style.display = \"none\"; return; }\n    if (t.id === \"min\") { ui.min = !ui.min; saveUi(); render(); place(); return; }\n    if (t.dataset.tab) {\n      if (run) return;\n      tab = t.dataset.tab; msg = \"\"; confirming = false;\n      const b = root.querySelector(\".body\"); if (b) b.scrollTop = 0;\n      render(); return;\n    }\n    if (t.id === \"auto\") { confirming = true; msg = \"\"; render(); return; }\n    if (t.id === \"cancel\") { confirming = false; render(); return; }\n    if (t.id === \"go\") {\n      confirming = false;\n      const keys = [...sel].filter(k => k.startsWith(tab + \"-\")).sort((a, b) => +a.split(\"-\")[1] - +b.split(\"-\")[1]);\n      runBatch(tab, keys); return;\n    }\n    if (t.id === \"pause\") { if (run) run.paused = true; render(); return; }\n    if (t.id === \"toggleDone\") { showDone = !showDone; render(); return; }\n    if (t.dataset.clearPending) {\n      const k = t.dataset.clearPending;\n      delete data.pending[k]; if (data.note) delete data.note[k];\n      save(); render(); return;\n    }\n    if (t.id === \"fetch\") { if (!run) fetchLatest(false); return; }\n    if (t.id === \"read\" || t.id === \"usePaste\") {\n      try {\n        const txt = t.id === \"read\" ? await navigator.clipboard.readText() : root.getElementById(\"paste\").value;\n        data = merge(parse(txt)); save();\n        msg = `✓ 讀到 ${data.rows121.length} 筆 121、${data.refs.length} 筆引薦`;\n      } catch (err) {\n        msg = t.id === \"read\" ? \"讀不到剪貼簿（可能沒允許）。請用下面的貼上方式。\" : \"資料格式不對，請回追綠光網站重新複製。\";\n      }\n      render(); return;\n    }\n    if (t.dataset.fill !== undefined) {\n      const i = +t.dataset.fill, want = tab === \"121\" ? \"121\" : \"ref\";\n      stopWatch();\n      t.disabled = true; t.textContent = \"填入中…\";\n      const d = await formFor(want);\n      if (!d) {\n        msg = `打不開「${want === \"121\" ? \"一對一會面\" : \"提供引薦\"}」表單。請先關掉畫面上其他的表單，回到 BNI Connect 首頁（儀表板）再按填入。`;\n        render(); return;\n      }\n      const r = (want === \"121\" ? data.rows121 : data.refs)[i];\n      try {\n        const notes = want === \"121\" ? await fill121(d, r) : await fillRef(d, r);\n        msg = `✓ 已填入第 ${i + 1} 筆「${esc(r.name)}」。請檢查後自己按「提交」，送出成功會自動打勾。` + (notes.length ? \"\u003cbr>⚠️ \" + notes.map(esc).join(\"\u003cbr>⚠️ \") : \"\");\n        watchSubmit(d, want, `${want}-${i}`, r.name);\n      } catch (err) {\n        msg = \"填入時出錯了，請手動填這一筆。\";\n      }\n      render();\n    }\n  });\n  root.addEventListener(\"change\", e => {\n    const t = e.target;\n    if (t.id === \"all\") {\n      const list = tab === \"121\" ? data.rows121 : data.refs;\n      list.forEach((_, i) => { const k = `${tab}-${i}`; if (!data.done[k] && !data.pending?.[k]) t.checked ? sel.add(k) : sel.delete(k); });\n      render(); return;\n    }\n    if (t.dataset.sel) { t.checked ? sel.add(t.dataset.sel) : sel.delete(t.dataset.sel); render(); return; }\n    const k = t.dataset.done;\n    if (!k) return;\n    data.done[k] = t.checked; if (t.checked) { sel.delete(k); delete data.pending[k]; }\n    if (!t.checked) { if (data.dupe) delete data.dupe[k]; if (data.note) delete data.note[k]; }\n    save(); render();\n  });\n\n  let drag = null;\n  root.addEventListener(\"pointerdown\", e => {\n    const hd = e.target.closest?.(\"#hd\");\n    if (!hd || e.target.closest(\"button\")) return;\n    const r = host.getBoundingClientRect();\n    drag = { dx: e.clientX - r.left, dy: e.clientY - r.top };\n    hd.setPointerCapture(e.pointerId);\n  });\n  root.addEventListener(\"pointermove\", e => {\n    if (!drag) return;\n    ui.x = e.clientX - drag.dx; ui.y = e.clientY - drag.dy; place();\n  });\n  root.addEventListener(\"pointerup\", () => { if (drag) { drag = null; saveUi(); } });\n\n  // 再點一次書籤：把面板叫出來並重新讀取最新資料（關面板用右上角的 ×）\n  window.__huaGreenlight = { toggle() {\n    host.style.display = \"\";\n    if (!run) fetchLatest(true);\n  } };\n  render();\n  place();\n  fetchLatest(true);\n})();\n";
 const BOOKMARKLET = "javascript:" + encodeURIComponent(`(()=>{window.__huaGreenlightSite=${JSON.stringify(new URL("./", location.href).href)};${KEYIN_SOURCE}})()`);
 function keyinData(rows, refRows) {
-  const me = ROSTER.get(state.me);
+  const me = currentPerson();
   const contactKey = Object.fromEntries(["card", "call", "both", "none"].map(key => [contactLabel(key), key]));
   return {
-    app: "hua-urban-greenlight", me: me ? me.name : "",
-    rows121: rows.map(r => ({ name: r.name, chapter: r.chapter, ext: r.src === "outside" || !!r.ext,
+    app: "hua-urban-greenlight", me: me ? me.name : "", meChapter: me ? me.chapter : "",
+    rows121: rows.map(r => ({ name: r.name, chapter: r.chapter, ext: recipientCrossChapter(r.chapter),
       place: r.place, date: `${r.y || YEAR}/${r.m}/${r.d}`, topic: r.kind })),
-    refs: refRows.map(r => ({ sourceId: r.sourceId, name: r.name, chapter: r.chapter, ext: !r.no,
+    refs: refRows.map(r => ({ sourceId: r.sourceId, name: r.name, chapter: r.chapter, ext: recipientCrossChapter(r.chapter),
       type: r.type, referredName: r.referredName, content: r.content, phone: r.phone, contact: contactKey[r.contact] })),
   };
 }
@@ -1644,7 +1784,7 @@ function videoBlock() {
 // 分流入口：在同一分頁切換到 121 或引薦流程
 const PORTALS = {
   "121": { t: "補 Key 121", s: "" },
-  ref:   { t: "補 Key 引薦", s: `${CHAPTER}夥伴、外分會夥伴` },
+  ref:   { t: "補 Key 引薦", s: `${CHAPTER}夥伴、其他／手動輸入夥伴` },
 };
 const PORTAL_GAPS = {
   "121": { key: "O2O", target: m => Math.ceil(2 * m.weeks), unit: "次" },
@@ -1654,9 +1794,11 @@ function portalCard(k, showGap = false) {
   const p = PORTALS[k];
   if (!p) return "";
   const gap = PORTAL_GAPS[k];
-  const gapLabel = showGap && gap ? `<span class="portal-count" data-gap-flow="${k}" aria-live="polite">讀取本期差距中…</span>` : "";
+  const gapLabel = showGap && gap ? currentPerson()?.ext
+    ? `<span class="portal-count">其他分會差距資料未提供</span>`
+    : `<span class="portal-count" data-gap-flow="${k}" aria-live="polite">讀取本期差距中…</span>` : "";
   return `<a class="portal${showGap ? " has-gap" : ""}" href="?flow=${k}">
-    <span class="pt">${p.t}</span><span class="ps">${k === "121" ? [`${CHAPTER}會員`, "其他活動／組聚", "外分會會員", "已舉辦活動"].join("、") : p.s}</span>
+    <span class="pt">${p.t}</span><span class="ps">${k === "121" ? [`${CHAPTER}會員`, "其他活動／組聚", "其他／手動輸入會員", "已舉辦活動"].join("、") : p.s}</span>
     ${gapLabel}<span class="pg" aria-hidden="true">↗</span></a>`;
 }
 function updatePortalGaps(m) {
@@ -1681,29 +1823,37 @@ function collect() {
   const rows = [];
   for (const ev of EVENTS) {
     for (const p of ev.people) {
-      if (!(state.picked[ev.id] || new Set()).has(p.no) || p.no === state.me) continue;
+      if (!(state.picked[ev.id] || new Set()).has(p.no) || p.no === state.me || isSelfTarget(p.name, p.chapter || CHAPTER)) continue;
       const [y, m, d] = ev.date;
       const kind = ev.title.replace(/^\S+\s/, "");
-      if (p.ext) rows.push({ no: "", name: p.name, chapter: p.chapter, job: "", y, m, d, place: "實體", kind, src: ev.title, ext: true });
-      else if (ROSTER.has(p.no)) rows.push({ no: p.no, name: ROSTER.get(p.no).name, chapter: CHAPTER, job: ROSTER.get(p.no).job, y, m, d, place: "實體", kind, src: ev.title });
+      const draft = { type: "event", eventId: ev.id, participant: p.no };
+      if (p.ext) rows.push({ no: "", name: p.name, chapter: p.chapter, job: "", y, m, d, place: "實體", kind, src: ev.title, ext: recipientCrossChapter(p.chapter), draft });
+      else if (ROSTER.has(p.no)) rows.push({ no: p.no, name: ROSTER.get(p.no).name, chapter: CHAPTER, job: ROSTER.get(p.no).job, y, m, d, place: "實體", kind, src: ev.title, ext: recipientCrossChapter(CHAPTER), draft });
     }
   }
   for (const g of state.gatherings || []) {
     if (!g.name.trim() || !validDate(g.m, g.d)) continue;
     const base = { m: +g.m, d: +g.d, place: g.venue.trim(), kind: g.name.trim(), src: "gather" };
-    for (const no of g.members) if (ROSTER.has(no) && no !== state.me)
-      rows.push({ no, name: ROSTER.get(no).name, chapter: CHAPTER, job: ROSTER.get(no).job, ...base });
-    for (const o of g.outside) if (o.name.trim())
-      rows.push({ no: "", name: o.name.trim(), chapter: o.chapter.trim(), job: "", ...base, ext: true });
+    const group = { name: g.name, m: g.m, d: g.d, venue: g.venue };
+    for (const no of g.members) if (ROSTER.has(no) && no !== state.me && !isSelfTarget(ROSTER.get(no).name, CHAPTER))
+      rows.push({ no, name: ROSTER.get(no).name, chapter: CHAPTER, job: ROSTER.get(no).job, ...base,
+        ext: recipientCrossChapter(CHAPTER), draft: { type: "gather-member", gatherId: g.id, participant: no, group } });
+    for (const o of g.outside) if (o.name.trim() && !isSelfTarget(o.name, o.chapter))
+      rows.push({ no: "", name: o.name.trim(), chapter: o.chapter.trim(), job: "", ...base,
+        ext: recipientCrossChapter(o.chapter), draft: { type: "gather-outside", gatherId: g.id, personId: o.id,
+          value: { ...o }, group } });
   }
   const one = Object.entries(state.meets).sort(([a], [b]) => a.localeCompare(b));
   for (const [no, v] of one) {
     const p = ROSTER.get(no);
-    rows.push({ no, name: p.name, chapter: CHAPTER, job: p.job, m: +v.m, d: +v.d, place: v.place, kind: v.kind, src: "121" });
+    if (!p || isSelfTarget(p.name, CHAPTER)) continue;
+    rows.push({ no, name: p.name, chapter: CHAPTER, job: p.job, m: +v.m, d: +v.d, place: v.place, kind: v.kind,
+      src: "121", ext: recipientCrossChapter(CHAPTER), draft: { type: "meet", no, value: { ...v } } });
   }
   for (const v of state.outside) {
-    if (!v.name.trim() || !validDate(v.m, v.d)) continue;
-    rows.push({ no: "", name: v.name.trim(), chapter: v.chapter.trim(), job: "", m: +v.m, d: +v.d, place: v.place, kind: v.kind, src: "outside" });
+    if (!v.name.trim() || !validDate(v.m, v.d) || isSelfTarget(v.name, v.chapter)) continue;
+    rows.push({ no: "", name: v.name.trim(), chapter: v.chapter.trim(), job: "", m: +v.m, d: +v.d, place: v.place, kind: v.kind,
+      src: "outside", ext: recipientCrossChapter(v.chapter), draft: { type: "outside", personId: v.id, value: { ...v } } });
   }
   return rows;
 }
@@ -1712,19 +1862,189 @@ function collectRefs() {
   const out = [];
   REF_QS.forEach((q, i) => {
     for (const r of state.refs[q.id] || []) {
-      if (refBad(r, q.ext)) continue;
+      if (refBad(r, q.ext) || q.ext && isSelfTarget(r.name, r.chapter)) continue;
       const p = r.no ? ROSTER.get(r.no) : null;
       out.push({ qid: q.id, qn: i + 1, sourceId: r.id, no: r.no || "", name: p ? p.name : r.name.trim(),
         chapter: p ? CHAPTER : r.chapter.trim(), job: p ? p.job : "",
-        type: r.type, referredName: r.referredName.trim(), content: r.content.trim(), phone: r.phone.trim(), contact: contactLabel(r.contact) });
+        type: r.type, referredName: r.referredName.trim(), content: r.content.trim(), phone: r.phone.trim(), contact: contactLabel(r.contact),
+        draft: { type: "ref", qid: q.id, refId: r.id, value: { ...r } } });
     }
   });
   return out;
 }
 
+const CLEARED_DRAFT_ARCHIVE_KEY = "hua-urban-greenlight-last-cleared-drafts-v1";
+const BRIDGE_KEY = "hua-urban-greenlight-keyin-v1";
+const draftEqual = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+function removeDraftSource(snapshot, source) {
+  if (!source) return false;
+  if (source.type === "event") {
+    const picked = snapshot.picked?.[source.eventId];
+    if (!Array.isArray(picked) || !picked.includes(source.participant)) return false;
+    snapshot.picked[source.eventId] = picked.filter(no => no !== source.participant);
+    return true;
+  }
+  if (source.type === "meet") {
+    if (!draftEqual(snapshot.meets?.[source.no], source.value)) return false;
+    delete snapshot.meets[source.no];
+    return true;
+  }
+  if (source.type === "outside") {
+    const list = snapshot.outside;
+    if (!Array.isArray(list)) return false;
+    const at = list.findIndex(value => (!source.personId || value.id === source.personId) && draftEqual(value, source.value));
+    if (at < 0) return false;
+    list.splice(at, 1);
+    return true;
+  }
+  if (source.type === "gather-member" || source.type === "gather-outside") {
+    const group = snapshot.gatherings?.find(value => value.id === source.gatherId);
+    if (!group || !draftEqual({ name: group.name, m: group.m, d: group.d, venue: group.venue }, source.group)) return false;
+    if (source.type === "gather-member") {
+      if (!group.members?.includes(source.participant)) return false;
+      group.members = group.members.filter(no => no !== source.participant);
+    } else {
+      const at = group.outside?.findIndex(value => (!source.personId || value.id === source.personId) && draftEqual(value, source.value)) ?? -1;
+      if (at < 0) return false;
+      group.outside.splice(at, 1);
+    }
+    if (!group.members.length && !group.outside.length) snapshot.gatherings = snapshot.gatherings.filter(value => value !== group);
+    return true;
+  }
+  if (source.type === "ref") {
+    const list = snapshot.refs?.[source.qid];
+    if (!Array.isArray(list)) return false;
+    const at = list.findIndex(value => value.id === source.refId && draftEqual(value, source.value));
+    if (at < 0) return false;
+    list.splice(at, 1);
+    return true;
+  }
+  return false;
+}
+function replaceState(next) {
+  for (const key of Object.keys(state)) delete state[key];
+  Object.assign(state, next);
+}
+function createDraftCleanup(rows, refRows) {
+  const removed = new Set();
+  const sourceFor = item => item.kind === "121" ? rows[item.sourceIndex]?.draft
+    : item.kind === "ref" ? refRows[item.sourceIndex]?.draft : null;
+  const rowKey = item => `${item.kind}:${item.sourceIndex}`;
+  function editUrl(item) {
+    const source = sourceFor(item);
+    if (!source || removed.has(rowKey(item))) return null;
+    const params = new URLSearchParams();
+    params.set("flow", item.kind);
+    if (source.type === "event") {
+      params.set("edit", `ev:${source.eventId}`);
+      params.set("focus", source.participant);
+    } else if (source.type === "meet") {
+      params.set("edit", "indiv");
+      params.set("focus", source.no);
+    } else if (source.type === "outside") {
+      params.set("edit", "ext");
+      if (source.personId) params.set("focus", source.personId);
+      else params.set("focusIndex", String(state.outside.findIndex(value => draftEqual(value, source.value))));
+    } else if (source.type === "gather-member" || source.type === "gather-outside") {
+      params.set("edit", "gather");
+      params.set("group", source.gatherId);
+      params.set("target", source.type === "gather-member" ? "member" : "outside");
+      if (source.type === "gather-member") params.set("focus", source.participant);
+      else if (source.personId) params.set("focus", source.personId);
+      else {
+        const group = state.gatherings.find(value => value.id === source.gatherId);
+        params.set("focusIndex", String(group?.outside.findIndex(value => draftEqual(value, source.value)) ?? -1));
+      }
+    } else if (source.type === "ref") {
+      params.set("edit", source.qid);
+      params.set("focus", source.refId);
+    } else return null;
+    return `${location.pathname}?${params}`;
+  }
+  function edit(item) {
+    const url = editUrl(item);
+    if (!url || !currentMemberMatchesStored()) return false;
+    try {
+      const raw = JSON.parse(localStorage.getItem(KEY) || "null");
+      if (!raw || raw.me !== state.me || !removeDraftSource(JSON.parse(JSON.stringify(raw)), sourceFor(item))) return false;
+    } catch { return false; }
+    location.assign(url);
+    return true;
+  }
+  const all = [
+    ...rows.map((_, sourceIndex) => ({ kind: "121", sourceIndex })),
+    ...refRows.map((_, sourceIndex) => ({ kind: "ref", sourceIndex })),
+  ];
+  function clear(items, manual = false, rerender = false) {
+    if (!currentMemberMatchesStored()) { returnToMemberPicker(); return false; }
+    const previousState = { ...state };
+    let raw, oldKey, oldDrafts, oldBridge, oldArchive;
+    try {
+      oldKey = localStorage.getItem(KEY);
+      oldDrafts = localStorage.getItem(MEMBER_DRAFTS_KEY);
+      oldBridge = localStorage.getItem(BRIDGE_KEY);
+      oldArchive = localStorage.getItem(CLEARED_DRAFT_ARCHIVE_KEY);
+      raw = JSON.parse(oldKey || "null");
+      if (!raw || raw.me !== state.me) return false;
+    } catch { return false; }
+    const newlyRemoved = [];
+    for (const item of items) {
+      if (!Number.isInteger(item.sourceIndex) || item.sourceIndex < 0 || removed.has(rowKey(item))) continue;
+      if (removeDraftSource(raw, sourceFor(item))) newlyRemoved.push(item);
+    }
+    if (!newlyRemoved.length) { if (rerender) render(); return true; }
+    let next, bridge;
+    try {
+      next = readStored(JSON.parse(JSON.stringify(raw)));
+      replaceState(next);
+      bridge = { ...keyinData(collect(), collectRefs()), savedAt: Date.now() };
+    } finally { replaceState(previousState); }
+    try {
+      const drafts = oldDrafts ? JSON.parse(oldDrafts) : {};
+      if (!drafts || typeof drafts !== "object" || Array.isArray(drafts)) throw new Error("Invalid draft store");
+      if (manual) localStorage.setItem(CLEARED_DRAFT_ARCHIVE_KEY, JSON.stringify({ memberKey: raw.me, savedAt: Date.now(), snapshot: JSON.parse(oldKey) }));
+      drafts[raw.me] = raw;
+      localStorage.setItem(MEMBER_DRAFTS_KEY, JSON.stringify(drafts));
+      localStorage.setItem(KEY, JSON.stringify(raw));
+      localStorage.setItem(BRIDGE_KEY, JSON.stringify(bridge));
+    } catch {
+      try {
+        for (const [key, value] of [[MEMBER_DRAFTS_KEY, oldDrafts], [KEY, oldKey], [BRIDGE_KEY, oldBridge], [CLEARED_DRAFT_ARCHIVE_KEY, oldArchive]])
+          value === null ? localStorage.removeItem(key) : localStorage.setItem(key, value);
+      } catch {}
+      return false;
+    }
+    replaceState(next);
+    for (const item of newlyRemoved) removed.add(rowKey(item));
+    if (rerender) render();
+    else {
+      const count121 = $("#draft-count-121"), countRef = $("#draft-count-ref");
+      if (count121) count121.textContent = String(collect().length);
+      if (countRef) countRef.textContent = String(collectRefs().length);
+      for (const item of newlyRemoved) {
+        const chip = document.querySelector(`[data-draft-kind="${item.kind}"][data-draft-index="${item.sourceIndex}"]`);
+        if (!chip) continue;
+        chip.querySelector("[data-clear-draft]")?.remove();
+        const note = document.createElement("small");
+        note.textContent = "已從待辦移除";
+        chip.append(note);
+      }
+    }
+    return true;
+  }
+  return {
+    confirmed: items => clear(items.filter(item => ["success", "already_sent"].includes(item.status)), false, false),
+    clearOne: item => clear([item], true, true),
+    clearAll: () => clear(all, true, true),
+    edit,
+    editUrl,
+    refresh: () => render(),
+  };
+}
+
 function download(rows, refRows) {
   if (!window.XLSX) { toast("Excel 元件還沒載入，請確認網路後再試一次"); return; }
-  const me = ROSTER.get(state.me) || { no: "", name: "" };
+  const me = currentPerson() || { no: "", name: "" };
   const head = ["我的姓名", "121 對象姓名", "分會", "發起人", "地點", "日期", "會談主題"];
   const ws = XLSX.utils.aoa_to_sheet([head, ...rows.map(r =>
     [me.name, r.name, r.chapter, me.name, r.place, null, r.kind])]);
@@ -1742,7 +2062,8 @@ function download(rows, refRows) {
     ...refRows.map(r => [me.name, r.name, r.chapter, r.referredName, r.type, r.content, r.phone, r.contact])]);
   ws2["!cols"] = [14, 18, 12, 18, 10, 40, 14, 18].map(wch => ({ wch }));
   XLSX.utils.book_append_sheet(wb, ws2, "引薦");
-  XLSX.writeFile(wb, `追綠光_${me.no}${me.name.split(" ")[0]}.xlsx`);
+  const filename = `${me.ext ? me.chapter + "_" : me.no}${me.name.split(" ")[0]}`.replace(/[\\/:*?"<>|]/g, "_");
+  XLSX.writeFile(wb, `追綠光_${filename}.xlsx`);
 }
 
 // ── 完成結果先存此瀏覽器；有真實後台連線時才額外送到分會後台 ──
@@ -1754,19 +2075,19 @@ function clientId() {
   } catch { return clientId.mem ||= crypto.randomUUID(); }
 }
 async function submit(rows, refRows) {
-  const me = ROSTER.get(state.me);
+  const me = currentPerson();
   if (!me) return "error";
   if (!currentMemberMatchesStored()) { returnToMemberPicker(); return "error"; }
   const payload = {
-    p_client_id: clientId(), p_member_no: me.no, p_member_name: me.name,
-    p_rows_121: rows.map(({ src, ...r }) => ({ ...r, date: `${r.y || YEAR}/${r.m}/${r.d}` })),
-    p_rows_ref: refRows.map(({ qid, ...r }) => ({ ...r, q: REF_QS[r.qn - 1].short })),
+    p_client_id: clientId(), p_member_no: me.ext ? "" : me.no, p_member_name: me.name, p_member_chapter: me.chapter,
+    p_rows_121: rows.map(({ src, draft, ...r }) => ({ ...r, date: `${r.y || YEAR}/${r.m}/${r.d}` })),
+    p_rows_ref: refRows.map(({ qid, draft, ...r }) => ({ ...r, q: REF_QS[r.qn - 1].short })),
   };
   try {
     const key = "hua-urban-greenlight-submissions-v1";
     const saved = JSON.parse(localStorage.getItem(key) || "{}");
-    saved[me.no] = {
-      client_id: payload.p_client_id, member_no: me.no, member_name: me.name,
+    saved[state.me] = {
+      client_id: payload.p_client_id, member_no: payload.p_member_no, member_name: me.name, member_chapter: me.chapter,
       count_121: rows.length, count_ref: refRows.length,
       rows_121: payload.p_rows_121, rows_ref: payload.p_rows_ref,
       updated_at: new Date().toISOString(),
@@ -1821,9 +2142,15 @@ function toast(msg) {
   }
   if (FLOW && !state.me) { location.replace(location.pathname); return; }
   // 每次進來都從入口開始：主頁直接到「紅綠燈＋補 key 121／引薦」，121 分頁從五個按鈕的選單，引薦從第 1 題
-  if (FLOW === "121") state.sec = null;
+  if (FLOW === "121") {
+    const editEvent = EDIT_SECTION?.startsWith("ev:") && EVENTS.some(ev => ev.id === EDIT_SECTION.slice(3));
+    state.sec = ["indiv", "ext", "gather"].includes(EDIT_SECTION) || editEvent ? EDIT_SECTION : null;
+  }
   buildSteps();
-  go(START_AT_WHO ? steps.findIndex(s => s.kind === "who") : !state.me ? 0 : FLOW ? 0 : steps.findIndex(s => s.kind === "light"));
+  const editAt = FLOW === "121" && state.sec?.startsWith("ev:") && state.attended[state.sec.slice(3)] ? 1
+    : FLOW === "ref" && EDIT_SECTION ? Math.max(0, REF_QS.findIndex(q => q.id === EDIT_SECTION)) : 0;
+  go(START_AT_WHO ? steps.findIndex(s => s.kind === "who") : !state.me ? 0 : FLOW ? editAt : steps.findIndex(s => s.kind === "light"));
+  focusEditedDraft();
 })();
 </script>
 </body>
