@@ -25,17 +25,21 @@
     return text;
   }
 
-  function diagnosticMessage(code) {
+  function diagnosticMessage(code, diagnostic = {}) {
+    const http = Number(diagnostic.httpStatus);
+    if (http === 429) return 'BNI 回應操作過於頻繁。請先查官方紀錄，稍候再處理，勿立即重送。';
+    if (http >= 500 && http <= 599) return `BNI 服務回應異常（HTTP ${http}），無法判斷是否已入帳。請先查官方紀錄，稍後再處理。`;
+    if (http === 405) return 'BNI 不接受這次送出方式（HTTP 405）。請保留草稿並通知管理者，不要反覆重送。';
     const messages = {
       BNI_DUPLICATE_OR_CONFIRMATION: "BNI Connect 回應重複或要求額外確認，請先檢查這筆是否已建立。",
-      BNI_VALIDATION_REJECTED: "BNI Connect 回報資料未通過驗證。請檢查資料內容。",
-      BNI_RESPONSE_UNCONFIRMED: "BNI Connect 未回傳可確認結果，請先檢查這筆是否已建立。",
-      BNI_RESPONSE_ERROR: "BNI Connect 回傳錯誤，請先檢查這筆是否已建立。",
+      BNI_VALIDATION_REJECTED: "BNI 未接受填寫資料。請按「編輯草稿」檢查會員、分會、日期與必填欄位，再重新配對；BNI 未指出具體錯誤欄位。",
+      BNI_RESPONSE_UNCONFIRMED: "BNI 有回應，但沒有可判讀的成功結果，原因尚未確認。請先查看官方紀錄；確認沒有這筆後，再編輯或重試。",
+      BNI_RESPONSE_ERROR: "BNI 回傳錯誤，但未提供可安全顯示的具體欄位原因。請先核對官方紀錄，再檢查日期、會員、分會與必填內容。",
       BNI_RESPONSE_WARNING: "BNI Connect 回傳警告，請先核對這筆資料是否已建立。",
       BNI_TRANSPORT_UNKNOWN: "連線中斷，無法確認是否建立；請先在 BNI Connect 查看。",
       BNI_AUTH_REQUIRED: "BNI 登入已逾時，無法確認是否建立；請先在 BNI Connect 查看。",
       BNI_ADAPTER_EXCEPTION: "送出服務發生錯誤，無法確認是否建立；請先在 BNI Connect 查看。",
-      BNI_JOURNAL_FAILURE: "系統無法保存送出結果，請先在 BNI Connect 查看。",
+      BNI_JOURNAL_FAILURE: "BNI 送出結果未能保存到追綠光，官方可能已入帳。請先查看官方紀錄，不要直接重送。",
     };
     return Object.hasOwn(messages, code)
       ? messages[code]
@@ -207,6 +211,8 @@
         ? "目前無法完成會員配對。請重新登入，並確認登入會員與本次填寫會員相符。"
         : "目前無法完成這項操作。請重新檢查登入狀態後再試。";
       if (error?.status === 404) return "BNI 登入服務暫時無法使用。填寫資料仍保留，請稍後重試。";
+      if (action === "submit" && !error?.status) return "瀏覽器未收到送出服務的回覆，可能是網路中斷或連線逾時，無法確認是否已入帳。請先到 BNI Connect 查這筆，再決定是否重試。";
+      if (action === "submit" && error?.status >= 500) return `送出服務回應異常（HTTP ${error.status}），無法確認是否已入帳。請先查看 BNI 官方紀錄；草稿已保留，可編輯或清除。`;
       return action === "submit"
         ? "送出結果目前無法確認。這筆已標示為待確認，請先到 BNI Connect 查看，系統不會自動重送。"
         : "無法完成 BNI Connect 操作，請稍後再試。";
@@ -473,7 +479,7 @@
       const message = textFromServer(item?.resultMessage) || textFromServer(item?.reason);
       if (message) card.append(node("p", "bc-item-message", message));
       if (item?.diagnostic?.code && !["success", "already_sent"].includes(item.status)) {
-        card.append(node("p", "bc-item-message", `送出診斷：${diagnosticMessage(item.diagnostic.code)}`));
+        card.append(node("p", "bc-item-message", `原因與處理方式：${diagnosticMessage(item.diagnostic.code, item.diagnostic)}`));
       }
 
       if (item?.status === "blocked" && item?.retryReviewAllowed === true) {
