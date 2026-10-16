@@ -1063,10 +1063,10 @@ function render() {
         <p class="hint">選好之後，後面的名單就不會出現你自己。其他分會夥伴請在下方填寫姓名與分會。</p>
         <div class="tools"><input id="filter" type="search" placeholder="搜尋編號或名字" aria-label="搜尋會員編號或名字"></div>
         <div class="who-roster-head">
-          <h2 class="who-group"><button type="button" class="who-roster-toggle" id="toggleRoster" aria-expanded="false" aria-controls="whoRoster">${CHAPTER}分會名單</button></h2>
+          <h2 class="who-group"><button type="button" class="who-roster-toggle" id="toggleRoster" aria-expanded="true" aria-controls="whoRoster">${CHAPTER}分會名單</button></h2>
           <label class="who-external-switch"><input type="checkbox" id="chooseExternal" aria-controls="externalMemberForm">外分會</label>
         </div>
-        <div id="whoRoster" hidden>
+        <div id="whoRoster">
         <div class="list one" id="list">
           ${all.map(p => `
             <label data-k="${key(p)}" class="${p.no === state.me ? "on" : ""}">
@@ -1102,7 +1102,11 @@ function render() {
       if (expanded) $("#chooseExternal").checked = false;
     };
     $("#chooseExternal").onchange = e => {
-      if (!e.target.checked) return;
+      if (!e.target.checked) {
+        $("#whoRoster").hidden = false;
+        $("#toggleRoster").setAttribute("aria-expanded", "true");
+        return;
+      }
       $("#whoRoster").hidden = true;
       $("#toggleRoster").setAttribute("aria-expanded", "false");
       $("#otherChapterEntry").scrollIntoView({ behavior: "smooth", block: "start" });
