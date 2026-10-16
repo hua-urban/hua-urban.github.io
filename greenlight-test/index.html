@@ -86,6 +86,12 @@
   .who-external-switch input { width: 20px; height: 20px; accent-color: var(--green-deep); }
   .who-roster-toggle:focus-visible, .who-external-switch input:focus-visible { outline: 3px solid var(--green-deep); outline-offset: 3px; }
   .who-saved-members summary { padding: 12px 0; color: var(--ink); font-weight: 700; cursor: pointer; }
+  .ref-chapter-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; }
+  .ref-chapter-heading .who-group { margin: 0; }
+  .ref-member-list > summary { padding: 14px 0; color: var(--ink); font-weight: 700; cursor: pointer; }
+  .ref-member-list > summary:focus-visible { outline: 3px solid var(--green-deep); outline-offset: 3px; }
+  .ref-member-list > summary span { margin-left: 8px; font-size: 14px; color: var(--green-deep); }
+  .ref-total-count { margin-top: 16px; text-align: center; }
   .who-other { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
   .who-error { color: var(--red); font-weight: 600; margin: 6px 0 0; }
 
@@ -653,7 +659,7 @@ function scoreCard(m, d) {
 const KINDS = ["組聚", "商務交流", "其他"];
 const OUT_KINDS = ["商務交流", "其他"];
 
-// ── 補 key 引薦：前四題從本分會名單挑人，第五題手動輸入外分會夥伴 ──
+// ── 補 key 引薦：同頁填寫華都更與外分會，保留原本 r1／r5 草稿來源 ──
 const REF_QS = [
   { id: "r1", q: `看一下${CHAPTER}的夥伴列表和專業別，你曾經幫過哪些夥伴？`,
     hint: "一個協助、一個窗口、一份資源或建議，各 key 一筆引薦", ph: "你幫他做了什麼：解答問題、提供窗口、加群、資源、建議…",
@@ -928,7 +934,7 @@ function buildSteps() {
     else steps.push({ kind: "hub121" }, { kind: "done" });
     return;
   } else {
-    REF_QS.forEach((q, i) => steps.push({ kind: q.ext ? "refExt" : "refPick", q, n: i + 1 }));
+    steps.push({ kind: "refCombined" });
   }
   steps.push({ kind: "done" });
 }
@@ -967,6 +973,14 @@ function focusEditedDraft() {
     target = [...document.querySelectorAll('#list input[type="checkbox"]')].find(el => el.value === focus) || $("#y");
   } else if (FLOW === "ref") {
     const ref = [...document.querySelectorAll(".ref[data-id]")].find(el => el.dataset.id === focus);
+    if (ref) {
+      const details = ref.closest("details");
+      if (details) details.open = true;
+      if (ref.closest("#externalRefList")) {
+        $("#refHuaMembers").open = false;
+        $("#refChooseExternal").checked = true;
+      }
+    }
     target = ref?.querySelector('[data-f="name"]') || ref?.querySelector('[data-f="content"]');
   }
   if (target) { target.scrollIntoView({ block: "center" }); target.focus({ preventScroll: true }); }
@@ -1436,9 +1450,10 @@ function render() {
     };
   }
 
-  if (s.kind === "refPick") {
-    const { q } = s;
+  if (s.kind === "refCombined") {
+    const q = REF_QS[0], externalQ = REF_QS.find(question => question.ext);
     const refs = () => state.refs[q.id] ||= [];
+    const externalRefs = () => state.refs[externalQ.id] ||= [];
     const met = new Set([...Object.keys(state.meets), ...Object.values(state.picked).flatMap(x => [...x])]);
     const rowHtml = p => {
       const mine = refs().filter(r => r.no === p.no);
@@ -1454,33 +1469,73 @@ function render() {
     app.innerHTML = `
       <section class="card">
         ${meTag()}
-        <p class="step">${s.n === 1 ? "接著來補 key 引薦啦！" : "補 key 引薦"} · ${s.n} / ${REF_QS.length}</p>
-        <p class="q">${q.q}</p>
-        <p class="hint">${q.hint}，在夥伴後面按「＋ 引薦」${q.tips ? "。不知道從哪裡想起？看旁邊的💡小提醒" : ""}</p>
-        <div class="tools">
-          <input id="filter" type="search" placeholder="搜尋編號、名字或專業">
-          <span class="count" id="count"></span>
+        <p class="step">一起補 key 引薦</p>
+        <p class="q">你曾經幫過哪些夥伴？</p>
+        <p class="hint">華都更與外分會的引薦都在這裡填，完成後一起整理。${q.hint}。不知道從哪裡想起？看看💡小提醒。</p>
+        <div class="ref-chapter-heading">
+          <h2 class="who-group">引薦對象</h2>
+          <label class="who-external-switch"><input type="checkbox" id="refChooseExternal" aria-controls="externalReferralEntry">外分會</label>
         </div>
-        <div class="list one" id="list">${members().map(rowHtml).join("")}</div>
+        <details class="ref-member-list" id="refHuaMembers" open>
+          <summary>${CHAPTER}夥伴 <span id="huaRefCount"></span></summary>
+          <div class="tools"><input id="filter" type="search" placeholder="搜尋編號、名字或專業" aria-label="搜尋華都更引薦夥伴"></div>
+          <div class="list one" id="list">${members().map(rowHtml).join("")}</div>
+        </details>
+        <section class="who-other" id="externalReferralEntry" aria-labelledby="externalReferralHeading">
+          <h2 class="who-group" id="externalReferralHeading">外分會／手動輸入引薦</h2>
+          <p class="hint">填寫對方姓名與分會，可與上方華都更引薦一起完成；勾選外分會可快速跳到這裡。</p>
+          <p class="hint" id="externalRefEmpty">還沒有外分會引薦，按下方按鈕開始填寫。</p>
+          <div id="externalRefList"></div>
+          <button type="button" class="add" id="addExternalRef">＋ 外分會引薦</button>
+        </section>
+        <p class="count ref-total-count" id="count" aria-live="polite"></p>
         <div class="actions sticky">
-          <button class="ghost" id="back">←</button>
-          <button class="primary" id="next">下一題 →</button>
+          <button type="button" class="ghost" id="back">← 首頁</button>
+          <button type="button" class="primary" id="next">完成，整理引薦單 →</button>
         </div>
       </section>
-      ${q.tips ? `<aside class="tipbox ${tipsOpen() ? "" : "closed"}" id="tipbox">
+      <aside class="tipbox ${tipsOpen() ? "" : "closed"}" id="tipbox">
         <button type="button" class="tip-toggle" id="tipToggle" aria-expanded="${tipsOpen()}">💡 小提醒</button>
-        <div class="tip-body">
-          <ol>${q.tips.map(x => `<li>${x}</li>`).join("")}</ol>
-          <p>${q.hint}</p>
-        </div>
-      </aside>` : ""}`;
-    const list = $("#list");
-    const sync = () => { $("#count").textContent = `已 key ${refs().length} 筆`; };
-    $("#tipToggle")?.addEventListener("click", () => {
+        <div class="tip-body"><ol>${q.tips.map(x => `<li>${x}</li>`).join("")}</ol><p>${q.hint}</p></div>
+      </aside>`;
+    const list = $("#list"), externalList = $("#externalRefList"), huaDetails = $("#refHuaMembers");
+    const sync = () => {
+      $("#huaRefCount").textContent = `已填 ${refs().length} 筆`;
+      $("#count").textContent = `${CHAPTER} ${refs().length} 筆 · 外分會 ${externalRefs().length} 筆 · 共 ${refs().length + externalRefs().length} 筆引薦`;
+      $("#externalRefEmpty").hidden = externalRefs().length > 0;
+    };
+    const drawExternal = () => {
+      externalList.innerHTML = externalRefs().map((r, i) => refForm(r, i + 1, externalQ.ph, true)).join("");
+      sync(); save();
+    };
+    const addExternal = () => {
+      externalRefs().push(newRef({ name: "", chapter: "" }));
+      drawExternal();
+      return externalList.lastElementChild;
+    };
+    $("#refChooseExternal").onchange = e => {
+      if (!e.target.checked) {
+        huaDetails.open = true;
+        huaDetails.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      huaDetails.open = false;
+      if (!externalRefs().length) addExternal();
+      $("#externalReferralEntry").scrollIntoView({ behavior: "smooth", block: "start" });
+      externalList.querySelector('[data-f="name"]')?.focus({ preventScroll: true });
+    };
+    $("#addExternalRef").onclick = () => {
+      $("#refChooseExternal").checked = true;
+      huaDetails.open = false;
+      const row = addExternal();
+      row.scrollIntoView({ behavior: "smooth", block: "center" });
+      row.querySelector('[data-f="name"]').focus({ preventScroll: true });
+    };
+    $("#tipToggle").onclick = () => {
       const open = $("#tipbox").classList.toggle("closed") === false;
-      $("#tipToggle").setAttribute("aria-expanded", open);
+      $("#tipToggle").setAttribute("aria-expanded", String(open));
       try { localStorage.setItem("hua-urban-greenlight-tips-v1", open ? "1" : "0"); } catch {}
-    });
+    };
     const redraw = no => {
       list.querySelector(`.row[data-no="${no}"]`).outerHTML = rowHtml(ROSTER.get(no));
       sync(); save();
@@ -1491,6 +1546,10 @@ function render() {
       state.refs[q.id] = refs().filter(x => x.id !== id);
       redraw(r.no);
     });
+    wireRefs(externalList, externalRefs, id => {
+      state.refs[externalQ.id] = externalRefs().filter(x => x.id !== id);
+      drawExternal();
+    });
     list.addEventListener("click", e => {
       const b = e.target.closest("[data-add]");
       if (!b) return;
@@ -1499,51 +1558,20 @@ function render() {
       forms[forms.length - 1].querySelector("textarea").focus();
     });
     filterBox("#list");
-    sync();
-    $("#back").onclick = () => go(at - 1);
+    drawExternal();
+    $("#back").onclick = () => { save(); location.assign(location.pathname); };
     $("#next").onclick = () => {
-      if (!flagBad(list, refs(), false)) {
+      // 自動帶入的電話不視為已填；保留已輸入任何內容的外分會草稿。
+      state.refs[externalQ.id] = externalRefs().filter(r => r.name.trim() || r.chapter.trim() || r.referredName?.trim() || r.content.trim());
+      drawExternal();
+      if (refs().some(r => refBad(r, false))) {
+        huaDetails.open = true;
         $("#filter").value = ""; $("#filter").dispatchEvent(new Event("input"));
+        flagBad(list, refs(), false);
         return;
       }
+      if (!flagBad(externalList, externalRefs(), true)) return;
       go(at + 1);
-    };
-  }
-
-  if (s.kind === "refExt") {
-    const { q } = s;
-    const refs = () => state.refs[q.id] ||= [];
-    if (!refs().length) refs().push(newRef({ name: "", chapter: "" }));
-    app.innerHTML = `
-      <section class="card">
-        ${meTag()}
-        <p class="step">補 key 引薦 · ${s.n} / ${REF_QS.length}</p>
-        <p class="q">${q.q}</p>
-        <p class="hint">${q.hint}；按「＋ 再加一筆」繼續填，沒有的話按「跳過」</p>
-        <div id="outs"></div>
-        <button class="add" id="add">＋ 再加一筆</button>
-        <div class="actions">
-          <button class="ghost" id="back">←</button>
-          <button class="ghost" id="skip">跳過</button>
-          <button class="primary" id="next">完成 →</button>
-        </div>
-      </section>`;
-    const box = $("#outs");
-    const draw = () => { box.innerHTML = refs().map((r, i) => refForm(r, i + 1, q.ph, true)).join(""); save(); };
-    draw();
-    wireRefs(box, refs, id => { state.refs[q.id] = refs().filter(x => x.id !== id); draw(); });
-    $("#add").onclick = () => {
-      refs().push(newRef({ name: "", chapter: "" })); draw();
-      box.lastElementChild.scrollIntoView({ behavior: "smooth", block: "center" });
-      box.lastElementChild.querySelector("[data-f=name]").focus();
-    };
-    $("#back").onclick = () => go(at - 1);
-    $("#skip").onclick = () => { state.refs[q.id] = []; go(at + 1); };
-    $("#next").onclick = () => {
-      // 名字、分會、內容都空白的直接略過（電話是自動帶入的，不算）
-      state.refs[q.id] = refs().filter(r => r.name.trim() || r.chapter.trim() || r.referredName?.trim() || r.content.trim());
-      draw();
-      if (flagBad(box, refs(), true)) go(at + 1);
     };
   }
 
@@ -2222,14 +2250,14 @@ function toast(msg) {
     return;
   }
   if (FLOW && !state.me) { location.replace(location.pathname); return; }
-  // 每次進來都從入口開始：主頁直接到「紅綠燈＋補 key 121／引薦」，121 分頁從五個按鈕的選單，引薦從第 1 題
+  // 每次進來都從入口開始：主頁直接到「紅綠燈＋補 key 121／引薦」，121 分頁從分類選單，引薦從同頁合併表單
   if (FLOW === "121") {
     const editEvent = EDIT_SECTION?.startsWith("ev:") && EVENTS.some(ev => ev.id === EDIT_SECTION.slice(3));
     state.sec = ["indiv", "ext", "gather"].includes(EDIT_SECTION) || editEvent ? EDIT_SECTION : null;
   }
   buildSteps();
   const editAt = FLOW === "121" && state.sec?.startsWith("ev:") && state.attended[state.sec.slice(3)] ? 1
-    : FLOW === "ref" && EDIT_SECTION ? Math.max(0, REF_QS.findIndex(q => q.id === EDIT_SECTION)) : 0;
+    : 0;
   go(START_AT_WHO ? steps.findIndex(s => s.kind === "who") : !state.me ? 0 : FLOW ? editAt : steps.findIndex(s => s.kind === "light"));
   focusEditedDraft();
 })();
