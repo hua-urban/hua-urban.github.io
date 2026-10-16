@@ -55,8 +55,8 @@ assert(index.includes('const SB_URL = ""'));
 assert(index.includes('Math.ceil(2 * m.weeks)') && index.includes('Math.ceil(1.5 * m.weeks)'));
 assert(index.includes('data-gap-flow="${k}"') && index.includes('還差 ${remaining} ${goal.unit}'));
 assert(!index.includes('href="admin.html"'), "public main page does not expose the admin link");
-assert(index.indexOf('portalCard("121", true)') < index.indexOf('id="memberTraining"')
-  && index.indexOf('id="memberTraining"') < index.indexOf('portalCard("ref", true)'), "training records appear before the referral flow");
+assert(index.indexOf('portalCard("121", true)') < index.indexOf('portalCard("ref", true)')
+  && index.indexOf('portalCard("ref", true)') < index.indexOf('id="memberTraining"'), "training records appear after the referral flow");
 assert(index.includes('hua-urban-greenlight-submissions-v1'));
 assert(index.includes('已保存在此瀏覽器'));
 assert(index.includes('data-f="referredName"'));

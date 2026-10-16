@@ -433,7 +433,7 @@
         ["被引薦人", item?.referredName || sourceRow?.referredName],
         ["引薦內容", item?.content || sourceRow?.content],
         ["電話", item?.phone || sourceRow?.phone],
-        ["聯絡方式", item?.contact || (sourceRow?.contact === "card" ? "提供名片" : sourceRow?.contact === "call" ? "電話聯絡" : "")],
+        ["聯絡方式", item?.contact || ({ card: "提供名片", call: "電話聯絡", both: "提供名片、電話聯絡", none: "未勾選" }[sourceRow?.contact] || "")],
       ];
       fields.forEach(([label, value]) => {
         const text = textFromServer(value);

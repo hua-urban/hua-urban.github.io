@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { currentDateInTaipei, mapEvents } from "./greenlight-events.mjs";
 import { selectFullCyclePalms } from "./greenlight-palms.mjs";
 
 const ROOT = resolve(import.meta.dirname, "..");
@@ -10,7 +11,6 @@ const PALMS_URL = "https://hua-urban.com/traffic-light/data.json";
 const MONTHLY_URL = "https://hua-urban.com/traffic-light/monthly.json";
 const REPOSITORY = "https://github.com/hua-urban/hua-urban.github.io";
 const CHAPTER = "華都更";
-const TIME_ZONE = "Asia/Taipei";
 
 async function fetchText(url) {
   const response = await fetch(url, {
@@ -78,49 +78,6 @@ function nameKey(value) {
   const chinese = compact.match(/^[\u3400-\u9fff]+/)?.[0];
   if (chinese) return chinese.slice(0, COMPOUND_SURNAMES.some(surname => chinese.startsWith(surname)) ? 4 : 3);
   return String(value ?? "").toLowerCase().split(/\s+/).filter(Boolean).sort().join(" ");
-}
-
-function currentDateInTaipei() {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: TIME_ZONE,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
-}
-
-function eventDate(value) {
-  const text = String(value ?? "").trim();
-  const match = text.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
-  if (!match) return "";
-  const [, year, month, day] = match;
-  const date = new Date(Date.UTC(+year, +month - 1, +day));
-  if (date.getUTCFullYear() !== +year || date.getUTCMonth() !== +month - 1 || date.getUTCDate() !== +day) return "";
-  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-}
-
-function mapEvents(rows, members) {
-  if (!Array.isArray(rows)) throw new Error("Official activity feed is not an array.");
-  const valid = rows.map(row => {
-    const name = String(row?.["活動標題"] || row?.["名稱"] || "").trim();
-    const date = eventDate(row?.["日期"]);
-    const type = String(row?.["類型"] || "").trim();
-    if (!name || !date || /例會|組聚/.test(type) || (!type && /例會|組聚/.test(name))) return null;
-    return { name, date };
-  }).filter(Boolean);
-
-  const today = currentDateInTaipei();
-  const upcoming = valid.filter(event => event.date >= today).sort((a, b) => a.date.localeCompare(b.date));
-  const past = valid.filter(event => event.date < today).sort((a, b) => b.date.localeCompare(a.date));
-  const selected = upcoming.concat(past.slice(0, Math.max(0, 5 - upcoming.length)));
-  return selected.map(event => ({
-    id: `official-${event.date}-${createHash("sha256").update(event.name).digest("hex").slice(0, 8)}`,
-    name: event.name,
-    date: event.date,
-    // The public calendar provides event details, not an attendance list. The form asks members to select their own interaction partners.
-    members: members.map(member => member.no),
-    outside: [],
-  }));
 }
 
 function json(value) {
@@ -199,7 +156,7 @@ const defaults = {
     eventMembersNote: "Official activity data has no attendee roster; all current members are offered as interaction candidates.",
   },
   members,
-  events: mapEvents(activityPayload.data, members),
+  events: mapEvents(activityPayload.data, members, currentDateInTaipei()),
 };
 const palms = {
   updatedAt: fullCyclePalms.updatedAt,
@@ -255,6 +212,6 @@ console.log(JSON.stringify({
   rosterCount: members.length,
   palmsCount: activePalmsRows.length,
   activitySourceRows: activityPayload.data.length,
-  scheduledActivities: defaults.events.length,
+  importedPastActivities: defaults.events.length,
   changed,
 }, null, 2));

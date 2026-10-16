@@ -26,14 +26,14 @@
     "localTestStorage": true
   },
   "sha256": {
-    "defaults.json": "0e59c725230e42f45dec036d82b600a2e4ccaba3d18bb97a7eddcad192c42f3c",
+    "defaults.json": "3514418c4e7181585551485a9387cc9e6c2659fbde76e824fac513cae31a349b",
     "palms.json": "c26656cac32e84288aa688fa64010df69b41924a20f4b6ef0209fba6d5df6eaf",
     "monthly.json": "4541e97b292e4340cdda9d662ff0b87d0077eec0aab9417ed61bf6fd7e231d06",
     "training.json": "25de5158d55935ee38630cd74c20e4093d3dd728d2e851bf570d0ccf0f8a595a"
   },
   "activities": {
     "source": "https://script.google.com/macros/s/AKfycbyCL7tHMfIkHHAhL0WDX-TMdMfmxNdWkVkGRhdaAjESgmUZ3-eJKJ7YsOi1IS-RMxW4/exec",
-    "rows": 5,
+    "rows": 7,
     "fetchedRows": 9,
     "schedule": "Every Wednesday at 10:00 Asia/Taipei",
     "attendeeRosterAvailable": false

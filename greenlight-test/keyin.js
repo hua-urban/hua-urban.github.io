@@ -191,8 +191,8 @@
     else notes.push("找不到 BNI 引薦內容欄位，請手動填入；這筆不會自動送出");
     const radio = d.querySelector(`input[name="referralType"][value="${r.type === "內部" ? "INSIDE" : "OUTSIDE"}"]`);
     if (radio && !radio.checked) radio.click();
-    setCheck(d.querySelector('input[name="cardGiven"]'), r.contact === "card");
-    setCheck(d.querySelector('input[name="callRequired"]'), r.contact === "call");
+    setCheck(d.querySelector('input[name="cardGiven"]'), ["card", "both"].includes(r.contact));
+    setCheck(d.querySelector('input[name="callRequired"]'), ["call", "both"].includes(r.contact));
     setText(d.querySelector('input[name="phoneNumber"]'), r.phone);
     return notes;
   }
@@ -215,8 +215,8 @@
       const description = refDescriptionField(d);
       if (!description || description.value !== r.content) bad.push("引薦內容");
       if (d.querySelector('input[name="referralType"]:checked')?.value !== (r.type === "內部" ? "INSIDE" : "OUTSIDE")) bad.push("引薦類型");
-      if (!!d.querySelector('input[name="cardGiven"]')?.checked !== (r.contact === "card")
-          || !!d.querySelector('input[name="callRequired"]')?.checked !== (r.contact === "call")) bad.push("引薦狀態");
+      if (!!d.querySelector('input[name="cardGiven"]')?.checked !== (["card", "both"].includes(r.contact))
+          || !!d.querySelector('input[name="callRequired"]')?.checked !== (["call", "both"].includes(r.contact))) bad.push("引薦狀態");
       if (val('input[name="phoneNumber"]') !== r.phone) bad.push("電話");
     }
     return bad;
