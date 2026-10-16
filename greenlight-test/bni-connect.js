@@ -284,6 +284,7 @@
         member.append(node("strong", "bc-member-name", state.member.name));
         if (state.member.chapter) member.append(node("span", "bc-member-chapter", state.member.chapter));
         section.append(member);
+        section.append(node("p", "bc-help bc-account-reminder", "請確認好BNI帳密，小追只能代發無法驗證喔！"));
         const logout = createButton("登出", "logout", "bc-button bc-secondary", !!state.busy);
         section.append(logout);
         return section;
