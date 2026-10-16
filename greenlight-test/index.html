@@ -1843,12 +1843,12 @@ function render() {
         <details class="bni-help">
           <summary>需要手動操作或教學？</summary>
           <p class="tip"><b>🔑 忘記密碼？</b>在 BNI Connect 登入頁點「忘記使用者名稱／密碼」重新設定。</p>
-          <p class="tip"><b>🎬 不知道怎麼 key？</b>看 Connect 系統 key in 教學影片${GUIDE_PDF ? "，或下載講義一步一步照著做" : ""}。</p>
+          <p class="tip"><b>🎬 不知道怎麼 key？</b>看華都更版 Key 單教學影片${GUIDE_PDF ? "，或下載講義一步一步照著做" : ""}。</p>
           <div class="links ${GUIDE_PDF ? "two" : ""}">
             ${CONNECT_LINKS.map(l => `<a class="link" href="${l.href}" target="_blank" rel="noopener">
               <span class="link-t">${l.label}</span><span class="link-s">${l.sub}</span><span class="link-go">↗</span></a>`).join("")}
-            <a class="link" href="https://youtu.be/7UL_KdVG_J4" target="_blank" rel="noopener">
-              <span class="link-t">教學影片</span><span class="link-s">YouTube</span><span class="link-go">▶</span></a>
+            <a class="link" href="https://www.youtube.com/watch?v=oXdds_PsTb8&amp;list=PLh29DqPYyf2Jfx_ArCnlU_SDADH_gElKz" target="_blank" rel="noopener">
+              <span class="link-t">華都更 Key 單教學</span><span class="link-s">YouTube・華都更版</span><span class="link-go">▶</span></a>
             ${GUIDE_PDF ? `<a class="link" href="${GUIDE_PDF}" download="BNI Connect 系統教學 ${CHAPTER}.pdf">
               <span class="link-t">下載講義</span><span class="link-s">PDF</span><span class="link-go">↓</span></a>` : ""}
           </div>
