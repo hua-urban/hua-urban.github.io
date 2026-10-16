@@ -47,6 +47,9 @@
     .view-nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 15px; border-radius: 8px; font-weight: 700; text-decoration: none; }
     .view-nav a[aria-current="page"] { background: var(--brand); color: #fff; }
     .view-nav a:not([aria-current="page"]):hover { background: var(--brand-wash); }
+    .view-nav a.greenlight-link { margin-left: auto; background: #176b4b; color: #fff; }
+    .view-nav a.greenlight-link:hover { background: #105238; color: #fff; }
+    @media (max-width: 480px) { .view-nav a.greenlight-link { margin-left: 0; } }
     .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin: 0 0 16px; }
     .button-link { display: inline-flex; min-height: 44px; align-items: center; padding: 8px 14px; border: 1px solid var(--brand); border-radius: 8px; background: var(--paper); color: var(--brand-dark); font-weight: 700; text-decoration: none; }
     .button-link:hover { background: var(--brand-wash); }
@@ -161,6 +164,7 @@
     <nav class="view-nav" aria-label="選擇檢視方式">
       <a id="monthlyNav" href="./" aria-current="page">LTNA 官方月報</a>
       <a id="weeklyNav" href="./?v=est">最新週期統計</a>
+      <a class="greenlight-link" href="/greenlight-test/">我想追綠光</a>
     </nav>
 
     <section id="monthlyView" aria-label="官方月報統計">
