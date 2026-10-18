@@ -317,47 +317,6 @@
       return line;
     }
 
-    function renderInviters() {
-      if (!rows121.length) return null;
-      const section = node("section", "bc-inviters");
-      const details = node("details", "bc-details");
-      details.dataset.inviterDetails = "true";
-      details.open = state.inviterDetailsOpen;
-      details.append(node("summary", "bc-summary", `逐筆更改邀請方（預設 ${rows121.length} 筆都由我邀請）`));
-      details.append(node("p", "bc-help", "依實際會面情況選擇；變更後請重新「配對單據會員」。"));
-
-      const list = node("div", "bc-inviter-list");
-      rows121.forEach((row, index) => {
-        const card = node("div", "bc-inviter-row");
-        const title = node("div", "bc-inviter-title", `${index + 1}. ${textFromServer(row?.name, "未命名會員")}`);
-        const meta = node("p", "bc-inviter-meta");
-        const pieces = [row?.chapter, row?.date, row?.place, row?.topic]
-          .map(value => textFromServer(value))
-          .filter(Boolean);
-        meta.textContent = pieces.join(" · ") || "121 資料";
-        const label = node("label", "bc-inviter-label");
-        label.append(node("span", "", "121 由誰邀請"));
-        const select = node("select", "bc-select");
-        select.dataset.inviterIndex = String(index);
-        select.setAttribute("aria-label", `第 ${index + 1} 筆 ${textFromServer(row?.name, "會員")} 由誰邀請`);
-        const options = [
-          ["me", "我邀請對方"],
-          ["other", "對方邀請我"],
-        ];
-        options.forEach(([value, text]) => {
-          const option = node("option", "", text);
-          option.value = value;
-          option.selected = state.inviterByRow[index] === value;
-          select.append(option);
-        });
-        label.append(select);
-        card.append(title, meta, label);
-        list.append(card);
-      });
-      details.append(list);
-      section.append(details);
-      return section;
-    }
 
     function renderLogin() {
       const section = node("section", "bc-login");
@@ -620,8 +579,6 @@
         shell.append(recovery);
       }
 
-      const inviters = renderInviters();
-      if (inviters) shell.append(inviters);
       shell.append(renderLogin());
 
       if (state.authenticated && state.member) {
