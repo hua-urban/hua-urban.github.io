@@ -1301,6 +1301,7 @@ function render() {
                   </label>
                 </div>
                 <label class="field"><span>地點</span><input data-f="place" list="meeting-locations" value="${esc(v?.place || "")}" placeholder="輸入或選擇地點"></label>
+                <label class="who-external-switch"><input type="checkbox" data-other-inviter ${v?.initiatedBy === "other" ? "checked" : ""}>對方邀請</label>
                 <div class="kinds"><span class="kinds-label">主題</span>
                   ${KINDS.map(k => `<button type="button" data-kind="${k}" class="${v?.kind === k ? "sel" : ""}">${k}</button>`).join("")}
                 </div>
@@ -1317,6 +1318,10 @@ function render() {
     const sync = () => { $("#count").textContent = `已勾 ${Object.keys(state.meets).length} 位`; };
     const rowOf = el => el.closest(".row");
     list.addEventListener("change", e => {
+      if (e.target.matches("[data-other-inviter]")) {
+        state.meets[rowOf(e.target).dataset.no].initiatedBy = e.target.checked ? "other" : "me";
+        save(); return;
+      }
       if (e.target.matches("[data-datepick]")) {
         const parts = datePartsFromPicker(e.target.value);
         if (!parts) return;
@@ -1412,6 +1417,7 @@ function render() {
             </label>
           </div>
           <label class="field"><span>地點</span><input data-f="place" list="meeting-locations" value="${esc(v.place)}" placeholder="輸入或選擇地點"></label>
+          <label class="who-external-switch"><input type="checkbox" data-other-inviter ${v.initiatedBy === "other" ? "checked" : ""}>對方邀請</label>
           <div class="kinds"><span class="kinds-label">主題</span>
             ${OUT_KINDS.map(k => `<button type="button" data-kind="${k}" class="${v.kind === k ? "sel" : ""}">${k}</button>`).join("")}
           </div>
@@ -1430,6 +1436,10 @@ function render() {
       save();
     });
     box.addEventListener("change", e => {
+      if (e.target.matches("[data-other-inviter]")) {
+        state.outside[idx(e.target)].initiatedBy = e.target.checked ? "other" : "me";
+        save(); return;
+      }
       if (!e.target.matches("[data-datepick]")) return;
       const parts = datePartsFromPicker(e.target.value);
       if (!parts) return;
@@ -1913,7 +1923,7 @@ function keyinData(rows, refRows) {
   return {
     app: "hua-urban-greenlight", me: me ? me.name : "", meChapter: me ? me.chapter : "",
     rows121: rows.map(r => ({ name: r.name, chapter: r.chapter, ext: recipientCrossChapter(r.chapter),
-      place: r.place, date: `${r.y || YEAR}/${r.m}/${r.d}`, topic: r.kind })),
+      place: r.place, date: `${r.y || YEAR}/${r.m}/${r.d}`, topic: r.kind, initiatedBy: r.initiatedBy === "other" ? "other" : "me" })),
     refs: refRows.map(r => ({ sourceId: r.sourceId, name: r.name, chapter: r.chapter, ext: recipientCrossChapter(r.chapter),
       type: r.type, referredName: r.referredName, content: r.content, phone: r.phone, contact: contactKey[r.contact] })),
   };
@@ -1997,12 +2007,12 @@ function collect() {
   for (const [no, v] of one) {
     const p = ROSTER.get(no);
     if (!p || isSelfTarget(p.name, CHAPTER)) continue;
-    rows.push({ no, name: p.name, chapter: CHAPTER, job: p.job, m: +v.m, d: +v.d, place: v.place, kind: v.kind,
+    rows.push({ no, name: p.name, chapter: CHAPTER, job: p.job, m: +v.m, d: +v.d, place: v.place, kind: v.kind, initiatedBy: v.initiatedBy === "other" ? "other" : "me",
       src: "121", ext: recipientCrossChapter(CHAPTER), draft: { type: "meet", no, value: { ...v } } });
   }
   for (const v of state.outside) {
     if (!v.name.trim() || !validDate(v.m, v.d) || isSelfTarget(v.name, v.chapter)) continue;
-    rows.push({ no: "", name: v.name.trim(), chapter: v.chapter.trim(), job: "", m: +v.m, d: +v.d, place: v.place, kind: v.kind,
+    rows.push({ no: "", name: v.name.trim(), chapter: v.chapter.trim(), job: "", m: +v.m, d: +v.d, place: v.place, kind: v.kind, initiatedBy: v.initiatedBy === "other" ? "other" : "me",
       src: "outside", ext: recipientCrossChapter(v.chapter), draft: { type: "outside", personId: v.id, value: { ...v } } });
   }
   return rows;
@@ -2208,7 +2218,7 @@ function download(rows, refRows) {
   const me = currentPerson() || { no: "", name: "" };
   const head = ["我的姓名", "121 對象姓名", "分會", "發起人", "地點", "日期", "會談主題"];
   const ws = XLSX.utils.aoa_to_sheet([head, ...rows.map(r =>
-    [me.name, r.name, r.chapter, me.name, r.place, null, r.kind])]);
+    [me.name, r.name, r.chapter, r.initiatedBy === "other" ? r.name : me.name, r.place, null, r.kind])]);
   // 日期存成真正的 Excel 日期，排序、篩選都正常
   rows.forEach((r, i) => {
     const serial = (Date.UTC(r.y || YEAR, r.m - 1, r.d) - Date.UTC(1899, 11, 30)) / 864e5;

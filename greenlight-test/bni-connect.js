@@ -88,7 +88,7 @@
       member: null,
       busy: "status",
       activeItemId: null,
-      inviterByRow: rows121.map(() => "me"),
+      inviterByRow: rows121.map(row => row?.initiatedBy === "other" ? "other" : "me"),
       inviterDetailsOpen: false,
       planId: null,
       hasPrepared: false,
