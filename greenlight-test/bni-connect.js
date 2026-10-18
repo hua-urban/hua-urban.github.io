@@ -562,6 +562,7 @@
     }
 
     function render() {
+      const pendingItems = state.items.filter(item => cleanupFailed || !["success", "already_sent"].includes(item.status));
       const shell = node("div", "bc-shell");
       if (!state.authenticated || !identityMatchesTarget()) {
         shell.append(node("div", "bc-filled-member", `本次填寫會員：${textFromServer(payload?.me, "資料未提供")}${payload?.meChapter ? " · " + textFromServer(payload.meChapter) : ""}`));
@@ -590,7 +591,7 @@
           !!state.busy || !!state.bulkConfirm || !invitersComplete() || !state.csrfToken || !identityMatchesTarget(),
         );
         actions.append(preview);
-        if (state.planId && state.items.length) {
+        if (state.planId && pendingItems.length) {
           if (state.bulkConfirm) {
             const confirm = node("div", "bc-bulk-confirm");
             const count = state.bulkConfirm.ids.length;
@@ -614,13 +615,13 @@
         shell.append(actions);
       }
 
-      if (state.items.length) {
+      if (pendingItems.length) {
         const preview = node("section", "bc-preview");
         const heading = node("h3", "bc-section-title", "會員配對預覽");
         preview.append(heading);
         preview.append(node("p", "bc-help", "逐筆確認單據內容；只有「可送出」項目能勾選。"));
         const list = node("div", "bc-items");
-        state.items.forEach((item, index) => list.append(renderItem(item, index)));
+        pendingItems.forEach(item => list.append(renderItem(item, state.items.indexOf(item))));
         preview.append(list);
         if (state.matchingChanged || !state.planId) {
           preview.append(node("p", "bc-selection-count", "配對資料已變更；請先按上方「配對單據會員」。"));
@@ -992,7 +993,9 @@
         const confirmed = selected.filter(item => item.status === "success" || item.status === "already_sent").length;
         setMessage(`本批次送出嘗試已結束：確認 ${confirmed} 筆、失敗 ${failed} 筆、待確認 ${uncertain} 筆。請查看各筆狀態；失敗或待確認項目不會自動重送。`, "error");
       } else {
-        setMessage("本批次已由 BNI Connect 確認完成。請查看各筆狀態。", "success");
+        setMessage(cleanupFailed
+          ? "本批次已由 BNI Connect 確認完成，但本機草稿尚未清除，請使用清除Key單，勿重送。"
+          : "本批次已由 BNI Connect 確認完成，已自動清除完成的 Key 單。", cleanupFailed ? "error" : "success");
       }
       render();
     }
