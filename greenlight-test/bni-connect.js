@@ -937,7 +937,15 @@
 
     function beginSendAll() {
       if (!state.planId || !state.authenticated || state.busy || state.bulkConfirm || !identityMatchesTarget()) return;
-      const eligible = eligibleReadyItems();
+      const ids = eligibleReadyItems().map(item => String(item.id));
+      if (!ids.length) return;
+      state.selected = new Set(ids);
+      void sendBatch(ids);
+    }
+
+    function beginManualSend() {
+      if (!state.planId || !state.authenticated || state.busy || state.bulkConfirm || !identityMatchesTarget()) return;
+      const eligible = currentReadyItems();
       if (!eligible.length) return;
       state.bulkConfirm = {
         ids: eligible.map(item => String(item.id)),
@@ -1177,7 +1185,7 @@
         } catch { setMessage('本機清除尚未完成，請保留本頁結果，勿重送。', 'error'); render(); }
       }
       else if (action === "prepare") void prepare();
-      else if (action === "send-batch") void sendBatch();
+      else if (action === "send-batch") beginManualSend();
       else if (action === "send-all") beginSendAll();
       else if (action === "cancel-send-all") cancelSendAll();
       else if (action === "confirm-send-all") {
