@@ -12,6 +12,8 @@
 main{width:min(100%,480px);padding:36px 28px;background:var(--card);border:1px solid var(--line);border-radius:24px;text-align:center;box-shadow:0 12px 36px #12351a0a}
 .org{font-size:14px;letter-spacing:.16em;color:var(--muted);margin:0}h1{font-size:30px;margin:4px 0 24px}h1 span{color:var(--green)}h2{font-size:22px;margin:22px 0 10px}p{margin:10px 0}.hint{color:var(--muted);font-size:15px}.status{background:var(--soft);border-radius:12px;padding:12px;margin-top:24px;font-size:15px}
 .spinner{width:50px;height:50px;border:4px solid var(--line);border-top-color:var(--green);border-radius:50%;margin:auto;animation:turn 1.2s linear infinite}button,a{font:inherit}button{border:0;border-radius:12px;background:var(--green);color:#fff;padding:12px 22px;cursor:pointer;width:100%;margin-top:18px}a{color:var(--green)}[hidden]{display:none!important}@keyframes turn{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.spinner{animation:none;border-style:dotted}}
+.angel-scene{width:260px;max-width:100%;height:auto;display:block;margin:-8px auto -6px;overflow:visible}.angel-wake{animation:wake 3.2s ease-in-out infinite;transform-origin:130px 120px}.angel-halo{animation:halo 3.2s ease-in-out infinite;transform-origin:130px 37px}.wing-left{transform-origin:112px 104px;animation:flap-left 3.2s ease-in-out infinite}.wing-right{transform-origin:148px 104px;animation:flap-right 3.2s ease-in-out infinite}.arm-left{transform-origin:115px 102px;animation:stretch-left 3.2s ease-in-out infinite}.arm-right{transform-origin:145px 102px;animation:stretch-right 3.2s ease-in-out infinite}.angel-open{animation:eyes 3.2s steps(1) infinite}.angel-sleep{animation:sleepy 3.2s steps(1) infinite}.sleep-z{animation:dream 3.2s ease-in-out infinite}.angel-spark{animation:sparkle 3.2s ease-in-out infinite}.angel-spark.second{animation-delay:.35s}.spinner{width:22px;height:22px;border-width:2px;margin:8px auto 0}
+@keyframes wake{0%,18%,100%{transform:translateY(12px) rotate(-4deg)}40%,78%{transform:translateY(-5px) rotate(0)}88%{transform:translateY(0)}}@keyframes halo{0%,18%,100%{transform:rotate(-10deg)}45%,80%{transform:translateY(-3px) rotate(5deg)}}@keyframes flap-left{0%,25%,100%{transform:rotate(8deg)}45%,65%{transform:rotate(-18deg)}55%,75%{transform:rotate(0)}}@keyframes flap-right{0%,25%,100%{transform:rotate(-8deg)}45%,65%{transform:rotate(18deg)}55%,75%{transform:rotate(0)}}@keyframes stretch-left{0%,20%,100%{transform:rotate(-25deg)}40%,75%{transform:rotate(65deg)}}@keyframes stretch-right{0%,20%,100%{transform:rotate(25deg)}40%,75%{transform:rotate(-65deg)}}@keyframes eyes{0%,100%{opacity:0}40%{opacity:1}85%{opacity:0}}@keyframes sleepy{0%,100%{opacity:1}40%{opacity:0}85%{opacity:1}}@keyframes dream{0%{opacity:0;transform:translateY(4px)}12%{opacity:1}40%,100%{opacity:0;transform:translateY(-12px)}}@keyframes sparkle{0%,24%,90%,100%{opacity:.2;transform:translateY(3px)}45%,70%{opacity:1;transform:translateY(-3px)}}@media(prefers-reduced-motion:reduce){.angel-scene *{animation:none!important}.angel-open{opacity:1}.angel-sleep,.sleep-z{opacity:0}}
 @media(prefers-color-scheme:dark){:root{--bg:#0d1510;--card:#16211a;--ink:#e8f1eb;--muted:#b0c1b5;--line:#3d5444;--green:#7be59e;--soft:#173524}button{color:#102a18}}
 </style>
 </head>
@@ -19,6 +21,32 @@ main{width:min(100%,480px);padding:36px 28px;background:var(--card);border:1px s
 <main>
 <p class="org">BNI 華都更分會</p>
 <h1>追<span>綠光</span></h1>
+<svg class="angel-scene" viewBox="0 0 260 170" role="img" aria-labelledby="angel-title">
+<title id="angel-title">綠光小天使起床伸懶腰、拍拍翅膀</title>
+<ellipse cx="130" cy="151" rx="83" ry="10" fill="#cce7d5" opacity=".6"/>
+<g class="angel-spark" fill="#f0bf4f"><path d="m55 57 3-9 3 9 9 3-9 3-3 9-3-9-9-3Z"/><circle cx="203" cy="85" r="3"/></g>
+<g class="angel-spark second" fill="#65b78b"><path d="m204 41 2-7 3 7 7 3-7 2-3 7-2-7-7-2Z"/><circle cx="58" cy="102" r="3"/></g>
+<rect x="73" y="118" width="114" height="28" rx="14" fill="#fffaf0" stroke="#c5dcca" stroke-width="2"/>
+<g class="angel-wake">
+<g class="wing-left" fill="#fffdf4" stroke="#bdddc9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M113 112C82 112 65 89 72 78c5-5 14 5 21 9-7-12-3-21 3-18 8 4 13 23 17 43Z"/><path d="M85 94q12 12 24 12" fill="none"/></g>
+<g class="wing-right" fill="#fffdf4" stroke="#bdddc9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M147 112c31 0 48-23 41-34-5-5-14 5-21 9 7-12 3-21-3-18-8 4-13 23-17 43Z"/><path d="M175 94q-12 12-24 12" fill="none"/></g>
+<path d="M115 98q15-8 30 0l14 38q-29 15-58 0Z" fill="#80cfa0" stroke="#367d53" stroke-width="2.5"/>
+<path d="m125 107 5 6 5-6" fill="none" stroke="#fffdf4" stroke-width="3" stroke-linecap="round"/>
+<g class="arm-left"><path d="m115 104-14 14" fill="none" stroke="#367d53" stroke-width="15" stroke-linecap="round"/><path d="m115 104-14 14" fill="none" stroke="#80cfa0" stroke-width="10" stroke-linecap="round"/><circle cx="99" cy="119" r="6" fill="#ffdabd"/></g>
+<g class="arm-right"><path d="m145 104 14 14" fill="none" stroke="#367d53" stroke-width="15" stroke-linecap="round"/><path d="m145 104 14 14" fill="none" stroke="#80cfa0" stroke-width="10" stroke-linecap="round"/><circle cx="161" cy="119" r="6" fill="#ffdabd"/></g>
+<ellipse cx="130" cy="72" rx="28" ry="29" fill="#ffdfc5" stroke="#b67b54" stroke-width="2"/>
+<path d="M102 68q-4-25 20-27 29-6 36 24-12-1-19-14-6 14-17 11l4-9q-10 13-24 15Z" fill="#946644"/>
+<path d="M129 43q-7-13 3-16 7-2 6 5" fill="none" stroke="#946644" stroke-width="4" stroke-linecap="round"/>
+<ellipse cx="113" cy="81" rx="5" ry="3" fill="#efa391"/><ellipse cx="147" cy="81" rx="5" ry="3" fill="#efa391"/>
+<g class="angel-open" fill="#41362b"><ellipse cx="120" cy="73" rx="2.5" ry="3.8"/><ellipse cx="140" cy="73" rx="2.5" ry="3.8"/></g>
+<g class="angel-sleep" fill="none" stroke="#654737" stroke-width="2.5" stroke-linecap="round"><path d="M116 74q4 4 8 0M136 74q4 4 8 0"/></g>
+<path d="M125 84q5 7 10 0" fill="none" stroke="#9b5d4b" stroke-width="2" stroke-linecap="round"/>
+<g class="angel-halo"><ellipse cx="130" cy="30" rx="23" ry="6" fill="none" stroke="#f0bf4f" stroke-width="5"/><ellipse cx="130" cy="29" rx="23" ry="6" fill="none" stroke="#ffe59a" stroke-width="2"/></g>
+</g>
+<path d="M64 137q34-13 66 0 32-13 66 0l-2 15H66Z" fill="#b6e2c6" stroke="#75ad8b" stroke-width="2"/>
+<path d="m119 141 3-5 3 5 6 1-5 4 1 5-5-3-5 3 1-5-5-4Z" fill="#fffaf0"/>
+<g class="sleep-z" fill="#6e8d7a" font-family="system-ui,sans-serif" font-weight="700"><text x="175" y="55" font-size="17">z</text><text x="188" y="40" font-size="12">z</text></g>
+</svg>
 <div class="spinner" id="spinner" aria-hidden="true"></div>
 <h2 id="heading">綠光小天使起床中，請稍等我一下喔！</h2>
 <p>服務需要一點點時間啟動，<br>請稍候，準備好就會自動帶你進入。</p>
@@ -70,7 +98,7 @@ main{width:min(100%,480px);padding:36px 28px;background:var(--card);border:1px s
       if (await probe()) {
         heading.textContent = '準備好了！';
         status.textContent = '服務已啟動，正在帶你進入追綠光…';
-        await delay(Math.max(600, 1800 - (Date.now() - started)));
+        await delay(Math.max(600, 3000 - (Date.now() - started)));
         location.replace(app.href);
         return;
       }
