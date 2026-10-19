@@ -20,7 +20,7 @@ main{width:min(100%,480px);padding:36px 28px;background:var(--card);border:1px s
 <p class="org">BNI 華都更分會</p>
 <h1>追<span>綠光</span></h1>
 <div class="spinner" id="spinner" aria-hidden="true"></div>
-<h2 id="heading">小追正在準備中 🌱</h2>
+<h2 id="heading">綠光小天使起床中，請稍等我一下喔！</h2>
 <p>服務需要一點點時間啟動，<br>請稍候，準備好就會自動帶你進入。</p>
 <p class="hint">不用一直重新整理，讓小追暖身一下。</p>
 <p class="status" id="status" role="status" aria-live="polite">正在喚醒追綠光服務…</p>
@@ -63,7 +63,7 @@ main{width:min(100%,480px);padding:36px 28px;background:var(--card);border:1px s
     running = true;
     retry.hidden = true;
     spinner.hidden = false;
-    heading.textContent = '小追正在準備中 🌱';
+    heading.textContent = '綠光小天使起床中，請稍等我一下喔！';
     status.textContent = '正在喚醒追綠光服務…';
     const started = Date.now();
     while (Date.now() - started < 90000) {
