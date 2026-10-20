@@ -6,6 +6,8 @@
     login: "/api/bni/login",
     logout: "/api/bni/logout",
     prepare: "/api/bni/prepare",
+    identityCandidates: "/api/bni/identity-candidates",
+    confirmIdentity: "/api/bni/confirm-identity",
     submit: "/api/bni/submit",
     retryReview: "/api/bni/retry-review",
   };
@@ -86,6 +88,8 @@
       authenticated: false,
       csrfToken: "",
       member: null,
+      identityCandidates: [],
+      confirmedIdentity: null,
       busy: "status",
       activeItemId: null,
       inviterByRow: rows121.map(row => row?.initiatedBy === "other" ? "other" : "me"),
@@ -122,7 +126,12 @@
       } catch { cleanupFailed = true; }
     }
 
+    function actorTarget() {
+      return state.confirmedIdentity || { name: payload?.me, chapter: payload?.meChapter };
+    }
+
     function identityMatchesTarget() {
+      if (state.confirmedIdentity && state.authenticated) return true;
       const loggedName = identityNameKey(state.member?.name);
       const targetName = identityNameKey(payload?.me);
       if (!loggedName || !targetName || loggedName !== targetName) return false;
@@ -130,6 +139,42 @@
       if (!targetChapter) return true;
       const loggedChapter = identityChapterKey(state.member?.chapter);
       return !!loggedChapter && loggedChapter === targetChapter;
+    }
+
+    async function loadIdentityCandidates() {
+      state.identityCandidates = [];
+      state.confirmedIdentity = null;
+      if (identityChapterKey(payload?.meChapter) !== identityChapterKey(state.member?.chapter)) return;
+      const result = await postJson(API.identityCandidates, { me: payload?.me, meChapter: payload?.meChapter });
+      state.identityCandidates = Array.isArray(result.candidates) ? result.candidates.filter(candidate =>
+        typeof candidate.candidateId === "string" && textFromServer(candidate.name) && textFromServer(candidate.chapter)) : [];
+      const confirmed = state.identityCandidates.find(candidate => candidate.candidateId === result.confirmedCandidateId);
+      if (confirmed && confirmed.name === payload?.me) state.confirmedIdentity = confirmed;
+    }
+
+    async function confirmIdentity(candidateId) {
+      if (state.busy || !state.authenticated) return;
+      const candidate = state.identityCandidates.find(value => value.candidateId === candidateId);
+      if (!candidate) return;
+      state.busy = "identity";
+      setMessage("正在確認你選擇的官網會員資料…");
+      render();
+      try {
+        const result = await postJson(API.confirmIdentity, {
+          candidateId, me: candidate.name, meChapter: candidate.chapter,
+        });
+        if (result.confirmedCandidate?.candidateId !== candidateId) throw new ApiError(502);
+        state.confirmedIdentity = candidate;
+        invalidatePlan("已確認官網會員對應，請配對單據會員。這一步不會送單。");
+        state.busy = null;
+        render();
+      } catch (error) {
+        state.busy = null;
+        state.confirmedIdentity = null;
+        if (error?.status === 401) expireSession("登入已逾時，請重新登入後選擇會員。");
+        else setMessage("無法確認這筆會員對應，請重新檢查登入狀態。", "error");
+        render();
+      }
     }
 
     function samePlanMember() {
@@ -283,6 +328,10 @@
     function setAuthenticated(member) {
       const name = textFromServer(member?.name);
       if (!name) return false;
+      if (String(state.member?.id || "") !== String(member?.id || "")) {
+        state.confirmedIdentity = null;
+        state.identityCandidates = [];
+      }
       state.authenticated = true;
       state.member = {
         id: member?.id == null ? "" : String(member.id),
@@ -294,6 +343,8 @@
 
     function expireSession(message) {
       state.authenticated = false;
+        state.confirmedIdentity = null;
+        state.identityCandidates = [];
       state.member = null;
       state.csrfToken = "";
       state.planId = null;
@@ -581,6 +632,19 @@
       }
 
       shell.append(renderLogin());
+      if (state.authenticated && !identityMatchesTarget() && state.identityCandidates.length) {
+        const panel = node("section", "bc-login bc-identity-candidates");
+        panel.append(node("h3", "bc-section-title", "請確認哪一筆是你的官網會員資料"));
+        panel.append(node("p", "bc-help", "官網姓名可能包含中文別稱。請選擇你自己的名單；送單仍使用上方已登入的 BNI 帳號。"));
+        for (const candidate of state.identityCandidates) {
+          const button = createButton(`${candidate.name} · ${candidate.chapter} — 這是我`, "confirm-identity", "bc-button bc-secondary", !!state.busy);
+          button.dataset.identityCandidateId = candidate.candidateId;
+          panel.append(button);
+        }
+        shell.append(panel);
+      } else if (state.authenticated && state.confirmedIdentity) {
+        shell.append(node("p", "bc-help", `已確認官網會員：${state.confirmedIdentity.name} · ${state.confirmedIdentity.chapter}`));
+      }
 
       if (state.authenticated && state.member) {
         const actions = node("div", "bc-actions");
@@ -610,7 +674,7 @@
         if (!invitersComplete() && rows121.length) {
           actions.append(node("p", "bc-help bc-full", "請先設定 121 邀請方。"));
         } else if (!identityMatchesTarget()) {
-          actions.append(node("p", "bc-help bc-full bc-identity-warning", "登入會員與本次填寫會員不符，請確認帳號後再配對。"));
+          actions.append(node("p", "bc-help bc-full bc-identity-warning", state.identityCandidates.length ? "請先選擇上方的官網會員資料。" : "請確認填寫會員的姓名與分會，或改用本人的 BNI 帳號登入。"));
         }
         shell.append(actions);
       }
@@ -676,9 +740,10 @@
         state.csrfToken = result.csrfToken;
         if (result.authenticated === true) {
           if (setAuthenticated(result.member)) {
+            if (!identityMatchesTarget()) await loadIdentityCandidates();
             if (!identityMatchesTarget()) {
               if (state.planId) invalidatePlan("登入會員已變更，請重新配對單據會員。", true);
-              setMessage("登入會員與本次填寫會員不符，請確認帳號後再配對。", "error");
+              setMessage(state.identityCandidates.length ? "找到可能含有別稱的官網會員資料，請在下方選擇確認。" : "找不到姓名與分會相符的官網會員，請確認填寫會員或登入帳號。", state.identityCandidates.length ? "info" : "error");
             } else if (state.planId && !samePlanMember()) {
               invalidatePlan("登入會員已變更，請重新配對單據會員。", true);
               setMessage("登入會員已變更，請重新配對單據會員。", "error");
@@ -687,6 +752,8 @@
             }
           } else {
             state.authenticated = false;
+        state.confirmedIdentity = null;
+        state.identityCandidates = [];
             state.member = null;
             state.planId = null;
             state.planMember = null;
@@ -696,6 +763,8 @@
           }
         } else {
           state.authenticated = false;
+        state.confirmedIdentity = null;
+        state.identityCandidates = [];
           state.member = null;
           state.planId = null;
           state.planMember = null;
@@ -712,6 +781,8 @@
         state.busy = null;
         state.available = false;
         state.authenticated = false;
+        state.confirmedIdentity = null;
+        state.identityCandidates = [];
         state.csrfToken = "";
         state.member = null;
         state.planId = null;
@@ -750,6 +821,8 @@
         if (typeof result.csrfToken !== "string" || !result.csrfToken) {
           state.busy = null;
           state.authenticated = false;
+        state.confirmedIdentity = null;
+        state.identityCandidates = [];
           state.member = null;
           state.csrfToken = "";
           setMessage("登入服務未回傳更新後的安全驗證資訊。請重新檢查服務狀態。", "error");
@@ -758,19 +831,22 @@
         }
         if (!setAuthenticated(result.member)) {
           state.authenticated = false;
+        state.confirmedIdentity = null;
+        state.identityCandidates = [];
           state.member = null;
           state.busy = null;
           setMessage("登入服務沒有回傳可辨識的會員資料。", "error");
           render();
           return;
         }
+        if (!identityMatchesTarget()) await loadIdentityCandidates();
         state.busy = null;
         invalidatePlan(invitersComplete()
           ? ""
           : "請先設定 121 邀請方，再配對單據會員。", state.hasPrepared);
         render();
         if (!identityMatchesTarget()) {
-          setMessage("登入會員與本次填寫會員不符，請確認帳號後再配對。", "error");
+          setMessage(state.identityCandidates.length ? "找到可能含有別稱的官網會員資料，請在下方選擇確認。" : "找不到姓名與分會相符的官網會員，請確認填寫會員或登入帳號。", state.identityCandidates.length ? "info" : "error");
           render();
         } else if (invitersComplete()) {
           await prepare();
@@ -779,6 +855,8 @@
         state.busy = null;
         if (error?.status === 401) {
           state.authenticated = false;
+        state.confirmedIdentity = null;
+        state.identityCandidates = [];
           state.member = null;
           state.csrfToken = "";
         } else if (error?.status === 403) {
@@ -798,6 +876,8 @@
       };
       return {
         ...payload,
+        me: actorTarget().name,
+        meChapter: actorTarget().chapter,
         rows121: rows121.map((row, index) => ({
           ...resolvedRow(row, "121", index),
           initiatedBy: state.inviterByRow[index],
@@ -809,7 +889,7 @@
     async function prepare() {
       if (!state.available || !state.authenticated || !state.csrfToken || state.busy) return;
       if (!identityMatchesTarget()) {
-        setMessage("登入會員與本次填寫會員不符，請確認帳號後再配對。", "error");
+        setMessage(state.identityCandidates.length ? "找到可能含有別稱的官網會員資料，請在下方選擇確認。" : "找不到姓名與分會相符的官網會員，請確認填寫會員或登入帳號。", state.identityCandidates.length ? "info" : "error");
         render();
         return;
       }
@@ -1045,6 +1125,8 @@
         state.busy = null;
         archiveSubmissionResults();
         state.authenticated = false;
+        state.confirmedIdentity = null;
+        state.identityCandidates = [];
         state.member = null;
         state.planId = null;
         state.planMember = null;
@@ -1058,6 +1140,8 @@
         state.busy = null;
         archiveSubmissionResults();
         state.authenticated = false;
+        state.confirmedIdentity = null;
+        state.identityCandidates = [];
         state.member = null;
         state.csrfToken = "";
         state.planId = null;
@@ -1129,7 +1213,8 @@
       const button = event.target.closest?.("[data-action]");
       if (!button || button.disabled) return;
       const action = button.dataset.action;
-      if (action === "refresh") void refreshStatus();
+      if (action === "confirm-identity") void confirmIdentity(button.dataset.identityCandidateId);
+      else if (action === "refresh") void refreshStatus();
       else if (action === "edit-draft") {
         if (state.busy) return;
         const sourceIndex = Number(button.dataset.editSourceIndex);

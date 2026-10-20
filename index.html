@@ -1721,7 +1721,7 @@ section[id]{scroll-margin-top:68px}
         <div class="chain-badge">E</div>
         <div class="chain-name">E 房產客戶成長鏈</div>
         <div class="chain-meta">
-          <div><strong>召集人：</strong>洪嘉璿左左</div>
+          <div><strong>召集人：</strong>洪嘉璿（左左）</div>
           <div><strong>下次組聚：</strong><span class="chain-next" data-chain="E">（時間待定）</span></div>
         </div>
       </div>
@@ -1842,7 +1842,7 @@ section[id]{scroll-margin-top:68px}
           <tr data-n="王雅慧Peggy" data-p="置產投資客-台北市中山大同區" data-role=""><td><span class="m-num">40</span></td><td><span class="m-name">王雅慧 Peggy</span></td><td><span class="m-prof">置產投資客－台北市中山、大同區</span></td></tr>
           <tr data-n="何俊彥" data-p="老屋翻新包租代管-台北市" data-role=""><td><span class="m-num">41</span></td><td><span class="m-name">何俊彥</span></td><td><span class="m-prof">老屋翻新包租代管－台北市</span></td></tr>
           <tr data-n="周育慈Anna" data-p="包租代管-台北市大安區" data-role=""><td><span class="m-num">42</span></td><td><span class="m-name">周育慈 Anna</span></td><td><span class="m-prof">包租代管－台北市大安區</span></td></tr>
-          <tr data-n="洪嘉璿左左" data-p="MMT天賦諮詢師" data-role="導師協調"><td><span class="m-num">43</span></td><td><span class="m-name">洪嘉璿左左</span></td><td><span class="m-prof">MMT 天賦諮詢師</span></td></tr>
+          <tr data-n="洪嘉璿（左左）" data-p="MMT天賦諮詢師" data-role="導師協調"><td><span class="m-num">43</span></td><td><span class="m-name">洪嘉璿（左左）</span></td><td><span class="m-prof">MMT 天賦諮詢師</span></td></tr>
           <tr data-n="鍾智媛Fiona" data-p="商務中心-台北市大安中山區" data-role=""><td><span class="m-num">44</span></td><td><span class="m-name">鍾智媛 Fiona</span></td><td><span class="m-prof">商務中心－台北市大安、中山區</span></td></tr>
           <tr data-n="林中群" data-p="鋼結構防蝕工程" data-role=""><td><span class="m-num">46</span></td><td><span class="m-name">林中群</span></td><td><span class="m-prof">鋼結構防蝕工程</span></td></tr>
           <tr data-n="蔡馨葳Mandy" data-p="人壽財務規劃-桃園" data-role="活動協調"><td><span class="m-num">47</span></td><td><span class="m-name">蔡馨葳 Mandy</span></td><td><span class="m-prof">人壽財務規劃－桃園</span></td></tr>
@@ -2063,10 +2063,10 @@ var GAS_CAL_URL = 'https://script.google.com/macros/s/AKfycbyCL7tHMfIkHHAhL0WDX-
 //   B 老屋現金流升級鏈（陳靖薇）　　　每月第 2、4 個週五・線上 21:00–22:00
 //   C 高齡安居×資產傳承（王春雄 Jayson）每月第 2、4 個週一・線上 21:00–22:00
 //   D 商用不動產升級鏈（陳向柔 Naomi）每月第 2、4 個週二・線上 21:00–22:00／實體 19:00–21:00
-//   E 房產客戶成長鏈（洪嘉璿左左）　　每月第 1、3 個週二・線上 20:30–21:30
+//   E 房產客戶成長鏈（洪嘉璿（左左））　　每月第 1、3 個週二・線上 20:30–21:30
 // 該月第 5 個指定星期兩組都休（沿用 D/E 舊制的邊界規則，泛化到全部五組）。
 // 遇受訓／課程當週可能整月取消，實際以分會 LINE 群公告為準；前端不計算此例外，只在文案註記。
-// 2026-08-26 E 組組長交接：召集人改為洪嘉璿左左（本頁 2026-09-02 補上，與 bni-pt-groups 一致）。
+// 2026-08-26 E 組組長交接：召集人改為洪嘉璿（左左）（本頁 2026-09-02 補上，與 bni-pt-groups 一致）。
 // 2026-09-14 成長協調 NO.035 陳昭男調整兩組：A 改 21:00 開始（原 20:30）；C 由週四改週一（weekday 4→1）。
 // 未來規則若變，只需要改這個物件，不必動計算邏輯。weekday：0=日...6=六（JS Date.getDay() 慣例）。
 // ─────────────────────────────────────────────
@@ -2075,7 +2075,7 @@ var GROUP_ROTATION = {
   'B': { weeks:[2,4], weekday:5, chainName:'老屋現金流升級鏈',     leader:'陳靖薇',        timeText:'線上 21:00–22:00' },
   'C': { weeks:[2,4], weekday:1, chainName:'高齡安居 × 資產傳承',  leader:'王春雄 Jayson', timeText:'線上 21:00–22:00' },
   'D': { weeks:[2,4], weekday:2, chainName:'商用不動產升級鏈',     leader:'陳向柔 Naomi',  timeText:'線上 21:00–22:00／實體 19:00–21:00' },
-  'E': { weeks:[1,3], weekday:2, chainName:'房產客戶成長鏈',       leader:'洪嘉璿左左',    timeText:'線上 20:30–21:30' }
+  'E': { weeks:[1,3], weekday:2, chainName:'房產客戶成長鏈',       leader:'洪嘉璿（左左）',    timeText:'線上 20:30–21:30' }
 };
 
 // 回傳指定 (y,m,0-indexed) 月份中，星期為 weekday 的所有日期（Date 物件陣列，第 1 個為當月第 1 個該星期）

@@ -671,3 +671,14 @@
     grid-template-columns: 3.8em minmax(0, 1fr);
   }
 }
+
+.bc-identity-candidates {
+  display: grid;
+  gap: 12px;
+}
+.bc-identity-candidates .bc-button {
+  width: 100%;
+  min-height: 52px;
+  white-space: normal;
+  text-align: left;
+}
