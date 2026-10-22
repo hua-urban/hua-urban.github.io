@@ -528,16 +528,33 @@ function fetchSessions() {
     .then(function (res) { return res.json(); })
     .then(function (data) {
       if (!data.ok || !Array.isArray(data.sessions)) throw new Error('格式錯誤');
-      sessionsData = data.sessions;
-      if (sessionsData.length === 0) {
-        fieldSession.innerHTML = '<option value="">目前尚無開放場次</option>';
+      if (data.sessions.length > 5000) throw new Error('場次資料過多');
+      if (data.sessions.length === 0) {
+        var emptyOption = document.createElement('option');
+        emptyOption.value = '';
+        emptyOption.textContent = '目前尚無開放場次';
+        fieldSession.replaceChildren(emptyOption);
         sessionHint.textContent = '目前沒有開放中的場次，可以先留意一下，或私訊邀請您的夥伴問問看。';
         return;
       }
-      fieldSession.innerHTML = '<option value="">請選擇場次</option>' +
-        sessionsData.map(function (s) {
-          return '<option value="' + s.id + '">' + s.date + '</option>';
-        }).join('');
+      sessionsData = data.sessions.map(function (s) {
+        if (!s || typeof s !== 'object') throw new Error('格式錯誤');
+        var id = s.id == null ? '' : String(s.id);
+        var date = s.date == null ? '' : String(s.date);
+        var deadline = s.deadline == null ? '' : String(s.deadline);
+        if (id.length > 128 || date.length > 120 || deadline.length > 300) throw new Error('格式錯誤');
+        return { id: id, date: date, deadline: deadline };
+      });
+      var options = [document.createElement('option')];
+      options[0].value = '';
+      options[0].textContent = '請選擇場次';
+      sessionsData.forEach(function (s) {
+        var option = document.createElement('option');
+        option.value = s.id;
+        option.textContent = s.date;
+        options.push(option);
+      });
+      fieldSession.replaceChildren(...options);
       fieldSession.addEventListener('change', function () {
         var s = sessionsData.filter(function (x) { return x.id === fieldSession.value; })[0];
         sessionHint.textContent = s && s.deadline ? ('Precall 截止：' + s.deadline) : '';
@@ -589,12 +606,23 @@ submitBtn.addEventListener('click', function () {
       document.getElementById('successCount').textContent = '第 ' + data.count + ' 位';
       if (data.duplicate) {
         document.getElementById('successTitle').textContent = '您已經預約過囉！';
-        document.getElementById('successBody').innerHTML =
-          '<strong>' + payload.name + '</strong> 已經在名單裡了，不用重複填寫。<br><br>有任何問題歡迎聯絡引薦夥伴 ' + payload.referrer + '。';
+        var successBody = document.getElementById('successBody');
+        var strongName = document.createElement('strong');
+        strongName.textContent = payload.name;
+        successBody.replaceChildren(strongName, document.createTextNode(' 已經在名單裡了，不用重複填寫。'));
+        successBody.append(document.createElement('br'), document.createElement('br'));
+        successBody.append(document.createTextNode('有任何問題歡迎聯絡引薦夥伴 ' + payload.referrer + '。'));
       } else {
         document.getElementById('successTitle').textContent = '已為您留好位置！';
-        document.getElementById('successBody').innerHTML =
-          '感謝您邀請 <strong>' + payload.name + '</strong> 一起來看看！<br><br>秘書會統一以 email／LINE 通知場地資訊。<br>有任何問題歡迎聯絡引薦夥伴 ' + payload.referrer + '。';
+        var successBody = document.getElementById('successBody');
+        var strongName = document.createElement('strong');
+        strongName.textContent = payload.name;
+        successBody.replaceChildren(document.createTextNode('感謝您邀請 '), strongName,
+          document.createTextNode(' 一起來看看！'));
+        successBody.append(document.createElement('br'), document.createElement('br'));
+        successBody.append(document.createTextNode('秘書會統一以 email／LINE 通知場地資訊。'));
+        successBody.append(document.createElement('br'));
+        successBody.append(document.createTextNode('有任何問題歡迎聯絡引薦夥伴 ' + payload.referrer + '。'));
       }
       /* V4 加了 navbar+hero+紅卡，頁面變長：scrollTo(top) 會把成功畫面藏到 fold 下面，
          改成把 #guestForm 捲進可視範圍，不動任何送出/防重/資料邏輯 */

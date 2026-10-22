@@ -8,7 +8,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
 
 concurrency:
   group: greenlight-test-data-sync
@@ -27,7 +26,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '22.23.4'
 
       - name: Check PALMS and activity mapping
         run: node --test scripts/greenlight-palms.test.mjs scripts/greenlight-events.test.mjs

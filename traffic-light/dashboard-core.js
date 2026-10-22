@@ -4,6 +4,227 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (global) {
   'use strict';
 
+  const TURNSTILE_SCRIPT_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+  const TURNSTILE_ACTION = 'traffic-light-update';
+
+  function createSecurityClient(options = {}) {
+    const fetcher = options.fetchImpl || (global.fetch && global.fetch.bind(global));
+    const documentObject = options.documentObject || global.document;
+    const windowObject = options.windowObject || global.window || global;
+    const apiUrl = options.apiUrl || 'https://htl-api.vercel.app/api/upload';
+    const configUrl = options.configUrl || 'security-config.json';
+    const timeoutMs = options.timeoutMs || 120000;
+    let turnstileScriptPromise = null;
+
+    async function prepareRevision() {
+      if (typeof fetcher !== 'function') throw new Error('無法連線取得資料版本');
+      const response = await fetcher(apiUrl + '?revision=1', {method: 'GET', cache: 'no-store'});
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data || data.ok !== true ||
+          typeof data.baseRevision !== 'string' || !/^[0-9a-f]{40}$/i.test(data.baseRevision)) {
+        throw new Error('無法取得資料版本，請重新載入頁面後再試。');
+      }
+      return data.baseRevision;
+    }
+
+    async function readSiteKey() {
+      if (typeof fetcher !== 'function') throw new Error('更新驗證設定暫時無法讀取，請稍後再試。');
+      let response;
+      try {
+        response = await fetcher(configUrl, {method: 'GET', cache: 'no-store'});
+      } catch {
+        throw new Error('更新驗證設定暫時無法讀取，請稍後再試。');
+      }
+      if (response.status === 404) throw new Error('更新驗證尚未設定，請聯絡維護者');
+      if (!response.ok) throw new Error('更新驗證設定暫時無法讀取，請稍後再試。');
+      const config = await response.json().catch(() => null);
+      const siteKey = config && typeof config.turnstileSiteKey === 'string'
+        ? config.turnstileSiteKey.trim() : '';
+      if (!siteKey) throw new Error('更新驗證尚未設定，請聯絡維護者');
+      if (siteKey.length > 128 || !/^[A-Za-z0-9_-]+$/.test(siteKey)) {
+        throw new Error('更新驗證設定格式錯誤，請聯絡維護者');
+      }
+      return siteKey;
+    }
+
+    function loadTurnstileApi() {
+      if (windowObject.turnstile && typeof windowObject.turnstile.render === 'function') {
+        return Promise.resolve(windowObject.turnstile);
+      }
+      if (turnstileScriptPromise) return turnstileScriptPromise;
+      if (!documentObject || !documentObject.head) {
+        return Promise.reject(new Error('無法載入更新驗證，請稍後再試。'));
+      }
+      turnstileScriptPromise = new Promise((resolve, reject) => {
+        const script = documentObject.createElement('script');
+        script.src = TURNSTILE_SCRIPT_URL;
+        script.async = true;
+        script.defer = true;
+        script.onload = () => {
+          if (windowObject.turnstile && typeof windowObject.turnstile.render === 'function') {
+            resolve(windowObject.turnstile);
+          } else {
+            reject(new Error('無法載入更新驗證，請稍後再試。'));
+          }
+        };
+        script.onerror = () => reject(new Error('無法載入更新驗證，請稍後再試。'));
+        documentObject.head.appendChild(script);
+      }).catch(error => {
+        turnstileScriptPromise = null;
+        throw error;
+      });
+      return turnstileScriptPromise;
+    }
+
+    function requestTurnstileToken(siteKey) {
+      return new Promise((resolve, reject) => {
+        if (!documentObject || !documentObject.body) {
+          reject(new Error('無法顯示更新驗證，請稍後再試。'));
+          return;
+        }
+        const dialog = documentObject.createElement('dialog');
+        dialog.setAttribute('aria-label', '更新驗證');
+        Object.assign(dialog.style, {
+          border: '1px solid #d8dde5', borderRadius: '14px', padding: '20px',
+          width: 'min(420px, calc(100vw - 32px))', boxShadow: '0 12px 40px #17212b33'
+        });
+        const title = documentObject.createElement('h2');
+        title.textContent = '確認更新';
+        title.style.margin = '0 0 8px';
+        const description = documentObject.createElement('p');
+        description.textContent = '完成 Cloudflare 更新驗證後才會送出資料。';
+        const widget = documentObject.createElement('div');
+        const status = documentObject.createElement('p');
+        status.setAttribute('aria-live', 'polite');
+        const cancel = documentObject.createElement('button');
+        cancel.type = 'button';
+        cancel.textContent = '取消';
+        cancel.style.marginTop = '12px';
+        dialog.append(title, description, widget, status, cancel);
+
+        let settled = false;
+        let widgetId = null;
+        let turnstile = null;
+        let timer = null;
+        const cleanupWidget = () => {
+          if (widgetId === null || !turnstile) return;
+          try { turnstile.reset(widgetId); } catch {}
+          try { turnstile.remove(widgetId); } catch {}
+          widgetId = null;
+        };
+        const finish = (error, token) => {
+          if (settled) return;
+          settled = true;
+          if (timer) clearTimeout(timer);
+          cleanupWidget();
+          if (dialog.open && typeof dialog.close === 'function') dialog.close();
+          dialog.remove();
+          if (error) reject(error);
+          else resolve(token);
+        };
+        const cancelVerification = event => {
+          if (event && typeof event.preventDefault === 'function') event.preventDefault();
+          finish(Object.assign(new Error('已取消更新驗證，資料沒有被改動。'), {name: 'AbortError'}));
+        };
+        dialog.addEventListener('cancel', cancelVerification);
+        cancel.addEventListener('click', cancelVerification);
+        documentObject.body.appendChild(dialog);
+        try {
+          if (typeof dialog.showModal === 'function') dialog.showModal();
+          else dialog.setAttribute('open', '');
+        } catch {
+          dialog.setAttribute('open', '');
+        }
+        timer = setTimeout(() => finish(new Error('更新驗證逾時，請重新送出。')), timeoutMs);
+
+        loadTurnstileApi().then(api => {
+          turnstile = api;
+          const render = () => {
+            if (settled) return;
+            try {
+              widgetId = turnstile.render(widget, {
+                sitekey: siteKey,
+                action: TURNSTILE_ACTION,
+                callback: token => {
+                  if (typeof token !== 'string' || !token) {
+                    finish(new Error('更新驗證沒有回傳有效憑證，請重新送出。'));
+                  } else {
+                    finish(null, token);
+                  }
+                },
+                'error-callback': () => {
+                  status.textContent = '驗證遇到問題，請重新送出。';
+                  finish(new Error('更新驗證失敗，請重新送出。'));
+                  return true;
+                },
+                'expired-callback': () => finish(new Error('更新驗證已逾時，請重新送出。')),
+                'timeout-callback': () => finish(new Error('更新驗證逾時，請重新送出。'))
+              });
+              if (settled) cleanupWidget();
+            } catch {
+              finish(new Error('無法顯示更新驗證，請稍後再試。'));
+            }
+          };
+          if (typeof turnstile.ready === 'function') turnstile.ready(render);
+          else render();
+        }).catch(error => finish(error));
+      });
+    }
+
+    async function postProtected(payload, baseRevision) {
+      if (!/^[0-9a-f]{40}$/i.test(String(baseRevision || ''))) {
+        throw new Error('沒有可用的資料版本，請重新預覽後再送出。');
+      }
+      const siteKey = await readSiteKey();
+      const token = await requestTurnstileToken(siteKey);
+      const response = await fetcher(apiUrl, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({...payload, baseRevision, turnstileToken: token})
+      });
+      const data = await response.json().catch(() => ({}));
+      return {response, data};
+    }
+
+    return {prepareRevision, postProtected};
+  }
+
+  function describeWriteFailure(response, data) {
+    if (response.status === 429) {
+      const bodySeconds = data && data.retryAfter != null ? Number(data.retryAfter) : NaN;
+      const headerSeconds = Number(response.headers && response.headers.get && response.headers.get('Retry-After'));
+      const seconds = Number.isFinite(bodySeconds) && bodySeconds >= 0
+        ? Math.min(3600, Math.ceil(bodySeconds))
+        : Number.isFinite(headerSeconds) && headerSeconds >= 0
+          ? Math.min(3600, Math.ceil(headerSeconds)) : null;
+      return {status: 429, retryAfter: seconds, message: seconds === null
+        ? '更新太頻繁，請稍後再試。' : `更新太頻繁，請等待 ${seconds} 秒後再試。`};
+    }
+    if (response.status === 409) {
+      return {status: 409, message: '資料版本已變更，請重新載入頁面並重新預覽、確認後再送出。'};
+    }
+    if (!response.ok || !data || data.ok !== true) {
+      const message = data && typeof data.error === 'string' ? data.error.slice(0, 500) : '更新失敗';
+      return {status: response.status, message};
+    }
+    return null;
+  }
+
+  function showWriteFailure(response, data, element) {
+    const failure = describeWriteFailure(response, data);
+    if (failure && element) element.textContent = failure.message;
+    return failure;
+  }
+
+  async function confirmAndPostChapterUpdate({confirmFn, reportMonth, score, prepareRevision, postProtected, payload}) {
+    if (typeof confirmFn !== 'function' ||
+        !confirmFn(`找到「${String(reportMonth ?? '')}」分會報告（得分 ${String(score ?? '')}）。要更新網站上的七項分會指標嗎？`)) {
+      return {confirmed: false};
+    }
+    const baseRevision = await prepareRevision();
+    return Object.assign({confirmed: true}, await postProtected(payload, baseRevision));
+  }
+
   function mount(root, input, settings) {
     if (!root || typeof root.querySelector !== 'function') throw new TypeError('A dashboard root element is required');
     settings = settings || {};
@@ -28,6 +249,9 @@
     const $id = id => root.querySelector('#' + id);
     const $q = selector => root.querySelector(selector);
     const $qa = selector => root.querySelectorAll(selector);
+    const esc = value => String(value ?? '').replace(/[&<>"']/g, character => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[character]);
 
 
 
@@ -109,13 +333,13 @@ const CHAPTER = {
   if (CHAPTER.provisional) {
     const scope = $q('header .period');
     if (scope) scope.insertAdjacentHTML('afterend',
-      `<div class="note note-watch"><b>暫定換算版</b>　${CHAPTER.provisional}</div>`);
+      `<div class="note note-watch"><b>暫定換算版</b>　${esc(CHAPTER.provisional)}</div>`);
   }
   if (VIEW.toggle) {
     const scope = $q('header .period');
     if (scope) scope.insertAdjacentHTML('afterend', `<nav class="vtoggle" aria-label="切換版本">
-      <a href="./dashboard.html" class="${VIEW.est ? '' : 'on'}">LTnA 官方版 · ${VIEW.offPeriod}</a>
-      <a href="./dashboard.html?v=est" class="${VIEW.est ? 'on' : ''}">暫定換算版 · ${VIEW.estPeriod}</a></nav>`);
+      <a href="./dashboard.html" class="${VIEW.est ? '' : 'on'}">LTnA 官方版 · ${esc(VIEW.offPeriod)}</a>
+      <a href="./dashboard.html?v=est" class="${VIEW.est ? 'on' : ''}">暫定換算版 · ${esc(VIEW.estPeriod)}</a></nav>`);
   }
 })();
 
@@ -356,8 +580,8 @@ const arrow = d => d > 0 ? `▲ +${d}` : d < 0 ? `▼ ${d}` : '—';
 $id('chapterStats').innerHTML = `
   <div class="stat s-${chapLight}">
     <p class="stat-label">分會得分 · ${VIEW.est ? 'PALMS 推算' : 'BNI 官方'}</p>
-    <div class="stat-value">${CHAPTER.score}<small>分 · ${LIGHT[chapLight].name}</small></div>
-    <p class="stat-note">上月 <b>${CHAPTER.prevScore}</b> 分　${arrow(chapDiff)}</p>
+    <div class="stat-value">${esc(CHAPTER.score)}<small>分 · ${LIGHT[chapLight].name}</small></div>
+    <p class="stat-note">上月 <b>${esc(CHAPTER.prevScore)}</b> 分　${arrow(chapDiff)}</p>
     <p class="stat-src" id="chapterSrc"></p>
   </div>
   <div class="stat s-green">
@@ -367,7 +591,7 @@ $id('chapterStats').innerHTML = `
   </div>
   <div class="stat s-amber">
     <p class="stat-label">綠燈加黃燈</p>
-    <div class="stat-value">${gyPct}<small>% · 上月 ${CHAPTER.prevGyPct}%</small></div>
+    <div class="stat-value">${gyPct}<small>% · 上月 ${esc(CHAPTER.prevGyPct)}%</small></div>
     <p class="stat-note">紅燈與黑燈 <b>${needAmber}</b> 人</p>
   </div>`;
 
@@ -392,9 +616,9 @@ function renderChapterSrc(){
   if (!m) {
     txt = '分會報告來源未記錄';
   } else if (CHAPTER.chapterStale) {
-    txt = `這七項是 <b>${m}</b> 的分會報告${when ? `，${when} 取得` : ''}`;
+    txt = `這七項是 <b>${esc(m)}</b> 的分會報告${when ? `，${when} 取得` : ''}`;
   } else {
-    txt = `分會報告 <b>${m}</b>${when ? `，${when} 取得` : ''}`;
+    txt = `分會報告 <b>${esc(m)}</b>${when ? `，${when} 取得` : ''}`;
   }
   box.innerHTML = txt + ' <button id="refreshChapter" type="button">看看有沒有新的</button>';
   $id('refreshChapter').addEventListener('click', refreshChapter);
@@ -413,9 +637,7 @@ async function refreshChapter(){
 
     // 跟現在畫面上的比，一樣就不必寫入
     if (d.reportMonth === CHAPTER.chapterMonth && d.chapter.score === CHAPTER.score) {
-      box.innerHTML = `分會報告 <b>${d.reportMonth}</b> 還是最新的，沒有變。`
-        + ' <button id="refreshChapter" type="button">再查一次</button>';
-      $id('refreshChapter').addEventListener('click', refreshChapter);
+      addChapterAction(`分會報告 ${d.reportMonth} 還是最新的，沒有變。`, '再查一次', refreshChapter);
       return;
     }
 
@@ -428,19 +650,32 @@ async function refreshChapter(){
       chapterFetchedAt: new Date().toISOString(),
     });
     if (CH.est) chapter.est = CH.est;   // 只換官方七項，暫定版原樣留著
-    const up = await fetch(API, {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({chapterOnly: true, chapter, uploadedBy: ''}),
+    const chapterPayload = {chapterOnly: true, chapter, uploadedBy: ''};
+    const update = await confirmAndPostChapterUpdate({
+      confirmFn: typeof global.confirm === 'function' ? global.confirm.bind(global) : null,
+      reportMonth: d.reportMonth,
+      score: d.chapter.score,
+      prepareRevision: securityClient.prepareRevision,
+      postProtected: securityClient.postProtected,
+      payload: chapterPayload
     });
-    const ud = await up.json();
-    if (!ud.ok) throw new Error(ud.error || '寫入失敗');
-    box.innerHTML = `✅ 已換成 <b>${d.reportMonth}</b> 的分會報告（得分 ${d.chapter.score}）。`
-      + '重新整理這一頁就會看到新的數字。';
+    if (!update.confirmed) {
+      addChapterAction(`已找到 ${d.reportMonth} 的分會報告，尚未更新。`, '重新查詢', refreshChapter);
+      return;
+    }
+    const {response, data} = update;
+    const failure = showWriteFailure(response, data, box);
+    if (failure) {
+      if (failure.status === 409) await showRevisionConflict(box);
+      else {
+        const retry = addChapterAction(failure.message, '再試一次', refreshChapter);
+        if (failure.status === 429) waitForRetry(retry, failure.retryAfter, '再試一次');
+      }
+      return;
+    }
+    box.textContent = `✅ 已換成 ${d.reportMonth} 的分會報告（得分 ${d.chapter.score}）。重新整理這一頁就會看到新的數字。`;
   } catch (e) {
-    box.innerHTML = `查不到新的（${e.message}）。`
-      + ' <button id="refreshChapter" type="button">再試一次</button>';
-    const b2 = $id('refreshChapter');
-    if (b2) b2.addEventListener('click', refreshChapter);
+    addChapterAction(`查詢或更新失敗：${e.message}。`, '再試一次', refreshChapter);
   }
 }
 
@@ -488,8 +723,8 @@ function render(){
       ? `<span class="gap">已達綠燈</span>`
       : `<span class="gap">離綠燈 <b>${GREEN - m.total}</b> 分</span>`;
     const aria = `${m.shortName}，${L.name}，${m.total} 分，${m.total >= GREEN ? '已達綠燈' : `離綠燈 ${GREEN - m.total} 分`}`;
-    return `<button class="card ${L.cls}" data-name="${m.name}" aria-label="${aria}">
-      <div class="card-top"><span class="name">${m.shortName}</span><span class="rank num">#${m.no}</span></div>
+    return `<button class="card ${L.cls}" data-name="${esc(m.name)}" aria-label="${esc(aria)}">
+      <div class="card-top"><span class="name">${esc(m.shortName)}</span><span class="rank num">#${m.no}</span></div>
       <div class="score num">${m.total}<small>/100</small></div>
       <div class="card-bot"><span class="pill">${L.name}</span>${gap}</div>
     </button>`;
@@ -602,7 +837,7 @@ function openSheet(name){
     <div class="sheet-head">
       <div class="row">
         <div>
-          <h2 class="sheet-name" id="sheetName">${m.name}</h2>
+          <h2 class="sheet-name" id="sheetName">${esc(m.name)}</h2>
           <p class="sheet-sub">會員編號 ${m.no}　·　這段期間計入 ${m.weeks} 週　·　${
             m.A === 0 ? '沒缺席過' : `缺席 ${m.A} 次（出席率 ${m.attend}%）`}</p>
         </div>
@@ -649,9 +884,9 @@ const easyWin   = M.filter(m => m.light === 'red')
 function listBlock(title, sub, arr, why){
   const rows = arr.length ? arr.map(m => {
     const {tag, how} = why(m);
-    return `<button class="li ${LIGHT[m.light].cls}" data-name="${m.name}" aria-label="${m.shortName}，${m.total} 分，${tag}，${how.replace(/<[^>]+>/g,'')}">
+    return `<button class="li ${LIGHT[m.light].cls}" data-name="${esc(m.name)}" aria-label="${esc(`${m.shortName}，${m.total} 分，${tag}，${how.replace(/<[^>]+>/g,'')}`)}">
       <span class="li-score num">${m.total}</span>
-      <span class="li-name">${m.shortName}</span>
+      <span class="li-name">${esc(m.shortName)}</span>
       <span class="li-tag">${tag}</span>
       <span class="li-how">${how}</span>
     </button>`;
@@ -705,7 +940,7 @@ $id('rules').innerHTML =
    </div>
    <div class="rule-foot">
      <b>分會得分和個人得分是兩套，不要混在一起。</b>
-     上面那六項算的是「每一位會員」的分數。頁面最上方那個 <b>${CHAPTER.score} 分</b>
+     上面那六項算的是「每一位會員」的分數。頁面最上方那個 <b>${esc(CHAPTER.score)} 分</b>
      是 BNI 官方《分會紅綠燈計算方式》給整個分會的成績，看的是下面這七項，跟個人六項無關。
      <div class="mtable-wrap"><table class="mtable">
        <thead><tr><th>官方指標</th><th>15 分</th><th>10 分</th><th>5 分</th><th>0 分</th></tr></thead>
@@ -713,7 +948,7 @@ $id('rules').innerHTML =
          const cells = m.label.length === 3
            ? ['—', m.label[0], m.label[1], m.label[2]]   // 轉換率只有三階，最高 10 分
            : m.label;
-         return `<tr><td>${m.k}</td>${cells.map(c => `<td class="num" style="text-align:right">${c}</td>`).join('')}</tr>`;
+         return `<tr><td>${esc(m.k)}</td>${cells.map(c => `<td class="num" style="text-align:right">${esc(c)}</td>`).join('')}</tr>`;
        }).join('')}
        </tbody>
      </table></div>
@@ -743,9 +978,9 @@ $id('rules').innerHTML =
     const tag = full ? '滿分' : got === 0 ? '掛零' : `還能 +${up[1] - got}`;
     const idx = m.tiers.findIndex(t => t[1] === got);
     return `<tr>
-      <td>${m.k}<div style="font-size:12px;color:var(--text-3);margin-top:1px">${m.note}</div></td>
-      <td class="n">${m.v}${m.unit}</td>
-      <td>${m.label[idx] || '—'}</td>
+      <td>${esc(m.k)}<div style="font-size:12px;color:var(--text-3);margin-top:1px">${esc(m.note)}</div></td>
+      <td class="n">${esc(m.v)}${esc(m.unit)}</td>
+      <td>${esc(m.label[idx] || '—')}</td>
       <td class="n"><b>${got}</b> / ${max}</td>
       <td><span class="verdict ${cls}">${tag}</span></td>
     </tr>`;
@@ -798,7 +1033,7 @@ $id('rules').innerHTML =
     if (keys.length) {
       changeLine = '差異來自' + keys.map(k => {
         const c = prevPts[k];
-        return `${k.replace(/（.*/, '')}（${c.pv} → ${c.v}，${c.before} 分 → ${c.after} 分）`;
+        return `${esc(k.replace(/（.*/, ''))}（${esc(c.pv)} → ${esc(c.v)}，${esc(c.before)} 分 → ${esc(c.after)} 分）`;
       }).join('、') + '。';
     } else if (typeof PREVC.score === 'number' && PREVC.score === CHAPTER.score) {
       changeLine = '七項得分與上一期相同。';
@@ -825,7 +1060,7 @@ $id('rules').innerHTML =
       <div class="target" style="border-bottom:0;padding-top:4px">
         <span class="target-num" style="background:var(--green-line)">→</span>
         <div>
-          <p class="target-h">${cheapest.m.k.replace(/（.*/, '')}達 ${cheapest.th}${cheapest.unit === '%' ? '%' : ' '+cheapest.unit} 以上 → 總分 ${total + cheapest.gain} 分${total + cheapest.gain >= GREEN ? '（綠燈）' : ''}</p>
+          <p class="target-h">${esc(cheapest.m.k.replace(/（.*/, ''))}達 ${esc(cheapest.th)}${esc(cheapest.unit === '%' ? '%' : ' '+cheapest.unit)} 以上 → 總分 ${esc(total + cheapest.gain)} 分${total + cheapest.gain >= GREEN ? '（綠燈）' : ''}</p>
           <p class="target-b">${cheapest.need}。<br>
             距綠燈門檻 70 分還差 <b>${toGreen} 分</b>，可加分的項目共 ${gaps.length} 項，列於下方。</p>
         </div>
@@ -849,7 +1084,7 @@ $id('rules').innerHTML =
       <div class="target">
         <span class="target-num" style="background:var(--amber-line)">+${g.gain}</span>
         <div>
-          <p class="target-h">${g.m.k.replace(/（.*/, '')}：達 ${g.th}${g.unit === '%' ? '%' : ' '+g.unit} 可得 ${pts(g.m) + g.gain} 分</p>
+          <p class="target-h">${esc(g.m.k.replace(/（.*/, ''))}：達 ${esc(g.th)}${esc(g.unit === '%' ? '%' : ' '+g.unit)} 可得 ${esc(pts(g.m) + g.gain)} 分</p>
           <p class="target-b">${g.need}。${
             g.m.k.indexOf('保留率') === 0
               ? '<br>分會成立未滿 12 個月，尚無會員符合此項計算條件，本期為 0。'
@@ -933,6 +1168,59 @@ $id('uploadPanel').innerHTML = `
 /* ---------- 上傳流程 ---------- */
 const API = 'https://htl-api.vercel.app/api/upload';
 const CHAPTER_API = 'https://htl-api.vercel.app/api/chapter';
+const securityClient = createSecurityClient({
+  fetchImpl: global.fetch && global.fetch.bind(global),
+  documentObject: global.document,
+  windowObject: global.window || global,
+  apiUrl: API,
+  configUrl: 'security-config.json'
+});
+let previewBaseRevision = null;
+let leaveBaseRevision = null;
+function waitForRetry(button, seconds, label) {
+  if (!Number.isInteger(seconds) || seconds <= 0) {
+    button.disabled = false;
+    button.textContent = label;
+    return;
+  }
+  let remaining = Math.min(seconds, 3600);
+  button.disabled = true;
+  const tick = () => {
+    if (remaining <= 0) {
+      button.disabled = false;
+      button.textContent = label;
+      return;
+    }
+    button.textContent = `請等待 ${remaining} 秒`;
+    remaining--;
+    setTimeout(tick, 1000);
+  };
+  tick();
+}
+function addChapterAction(message, label, callback) {
+  const box = $id('chapterSrc');
+  box.textContent = String(message ?? '');
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.textContent = label;
+  button.addEventListener('click', callback);
+  box.append(document.createTextNode(' '), button);
+  return button;
+}
+async function showRevisionConflict(element) {
+  element.textContent = '資料版本已變更，正在取得最新版本…';
+  const latest = await securityClient.prepareRevision().catch(() => null);
+  element.textContent = latest
+    ? `資料版本已變更（${latest.slice(0, 8)}）。請重新載入頁面並重新預覽、確認後再送出。`
+    : '資料版本已變更，請重新載入頁面並重新預覽、確認後再送出。';
+  const reload = document.createElement('button');
+  reload.type = 'button';
+  reload.textContent = '重新載入並重新確認';
+  reload.addEventListener('click', () => {
+    if (global.location && typeof global.location.reload === 'function') global.location.reload();
+  });
+  element.append(document.createElement('br'), reload);
+}
 const CH_FIELDS = [
   {k:'score',      label:'分會得分',        hint:'本月'},
   {k:'prevScore',  label:'分會得分（上月）', hint:'上個月的分數'},
@@ -993,8 +1281,8 @@ function fillPalmsChapter(){
   chapterMeta = {reportMonth: 'PALMS 推算（' + pendingPeriod + '）', stale: false};
   $id('chapterNote').innerHTML =
     '這七項是<b>推算的</b>：分會大小、每週引薦數、每週來賓數、缺席率由 PALMS 算出；'
-    + '會員成長、保留率、轉換率 PALMS 沒有，<b>沿用官方 ' + (LATEST_OFFICIAL_CHAPTER?.period || CHAPTER.period) + '</b> 的數字；'
-    + '分會得分照官方計分表重算，「上月」填的是官方 ' + (LATEST_OFFICIAL_CHAPTER?.period || CHAPTER.period) + ' 的分數。都可以手動改。';
+    + '會員成長、保留率、轉換率 PALMS 沒有，<b>沿用官方 ' + esc(LATEST_OFFICIAL_CHAPTER?.period || CHAPTER.period) + '</b> 的數字；'
+    + '分會得分照官方計分表重算，「上月」填的是官方 ' + esc(LATEST_OFFICIAL_CHAPTER?.period || CHAPTER.period) + ' 的分數。都可以手動改。';
 }
 
 async function fetchChapter(period){
@@ -1012,11 +1300,11 @@ async function fetchChapter(period){
     }
     chapterMeta = {reportMonth: d.reportMonth, stale: !!d.stale, source: d.source};
     note.innerHTML = d.stale
-      ? '⚠️ <b>' + period + '</b> 的分會報告還沒發佈，以下填的是 <b>' + d.reportMonth
+      ? '⚠️ <b>' + esc(period) + '</b> 的分會報告還沒發佈，以下填的是 <b>' + esc(d.reportMonth)
         + '</b> 的數字。等對方發佈後再上傳一次就會更新，或直接改下面的欄位。'
-      : '✅ 已自動帶入 <b>' + d.reportMonth + '</b> 的分會報告數字，核對一下即可。';
+      : '✅ 已自動帶入 <b>' + esc(d.reportMonth) + '</b> 的分會報告數字，核對一下即可。';
   } catch (e) {
-    note.innerHTML = '取不到分會報告（' + e.message + '），下面七格請照《分會紅綠燈報告》自己填，欄位是上次的數值。';
+    note.textContent = '取不到分會報告（' + e.message + '），下面七格請照《分會紅綠燈報告》自己填，欄位是上次的數值。';
   }
 }
 
@@ -1072,6 +1360,7 @@ function parsePalms(rows){
     if (a === 'BNI') { bni = r; continue; }
     if (a === '來賓') continue;
     const name = (a + String(r[1] || '').trim()).trim();
+    if (name.length > 200) throw new Error('會員姓名超過 200 字元');
     const W = n(r,'P') + n(r,'A') + n(r,'Med') + n(r,'S');
     if (!name || W <= 0) continue;
     list.push([0, name, W, n(r,'P'), n(r,'A'), n(r,'L'), n(r,'Med'), n(r,'S'),
@@ -1118,18 +1407,39 @@ function chapterScoreOf(v){
 }
 
 function parseWorkbook(wb){
+  if (!wb || !Array.isArray(wb.SheetNames) || wb.SheetNames.length === 0 || wb.SheetNames.length > 50 ||
+      wb.SheetNames.some(name => typeof name !== 'string' || name.length > 128)) {
+    throw new Error('工作表數量或名稱不符合限制');
+  }
+  const rowsFromSheet = name => {
+    const sheet = wb.Sheets && wb.Sheets[name];
+    if (!sheet) throw new Error('找不到工作表');
+    if (sheet['!ref']) {
+      const range = XLSX.utils.decode_range(sheet['!ref']);
+      if (range.e.r - range.s.r + 1 > 5000 || range.e.c - range.s.c + 1 > 100) {
+        throw new Error('工作表超過 5000 列或 100 欄');
+      }
+    }
+    const rows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: null, raw: true});
+    if (!Array.isArray(rows) || rows.length > 5000 || rows.some(row => Array.isArray(row) && row.length > 100)) {
+      throw new Error('工作表超過 5000 列或 100 欄');
+    }
+    return rows;
+  };
   {
-    const first = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header: 1, defval: null, raw: true});
+    const first = rowsFromSheet(wb.SheetNames[0]);
     if (isPalms(first)) return parsePalms(first);
   }
   const name = wb.SheetNames.find(n => /traffic|紅綠燈/i.test(n)) || wb.SheetNames[0];
-  const rows = XLSX.utils.sheet_to_json(wb.Sheets[name], {header: 1, defval: null, raw: true});
+  const rows = rowsFromSheet(name);
   const out = [];
   for (const r of rows){
     if (!r) continue;
     const no = r[0], nm = r[1];
     if (typeof no !== 'number' || !nm || typeof nm !== 'string' || !nm.trim()) continue;
-    out.push([no, nm.trim(), num(r[3]), num(r[12]), num(r[13]), num(r[14]), num(r[15]), num(r[16]),
+    const memberName = nm.trim();
+    if (memberName.length > 200) throw new Error('會員姓名超過 200 字元');
+    out.push([no, memberName, num(r[3]), num(r[12]), num(r[13]), num(r[14]), num(r[15]), num(r[16]),
               num(r[17]), num(r[18]), num(r[19]), num(r[20]), num(r[21]), num(r[22])]);
   }
   return {sheet: name, members: out, range: findRangeInRows(rows), kind: 'official'};
@@ -1152,6 +1462,16 @@ function pad(y,m,d){ return y + '-' + String(+m).padStart(2,'0') + '-' + String(
 
 async function handleFile(file){
   const msg = $id('fileMsg');
+  parsedMembers = null;
+  previewBaseRevision = null;
+  const uploadButton = $id('doUpload');
+  uploadButton.disabled = true;
+  $id('previewBox').hidden = true;
+  $id('chapterBox').hidden = true;
+  if (!file || !Number.isFinite(file.size) || file.size > 5 * 1024 * 1024) {
+    msg.textContent = '檔案不能超過 5 MB。';
+    return;
+  }
   msg.textContent = '讀取中…';
   try {
     await loadSheetJS();
@@ -1181,13 +1501,19 @@ async function handleFile(file){
         + '<br>正式分數仍以 LTnA 區域領導會議發布的會員紅綠燈為準。</div>'
       : '<div class="note note-ok" style="margin:0 0 12px"><b>這是官方會員成績表</b>，會更新<b>官方版</b>。</div>';
     $id('previewBody').innerHTML = kindNote +
-      '<p class="target-b" style="margin:0 0 12px">從「' + parsed.sheet + '」' + (parsed.kind === 'palms' ? '' : '分頁') + '讀到 <b>'
+      '<p class="target-b" style="margin:0 0 12px">從「' + esc(parsed.sheet) + '」' + (parsed.kind === 'palms' ? '' : '分頁') + '讀到 <b>'
       + members.length + ' 位會員</b>，計分週數 <b>' + members[0][2] + ' 週</b>。<br>前三位是：'
-      + top + '。<br>計分月份：<b>' + pendingPeriod + '</b>　計分期間 <b>' + pendingRange + '</b>'
-      + '<br><span style="color:var(--text-2)">（月份取自' + periodSource + '）</span>'
-      + '<br>核對無誤後，於下方填寫七項數字並按更新。</p>';
+      + esc(top) + '。<br>計分月份：<b>' + esc(pendingPeriod) + '</b>　計分期間 <b>' + esc(pendingRange) + '</b>'
+      + '<br><span style="color:var(--text-2)">（月份取自' + esc(periodSource) + '）</span>'
+      + '<br>核對無誤後，於下方填寫七項數字並按更新。</p>'
+      + '<p id="previewRevision" class="sub">正在取得資料版本…</p>';
     if (settings.uploadOnly) {
       $id('previewBody').textContent = '共 ' + members.length + ' 位會員，' + members[0][2] + ' 週；統計期間 ' + pendingRange + '。';
+      const revisionNote = document.createElement('p');
+      revisionNote.id = 'previewRevision';
+      revisionNote.className = 'sub';
+      revisionNote.textContent = '正在取得資料版本…';
+      $id('previewBody').append(revisionNote);
     }
     $id('previewBox').hidden = false;
     $id('chapterBox').hidden = false;
@@ -1200,8 +1526,22 @@ async function handleFile(file){
       upBtn.textContent = '確認更新';
       fetchChapter(pendingPeriod);
     }
+    securityClient.prepareRevision().then(revision => {
+      if (parsedMembers !== members) return;
+      previewBaseRevision = revision;
+      const note = $id('previewRevision');
+      if (note) note.textContent = '預覽版本：' + revision.slice(0, 8);
+      upBtn.disabled = false;
+    }).catch(() => {
+      if (parsedMembers !== members) return;
+      previewBaseRevision = null;
+      const note = $id('previewRevision');
+      if (note) note.textContent = '無法取得資料版本，不能提交；請重新載入頁面後再預覽。';
+      upBtn.disabled = true;
+    });
   } catch (e) {
     parsedMembers = null; pendingKind = 'official';
+    previewBaseRevision = null;
     pendingPeriod = null; pendingRange = null; periodSource = '';
     msg.textContent = '讀不到：' + e.message;
     $id('previewBox').hidden = true;
@@ -1222,8 +1562,8 @@ function renderLeaveList(){
   box.innerHTML = ALL.slice()
     .sort((a, b) => a.no - b.no)
     .map(m => `<label class="leave-item${m.hasLeft ? ' on' : ''}">
-        <input type="checkbox" data-leave="${m.name.replace(/"/g, '&quot;')}"${m.hasLeft ? ' checked' : ''}>
-        <span class="lno">#${m.no}</span><span>${m.shortName}</span>
+        <input type="checkbox" data-leave="${esc(m.name)}"${m.hasLeft ? ' checked' : ''}>
+        <span class="lno">#${m.no}</span><span>${esc(m.shortName)}</span>
       </label>`).join('');
 }
 
@@ -1236,6 +1576,10 @@ $id('doLeave').addEventListener('click', async () => {
   const btn = $id('doLeave');
   const msg = $id('leaveMsg');
   msg.hidden = false;
+  if (!leaveBaseRevision) {
+    msg.textContent = '沒有可用的資料版本，不能儲存；請重新載入頁面並重新確認名單。';
+    return;
+  }
   const picked = [...$qa('#leaveList [data-leave]')]
     .filter(cb => cb.checked).map(cb => cb.dataset.leave);
   if (picked.length >= ALL.length) {
@@ -1245,14 +1589,25 @@ $id('doLeave').addEventListener('click', async () => {
   msg.textContent = '正在儲存，請不要關掉這一頁…';
   try {
     const chapter = Object.assign({}, CH, {period: CHAPTER.period});
-    const r = await fetch(API, {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({chapterOnly: true, chapter, leftMembers: picked, uploadedBy: ''}),
-    });
-    const d = await r.json();
-    if (!d.ok) throw new Error(d.error || '儲存失敗');
-    msg.innerHTML = picked.length
-      ? `✅ 已標記 <b>${picked.length}</b> 位退會，他們不會再出現在名單與統計裡。重新整理這一頁就會看到。`
+    const {response, data} = await securityClient.postProtected(
+      {chapterOnly: true, chapter, leftMembers: picked, uploadedBy: ''}, leaveBaseRevision);
+    const failure = showWriteFailure(response, data, msg);
+    if (failure) {
+      if (failure.status === 409) {
+        leaveBaseRevision = null;
+        btn.disabled = true;
+        btn.textContent = '請重新載入頁面';
+        await showRevisionConflict(msg);
+      } else if (failure.status === 429) {
+        waitForRetry(btn, failure.retryAfter, '儲存');
+      } else {
+        btn.disabled = false;
+        btn.textContent = '儲存';
+      }
+      return;
+    }
+    msg.textContent = picked.length
+      ? `✅ 已標記 ${picked.length} 位退會，他們不會再出現在名單與統計裡。重新整理這一頁就會看到。`
       : '✅ 已清空退會標記，所有人都會列入。重新整理這一頁就會看到。';
     btn.textContent = '已儲存';
   } catch (e) {
@@ -1262,9 +1617,25 @@ $id('doLeave').addEventListener('click', async () => {
 });
 
 renderLeaveList();
+if (!VIEW.est && !settings.compact && !settings.uploadOnly) {
+  $id('doLeave').disabled = true;
+  securityClient.prepareRevision().then(revision => {
+    leaveBaseRevision = revision;
+    $id('doLeave').disabled = false;
+  }).catch(() => {
+    leaveBaseRevision = null;
+    const msg = $id('leaveMsg');
+    msg.hidden = false;
+    msg.textContent = '無法取得資料版本，不能儲存；請重新載入頁面並重新確認名單。';
+  });
+}
 
 $id('pickFile').addEventListener('click', () => $id('fileInput').click());
-$id('fileInput').addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+$id('fileInput').addEventListener('change', e => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (file) handleFile(file);
+});
 const dz = $id('dropZone');
 ['dragover','dragenter'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.style.borderColor = 'var(--accent)'; }));
 ['dragleave','drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.style.borderColor = ''; }));
@@ -1275,6 +1646,11 @@ $id('doUpload').addEventListener('click', async () => {
   const msg = $id('uploadMsg');
   msg.hidden = false;
   if (!parsedMembers) { msg.textContent = '還沒選檔案。'; return; }
+  if (!previewBaseRevision) {
+    msg.textContent = '沒有可用的資料版本，不能提交；請重新載入頁面後再預覽。';
+    btn.disabled = true;
+    return;
+  }
   const chapter = {};
   for (const f of CH_FIELDS){
     const v = parseFloat($id('ch-' + f.k).value);
@@ -1311,22 +1687,43 @@ $id('doUpload').addEventListener('click', async () => {
   btn.disabled = true; btn.textContent = '更新中…';
   msg.textContent = '正在寫入，請不要關掉這一頁…';
   try {
-    const r = await fetch(API, {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(payload)
-    });
-    const d = await r.json();
-    if (!d.ok) throw new Error(d.error || '未知錯誤');
-    msg.innerHTML = (isP
+    const {response, data} = await securityClient.postProtected(payload, previewBaseRevision);
+    const failure = showWriteFailure(response, data, msg);
+    if (failure) {
+      if (failure.status === 409) {
+        previewBaseRevision = null;
+        btn.disabled = true;
+        btn.textContent = '請重新載入頁面';
+        await showRevisionConflict(msg);
+      } else if (failure.status === 429) {
+        waitForRetry(btn, failure.retryAfter, settings.uploadOnly
+          ? '確認更新最新週期統計' : (pendingKind === 'palms' ? '放進暫定換算版' : '確認更新'));
+      } else {
+        btn.disabled = false;
+        btn.textContent = settings.uploadOnly
+          ? '確認更新最新週期統計' : (pendingKind === 'palms' ? '放進暫定換算版' : '確認更新');
+      }
+      return;
+    }
+    const doneMessage = isP
       ? '✅ 已放進「暫定換算版」，' + parsedMembers.length + ' 位會員。官方版沒有被動到。'
-        + '<br>30 秒後重新整理，在網頁頂端按「暫定換算版」就看得到。'
-      : '✅ ' + d.message
-        + '<br>這一頁 30 秒後重新整理就會看到新的數字。');
-    if (settings.uploadOnly) msg.innerHTML = '已更新 ' + parsedMembers.length + ' 位會員的最新週期統計。網站發布約需 1 分鐘。<br><a href="./?v=est">返回最新週期統計</a>';
+        + '\n30 秒後重新整理，在網頁頂端按「暫定換算版」就看得到。'
+      : '✅ ' + String(data.message ?? '').slice(0, 500)
+        + '\n這一頁 30 秒後重新整理就會看到新的數字。';
+    msg.textContent = doneMessage;
+    if (settings.uploadOnly) {
+      msg.textContent = '已更新 ' + parsedMembers.length + ' 位會員的最新週期統計。網站發布約需 1 分鐘。';
+      const link = document.createElement('a');
+      link.href = './?v=est';
+      link.textContent = '返回最新週期統計';
+      msg.append(document.createElement('br'), link);
+    }
     btn.textContent = '已更新';
   } catch (e) {
     msg.textContent = '更新失敗：' + e.message + '　資料沒有被改動，可以再試一次。';
-    btn.disabled = false; btn.textContent = '確認更新';
+    btn.disabled = false;
+    btn.textContent = settings.uploadOnly
+      ? '確認更新最新週期統計' : (pendingKind === 'palms' ? '放進暫定換算版' : '確認更新');
   }
 });
 
@@ -1367,5 +1764,5 @@ if (settings.uploadOnly) {
 }
   }
 
-  return {mount};
+  return {mount, createSecurityClient, describeWriteFailure, showWriteFailure, confirmAndPostChapterUpdate};
 });
