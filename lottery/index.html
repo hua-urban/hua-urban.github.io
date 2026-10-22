@@ -898,20 +898,56 @@ $('#btnBackup').onclick=()=>{
   download(`bni-lottery-backup-${todayStr()}.json`, JSON.stringify(S,null,2), 'application/json');
   toast('備份已下載');
 };
+function isBoundedBackupValue(value, depth=0){
+  if(depth>8) return false;
+  if(typeof value==='string') return value.length<=2000;
+  if(value===null || typeof value==='boolean') return true;
+  if(typeof value==='number') return Number.isFinite(value);
+  if(Array.isArray(value)) return value.length<=5000 && value.every(v=>isBoundedBackupValue(v,depth+1));
+  if(typeof value==='object'){
+    const entries=Object.entries(value);
+    return entries.length<=5000 && entries.every(([k,v])=>k.length<=128 && isBoundedBackupValue(v,depth+1));
+  }
+  return false;
+}
+function validateBackupData(data){
+  const record = value => !!value && typeof value==='object' && !Array.isArray(value);
+  if(!record(data) || !Array.isArray(data.members) || !Array.isArray(data.history) ||
+     data.members.length>5000 || data.history.length>5000 || !isBoundedBackupValue(data)) return false;
+  if(data.today!==undefined && (!record(data.today) ||
+     data.today.rounds!==undefined && (!Array.isArray(data.today.rounds) || data.today.rounds.length>2))) return false;
+  if(data.settings!==undefined && !record(data.settings)) return false;
+  if(data.gifts!==undefined && !record(data.gifts)) return false;
+  if(data.sponsors!==undefined && !record(data.sponsors)) return false;
+  const shortString = (value,max) => typeof value==='string' && value.length<=max;
+  if(!data.members.every(member => record(member) && shortString(member.name,200) &&
+     (member.profession===undefined || member.profession===null || shortString(member.profession,500)) &&
+     (member.active===undefined || typeof member.active==='boolean'))) return false;
+  if(!data.history.every(item => record(item) && shortString(item.date,32) &&
+     Number.isInteger(item.round) && (item.round===1 || item.round===2) && shortString(item.winner,200) &&
+     (item.gift===undefined || item.gift===null || shortString(item.gift,500)) &&
+     (item.sponsor===undefined || item.sponsor===null || shortString(item.sponsor,200)))) return false;
+  return true;
+}
 $('#btnRestore').onclick=()=>$('#fileIn').click();
 $('#fileIn').onchange=e=>{
   const f=e.target.files[0]; if(!f) return;
+  const maxImportBytes=5*1024*1024;
+  if(!Number.isFinite(f.size) || f.size>maxImportBytes){ toast('備份檔不能超過 5 MB'); e.target.value=''; return; }
   const r=new FileReader();
   r.onload=async()=>{
     try{
-      const d=JSON.parse(r.result);
-      if(!d.members||!d.history) throw new Error('格式不對');
+      const raw=String(r.result||'');
+      if(raw.length>maxImportBytes) throw new Error('檔案過大');
+      const d=JSON.parse(raw);
+      if(!validateBackupData(d)) throw new Error('格式不對');
       if(await ask('還原備份？','現在的資料會被備份檔覆蓋。')){
         S=d; migrate(); save(); renderAll(); toast('已還原');
       }
     }catch(err){ toast('這個檔案讀不了'); }
-    e.target.value='';
+    finally{ e.target.value=''; }
   };
+  r.onerror=()=>{ toast('這個檔案讀不了'); e.target.value=''; };
   r.readAsText(f);
 };
 
