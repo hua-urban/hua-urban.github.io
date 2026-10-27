@@ -4,17 +4,10 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (global) {
   'use strict';
 
-  const TURNSTILE_SCRIPT_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-  const TURNSTILE_ACTION = 'traffic-light-update';
-
+  // Public updates retain revision conflict protection; no CAPTCHA or upload quota.
   function createSecurityClient(options = {}) {
     const fetcher = options.fetchImpl || (global.fetch && global.fetch.bind(global));
-    const documentObject = options.documentObject || global.document;
-    const windowObject = options.windowObject || global.window || global;
     const apiUrl = options.apiUrl || 'https://htl-api.vercel.app/api/upload';
-    const configUrl = options.configUrl || 'security-config.json';
-    const timeoutMs = options.timeoutMs || 120000;
-    let turnstileScriptPromise = null;
 
     async function prepareRevision() {
       if (typeof fetcher !== 'function') throw new Error('無法連線取得資料版本');
@@ -27,160 +20,14 @@
       return data.baseRevision;
     }
 
-    async function readSiteKey() {
-      if (typeof fetcher !== 'function') throw new Error('更新驗證設定暫時無法讀取，請稍後再試。');
-      let response;
-      try {
-        response = await fetcher(configUrl, {method: 'GET', cache: 'no-store'});
-      } catch {
-        throw new Error('更新驗證設定暫時無法讀取，請稍後再試。');
-      }
-      if (response.status === 404) throw new Error('更新驗證尚未設定，請聯絡維護者');
-      if (!response.ok) throw new Error('更新驗證設定暫時無法讀取，請稍後再試。');
-      const config = await response.json().catch(() => null);
-      const siteKey = config && typeof config.turnstileSiteKey === 'string'
-        ? config.turnstileSiteKey.trim() : '';
-      if (!siteKey) throw new Error('更新驗證尚未設定，請聯絡維護者');
-      if (siteKey.length > 128 || !/^[A-Za-z0-9_-]+$/.test(siteKey)) {
-        throw new Error('更新驗證設定格式錯誤，請聯絡維護者');
-      }
-      return siteKey;
-    }
-
-    function loadTurnstileApi() {
-      if (windowObject.turnstile && typeof windowObject.turnstile.render === 'function') {
-        return Promise.resolve(windowObject.turnstile);
-      }
-      if (turnstileScriptPromise) return turnstileScriptPromise;
-      if (!documentObject || !documentObject.head) {
-        return Promise.reject(new Error('無法載入更新驗證，請稍後再試。'));
-      }
-      turnstileScriptPromise = new Promise((resolve, reject) => {
-        const script = documentObject.createElement('script');
-        script.src = TURNSTILE_SCRIPT_URL;
-        script.async = true;
-        script.defer = true;
-        script.onload = () => {
-          if (windowObject.turnstile && typeof windowObject.turnstile.render === 'function') {
-            resolve(windowObject.turnstile);
-          } else {
-            reject(new Error('無法載入更新驗證，請稍後再試。'));
-          }
-        };
-        script.onerror = () => reject(new Error('無法載入更新驗證，請稍後再試。'));
-        documentObject.head.appendChild(script);
-      }).catch(error => {
-        turnstileScriptPromise = null;
-        throw error;
-      });
-      return turnstileScriptPromise;
-    }
-
-    function requestTurnstileToken(siteKey) {
-      return new Promise((resolve, reject) => {
-        if (!documentObject || !documentObject.body) {
-          reject(new Error('無法顯示更新驗證，請稍後再試。'));
-          return;
-        }
-        const dialog = documentObject.createElement('dialog');
-        dialog.setAttribute('aria-label', '更新驗證');
-        Object.assign(dialog.style, {
-          border: '1px solid #d8dde5', borderRadius: '14px', padding: '20px',
-          width: 'min(420px, calc(100vw - 32px))', boxShadow: '0 12px 40px #17212b33'
-        });
-        const title = documentObject.createElement('h2');
-        title.textContent = '確認更新';
-        title.style.margin = '0 0 8px';
-        const description = documentObject.createElement('p');
-        description.textContent = '完成 Cloudflare 更新驗證後才會送出資料。';
-        const widget = documentObject.createElement('div');
-        const status = documentObject.createElement('p');
-        status.setAttribute('aria-live', 'polite');
-        const cancel = documentObject.createElement('button');
-        cancel.type = 'button';
-        cancel.textContent = '取消';
-        cancel.style.marginTop = '12px';
-        dialog.append(title, description, widget, status, cancel);
-
-        let settled = false;
-        let widgetId = null;
-        let turnstile = null;
-        let timer = null;
-        const cleanupWidget = () => {
-          if (widgetId === null || !turnstile) return;
-          try { turnstile.reset(widgetId); } catch {}
-          try { turnstile.remove(widgetId); } catch {}
-          widgetId = null;
-        };
-        const finish = (error, token) => {
-          if (settled) return;
-          settled = true;
-          if (timer) clearTimeout(timer);
-          cleanupWidget();
-          if (dialog.open && typeof dialog.close === 'function') dialog.close();
-          dialog.remove();
-          if (error) reject(error);
-          else resolve(token);
-        };
-        const cancelVerification = event => {
-          if (event && typeof event.preventDefault === 'function') event.preventDefault();
-          finish(Object.assign(new Error('已取消更新驗證，資料沒有被改動。'), {name: 'AbortError'}));
-        };
-        dialog.addEventListener('cancel', cancelVerification);
-        cancel.addEventListener('click', cancelVerification);
-        documentObject.body.appendChild(dialog);
-        try {
-          if (typeof dialog.showModal === 'function') dialog.showModal();
-          else dialog.setAttribute('open', '');
-        } catch {
-          dialog.setAttribute('open', '');
-        }
-        timer = setTimeout(() => finish(new Error('更新驗證逾時，請重新送出。')), timeoutMs);
-
-        loadTurnstileApi().then(api => {
-          turnstile = api;
-          const render = () => {
-            if (settled) return;
-            try {
-              widgetId = turnstile.render(widget, {
-                sitekey: siteKey,
-                action: TURNSTILE_ACTION,
-                callback: token => {
-                  if (typeof token !== 'string' || !token) {
-                    finish(new Error('更新驗證沒有回傳有效憑證，請重新送出。'));
-                  } else {
-                    finish(null, token);
-                  }
-                },
-                'error-callback': () => {
-                  status.textContent = '驗證遇到問題，請重新送出。';
-                  finish(new Error('更新驗證失敗，請重新送出。'));
-                  return true;
-                },
-                'expired-callback': () => finish(new Error('更新驗證已逾時，請重新送出。')),
-                'timeout-callback': () => finish(new Error('更新驗證逾時，請重新送出。'))
-              });
-              if (settled) cleanupWidget();
-            } catch {
-              finish(new Error('無法顯示更新驗證，請稍後再試。'));
-            }
-          };
-          if (typeof turnstile.ready === 'function') turnstile.ready(render);
-          else render();
-        }).catch(error => finish(error));
-      });
-    }
-
     async function postProtected(payload, baseRevision) {
       if (!/^[0-9a-f]{40}$/i.test(String(baseRevision || ''))) {
         throw new Error('沒有可用的資料版本，請重新預覽後再送出。');
       }
-      const siteKey = await readSiteKey();
-      const token = await requestTurnstileToken(siteKey);
       const response = await fetcher(apiUrl, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({...payload, baseRevision, turnstileToken: token})
+        body: JSON.stringify({...payload, baseRevision})
       });
       const data = await response.json().catch(() => ({}));
       return {response, data};

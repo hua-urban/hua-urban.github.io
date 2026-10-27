@@ -1,7 +1,7 @@
-# Traffic light update verification
+# Traffic light public updates
 
-`security-config.json` contains the public Cloudflare Turnstile site key used by this page. Set `turnstileSiteKey` to the site key for the deployed traffic-light host before enabling public updates. The checked-in empty value intentionally blocks every write and displays「更新驗證尚未設定，請聯絡維護者」. Viewing scores and previewing a local workbook remain available.
+As requested by the site owner on 2026-10-27, public updates no longer require Cloudflare Turnstile and the upload API no longer enforces application-level write quotas. This applies to the shared PALMS, chapter update, and departure-list endpoint. There is no member authentication; anyone able to call the public endpoint can attempt an update.
 
-Only the public site key belongs in this file. Never add the Turnstile secret key, `HTL_UPLOAD_TOKEN`, or any other server credential to frontend files. The API must verify each fresh Turnstile token and enforce write quotas on the server; browser checks do not replace those controls.
+File size, format and weekly date checks remain. The API retains JSON/body bounds, data validation and optimistic revision checks. A `409` still requires reloading and reviewing the latest data; submitting an outdated preview must not overwrite a newer update.
 
-Each write preview captures the API's base revision before submission. A `409` means the underlying data changed: reload and review the latest data before submitting again. A `429` displays the server-provided retry delay.
+The legacy `security-config.json` public site key is no longer read. Existing provider credentials and quota infrastructure are not deleted by this change. Never add server credentials to frontend files. Hosting-provider limits may still apply independently.
