@@ -5,7 +5,7 @@
   function latestWednesday(now=new Date()){
     const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(now);
     const p=Object.fromEntries(parts.map(x=>[x.type,x.value]));const d=date(`${p.year}-${p.month}-${p.day}`);
-    let back=(d.getUTCDay()-3+7)%7+7; // 本次更新日為最近週三，資料基準固定為該更新日的上週三
+    let back=(d.getUTCDay()-3+7)%7; if(back===0)back=7; // 台北週四才切換到前一天週三；週三當天仍沿用前期
     d.setUTCDate(d.getUTCDate()-back);return iso(d);
   }
   function startFor(end){const d=date(end),day=d.getUTCDate();d.setUTCDate(1);d.setUTCMonth(d.getUTCMonth()-6);const max=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+1,0)).getUTCDate();d.setUTCDate(Math.min(day,max)+1);return iso(d);}
@@ -17,7 +17,7 @@
     const d=date(latestWednesday(now));d.setUTCDate(d.getUTCDate()+7);return iso(d);
   }
   function nextUpdate(now=new Date()){
-    const d=date(latestWednesday(now));d.setUTCDate(d.getUTCDate()+14);return iso(d);
+    const d=date(latestWednesday(now));d.setUTCDate(d.getUTCDate()+8);return iso(d);
   }
   function validateRange(range){
     if(!range?.start||!range?.end)throw new Error('PALMS 必須提供報告內的起訖日期，不能以檔名推算週報');
@@ -27,11 +27,11 @@
   }
   function validate(range,now=new Date()){
     const result=validateRange(range);
-    if(date(range.end).getUTCDay()!==3)throw new Error('週報截止日必須是週三；請重新匯出以上週三為截止日的六個月 PALMS');
-    if(range.end>latestWednesday(now))throw new Error('報告截止日不得晚於本次更新基準（上週三）：'+latestWednesday(now));
+    if(date(range.end).getUTCDay()!==3)throw new Error('週報截止日必須是週三；請重新匯出以當週三為截止日的六個月 PALMS');
+    if(range.end>latestWednesday(now))throw new Error('報告截止日不得晚於本次更新基準（已到週四更新日的週三）：'+latestWednesday(now));
     return result;
   }
-  // Read-only compatibility for reports stored before the Wednesday update rule.
+  // Read-only compatibility for reports stored before the Thursday update rule.
   // Uploads use the current cycle and independent submission evidence instead.
   function validateStored(range,now=new Date()){
     const result=validateRange(range);
@@ -74,7 +74,7 @@
     return (cutoff ? 'PALMS 報告查詢截止：'+cutoff+'。' : 'PALMS 報告未提供查詢截止日期。')
       + (submitted ? '最新已提交例會：'+submitted+'（依 BNI Connect PALMS 狀態確認）。' : '最新已提交例會日期尚待確認。')
       + (submitted && submitted>=expectedMeeting(now) ? '' : '待核對本次基準例會提交狀態。')
-      + (cutoff>latestWednesday(now) ? '目前保留先前匯入的報告；下次週三 '+nextUpdate(now)+' 處理 '+nextWednesday(now)+' 統計，須先確認副主席已提交。' : '');
+      + (cutoff>latestWednesday(now) ? '目前保留先前匯入的報告；下次週四 '+nextUpdate(now)+' 處理 '+nextWednesday(now)+' 統計，須先確認副主席已提交。' : '');
   }
   return {latestWednesday,nextWednesday,nextUpdate,expectedMeeting,startFor,rangeEnd,validate,uploadEvidence,preventRollback,validateUpload,validateStored,submissionEvidence,submissionStatus};
 });

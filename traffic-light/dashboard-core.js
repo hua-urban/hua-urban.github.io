@@ -966,7 +966,7 @@ $id('uploadPanel').innerHTML = `
       <br>・會員成績表 → 更新<b>官方版</b>；PALMS 摘要報告 → 只更新<b>暫定換算版</b>，官方版完全不會被動到。
       <br>・暫定版會出現在網頁頂端的切換鈕裡，並標明「正式分數以 LTnA 區域領導會議發布為準」。
       <br>・暫定版按週獨立保留；官方月報更新後仍可查看實際統計截止日。
-      <br>・下載 PALMS 時，期間請選<b>以上週三為截止日的滾動六個月</b>；每週三更新，平均值仍以各會員實際計入週數計算。
+      <br>・下載 PALMS 時，期間請選<b>以當週三為截止日的滾動六個月</b>；每週四更新，平均值仍以各會員實際計入週數計算。
     </div>
   </div>
 
@@ -1092,7 +1092,7 @@ let periodSource = '';
 let chapterMeta = null;
 let pendingKind = 'official';   // 'official'＝會員成績表，'palms'＝PALMS 摘要報告（換算成暫定版）
 let palmsChapter = null;
-const PROVISIONAL_TEXT = p => `每週三更新，採上週三截止的滾動六個月 PALMS 報告（${p}），沿用現有計分規則；正式分數以 LTnA 公布為準。`;
+const PROVISIONAL_TEXT = p => `每週四更新，採當週三截止的滾動六個月 PALMS 報告（${p}），沿用現有計分規則；正式分數以 LTnA 公布為準。`;
 
 // 從成績表檔名抓計分月份，例如「…(2026-08).xlsx」「…2026年8月…」；抓不到就回上一個月
 function periodFromFilename(name){
