@@ -343,22 +343,13 @@ exportButton.addEventListener('click', async () => {
 /* 週數最多的人＝待滿整個計分區間；比他少代表這半年才入會 */
 const FULL_WEEKS = Math.max(...M.map(m => m.weeks));
 
-/* 計分期間寫的是 6 個月，但官方只從成會後開始算週數（華都更 3/31 成會，官方從 5/6 第一次例會起算）。
-   用期間最後一個週三往回推「週數 − 1」週，就是實際第一次計入的例會；比期間起日晚才另外註明 */
+/* PALMS 只提供累計次數；不能假設每週連續計入，再倒推首次例會日期。 */
 (() => {
   const el = $q('.period-note');
-  const r = CH.range || rangeFromPeriod(CH.period) || '';
-  const mm = /(\d{4}-\d{2}-\d{2})\s*[–-]\s*(\d{4}-\d{2}-\d{2})/.exec(r);
-  if (!el || !mm || !isFinite(FULL_WEEKS)) return;
-  const MEET_DAY = 3;                                   // 例會在週三
-  const end = new Date(mm[2] + 'T00:00:00');
-  end.setDate(end.getDate() - ((end.getDay() - MEET_DAY + 7) % 7));
-  const first = new Date(end); first.setDate(end.getDate() - (FULL_WEEKS - 1) * 7);
-  const fmt = d => `${d.getMonth() + 1}/${d.getDate()}`;
-  el.textContent = first > new Date(mm[1] + 'T00:00:00')
-    ? `實際從 ${fmt(first)} 第一次例會起算，共 ${FULL_WEEKS} 次例會（分會成會後才開始計分）`
-    : `共 ${FULL_WEEKS} 次例會，往前算 6 個月的累計`;
+  if (!el || !Number.isFinite(FULL_WEEKS)) return;
+  el.textContent = `依 PALMS 報告實際計入次數計算，會員最多 ${FULL_WEEKS} 次例會；各會員依自己的計入週數換算`;
 })();
+
 M.forEach(m => {
   m.isNew = m.weeks < FULL_WEEKS;
   m.zeroCount = Object.values(m.sc).filter(v => v === 0).length;
