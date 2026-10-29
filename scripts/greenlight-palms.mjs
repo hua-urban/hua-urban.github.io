@@ -12,7 +12,7 @@ export function selectFullCyclePalms(source) {
   }
   const dates = String(full.chapter.range || '').match(/\d{4}-\d{2}-\d{2}/g) || [];
   if (dates.length !== 2) throw new Error('Full-cycle PALMS must include its report date range.');
-  const validated = period.validate({ start: dates[0], end: dates[1] });
+  const validated = period.validateStored({ start: dates[0], end: dates[1] });
   if (full.chapter.asOf !== validated.asOf) {
     throw new Error('Full-cycle PALMS asOf does not match the report end date.');
   }

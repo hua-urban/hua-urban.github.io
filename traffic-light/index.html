@@ -197,7 +197,7 @@
     <section id="weeklyView" aria-labelledby="weeklyHeading" hidden>
       <div class="weekly-panel">
         <h2 id="weeklyHeading">最新週期統計</h2>
-        <p>依 PALMS 六個月報告換算，每週四更新；正式分數以 LTNA 公布為準。</p>
+        <p>依 PALMS 六個月報告換算，每週三更新；正式分數以 LTNA 公布為準。</p>
         <p><a href="./upload.html">上傳最新 PALMS 報告</a></p>
         <p id="weeklyActual" role="status">正在確認現有 PALMS 統計期間…</p>
         <p id="weeklyCutoff" class="action-note">本週預期資料截止日：計算中</p>
@@ -212,10 +212,10 @@
     </footer>
   </main>
 
-  <script src="./weekly-period.js?v=20261029-submission"></script>
+  <script src="./weekly-period.js?v=20261029-prior-wednesday"></script>
   <script src="export.js?v=20261005"></script>
-  <script src="dashboard-template.js?v=20261013-flat"></script>
-  <script src="dashboard-core.js?v=20261029-submission"></script>
+  <script src="dashboard-template.js?v=20261029-prior-wednesday"></script>
+  <script src="dashboard-core.js?v=20261029-prior-wednesday"></script>
   <script>
     (function () {
       'use strict';
@@ -248,7 +248,7 @@
         var cutoff = document.getElementById('weeklyCutoff');
         if (window.WeeklyPeriod && typeof window.WeeklyPeriod.latestWednesday === 'function') {
           var expectedEnd = window.WeeklyPeriod.latestWednesday(new Date()).split('-');
-          cutoff.textContent = '依週四更新節奏，本週預期資料截止日：' + expectedEnd[0] + ' 年 ' + Number(expectedEnd[1]) + ' 月 ' + Number(expectedEnd[2]) + ' 日；實際期間以 PALMS 報告日期為準。';
+          cutoff.textContent = '依週三更新節奏，本週預期資料截止日：' + expectedEnd[0] + ' 年 ' + Number(expectedEnd[1]) + ' 月 ' + Number(expectedEnd[2]) + ' 日；下次更新：' + WeeklyPeriod.nextUpdate() + '，預定截止：' + WeeklyPeriod.nextWednesday() + '。須確認副主席已提交；實際期間以 PALMS 報告日期為準。';
         } else {
           cutoff.textContent = '本週預期截止日無法計算；實際期間以 PALMS 報告日期為準。';
         }
@@ -264,7 +264,7 @@
           var data = await response.json();
           var est = data.chapter && data.chapter.est;
           if (!est || !Array.isArray(est.members) || !est.members.length) {
-            status.textContent = '尚無 PALMS 報告，請上傳截至週三的六個月資料。';
+            status.textContent = '尚無 PALMS 報告，請上傳以上週三為截止日的六個月資料。';
             return;
           }
           var monthlyResponse = await fetch('monthly.json', {cache:'no-store'});

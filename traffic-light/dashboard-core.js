@@ -966,7 +966,7 @@ $id('uploadPanel').innerHTML = `
       <br>・會員成績表 → 更新<b>官方版</b>；PALMS 摘要報告 → 只更新<b>暫定換算版</b>，官方版完全不會被動到。
       <br>・暫定版會出現在網頁頂端的切換鈕裡，並標明「正式分數以 LTnA 區域領導會議發布為準」。
       <br>・暫定版按週獨立保留；官方月報更新後仍可查看實際統計截止日。
-      <br>・下載 PALMS 時，期間請選<b>截至最近週三的滾動六個月</b>；每週四更新，平均值仍以各會員實際計入週數計算。
+      <br>・下載 PALMS 時，期間請選<b>以上週三為截止日的滾動六個月</b>；每週三更新，平均值仍以各會員實際計入週數計算。
     </div>
   </div>
 
@@ -990,6 +990,15 @@ $id('uploadPanel').innerHTML = `
     <h3>分會那七項</h3>
     <p class="sub" id="chapterNote">這七項不在會員成績表內，系統會自動去《分會紅綠燈報告》取得。取不到才需要自己填。</p>
     <div class="fgrid" id="chapterForm"></div>
+    <fieldset id="submissionFields" hidden>
+      <legend>PALMS 例會完成狀態</legend>
+      <p class="sub">請另開 BNI Connect PALMS 管理核對；只有副主席已提交、狀態顯示「完成」，且出席報告含該週時，才能修改此紀錄。日期與查核來源會隨本次報告一起儲存。</p>
+      <label for="submittedMeeting">已向 BNI Connect 核對的最新已提交例會日期</label>
+      <input type="date" id="submittedMeeting">
+      <label for="submissionSource">查核來源（系統頁面、查閱日期與完成狀態）</label>
+      <input type="text" id="submissionSource" maxlength="1000" style="width:100%">
+      <label><input type="checkbox" id="submissionConfirmed">我已核對 BNI Connect 顯示該週「完成」，且出席報告含該週</label>
+    </fieldset>
     <div class="drop-row" style="margin-top:18px; justify-content:flex-start">
       <input class="pw" id="uploaderName" placeholder="你的名字（選填）" aria-label="上傳者姓名" style="width:190px">
       <button class="btn" id="doUpload">確認更新</button>
@@ -1083,7 +1092,7 @@ let periodSource = '';
 let chapterMeta = null;
 let pendingKind = 'official';   // 'official'＝會員成績表，'palms'＝PALMS 摘要報告（換算成暫定版）
 let palmsChapter = null;
-const PROVISIONAL_TEXT = p => `每週四更新，採截至週三的滾動六個月 PALMS 報告（${p}），沿用現有計分規則；正式分數以 LTnA 公布為準。`;
+const PROVISIONAL_TEXT = p => `每週三更新，採上週三截止的滾動六個月 PALMS 報告（${p}），沿用現有計分規則；正式分數以 LTnA 公布為準。`;
 
 // 從成績表檔名抓計分月份，例如「…(2026-08).xlsx」「…2026年8月…」；抓不到就回上一個月
 function periodFromFilename(name){
@@ -1322,7 +1331,10 @@ async function handleFile(file){
     const buf = await file.arrayBuffer();
     const parsed = parseWorkbook(XLSX.read(buf, {type: 'array'}));
     if (settings.uploadOnly && parsed.kind !== 'palms') throw new Error('請選擇 BNI Connect 下載的 PALMS 概要報告。');
-    if (parsed.kind === 'palms') WeeklyPeriod.validate(parsed.range);
+    if (parsed.kind === 'palms') {
+      WeeklyPeriod.validate(parsed.range);
+      WeeklyPeriod.preventRollback(parsed.range, CH.est?.chapter || CH);
+    }
     const members = parsed.members;
     if (members.length < 10) throw new Error('只讀到 ' + members.length + ' 位會員，這可能不是會員成績表');
     parsedMembers = members;
@@ -1352,7 +1364,7 @@ async function handleFile(file){
       + '<br>核對無誤後，於下方填寫七項數字並按更新。</p>'
       + '<p id="previewRevision" class="sub">正在取得資料版本…</p>';
     if (settings.uploadOnly) {
-      $id('previewBody').textContent = '共 ' + members.length + ' 位會員，' + members[0][2] + ' 週；報告查詢期間 ' + pendingRange + '。查詢截止日不代表該日例會已提交；最新已提交例會日期沿用已確認的 PALMS 狀態紀錄。';
+      $id('previewBody').textContent = '共 ' + members.length + ' 位會員，' + members[0][2] + ' 週；報告查詢期間 ' + pendingRange + '。查詢截止日不代表該日例會已提交；最新已提交例會日期預設沿用已確認紀錄；如有新實證，請在下方填寫日期、查核來源並勾選確認。';
       const revisionNote = document.createElement('p');
       revisionNote.id = 'previewRevision';
       revisionNote.className = 'sub';
@@ -1361,6 +1373,7 @@ async function handleFile(file){
     }
     $id('previewBox').hidden = false;
     $id('chapterBox').hidden = false;
+    $id('submissionFields').hidden = parsed.kind !== 'palms';
     $id('chapterBox').scrollIntoView({behavior: 'smooth', block: 'start'});
     const upBtn = $id('doUpload');
     if (parsed.kind === 'palms') {
@@ -1391,6 +1404,17 @@ async function handleFile(file){
     $id('previewBox').hidden = true;
     $id('chapterBox').hidden = true;
   }
+}
+
+const initialSubmission = WeeklyPeriod.submissionEvidence(CH.est?.chapter || CH);
+$id('submittedMeeting').value = initialSubmission.lastSubmittedMeeting || '';
+$id('submittedMeeting').max = WeeklyPeriod.latestWednesday();
+$id('submissionSource').value = initialSubmission.lastSubmittedMeetingSource || '';
+function selectedSubmissionEvidence(){
+  return WeeklyPeriod.uploadEvidence(CH.est?.chapter || CH, {
+    lastSubmittedMeeting:$id('submittedMeeting').value,
+    lastSubmittedMeetingSource:$id('submissionSource').value.trim()
+  }, $id('submissionConfirmed').checked);
 }
 
 /* ---------- 標記退會 ---------- */
@@ -1513,11 +1537,17 @@ $id('doUpload').addEventListener('click', async () => {
   let payload;
   if (isP) {
     const dates = pendingRange.match(/\d{4}-\d{2}-\d{2}/g);
+    let verifiedSubmission;
+    try {
+      verifiedSubmission = selectedSubmissionEvidence();
+      WeeklyPeriod.validateUpload({start:dates[0],end:dates[1]}, verifiedSubmission, new Date(), CH.est?.chapter || CH);
+    }
+    catch (error) { msg.textContent = error.message; return; }
     chapter.asOf = dates[1];
     chapter.frequency = 'weekly';
-    // Summary uploads cannot establish submission status. Retain separately
-    // verified attendance-report evidence until that source is checked again.
-    Object.assign(chapter, WeeklyPeriod.submissionEvidence(CH.est?.chapter));
+    // Store separately verified evidence atomically with the report. The file
+    // range never populates the submission date or verification controls.
+    Object.assign(chapter, verifiedSubmission);
     chapter.officialBaseline = LATEST_OFFICIAL_CHAPTER?.period || CHAPTER.period;
     chapter.provisional = PROVISIONAL_TEXT(pendingRange ? pendingRange.replace(' – ', ' 至 ') : chapter.period);
     // 官方那七項原封不動，暫定版整包掛在 est 底下
