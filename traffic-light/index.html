@@ -212,10 +212,10 @@
     </footer>
   </main>
 
-  <script src="./weekly-period.js?v=20261013"></script>
+  <script src="./weekly-period.js?v=20261029-submission"></script>
   <script src="export.js?v=20261005"></script>
   <script src="dashboard-template.js?v=20261013-flat"></script>
-  <script src="dashboard-core.js?v=20261029-actual-weeks"></script>
+  <script src="dashboard-core.js?v=20261029-submission"></script>
   <script>
     (function () {
       'use strict';
@@ -271,14 +271,12 @@
           if (!monthlyResponse.ok) throw new Error('LTNA HTTP ' + monthlyResponse.status);
           var monthlyData = await monthlyResponse.json();
           var latest = (monthlyData.months || []).slice().sort(function(a,b){return b.month.localeCompare(a.month);})[0] || null;
-          var end = WeeklyPeriod.rangeEnd(est.chapter.range);
-          var current = end === WeeklyPeriod.latestWednesday() && est.chapter.frequency === 'weekly';
           TrafficDashboard.mount(root, {
             members: est.members, chapter: est.chapter, updatedAt: est.updatedAt,
             prev: {updatedAt:data.updatedAt,chapter:data.chapter,members:data.members},
             leftMembers:data.leftMembers || []
           }, {view:{est:true,toggle:false}, latestOfficialChapter:latest, compact:true});
-          status.textContent = end ? '現有報告截止：'+end+'。'+(current?'已取得本週統計。':'待補最新六個月 PALMS 週報；以下為既有資料。') : 'PALMS 報告未提供統計日期。';
+          status.textContent = WeeklyPeriod.submissionStatus(est.chapter);
         } catch (error) {
           root.replaceChildren();
           status.textContent = '無法載入最新週期統計，請重新整理。';

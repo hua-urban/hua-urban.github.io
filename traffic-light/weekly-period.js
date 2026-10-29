@@ -18,5 +18,21 @@
     const start=startFor(range.end);if(range.start!==start)throw new Error(`六個月週報期間應為 ${start} 至 ${range.end}，請依此日期重新匯出`);
     return {asOf:range.end,start};
   }
-  return {latestWednesday,startFor,rangeEnd,validate};
+  // A summary report's range/asOf only describes its query cutoff. Submission
+  // evidence comes from the separate PALMS attendance report, never week counts.
+  function submissionEvidence(chapter={}){
+    try {
+      const submitted=date(chapter.lastSubmittedMeeting);
+      if(submitted.getUTCDay()!==3 || typeof chapter.lastSubmittedMeetingSource!=='string' || !chapter.lastSubmittedMeetingSource.trim())return {};
+      return {lastSubmittedMeeting:iso(submitted),lastSubmittedMeetingSource:chapter.lastSubmittedMeetingSource.trim()};
+    } catch (_) {return {};}
+  }
+  function submissionStatus(chapter={},now=new Date()){
+    const cutoff=rangeEnd(chapter.range);
+    const submitted=submissionEvidence(chapter).lastSubmittedMeeting;
+    return (cutoff ? 'PALMS 報告查詢截止：'+cutoff+'。' : 'PALMS 報告未提供查詢截止日期。')
+      + (submitted ? '最新已提交例會：'+submitted+'（依 BNI Connect PALMS 狀態確認）。' : '最新已提交例會日期尚待確認。')
+      + (submitted===latestWednesday(now) ? '' : '待更新最新例會提交狀態。');
+  }
+  return {latestWednesday,startFor,rangeEnd,validate,submissionEvidence,submissionStatus};
 });

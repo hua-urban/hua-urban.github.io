@@ -348,6 +348,12 @@ const FULL_WEEKS = Math.max(...M.map(m => m.weeks));
   const el = $q('.period-note');
   if (!el || !Number.isFinite(FULL_WEEKS)) return;
   el.textContent = `依 PALMS 報告實際計入次數計算，會員最多 ${FULL_WEEKS} 次例會；各會員依自己的計入週數換算`;
+  if (VIEW.est && !settings.compact) {
+    const status = document.createElement('p');
+    status.className = 'period';
+    status.textContent = WeeklyPeriod.submissionStatus(CH);
+    el.closest('.period').after(status);
+  }
 })();
 
 M.forEach(m => {
@@ -1346,7 +1352,7 @@ async function handleFile(file){
       + '<br>核對無誤後，於下方填寫七項數字並按更新。</p>'
       + '<p id="previewRevision" class="sub">正在取得資料版本…</p>';
     if (settings.uploadOnly) {
-      $id('previewBody').textContent = '共 ' + members.length + ' 位會員，' + members[0][2] + ' 週；統計期間 ' + pendingRange + '。';
+      $id('previewBody').textContent = '共 ' + members.length + ' 位會員，' + members[0][2] + ' 週；報告查詢期間 ' + pendingRange + '。查詢截止日不代表該日例會已提交；最新已提交例會日期沿用已確認的 PALMS 狀態紀錄。';
       const revisionNote = document.createElement('p');
       revisionNote.id = 'previewRevision';
       revisionNote.className = 'sub';
@@ -1509,6 +1515,9 @@ $id('doUpload').addEventListener('click', async () => {
     const dates = pendingRange.match(/\d{4}-\d{2}-\d{2}/g);
     chapter.asOf = dates[1];
     chapter.frequency = 'weekly';
+    // Summary uploads cannot establish submission status. Retain separately
+    // verified attendance-report evidence until that source is checked again.
+    Object.assign(chapter, WeeklyPeriod.submissionEvidence(CH.est?.chapter));
     chapter.officialBaseline = LATEST_OFFICIAL_CHAPTER?.period || CHAPTER.period;
     chapter.provisional = PROVISIONAL_TEXT(pendingRange ? pendingRange.replace(' – ', ' 至 ') : chapter.period);
     // 官方那七項原封不動，暫定版整包掛在 est 底下
