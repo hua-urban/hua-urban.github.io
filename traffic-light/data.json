@@ -1,5 +1,5 @@
 {
- "updatedAt": "2026-10-28T03:29:52.460Z",
+ "updatedAt": "2026-10-29T03:21:45.280Z",
  "uploadedBy": "PALMS 換算版",
  "chapter": {
   "size": 57,
@@ -17,7 +17,7 @@
   "chapterStale": false,
   "chapterFetchedAt": "2026-09-07T03:18:33.016Z",
   "est": {
-   "updatedAt": "2026-10-28T03:29:51.920Z",
+   "updatedAt": "2026-10-29T03:21:44.710Z",
    "uploadedBy": "",
    "chapter": {
     "score": 65,
@@ -30,14 +30,14 @@
     "conv": 22.86,
     "absent": 2.08,
     "period": "2026 年 10 月",
-    "range": "2026-04-22 – 2026-10-21",
+    "range": "2026-04-29 – 2026-10-28",
     "chapterMonth": "PALMS 推算（2026 年 10 月）",
     "chapterStale": false,
-    "chapterFetchedAt": "2026-10-28T03:29:51.920Z",
-    "asOf": "2026-10-21",
+    "chapterFetchedAt": "2026-10-29T03:21:44.710Z",
+    "asOf": "2026-10-28",
     "frequency": "weekly",
     "officialBaseline": "2026 年 9 月",
-    "provisional": "每週四更新，採截至週三的滾動六個月 PALMS 報告（2026-04-22 至 2026-10-21），沿用現有計分規則；正式分數以 LTnA 公布為準。"
+    "provisional": "每週四更新，採截至週三的滾動六個月 PALMS 報告（2026-04-29 至 2026-10-28），沿用現有計分規則；正式分數以 LTnA 公布為準。"
    },
    "members": [
     [
