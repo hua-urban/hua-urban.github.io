@@ -1795,8 +1795,8 @@ section[id]{scroll-margin-top:68px}
         <svg class="srch-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="rSearch" placeholder="搜尋姓名或專業..." oninput="filterR()">
       </div>
-      <div class="roster-ct">顯示 <span id="rv">55</span> / <span id="rosterTotal">55</span> 位夥伴</div>
-      <p id="rosterStatus" class="roster-status" role="status" aria-live="polite">中央名冊：尚未確認</p>
+      <div class="roster-ct">顯示 <span id="rv">55</span> / 共 <span id="rosterTotal">55</span> 位會員</div>
+      <p id="rosterStatus" class="roster-status" role="status" aria-live="polite">正在確認會員名單…</p>
     </div>
     <div class="tbl-wrap">
       <table id="rTbl">
@@ -2799,13 +2799,8 @@ window.renderRosterRoles();
 (function(){
   var status=document.getElementById('rosterStatus');
   var tbody=document.querySelector('#rTbl tbody');
-  function showUnconfirmed(result){
-    var message=result&&result.error&&result.error.message;
-    if(result&&result.status==='unversioned'){
-      status.textContent='尚未接入中央名冊；目前保留頁面名單備援，資料未確認最新。';
-    }else{
-      status.textContent=(message||'無法確認中央名冊最新版。')+' 目前保留頁面名單備援，資料未確認最新。';
-    }
+  function showUnconfirmed(){
+    status.textContent='目前無法確認會員名單是否最新，暫時顯示頁面備援名單。名單確認日期：未確認。';
   }
   function cell(className,text){
     var td=document.createElement('td');
@@ -2836,9 +2831,9 @@ window.renderRosterRoles();
     document.getElementById('rosterTotal').textContent=String(members.length);
     window.renderRosterRoles();
     filterR();
-    status.textContent='中央名冊版本：'+result.snapshot.rosterVersion+'；生效日期：'+result.snapshot.effectiveAsOf;
+    status.textContent='會員名單已同步｜共 '+members.length+' 位會員；名單確認日期：'+result.snapshot.effectiveAsOf;
   }).catch(function(){
-    showUnconfirmed({error:{message:'無法確認中央名冊最新版。'}});
+    showUnconfirmed();
   });
 })();
 </script>

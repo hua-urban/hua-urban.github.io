@@ -312,7 +312,7 @@ const exportButton = $id('exportWorkbook');
 const exportStatus = $id('exportStatus');
 const exportVersion = VIEW.est ? 'PALMS 暫定換算版' : 'LTnA 官方版';
 $id('exportHint').textContent =
-  `${CHAPTER.period || '月份未標'} · ${exportVersion} · 全部 ${M.length} 位現任會員`;
+  `${CHAPTER.period || '月份未標'} · ${exportVersion} · 共 ${M.length} 位會員`;
 exportButton.disabled = !M.length;
 exportButton.addEventListener('click', async () => {
   exportButton.disabled = true;

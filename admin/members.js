@@ -43,7 +43,7 @@ async function loadAdminEntry() {
     if (!target) throw new Error("管理入口尚未設定");
 
     statusNode.textContent = "入口已設定";
-    detailNode.textContent = "開啟 Google 管理服務；可用權限依 GAS 正式授權設定為準。";
+    detailNode.textContent = "開啟 Google 登入管理；可用功能依登入帳號權限設定而定。";
     const link = element("a", "connect-action", "Google 登入管理");
     link.href = target;
     link.target = "_blank";
@@ -105,21 +105,23 @@ function renderMembers() {
   if (visible.length) {
     visible.forEach((member) => fragment.append(renderMember(member)));
   } else {
-    let message = "中央名冊目前沒有會員資料。";
+    let message = "目前沒有會員資料。";
     if (centralMembers.length) message = "沒有符合搜尋條件的會員。";
-    else if (snapshotState === "unavailable") message = "目前無法讀取中央名冊，最新狀態未確認。";
+    else if (snapshotState === "unavailable") message = "目前無法確認會員名單是否最新，請稍後再試。";
     fragment.append(element("p", "snapshot-message", message));
   }
   memberList.replaceChildren(fragment);
 
   if (snapshotState === "current") {
-    snapshotCount.textContent = "顯示 " + visible.length + " 位中央名冊會員";
+    snapshotCount.textContent = query
+      ? "顯示 " + visible.length + " / 共 " + centralMembers.length + " 位會員"
+      : "會員名單已同步｜共 " + centralMembers.length + " 位會員";
   } else if (snapshotState === "stale") {
-    snapshotCount.textContent = "尚未確認最新資料；目前顯示 " + visible.length + " 位先前取得的會員";
+    snapshotCount.textContent = "尚未確認最新會員名單；顯示 " + visible.length + " / 共 " + centralMembers.length + " 位前次資料";
   } else if (snapshotState === "unavailable") {
-    snapshotCount.textContent = "目前無法確認中央名冊最新狀態";
+    snapshotCount.textContent = "目前無法確認會員名單是否最新";
   } else {
-    snapshotCount.textContent = "正在讀取中央會員名冊…";
+    snapshotCount.textContent = "正在載入會員名單…";
   }
 }
 
@@ -133,18 +135,17 @@ function isUsableSnapshot(snapshot) {
 function showUnavailable() {
   centralMembers = [];
   snapshotState = "unavailable";
-  snapshotMeta.textContent = "尚未取得中央名冊版本與生效日期。";
+  snapshotMeta.textContent = "名單確認日期：未確認。";
   renderMembers();
 }
 
 function showSnapshot(snapshot, isCurrent) {
   centralMembers = snapshot.members.filter((member) => member && typeof member === "object");
   snapshotState = isCurrent ? "current" : "stale";
-  const version = "v" + snapshot.rosterVersion;
   const effectiveDate = snapshot.effectiveAsOf.trim();
   snapshotMeta.textContent = isCurrent
-    ? "中央名冊版本 " + version + "｜資料生效日期 " + effectiveDate
-    : "先前載入版本 " + version + "｜資料生效日期 " + effectiveDate + "；此次連線未能確認最新版本。";
+    ? "名單確認日期：" + effectiveDate
+    : "名單確認日期：" + effectiveDate + "（前次資料；最新狀態未確認）。";
   renderMembers();
 }
 
