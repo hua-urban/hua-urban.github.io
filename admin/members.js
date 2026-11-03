@@ -1,15 +1,15 @@
 "use strict";
 
 const CONFIG_URL = "/admin/config.json";
-const PUBLIC_ROSTER_URL = "https://hua-urban.com/bni-pt-groups/data.json";
-
 const statusNode = document.getElementById("connection-status");
 const detailNode = document.getElementById("connection-detail");
 const editButton = document.getElementById("edit-button");
 const memberList = document.getElementById("member-list");
 const memberSearch = document.getElementById("member-search");
+const snapshotMeta = document.getElementById("snapshot-meta");
 const snapshotCount = document.getElementById("snapshot-count");
-let publicMembers = [];
+let centralMembers = [];
+let snapshotState = "loading";
 
 function element(tag, className, text) {
   const node = document.createElement(tag);
@@ -21,8 +21,11 @@ function element(tag, className, text) {
 function safeAdminUrl(value) {
   if (typeof value !== "string" || !value.trim()) return null;
   try {
-    const url = new URL(value, window.location.origin);
-    if (url.protocol !== "https:" || url.username || url.password) return null;
+    const url = new URL(value);
+    if (url.protocol !== "https:" || url.origin !== "https://script.google.com" ||
+        url.username || url.password || url.hash ||
+        !/^\/macros\/s\/[^/]+\/exec$/.test(url.pathname) ||
+        url.searchParams.get("admin") !== "1") return null;
     return url.href;
   } catch (_error) {
     return null;
@@ -31,48 +34,47 @@ function safeAdminUrl(value) {
 
 async function loadAdminEntry() {
   try {
-    const response = await fetch(CONFIG_URL, { cache: "no-store" });
-    if (!response.ok) throw new Error("設定檔不存在");
+    const response = await fetch(CONFIG_URL, { cache: "no-store", credentials: "omit" });
+    if (!response.ok) throw new Error("管理入口設定讀取失敗");
     const config = await response.json();
     const target = config && typeof config === "object"
       ? safeAdminUrl(config.memberAdminUrl)
       : null;
     if (!target) throw new Error("管理入口尚未設定");
 
-    statusNode.textContent = "已設定";
-    detailNode.textContent = "可前往會員編輯服務；身分與權限由該服務驗證。";
-    const link = element("a", "connect-action", "前往管理後台");
+    statusNode.textContent = "入口已設定";
+    detailNode.textContent = "開啟 Google 管理服務；可用權限依 GAS 正式授權設定為準。";
+    const link = element("a", "connect-action", "Google 登入管理");
     link.href = target;
     link.target = "_blank";
     link.rel = "noopener noreferrer";
     editButton.replaceWith(link);
   } catch (_error) {
-    statusNode.textContent = "準備中";
-    detailNode.textContent = "會員編輯功能準備中，目前可查閱名冊。";
+    statusNode.textContent = "入口未設定";
+    detailNode.textContent = "目前無法讀取 Google 登入管理入口設定，請聯絡管理者。";
     editButton.disabled = true;
   }
 }
 
 function displayValue(value) {
-  if (value === null || value === undefined || value === "") return "未提供";
-  if (Array.isArray(value)) {
-    const items = value.map((item) => {
-      if (item === null || item === undefined) return "";
-      if (typeof item === "string" || typeof item === "number") return String(item);
-      if (typeof item === "object") {
-        return String(item.name || item.label || item.title || item.code || "");
-      }
-      return "";
-    }).filter(Boolean);
-    return items.length ? items.join("、") : "未提供";
+  if (typeof value === "string" || typeof value === "number") {
+    const text = String(value).trim();
+    return text || "未提供";
   }
-  if (typeof value === "string" || typeof value === "number") return String(value);
   return "未提供";
 }
 
+function memberChains(member) {
+  if (!Array.isArray(member.chains)) return [];
+  return Array.from(new Set(member.chains.filter((chain) =>
+    typeof chain === "string" && /^[A-E]$/.test(chain)
+  )));
+}
+
 function memberSearchText(member) {
-  return [member.id, member.name, member.profession, member.chains]
-    .map(displayValue)
+  return [member.memberNo, member.name, member.profession, member.role, ...memberChains(member)]
+    .filter((value) => typeof value === "string" || typeof value === "number")
+    .map(String)
     .join(" ")
     .toLocaleLowerCase("zh-Hant");
 }
@@ -81,46 +83,89 @@ function renderMember(member) {
   const row = element("article", "member-row");
   const nameLine = element("div", "member-name-line");
   nameLine.append(element("h3", "member-name", displayValue(member.name)));
-  const memberNumber = displayValue(member.id);
-  const formattedMemberNumber = /^\d+$/.test(memberNumber) ? memberNumber.padStart(3, "0") : memberNumber;
-  nameLine.append(element("span", "member-id", "會員編號 " + formattedMemberNumber));
+  nameLine.append(element("span", "member-id", "會員編號 " + displayValue(member.memberNo)));
 
   const details = element("dl", "member-detail");
-  [["專業別", member.profession], ["分組", member.chains]].forEach(([label, value]) => {
-    details.append(element("dt", "", label));
-    details.append(element("dd", "", displayValue(value)));
-  });
+  details.append(element("dt", "", "專業別"));
+  details.append(element("dd", "", displayValue(member.profession)));
+  if (typeof member.role === "string" && member.role.trim()) {
+    details.append(element("dt", "", "職務"));
+    details.append(element("dd", "", member.role.trim()));
+  }
+  details.append(element("dt", "", "分組"));
+  details.append(element("dd", "", memberChains(member).join("、") || "未提供"));
   row.append(nameLine, details);
   return row;
 }
 
 function renderMembers() {
   const query = memberSearch.value.trim().toLocaleLowerCase("zh-Hant");
-  const visible = publicMembers.filter((member) => !query || memberSearchText(member).includes(query));
+  const visible = centralMembers.filter((member) => !query || memberSearchText(member).includes(query));
   const fragment = document.createDocumentFragment();
   if (visible.length) {
     visible.forEach((member) => fragment.append(renderMember(member)));
   } else {
-    fragment.append(element("p", "snapshot-message", publicMembers.length ? "沒有符合搜尋條件的會員。" : "公開名冊目前沒有會員資料。"));
+    let message = "中央名冊目前沒有會員資料。";
+    if (centralMembers.length) message = "沒有符合搜尋條件的會員。";
+    else if (snapshotState === "unavailable") message = "目前無法讀取中央名冊，最新狀態未確認。";
+    fragment.append(element("p", "snapshot-message", message));
   }
   memberList.replaceChildren(fragment);
-  snapshotCount.textContent = "顯示 " + visible.length + " 位公開名冊會員";
+
+  if (snapshotState === "current") {
+    snapshotCount.textContent = "顯示 " + visible.length + " 位中央名冊會員";
+  } else if (snapshotState === "stale") {
+    snapshotCount.textContent = "尚未確認最新資料；目前顯示 " + visible.length + " 位先前取得的會員";
+  } else if (snapshotState === "unavailable") {
+    snapshotCount.textContent = "目前無法確認中央名冊最新狀態";
+  } else {
+    snapshotCount.textContent = "正在讀取中央會員名冊…";
+  }
 }
 
-async function loadPublicRoster() {
+function isUsableSnapshot(snapshot) {
+  return !!snapshot && Array.isArray(snapshot.members) &&
+    Number.isFinite(snapshot.rosterVersion) &&
+    typeof snapshot.effectiveAsOf === "string" && snapshot.effectiveAsOf.trim() !== "" &&
+    typeof snapshot.contentHash === "string" && snapshot.contentHash.trim() !== "";
+}
+
+function showUnavailable() {
+  centralMembers = [];
+  snapshotState = "unavailable";
+  snapshotMeta.textContent = "尚未取得中央名冊版本與生效日期。";
+  renderMembers();
+}
+
+function showSnapshot(snapshot, isCurrent) {
+  centralMembers = snapshot.members.filter((member) => member && typeof member === "object");
+  snapshotState = isCurrent ? "current" : "stale";
+  const version = "v" + snapshot.rosterVersion;
+  const effectiveDate = snapshot.effectiveAsOf.trim();
+  snapshotMeta.textContent = isCurrent
+    ? "中央名冊版本 " + version + "｜資料生效日期 " + effectiveDate
+    : "先前載入版本 " + version + "｜資料生效日期 " + effectiveDate + "；此次連線未能確認最新版本。";
+  renderMembers();
+}
+
+async function loadCentralRoster() {
   try {
-    const response = await fetch(PUBLIC_ROSTER_URL, { cache: "no-store" });
-    if (!response.ok) throw new Error("公開快照讀取失敗");
-    const payload = await response.json();
-    if (!payload || !Array.isArray(payload.members)) throw new Error("公開快照格式不符");
-    publicMembers = payload.members.filter((member) => member && typeof member === "object");
-    renderMembers();
+    if (!window.HuaMembers || typeof window.HuaMembers.load !== "function") {
+      throw new Error("中央會員名冊 client 尚未載入");
+    }
+    const result = await window.HuaMembers.load();
+    const snapshot = result && result.snapshot;
+    if (!isUsableSnapshot(snapshot)) {
+      showUnavailable();
+      return;
+    }
+    const latestConfirmed = result.ok === true && result.latestConfirmed !== false;
+    showSnapshot(snapshot, latestConfirmed);
   } catch (_error) {
-    memberList.replaceChildren(element("p", "snapshot-message", "目前無法讀取官網公開名冊，請稍後再試。"));
-    snapshotCount.textContent = "公開名冊暫時無法讀取";
+    showUnavailable();
   }
 }
 
 memberSearch.addEventListener("input", renderMembers);
 loadAdminEntry();
-loadPublicRoster();
+loadCentralRoster();

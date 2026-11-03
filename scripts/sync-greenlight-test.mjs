@@ -1,4 +1,6 @@
 import { createHash } from "node:crypto";
+import { createRequire } from "node:module";
+const centralRegistry = createRequire(import.meta.url)("../assets/member-registry.js");
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { currentDateInTaipei, mapEvents } from "./greenlight-events.mjs";
@@ -101,7 +103,10 @@ const [homepage, officialPalms, monthly, oldProvenance, oldDefaults] = await Pro
   readFile(resolve(TEST_DIR, "defaults.json"), "utf8").then(JSON.parse),
 ]);
 
-const members = parseRoster(homepage);
+const registryResult = await centralRegistry.load({force:true});
+if (!registryResult.ok || !registryResult.latestConfirmed) throw new Error('Central member registry unavailable; existing files are unchanged.');
+const registry = registryResult.snapshot;
+const members = registry.members.map(m=>({no:m.memberNo,memberId:m.memberId,name:m.name,dataName:m.name,job:m.profession,role:m.role,aliases:m.aliases}));
 const fullCyclePalms = selectFullCyclePalms(officialPalms);
 if (!monthly || !Array.isArray(monthly.months)) throw new Error("Official monthly source does not match the expected data shape.");
 
@@ -114,13 +119,14 @@ if (activityPayload?.ok !== true || !Array.isArray(activityPayload.data)) {
   throw new Error("Official activity feed response is invalid; existing test data was left untouched.");
 }
 
-const activeNames = new Set(members.map(member => nameKey(member.name)));
-const activePalmsRows = fullCyclePalms.members.filter(row => Array.isArray(row) && activeNames.has(nameKey(row[1])));
-if (activePalmsRows.length < 40) throw new Error(`Refusing to sync only ${activePalmsRows.length} matching PALMS rows.`);
+const activeNames = new Set(members.flatMap(member => [member.name,...member.aliases].map(centralRegistry.normalizeNameKey)));
+const activePalmsRows = fullCyclePalms.members.filter(row => Array.isArray(row) && activeNames.has(centralRegistry.normalizeNameKey(row[1])));
+if (activePalmsRows.length < 1) throw new Error(`Refusing to sync only ${activePalmsRows.length} matching PALMS rows.`);
 const palmsNames = activePalmsRows.map(row => nameKey(row[1]));
 if (new Set(palmsNames).size !== activePalmsRows.length) throw new Error("Official PALMS has ambiguous matching member names.");
 const syncHash = createHash("sha256").update([
   homepage,
+  JSON.stringify(registry),
   JSON.stringify(officialPalms),
   JSON.stringify(monthly),
   JSON.stringify(activityPayload),
@@ -139,18 +145,20 @@ const defaults = {
     commit: sourceCommit,
     commitDate: sourceCommitDate,
     syncHash,
-    file: "index.html",
-    selector: "tr[data-n][data-p]",
+    file: "central-member-registry",
+    rosterVersion: registry.rosterVersion,
+    rosterHash: registry.contentHash,
+    selector: "members[*]",
     mapping: {
-      no: "text from span.m-num, padded to three digits",
-      name: "text from span.m-name",
-      dataName: "tr @data-n",
-      job: "tr @data-p",
-      role: "tr @data-role",
+      no: "central memberNo; never PALMS rank",
+      name: "central member name",
+      dataName: "central member name",
+      job: "central profession",
+      role: "central display role",
     },
     noMeaning: "Displayed roster number; no BNI Connect member ID is inferred.",
     repository: REPOSITORY,
-    url: HOMEPAGE_URL,
+    url: centralRegistry.apiUrl,
     activitySource: activityUrl.origin + activityUrl.pathname,
     schedule: "Every Wednesday at 10:00 Asia/Taipei",
     eventMembersNote: "Official activity data has no attendee roster; all current members are offered as interaction candidates.",
@@ -179,10 +187,12 @@ const provenance = {
   chapter: CHAPTER,
   preparedOn: sourceChanged ? currentDateInTaipei() : oldProvenance.preparedOn,
   roster: {
-    source: HOMEPAGE_URL,
+    source: centralRegistry.apiUrl,
+    rosterVersion: registry.rosterVersion,
+    contentHash: registry.contentHash,
     commit: sourceCommit,
     members: members.length,
-    memberNumbers: "Official homepage member roster, padded to 3 digits",
+    memberNumbers: "Central memberNo; stable memberId retained separately",
   },
   palms: {
     source: PALMS_URL,

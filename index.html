@@ -401,18 +401,20 @@ a{text-decoration:none;color:inherit}
 .search-bar{position:relative;max-width:440px}
 .search-bar input{width:100%;padding:11px 16px 11px 42px;border:1.5px solid var(--gray-200);border-radius:var(--r-md);font-family:"Noto Sans TC",sans-serif;font-size:14px;color:var(--gray-800);background:var(--white);outline:none;transition:border-color .15s,box-shadow .15s}
 .search-bar input:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(207,32,48,.1)}
-.search-bar input::placeholder{color:var(--gray-400)}
+.search-bar input::placeholder{color:var(--gray-600)}
 .srch-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--gray-400);fill:none;stroke-width:2}
-.roster-ct{font-size:13px;color:var(--gray-400);margin-top:8px}
+.roster-ct{font-size:13px;color:var(--gray-600);margin-top:8px}
+.roster-status{margin-top:5px;color:var(--gray-800);font-size:13px;line-height:1.5}
 .roster-ct span{color:var(--red);font-weight:600}
 .tbl-wrap{background:var(--white);border:1px solid var(--gray-100);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-sm)}
+.tbl-wrap th{color:var(--gray-600)}
 table{width:100%;border-collapse:collapse}
 th{background:var(--gray-50);padding:12px 18px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-400);border-bottom:1px solid var(--gray-100)}
 td{padding:14px 18px;font-size:14px;color:var(--gray-800);border-bottom:1px solid var(--gray-50);vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:var(--gray-50)}
 tr.hidden{display:none}
-.m-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:var(--r-sm);background:var(--gray-50);border:1px solid var(--gray-100);font-size:11px;font-weight:700;color:var(--gray-400)}
+.m-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:var(--r-sm);background:var(--gray-50);border:1px solid var(--gray-100);font-size:11px;font-weight:700;color:var(--gray-600)}
 .m-name{font-weight:600;color:var(--gray-900)}
 .m-prof{font-size:13px;color:var(--gray-600)}
 .m-grp{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px}
@@ -421,7 +423,7 @@ tr.hidden{display:none}
 .g-c{background:rgba(16,150,90,.08);color:#10965A;border:1px solid rgba(16,150,90,.2)}
 .g-d{background:rgba(99,130,200,.07);color:#4A63C8;border:1px solid rgba(99,130,200,.2)}
 .g-e{background:rgba(214,158,46,.1);color:#C49A17;border:1px solid rgba(214,158,46,.2)}
-.no-result{text-align:center;padding:40px;color:var(--gray-400);font-size:14px;display:none}
+.no-result{text-align:center;padding:40px;color:var(--gray-600);font-size:14px;display:none}
 /* 第 7 項：幹部職務標籤 pill */
 .m-role{
   display:inline-block;
@@ -431,7 +433,7 @@ tr.hidden{display:none}
   white-space:nowrap;
 }
 .m-role-chief{background:var(--red);color:#fff}
-.m-role-gold{background:#B8963E;color:#fff}
+.m-role-gold{background:#75570F;color:#fff}
 
 /* ── FOOTER ── */
 .footer{background:var(--gray-900);color:rgba(255,255,255,.7);padding:48px 0 24px;border-top:3px solid var(--red)}
@@ -1793,7 +1795,8 @@ section[id]{scroll-margin-top:68px}
         <svg class="srch-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="rSearch" placeholder="搜尋姓名或專業..." oninput="filterR()">
       </div>
-      <div class="roster-ct">顯示 <span id="rv">55</span> / 55 位夥伴</div>
+      <div class="roster-ct">顯示 <span id="rv">55</span> / <span id="rosterTotal">55</span> 位夥伴</div>
+      <p id="rosterStatus" class="roster-status" role="status" aria-live="polite">中央名冊：尚未確認</p>
     </div>
     <div class="tbl-wrap">
       <table id="rTbl">
@@ -2266,7 +2269,9 @@ function filterR(){
     else{r.classList.add('hidden')}
   });
   document.getElementById('rv').textContent=v;
-  document.getElementById('noRes').style.display=v===0?'block':'none';
+  var empty=document.getElementById('noRes');
+  empty.textContent=rows.length===0?'目前中央名冊沒有現任會員。':'找不到符合的夥伴，請試試其他關鍵字。';
+  empty.style.display=v===0?'block':'none';
 }
 
 // ─────────────────────────────────────────────
@@ -2721,26 +2726,23 @@ window.addEventListener('scroll',function(){
   });
 });
 
-// ─────────────────────────────────────────────
-// 第 7 項：名冊幹部職務標籤渲染（ROSTER_ROLE_7ZK3）
-// 掃 tbody 每列 data-role，有值就在姓名 <td> 插入彩色 pill
-// data-role 目前全為空，需求方在 Sheet 名冊分頁補職務欄後，
-// 可改成 fetch API 並寫入 data-role，此函式自動上色。
-// 目前機制：直接讀 HTML 上的 data-role=""，有值才顯示，空值靜默。
-// ─────────────────────────────────────────────
-// FIX5: 名冊九長職務 pill — 主席/副主席用金色(m-role-gold)，其餘幹部用紅色(m-role-chief)
-(function renderRosterRoles(){
-  var goldRoles = /主席|副主席/; // 最高職階：金底
+// 名冊職務只作顯示，不提供或代表任何權限。
+window.renderRosterRoles=function(){
+  var goldRoles = /主席|副主席/;
   document.querySelectorAll('#rTbl tbody tr[data-role]').forEach(function(tr){
     var role = (tr.getAttribute('data-role')||'').trim();
-    if(!role) return;
     var nameTd = tr.querySelectorAll('td')[1];
     if(!nameTd) return;
-    var cls = goldRoles.test(role) ? 'm-role m-role-gold' : 'm-role m-role-chief';
-    var pill = '<span class="'+cls+'">'+role+'</span>';
-    nameTd.innerHTML += pill;
+    var existing = nameTd.querySelector('.m-role');
+    if(existing) existing.remove();
+    if(!role) return;
+    var pill = document.createElement('span');
+    pill.className = goldRoles.test(role) ? 'm-role m-role-gold' : 'm-role m-role-chief';
+    pill.textContent = role;
+    nameTd.appendChild(pill);
   });
-})();
+};
+window.renderRosterRoles();
 // 活動編輯碼僅防誤觸；真正存取權由 Google 試算表分享權限管理。
 (function(){
   var dialog=document.getElementById('activityEditDialog');
@@ -2792,5 +2794,53 @@ window.addEventListener('scroll',function(){
     </a>
   </div>
 </nav>
+<script src="./assets/member-registry.js"></script>
+<script>
+(function(){
+  var status=document.getElementById('rosterStatus');
+  var tbody=document.querySelector('#rTbl tbody');
+  function showUnconfirmed(result){
+    var message=result&&result.error&&result.error.message;
+    if(result&&result.status==='unversioned'){
+      status.textContent='尚未接入中央名冊；目前保留頁面名單備援，資料未確認最新。';
+    }else{
+      status.textContent=(message||'無法確認中央名冊最新版。')+' 目前保留頁面名單備援，資料未確認最新。';
+    }
+  }
+  function cell(className,text){
+    var td=document.createElement('td');
+    var span=document.createElement('span');
+    span.className=className;
+    span.textContent=String(text==null?'':text);
+    td.appendChild(span);
+    return td;
+  }
+  window.HuaMembers.load().then(function(result){
+    if(!result||!result.ok||!result.latestConfirmed||!result.snapshot){
+      showUnconfirmed(result);
+      return;
+    }
+    var members=result.snapshot.members;
+    var rows=members.map(function(member){
+      var tr=document.createElement('tr');
+      tr.dataset.n=[member.name].concat(member.aliases||[]).join(' ');
+      tr.dataset.p=member.profession;
+      tr.dataset.role=member.role||'';
+      tr.appendChild(cell('m-num',member.memberNo));
+      var nameCell=cell('m-name',member.name);
+      tr.appendChild(nameCell);
+      tr.appendChild(cell('m-prof',member.profession));
+      return tr;
+    });
+    tbody.replaceChildren.apply(tbody,rows);
+    document.getElementById('rosterTotal').textContent=String(members.length);
+    window.renderRosterRoles();
+    filterR();
+    status.textContent='中央名冊版本：'+result.snapshot.rosterVersion+'；生效日期：'+result.snapshot.effectiveAsOf;
+  }).catch(function(){
+    showUnconfirmed({error:{message:'無法確認中央名冊最新版。'}});
+  });
+})();
+</script>
 </body>
 </html>

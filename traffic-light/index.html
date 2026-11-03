@@ -120,6 +120,11 @@
     .weekly-panel { padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--paper); box-shadow: var(--shadow); }
     .weekly-panel h2 { margin: 0; font-size: 23px; }
     .weekly-panel > p { color: var(--muted); }
+    .registry-pending { margin-top: 18px; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: #202020; }
+    .registry-pending h3 { margin: 0 0 8px; font-size: 18px; }
+    .registry-pending p { margin: 0 0 10px; color: #414141; }
+    .registry-pending table { min-width: 0; }
+    .registry-pending th, .registry-pending td { text-align: left; }
     .foot { margin-top: 28px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
     .foot p { margin: 6px 0; }
     .privacy { color: #414141; font-weight: 650; }
@@ -199,7 +204,8 @@
         <h2 id="weeklyHeading">最新週期統計</h2>
         <p>依 PALMS 六個月報告換算，每週四更新；正式分數以 LTNA 公布為準。</p>
         <p><a href="./upload.html">上傳最新 PALMS 報告</a></p>
-        <p id="weeklyActual" role="status">正在確認現有 PALMS 統計期間…</p>
+        <p id="registryStatus" role="status" aria-live="polite">中央名冊版本：載入確認中…</p>
+        <p id="weeklyActual" role="status" aria-live="polite">PALMS 報告日期：載入確認中…</p>
         <p id="weeklyCutoff" class="action-note">本週預期資料截止日：計算中</p>
         <div id="weeklyDashboard" class="traffic-dashboard" data-theme="light" aria-label="最新週期會員統計"></div>
       </div>
@@ -213,6 +219,7 @@
   </main>
 
   <script src="./weekly-period.js?v=20261029-thursday"></script>
+  <script src="../assets/member-registry.js"></script>
   <script src="export.js?v=20261005"></script>
   <script src="dashboard-template.js?v=20261029-thursday"></script>
   <script src="dashboard-core.js?v=20261029-thursday"></script>
@@ -257,31 +264,70 @@
 
       async function loadWeeklyData() {
         var status = document.getElementById('weeklyActual');
+        var registryStatus = document.getElementById('registryStatus');
         var root = document.getElementById('weeklyDashboard');
-        try {
-          var response = await fetch('data.json?t=' + Date.now(), {cache:'no-store'});
-          if (!response.ok) throw new Error('HTTP ' + response.status);
-          var data = await response.json();
-          var est = data.chapter && data.chapter.est;
-          if (!est || !Array.isArray(est.members) || !est.members.length) {
-            status.textContent = '尚無 PALMS 報告，請上傳以當週三為截止日的六個月資料。';
-            return;
-          }
-          var monthlyResponse = await fetch('monthly.json', {cache:'no-store'});
-          if (!monthlyResponse.ok) throw new Error('LTNA HTTP ' + monthlyResponse.status);
-          var monthlyData = await monthlyResponse.json();
-          var latest = (monthlyData.months || []).slice().sort(function(a,b){return b.month.localeCompare(a.month);})[0] || null;
-          TrafficDashboard.mount(root, {
-            members: est.members, chapter: est.chapter, updatedAt: est.updatedAt,
-            prev: {updatedAt:data.updatedAt,chapter:data.chapter,members:data.members},
-            leftMembers:data.leftMembers || []
-          }, {view:{est:true,toggle:false}, latestOfficialChapter:latest, compact:true});
-          status.textContent = WeeklyPeriod.submissionStatus(est.chapter);
-        } catch (error) {
-          root.replaceChildren();
-          status.textContent = '無法載入最新週期統計，請重新整理。';
-          console.error(error);
+        var results = await Promise.allSettled([
+          (async function () {
+            var response = await fetch('data.json?t=' + Date.now(), {cache:'no-store'});
+            if (!response.ok) throw new Error('PALMS HTTP ' + response.status);
+            return response.json();
+          })(),
+          window.HuaMembers.load()
+        ]);
+        var dataResult = results[0];
+        var rosterResult = results[1].status === 'fulfilled' ? results[1].value : null;
+        var data = dataResult.status === 'fulfilled' ? dataResult.value : null;
+        var est = data && data.chapter && data.chapter.est;
+
+        if (rosterResult && rosterResult.ok && rosterResult.latestConfirmed && rosterResult.snapshot) {
+          registryStatus.textContent = '中央名冊版本：' + rosterResult.snapshot.rosterVersion +
+            '；生效日期：' + rosterResult.snapshot.effectiveAsOf;
+        } else {
+          var registryMessage = rosterResult && rosterResult.error && rosterResult.error.message;
+          registryStatus.textContent = (rosterResult && rosterResult.status === 'unversioned'
+            ? '尚未接入中央名冊。' : registryMessage || '無法確認中央名冊最新版。') +
+            ' 紅綠燈會員資料未確認最新，保留現有頁面內容。';
         }
+
+        if (dataResult.status !== 'fulfilled') {
+          status.textContent = 'PALMS 報告日期：無法讀取；最新週期資料未確認最新。';
+          console.error(dataResult.reason);
+          return;
+        }
+        if (est && est.chapter) {
+          var reportDate = est.chapter.asOf || est.chapter.lastSubmittedMeeting || '未提供';
+          var submission = window.WeeklyPeriod && typeof WeeklyPeriod.submissionStatus === 'function'
+            ? WeeklyPeriod.submissionStatus(est.chapter) : '';
+          status.textContent = 'PALMS 報告日期：' + reportDate + (submission ? '；' + submission : '');
+        } else {
+          status.textContent = 'PALMS 報告日期：未提供；目前沒有可用的最新週期報告。';
+        }
+
+        if (!rosterResult || !rosterResult.ok || !rosterResult.snapshot) return;
+
+        var reconciliation = window.HuaMembers.reconcileWeeklyRows(
+          rosterResult.snapshot.members,
+          est && Array.isArray(est.members) ? est.members : []
+        );
+        if (reconciliation.members.length) {
+          try {
+            var monthlyResponse = await fetch('monthly.json', {cache:'no-store'});
+            if (!monthlyResponse.ok) throw new Error('LTNA HTTP ' + monthlyResponse.status);
+            var monthlyData = await monthlyResponse.json();
+            var latest = (monthlyData.months || []).slice().sort(function(a,b){return b.month.localeCompare(a.month);})[0] || null;
+            TrafficDashboard.mount(root, {
+              members: reconciliation.members,
+              chapter: est.chapter,
+              updatedAt: est.updatedAt,
+              prev: {updatedAt:data.updatedAt,chapter:data.chapter,members:data.members},
+              leftMembers: []
+            }, {view:{est:true,toggle:false}, latestOfficialChapter:latest, compact:true});
+          } catch (error) {
+            status.textContent += '；最新週期畫面載入失敗，資料未確認最新。';
+            console.error(error);
+          }
+        }
+        renderPendingMembers(root, reconciliation.pending);
       }
 
       function element(tag, className, text) {
@@ -289,6 +335,39 @@
         if (className) node.className = className;
         if (text !== undefined && text !== null) node.textContent = String(text);
         return node;
+      }
+
+      function renderPendingMembers(root, members) {
+        var old = root.querySelector('.registry-pending');
+        if (old) old.remove();
+        if (!members.length) return;
+        var container = root.querySelector('#p-all') || root;
+        var section = element('section', 'registry-pending');
+        section.setAttribute('aria-labelledby', 'registryPendingHeading');
+        section.appendChild(element('h3', '', '中央名冊待處理'));
+        section.querySelector('h3').id = 'registryPendingHeading';
+        section.appendChild(element('p', '', '下列現任會員未列入分數與燈號；待PALMS資料不填 0 分，待核對資料不作會員配對。'));
+        var table = document.createElement('table');
+        var thead = document.createElement('thead');
+        var headRow = document.createElement('tr');
+        ['會員編號', '姓名', '資料狀態'].forEach(function (label) {
+          var th = element('th', '', label);
+          th.scope = 'col';
+          headRow.appendChild(th);
+        });
+        thead.appendChild(headRow);
+        table.appendChild(thead);
+        var tbody = document.createElement('tbody');
+        members.forEach(function (member) {
+          var row = document.createElement('tr');
+          [member.memberNo, member.name, member.status].forEach(function (value) {
+            row.appendChild(element('td', '', value));
+          });
+          tbody.appendChild(row);
+        });
+        table.appendChild(tbody);
+        section.appendChild(table);
+        container.appendChild(section);
       }
 
       function displayValue(value) {
