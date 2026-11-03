@@ -2,6 +2,31 @@
   "asOf": "2026-11-04",
   "entries": [
     {
+      "id": "hua-owned-admin-cutover-20261104",
+      "date": "2026-11-04",
+      "status": "已上線",
+      "statusKind": "live",
+      "category": "會員名單",
+      "title": "會員管理改由華都更帳號持有與部署",
+      "summary": [
+        "管理後台改由 hua.urban.renewal@gmail.com 建立及部署；Google 授權畫面的開發者已確認為華都更帳號。",
+        "舊管理與分組寫入入口已停用；新版管理及會員編號編輯碼共用同一專案與寫入鎖，保留原本跨組規則。",
+        "沿用同一份會員正本，55 位會員、5 組、固定會員身分及名單版本於切換前後比對一致，未建立第二份名冊。"
+      ],
+      "services": [
+        {
+          "label": "會員名單與管理入口",
+          "href": "../members/"
+        },
+        {
+          "label": "產業鏈分組",
+          "href": "/bni-pt-groups/"
+        }
+      ],
+      "sources": [],
+      "sourceNote": "新後台華都更帳號登入、公開端點讀回與不變更資料的儲存核對通過。"
+    },
+    {
       "id": "member-cue-boundary-20261104",
       "date": "2026-11-04",
       "status": "已上線",

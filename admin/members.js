@@ -43,7 +43,7 @@ async function loadAdminEntry() {
     if (!target) throw new Error("管理入口尚未設定");
 
     statusNode.textContent = "入口已設定";
-    detailNode.textContent = "開啟 Google 登入管理；可用功能依登入帳號權限設定而定。";
+    detailNode.textContent = "使用華都更帳號 hua.urban.renewal@gmail.com 開啟會員管理。";
     const link = element("a", "connect-action", "Google 登入管理");
     link.href = target;
     link.target = "_blank";
