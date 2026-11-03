@@ -2270,7 +2270,7 @@ function filterR(){
   });
   document.getElementById('rv').textContent=v;
   var empty=document.getElementById('noRes');
-  empty.textContent=rows.length===0?'目前中央名冊沒有現任會員。':'找不到符合的夥伴，請試試其他關鍵字。';
+  empty.textContent=rows.length===0?'目前沒有會員資料。':'找不到符合的夥伴，請試試其他關鍵字。';
   empty.style.display=v===0?'block':'none';
 }
 
@@ -2831,7 +2831,7 @@ window.renderRosterRoles();
     document.getElementById('rosterTotal').textContent=String(members.length);
     window.renderRosterRoles();
     filterR();
-    status.textContent='會員名單已同步｜共 '+members.length+' 位會員；名單確認日期：'+result.snapshot.effectiveAsOf;
+    status.textContent='會員名單｜名單確認日期：'+result.snapshot.effectiveAsOf;
   }).catch(function(){
     showUnconfirmed();
   });

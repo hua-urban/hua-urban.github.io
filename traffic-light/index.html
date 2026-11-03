@@ -280,8 +280,7 @@
         var est = data && data.chapter && data.chapter.est;
 
         if (rosterResult && rosterResult.ok && rosterResult.latestConfirmed && rosterResult.snapshot) {
-          registryStatus.textContent = '會員名單已同步｜共 ' + rosterResult.snapshot.members.length +
-            ' 位會員；名單確認日期：' + rosterResult.snapshot.effectiveAsOf;
+          registryStatus.textContent = '會員名單｜名單確認日期：' + rosterResult.snapshot.effectiveAsOf;
         } else {
           registryStatus.textContent = '目前無法確認會員名單是否最新；紅綠燈暫時保留既有資料。名單確認日期：未確認。';
         }
@@ -341,7 +340,7 @@
         var container = root.querySelector('#p-all') || root;
         var section = element('section', 'registry-pending');
         section.setAttribute('aria-labelledby', 'registryPendingHeading');
-        section.appendChild(element('h3', '', '中央名冊待處理'));
+        section.appendChild(element('h3', '', '會員名單待處理'));
         section.querySelector('h3').id = 'registryPendingHeading';
         section.appendChild(element('p', '', '下列現任會員未列入分數與燈號；待PALMS資料不填 0 分，待核對資料不作會員配對。'));
         var table = document.createElement('table');

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'self'; form-action 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self'; object-src 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#8b1538">
+  <title>資訊組更新日誌｜華都更管理中心</title>
+  <link rel="stylesheet" href="../admin.css">
+  <link rel="stylesheet" href="./updates.css">
+  <script src="./updates.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main" rel="noreferrer">跳至主要內容</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="../" aria-label="華都更管理中心首頁" rel="noreferrer">
+        <span class="brand-mark" aria-hidden="true">華</span>
+        <span><strong>華都更</strong><small>管理中心</small></span>
+      </a>
+      <a class="header-note updates-login" href="../members/" rel="noreferrer">會員登入入口</a>
+    </div>
+  </header>
+
+  <main id="main" class="page-shell updates-shell">
+    <section class="page-intro" aria-labelledby="page-title">
+      <nav class="breadcrumbs" aria-label="麵包屑導覽">
+        <a href="../" rel="noreferrer">管理中心</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">資訊組更新日誌</span>
+      </nav>
+      <p class="eyebrow">SYSTEM UPDATES</p>
+      <h1 id="page-title">資訊組更新日誌</h1>
+      <p>整理近期修改重點、關聯服務與查核紀錄。整理日期：<time id="journal-as-of">讀取中</time>。</p>
+    </section>
+
+    <aside class="public-notice updates-notice" aria-label="日誌範圍">
+      <span class="notice-icon" aria-hidden="true">i</span>
+      <p><strong>更多紀錄</strong>　維護平台與執行紀錄，可從<a href="../members/">會員管理後台</a>的「內部服務」開啟；會員資料的編輯紀錄則列在「最近異動」。</p>
+    </aside>
+
+    <section class="updates-directory" aria-labelledby="updates-heading">
+      <div class="section-heading updates-heading">
+        <div>
+          <p class="eyebrow">CHANGE NOTES</p>
+          <h2 id="updates-heading">近期更新重點</h2>
+        </div>
+        <p class="section-note">可依分類篩選，或搜尋日期、服務名稱與改動內容。</p>
+      </div>
+
+      <div class="updates-controls">
+        <label class="updates-search" for="updates-search">
+          <span class="visually-hidden">搜尋更新日誌</span>
+          <input id="updates-search" type="search" placeholder="搜尋更新內容" autocomplete="off">
+        </label>
+        <label class="updates-category-label" for="category-filter">分類</label>
+        <select id="category-filter" class="updates-category-filter">
+          <option value="all">全部分類</option>
+        </select>
+      </div>
+
+      <p id="result-count" class="result-count" role="status" aria-live="polite">正在讀取更新日誌…</p>
+      <div id="updates-list" class="updates-list" aria-live="polite"></div>
+      <div id="empty-state" class="empty-state" hidden>
+        <strong>找不到符合的更新</strong>
+        <span>請更換搜尋文字或分類。</span>
+      </div>
+      <div id="load-error" class="updates-error" role="alert" hidden></div>
+    </section>
+
+    <p class="updates-back"><a href="../" rel="noreferrer">返回管理中心服務目錄</a></p>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner"><span>華都更管理中心</span><span>資訊組更新日誌 · <time id="journal-footer-date">讀取中</time></span></div>
+  </footer>
+</body>
+</html>

@@ -2,20 +2,20 @@
 
 const SERVICES = [
   {
-    title: "統一會員管理",
+    title: "會員名單",
     category: "會員與分組",
-    description: "會員管理模組入口。正式管理後端尚未接通；目前可在會員頁查看官網公開快照。",
-    use: [{ label: "會員管理入口", href: "./members/" }],
+    description: "會員名單已接入中央名冊，支援 Google 登入後新增、修改、退會、重入會與分組管理。",
+    use: [{ label: "會員登入入口", href: "./members/" }],
     data: [{ label: "公開產業鏈分組頁", href: "https://hua-urban.com/bni-pt-groups/" }],
-    maintenance: [{ status: "管理後端待接通" }]
+    maintenance: [{ label: "會員名單更新紀錄", href: "./updates/#member-registry-20261103" }, { status: "真實入會日待官方資料確認" }]
   },
   {
     title: "產業鏈分組",
     category: "會員與分組",
-    description: "查看公開分組名冊與產業鏈協作資訊；組長資料編輯入口尚待核對。",
+    description: "公開產業鏈分組名冊已上線，與官網會員資料使用同一中央來源；組長個別管理帳號仍待授權。",
     use: [{ label: "開啟產業鏈分組", href: "https://hua-urban.com/bni-pt-groups/" }],
-    data: [{ status: "組長編輯入口待核對" }],
-    maintenance: [{ label: "公開 GitHub 專案", href: "https://github.com/hua-urban/bni-pt-groups" }]
+    data: [{ status: "會員及分組資料由中央名冊同步" }],
+    maintenance: [{ label: "分組系統更新紀錄", href: "./updates/#pt-registry-20261103" }, { label: "公開 GitHub 專案", href: "https://github.com/hua-urban/bni-pt-groups" }]
   },
   {
     title: "官網與活動牆",
@@ -63,15 +63,15 @@ const SERVICES = [
     description: "查看紅綠燈公開統計；PALMS 上傳仍由原入口處理。",
     use: [{ label: "開啟紅綠燈統計", href: "https://hua-urban.com/traffic-light/?v=est" }],
     data: [{ label: "PALMS 上傳入口", href: "https://hua-urban.com/traffic-light/upload.html" }],
-    maintenance: [{ label: "公開官網原始碼", href: "https://github.com/hua-urban/hua-urban.github.io" }]
+    maintenance: [{ label: "PALMS 更新紀錄", href: "./updates/#palms-period-20261029" }, { label: "公開官網原始碼", href: "https://github.com/hua-urban/hua-urban.github.io" }]
   },
   {
     title: "追綠光",
     category: "紅綠燈與追綠光",
-    description: "開啟公開追綠光服務；管理與維護入口仍待正式核對。",
+    description: "公開追綠光服務已上線，直接讀取官方最新 PALMS；維護紀錄由會員登入入口查看。",
     use: [{ label: "開啟追綠光", href: "https://hua-urban.com/greenlight/" }],
-    data: [{ status: "資料管理入口待核對" }],
-    maintenance: [{ status: "維護後台網址待核對" }]
+    data: [{ status: "直接使用官方最新 PALMS" }],
+    maintenance: [{ label: "追綠光更新紀錄", href: "./updates/#greenlight-palms-20261028" }, { label: "維護紀錄（會員登入）", href: "./members/" }]
   },
   {
     title: "AI 應用問卷",
@@ -111,10 +111,10 @@ const SERVICES = [
   {
     title: "總簡報整合",
     category: "週會與簡報",
-    description: "簡報整合作業與其公開自動化執行紀錄；執行前仍須在原平台確認狀態。",
+    description: "總簡報合併與 PDF 匯出作業。登入管理後台可查看簡報、來源資料與執行紀錄。",
     use: [{ status: "總簡報入口待核對" }],
     data: [{ status: "來源資料入口待核對" }],
-    maintenance: [{ status: "登入後台後查看" }]
+    maintenance: [{ label: "簡報流程更新紀錄", href: "./updates/#pdf-workflow-20261028" }, { label: "登入查看執行紀錄", href: "./members/" }]
   },
   {
     title: "教育訓練跨分會查詢",
@@ -151,6 +151,14 @@ const SERVICES = [
       { label: "Google Cloud Console", href: "https://console.cloud.google.com/" },
       { label: "Vercel Dashboard", href: "https://vercel.com/dashboard" }
     ]
+  },
+  {
+    title: "資訊組更新日誌",
+    category: "LINE 與系統維護",
+    description: "依日期整理已上線服務、程式更新與待確認事項，只列業務摘要及公開提交證據。",
+    use: [{ label: "查看資訊組更新日誌", href: "./updates/" }],
+    data: [{ status: "公開更新摘要與查核來源" }],
+    maintenance: [{ label: "會員登入入口", href: "./members/" }]
   }
 ];
 

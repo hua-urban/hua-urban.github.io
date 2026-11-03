@@ -1,0 +1,253 @@
+{
+  "asOf": "2026-11-03",
+  "entries": [
+    {
+      "date": "2026-11-03",
+      "status": "已上線",
+      "statusKind": "live",
+      "category": "會員名單",
+      "title": "會員名單管理上線",
+      "summary": [
+        "管理中心服務目錄與會員名單已上線；Google 登入後可新增、修改、退會、重入會及維護分組。",
+        "截至 2026-11-03，中央名冊有 55 位現任會員、5 組；官網、產業鏈、紅綠燈與追綠光共用同一來源。",
+        "修正誤標退會的會員顯示；沒有官方逐人入會日的資料維持未知，新人缺少 PALMS 明細時不補 0 分。"
+      ],
+      "services": [
+        {
+          "label": "會員登入入口",
+          "href": "../members/"
+        },
+        {
+          "label": "管理中心服務目錄",
+          "href": "../"
+        },
+        {
+          "label": "公開產業鏈分組",
+          "href": "/bni-pt-groups/"
+        }
+      ],
+      "sources": [
+        {
+          "label": "官網管理中心與中央名冊更新",
+          "href": "https://github.com/hua-urban/hua-urban.github.io/commit/a0a27d3d38e90e275615289c9f404f6988c99f44"
+        },
+        {
+          "label": "會員名單來源整合",
+          "href": "https://github.com/hua-urban/hua-urban.github.io/commit/2ddf30ee72f574dfe6a260f9ce961c1f668bff26"
+        }
+      ],
+      "sourceNote": "公開 Git 提交紀錄",
+      "id": "member-registry-20261103"
+    },
+    {
+      "id": "member-identity-matching-20261103",
+      "date": "2026-11-03",
+      "status": "處理中",
+      "statusKind": "processing",
+      "statusDetail": "正在修正姓名配對，完成驗證後更新紀錄。",
+      "category": "追綠光",
+      "title": "姓名顯示與會員檢核分離",
+      "summary": [
+        "保留「洪嘉璿左左」及其他會員現有顯示名稱，不變更會員資料。",
+        "PALMS 與培訓查詢改由固定會員身分及核對過的官方／歷史別名比對，不把暱稱當成完整官方姓名。",
+        "修復完成後，將核對會員名單、PALMS 與培訓紀錄的配對結果。"
+      ],
+      "services": [
+        {
+          "label": "公開追綠光服務",
+          "href": "../../greenlight/"
+        },
+        {
+          "label": "會員登入入口",
+          "href": "../members/"
+        }
+      ],
+      "sources": [],
+      "sourceNote": "已重現暱稱影響培訓配對的問題，修正進行中。"
+    },
+    {
+      "date": "2026-11-03",
+      "status": "已上線",
+      "statusKind": "live",
+      "statusDetail": "組長個別管理帳號授權待提供",
+      "category": "產業鏈",
+      "title": "產業鏈分組頁同步中央會員資料",
+      "summary": [
+        "公開產業鏈分組頁已上線，會員與分組資料使用中央名冊。",
+        "組長個別管理帳號尚未提供或開通；取得授權前不宣稱組長可自行編輯。"
+      ],
+      "services": [
+        {
+          "label": "公開產業鏈分組",
+          "href": "/bni-pt-groups/"
+        },
+        {
+          "label": "會員登入入口",
+          "href": "../members/"
+        }
+      ],
+      "sources": [
+        {
+          "label": "產業鏈名冊更新",
+          "href": "https://github.com/hua-urban/bni-pt-groups/commit/6703edc0cdd16d60cfcfccbe195388b766b34632"
+        }
+      ],
+      "sourceNote": "公開 Git 提交紀錄；組長授權仍待提供",
+      "id": "pt-registry-20261103"
+    },
+    {
+      "date": "2026-10-29",
+      "status": "程式已更新",
+      "statusKind": "updated",
+      "category": "PALMS",
+      "title": "分開 PALMS 實際截止日與已提交例會日",
+      "summary": [
+        "週四更新時，以前一日（週三）已提交的例會資料為準，並分開呈現實際報告截止日與已提交日期。",
+        "個別計分週期工具採官方會期月份並要求完整報告；會期月份不代表實際入會日。"
+      ],
+      "services": [
+        {
+          "label": "紅綠燈統計",
+          "href": "../../traffic-light/"
+        },
+        {
+          "label": "會員登入入口",
+          "href": "../members/"
+        }
+      ],
+      "sources": [
+        {
+          "label": "PALMS 週期修正",
+          "href": "https://github.com/hua-urban/hua-urban.github.io/commit/8ebddb52f3c2a749c20d0e8d2bc5dc53c7275ad1"
+        },
+        {
+          "label": "截止日與提交日分開呈現",
+          "href": "https://github.com/hua-urban/hua-urban.github.io/commit/b0ffeae342ffcc4c151545d3cd65177f0d86377a"
+        },
+        {
+          "label": "個別計分週期工具修正",
+          "href": "https://github.com/hua-urban/hua-urban.github.io/commit/bb6cd531f54e73f6eee6c5f823d9722d8c30e9cb"
+        }
+      ],
+      "sourceNote": "公開 Git 提交紀錄；程式更新不代表個別資料已補齊",
+      "id": "palms-period-20261029"
+    },
+    {
+      "date": "2026-10-28",
+      "status": "程式已更新",
+      "statusKind": "updated",
+      "category": "紅綠燈",
+      "title": "修正紅綠燈分數說明表格溢位",
+      "summary": [
+        "調整「紅綠燈分數怎麼算」的表格與響應式卡片版面，避免小螢幕內容溢出。"
+      ],
+      "services": [
+        {
+          "label": "紅綠燈統計",
+          "href": "../../traffic-light/"
+        }
+      ],
+      "sources": [
+        {
+          "label": "紅綠燈說明版面修正",
+          "href": "https://github.com/hua-urban/hua-urban.github.io/commit/0808e9737f6be7e51183af28a962b5366fcc8234"
+        }
+      ],
+      "sourceNote": "公開 Git 提交紀錄",
+      "id": "scoring-layout-20261028"
+    },
+    {
+      "date": "2026-10-28",
+      "status": "已上線",
+      "statusKind": "live",
+      "category": "追綠光",
+      "title": "追綠光改讀官方最新 PALMS",
+      "summary": [
+        "追綠光服務已部署，直接讀取官方最新 PALMS。",
+        "此處只連公開服務；維護紀錄與內部服務由會員登入入口查看。"
+      ],
+      "services": [
+        {
+          "label": "公開追綠光服務",
+          "href": "../../greenlight/"
+        },
+        {
+          "label": "會員登入入口",
+          "href": "../members/"
+        }
+      ],
+      "sources": [],
+      "sourceNote": "部署狀態已核實；未提供公開 Git 提交連結",
+      "id": "greenlight-palms-20261028"
+    },
+    {
+      "date": "2026-10-28",
+      "status": "程式已更新，執行待確認",
+      "statusKind": "updated",
+      "category": "週會與簡報",
+      "title": "更新總簡報合併與 PDF 匯出流程",
+      "summary": [
+        "程式已加入順序化合併與 PDF 匯出、提早排程及獨立監測，並透過 Drive API 驗證回傳檔案 ID。",
+        "週三 05:30 前備妥 PDF 是完成目標；最近一次執行結果與完成時間，請登入後查看維護紀錄。"
+      ],
+      "services": [
+        {
+          "label": "會員登入入口查看維護紀錄",
+          "href": "../members/"
+        }
+      ],
+      "sources": [],
+      "sourceNote": "程式更新已核對；排程與單次執行結果仍待確認，未列私有程式庫連結",
+      "id": "pdf-workflow-20261028"
+    },
+    {
+      "date": "2026-10-27",
+      "status": "程式已更新",
+      "statusKind": "updated",
+      "category": "系統維護",
+      "title": "移除人機驗證並保留上傳版本保護",
+      "summary": [
+        "上傳流程移除人機驗證，保留上傳版本保護。",
+        "後端已移除上傳次數限制；相關程式變更已核對，部署紀錄由管理入口查閱。"
+      ],
+      "services": [
+        {
+          "label": "會員登入入口查看維護紀錄",
+          "href": "../members/"
+        }
+      ],
+      "sources": [
+        {
+          "label": "上傳流程與版本保護更新",
+          "href": "https://github.com/hua-urban/hua-urban.github.io/commit/c9008e43e61b75380972a3909cee69ff172dc7dc"
+        }
+      ],
+      "sourceNote": "公開提交紀錄為上傳頁修改；後端部署紀錄請登入查看。",
+      "id": "palms-upload-20261027"
+    },
+    {
+      "date": "2026-11-03",
+      "status": "待資料／授權",
+      "statusKind": "pending",
+      "category": "待確認",
+      "title": "兩項資料與授權待補",
+      "summary": [
+        "真實入會日仍待官方逐人資料；取得前維持未知，不推估。",
+        "組長個別管理 Google 帳號授權尚未提供或開通。"
+      ],
+      "services": [
+        {
+          "label": "會員登入入口",
+          "href": "../members/"
+        },
+        {
+          "label": "公開產業鏈分組",
+          "href": "/bni-pt-groups/"
+        }
+      ],
+      "sources": [],
+      "sourceNote": "待補官方資料與授權；目前沒有可公開列出的提交證據",
+      "id": "pending-member-data-20261103"
+    }
+  ]
+}

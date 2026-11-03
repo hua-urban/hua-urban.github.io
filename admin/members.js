@@ -115,7 +115,7 @@ function renderMembers() {
   if (snapshotState === "current") {
     snapshotCount.textContent = query
       ? "顯示 " + visible.length + " / 共 " + centralMembers.length + " 位會員"
-      : "會員名單已同步｜共 " + centralMembers.length + " 位會員";
+      : "共 " + centralMembers.length + " 位會員";
   } else if (snapshotState === "stale") {
     snapshotCount.textContent = "尚未確認最新會員名單；顯示 " + visible.length + " / 共 " + centralMembers.length + " 位前次資料";
   } else if (snapshotState === "unavailable") {
