@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self' https://hua-urban.com; img-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#8b1538">
+  <meta name="description" content="華都更管理中心公開服務目錄與會員管理入口。">
+  <title>華都更管理中心｜服務目錄</title>
+  <link rel="stylesheet" href="./admin.css">
+  <script src="./admin.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳至主要內容</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="./" aria-label="華都更管理中心首頁">
+        <span class="brand-mark" aria-hidden="true">華</span>
+        <span><strong>華都更</strong><small>管理中心</small></span>
+      </a>
+      <span class="header-note">公開服務索引</span>
+    </div>
+  </header>
+
+  <main id="main" class="page-shell">
+    <section class="hero" aria-labelledby="page-title">
+      <div class="hero-copy">
+        <p class="eyebrow">HUADU · ADMIN DIRECTORY</p>
+        <h1 id="page-title">服務目錄</h1>
+        <p class="hero-description">常用服務、資料入口與維護專案集中於此。各系統仍由原服務自行驗證身分與權限。</p>
+        <a class="primary-link" href="./members/">前往會員管理入口 <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="hero-stamp" aria-hidden="true"><span>BNI</span><strong>華都更</strong><small>服務入口</small></div>
+    </section>
+
+    <section class="directory" aria-labelledby="directory-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">FIND A SERVICE</p>
+          <h2 id="directory-title">找到需要的服務</h2>
+        </div>
+        <p class="section-note">入口分為使用入口、管理資料與維護系統；未核實的網址會標示待核對。</p>
+      </div>
+
+      <label class="search-box" for="service-search">
+        <span class="search-icon" aria-hidden="true">⌕</span>
+        <span class="visually-hidden">搜尋服務</span>
+        <input id="service-search" type="search" placeholder="搜尋服務名稱或關鍵字" autocomplete="off">
+        <kbd aria-hidden="true">⌘ K</kbd>
+      </label>
+
+      <nav class="category-filters" aria-label="服務分類" id="category-filters">
+        <button type="button" class="filter-button is-active" data-category="all" aria-pressed="true">全部服務</button>
+        <button type="button" class="filter-button" data-category="會員與分組" aria-pressed="false">會員與分組</button>
+        <button type="button" class="filter-button" data-category="活動與來賓" aria-pressed="false">活動與來賓</button>
+        <button type="button" class="filter-button" data-category="新人與培訓" aria-pressed="false">新人與培訓</button>
+        <button type="button" class="filter-button" data-category="紅綠燈與追綠光" aria-pressed="false">紅綠燈與追綠光</button>
+        <button type="button" class="filter-button" data-category="週會與簡報" aria-pressed="false">週會與簡報</button>
+        <button type="button" class="filter-button" data-category="LINE 與系統維護" aria-pressed="false">LINE 與系統維護</button>
+      </nav>
+
+      <p id="result-count" class="result-count" aria-live="polite"></p>
+      <div id="service-list" class="service-grid"></div>
+      <div id="empty-state" class="empty-state" hidden>
+        <strong>找不到符合的服務</strong>
+        <span>請試試其他關鍵字或切換分類。</span>
+      </div>
+    </section>
+
+    <aside class="public-notice" aria-label="使用說明">
+      <span class="notice-icon" aria-hidden="true">i</span>
+      <p><strong>使用前請留意</strong>　這是公開索引，不負責授權或登入。標示 HTTP 200 僅代表公開頁面可達，不代表正式版業務功能已驗收。管理資料只列可公開確認的服務入口；待核對項目完成正式確認後再補上。</p>
+    </aside>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner"><span>華都更管理中心</span><span>公開服務索引 · 各後台自行驗證</span></div>
+  </footer>
+</body>
+</html>
