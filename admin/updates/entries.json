@@ -2,6 +2,41 @@
   "asOf": "2026-11-04",
   "entries": [
     {
+      "id": "merge-pdf-verification-20261104",
+      "date": "2026-11-04",
+      "status": "已上線",
+      "statusKind": "live",
+      "category": "總簡報",
+      "title": "修正頁數驗證誤報與 PDF 排程延遲停止",
+      "summary": [
+        "整合後改以 Slides API 讀取已儲存內容，頁數或文字差異完成有限次重讀後才留警告；另提供「重新驗證上次整合」，不重複插入頁面。",
+        "本次已重新驗證：總簡報 154 頁、會員段 65 頁、教育段 8 頁，來源內容通過，舊差異警告已清除。",
+        "PDF 提早於每週三 00:17 啟動，使用獨立佇列；超過 05:30 記錄延遲但繼續補做。等待上限依實際啟動起計 240 分鐘，並核對同週整合與來源版本。",
+        "2026-11-04 PDF 已補做成功：154 頁，上傳與讀回驗證完成。原失敗排程紀錄保留，人工補做不掩蓋歷史失敗；GitHub 平台仍可能延遲。"
+      ],
+      "services": [
+        {
+          "label": "本週總簡報 PDF",
+          "href": "https://drive.google.com/file/d/19afuQkGU8Ca0Z7KpZ-exdVZT89I5Fdvw/view"
+        },
+        {
+          "label": "總簡報",
+          "href": "https://docs.google.com/presentation/d/1CvP9Nqg4IhCIhWB40jexGQns-J0mJJJeUlC6BxacpVo/edit"
+        }
+      ],
+      "sources": [
+        {
+          "label": "PDF 正式匯出成功紀錄",
+          "href": "https://github.com/hua-urban/bni-merger/actions/runs/41735483851"
+        },
+        {
+          "label": "回歸檢查通過",
+          "href": "https://github.com/hua-urban/bni-merger/actions/runs/41735408745"
+        }
+      ],
+      "sourceNote": "正式頁數重新驗證、PDF 154 頁匯出及 Drive 檔案／匯出憑證讀回核對。"
+    },
+    {
       "id": "hua-owned-admin-cutover-20261104",
       "date": "2026-11-04",
       "status": "已上線",
