@@ -68,8 +68,11 @@ test('chapter report refresh is wired to a user action rather than called during
   assert.ok(renderStart >= 0 && refreshStart > renderStart);
   const renderSource = coreSource.slice(renderStart, refreshStart);
   assert.match(renderSource, /addEventListener\('click', refreshChapter\)/);
-  const refreshEnd = coreSource.indexOf('\n}\n', refreshStart) + 3;
-  assert.ok(refreshEnd > refreshStart);
+  const closing = /\r?\n\}\r?\n/g;
+  closing.lastIndex = refreshStart;
+  const match = closing.exec(coreSource);
+  assert.ok(match);
+  const refreshEnd = match.index + match[0].length;
   const outsideRefresh = coreSource.slice(0, refreshStart) + coreSource.slice(refreshEnd);
   assert.doesNotMatch(outsideRefresh, /\brefreshChapter\s*\(/,
     'refreshChapter must not be invoked automatically when the dashboard renders');
