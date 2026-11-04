@@ -316,7 +316,7 @@
               updatedAt: est.updatedAt,
               prev: {updatedAt:data.updatedAt,chapter:data.chapter,members:data.members},
               leftMembers: weekly.leftMembers
-            }, {view:{est:true,toggle:false}, latestOfficialChapter:latest, compact:true});
+            }, {view:{est:true,toggle:false,palmsRanking:!weekly.confirmed}, latestOfficialChapter:latest, compact:true});
           } catch (error) {
             status.textContent += '；最新週期畫面載入失敗，資料未確認最新。';
             console.error(error);

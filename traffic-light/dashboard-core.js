@@ -569,7 +569,7 @@ function render(){
       : `<span class="gap">離綠燈 <b>${GREEN - m.total}</b> 分</span>`;
     const aria = `${m.shortName}，${L.name}，${m.total} 分，${m.total >= GREEN ? '已達綠燈' : `離綠燈 ${GREEN - m.total} 分`}`;
     return `<button class="card ${L.cls}" data-name="${esc(m.name)}" aria-label="${esc(aria)}">
-      <div class="card-top"><span class="name">${esc(m.shortName)}</span><span class="rank num">#${esc(m.no)}</span></div>
+      <div class="card-top"><span class="name">${esc(m.shortName)}</span><span class="rank num">${VIEW.palmsRanking ? '排名 ' : ''}#${esc(m.no)}</span></div>
       <div class="score num">${m.total}<small>/100</small></div>
       <div class="card-bot"><span class="pill">${L.name}</span>${gap}</div>
     </button>`;
@@ -683,7 +683,7 @@ function openSheet(name){
       <div class="row">
         <div>
           <h2 class="sheet-name" id="sheetName">${esc(m.name)}</h2>
-          <p class="sheet-sub">會員編號 ${esc(m.no)}　·　這段期間計入 ${m.weeks} 週　·　${
+          <p class="sheet-sub">${VIEW.palmsRanking ? 'PALMS 排名' : '會員編號'} ${esc(m.no)}　·　這段期間計入 ${m.weeks} 週　·　${
             m.A === 0 ? '沒缺席過' : `缺席 ${m.A} 次（出席率 ${m.attend}%）`}</p>
         </div>
         <div style="display:flex; gap:12px; align-items:flex-start">

@@ -2,6 +2,36 @@
   "asOf": "2026-11-04",
   "entries": [
     {
+      "id": "chapter-cors-backend-20261104",
+      "date": "2026-11-04",
+      "status": "已上線",
+      "statusKind": "live",
+      "category": "會員紅綠燈",
+      "title": "修正官網讀取分會指標的跨網域限制",
+      "summary": [
+        "分會指標後端原先只允許舊 GitHub Pages 網址，已補上 hua-urban.com，並保留舊網址相容性。",
+        "已部署 Vercel 正式版；正式官網來源的預檢與分會指標查詢通過，PALMS 上傳版本查詢也正常。",
+        "26 項回歸測試通過。僅調整分會指標讀取的來源設定，未寫入或覆蓋會員統計資料。"
+      ],
+      "services": [
+        {
+          "label": "會員紅綠燈",
+          "href": "https://hua-urban.com/traffic-light/?v=est"
+        },
+        {
+          "label": "PALMS 上傳",
+          "href": "https://hua-urban.com/traffic-light/upload.html"
+        }
+      ],
+      "sources": [
+        {
+          "label": "後端修正紀錄",
+          "href": "https://github.com/hua-urban/htl-api/commit/cc0ce54cf8a07921ba26629a41b421dab99fad76"
+        }
+      ],
+      "sourceNote": "已驗證正式端點對官網與舊網址回傳正確 CORS，未允許其他來源；分會指標 GET 200、上傳版本 GET 200。"
+    },
+    {
       "id": "merge-pdf-verification-20261104",
       "date": "2026-11-04",
       "status": "已上線",
