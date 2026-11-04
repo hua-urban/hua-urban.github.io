@@ -114,6 +114,9 @@ if (!monthly || !Array.isArray(monthly.months)) throw new Error("Official monthl
 const gasUrlMatch = homepage.match(/\bGAS_CAL_URL\s*=\s*["']([^"']+)["']/);
 if (!gasUrlMatch) throw new Error("Could not locate the official activity feed URL on the homepage.");
 const activityUrl = new URL(gasUrlMatch[1]);
+if (activityUrl.protocol !== "https:" || activityUrl.hostname !== "script.google.com") {
+  throw new Error(`Refusing an activity feed outside script.google.com: ${activityUrl.origin}`);
+}
 activityUrl.searchParams.set("sheet", "行事曆");
 const activityPayload = await fetchJson(activityUrl.href);
 if (activityPayload?.ok !== true || !Array.isArray(activityPayload.data)) {
