@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { selectFullCyclePalms } from './greenlight-palms.mjs';
+import { assertNoSharpDrop, selectFullCyclePalms } from './greenlight-palms.mjs';
 
 function source() {
   return {
@@ -38,4 +38,13 @@ test('a partial month cannot be accepted as the full six-month report', () => {
 test('report end and asOf must agree', () => {
   const data = source(); data.chapter.est.chapter.asOf = '2026-10-14';
   assert.throws(() => selectFullCyclePalms(data), /asOf/);
+});
+
+test('refuses to publish when a source shrinks below 80% of the last published snapshot', () => {
+  assert.throws(() => assertNoSharpDrop('PALMS rows', 1, 55), /1 .*below 80% .*55/);
+  assert.throws(() => assertNoSharpDrop('roster members', 43, 55), /below 80%/);
+  assert.throws(() => assertNoSharpDrop('PALMS rows', 0, undefined), /no rows/);
+  assert.equal(assertNoSharpDrop('roster members', 44, 55), 44);
+  assert.equal(assertNoSharpDrop('roster members', 60, 55), 60);
+  assert.equal(assertNoSharpDrop('PALMS rows', 12, undefined), 12, 'first sync has no baseline');
 });
