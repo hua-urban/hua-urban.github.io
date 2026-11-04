@@ -2,6 +2,37 @@
   "asOf": "2026-11-04",
   "entries": [
     {
+      "id": "greenlight-login-classification-20261104",
+      "date": "2026-11-04",
+      "status": "已上線",
+      "statusKind": "live",
+      "category": "追綠光",
+      "title": "區分登入失敗原因，避免逾時誤報帳密錯誤",
+      "summary": [
+        "登入失敗改為區分帳密被官方明確拒絕、帳號狀態、額外驗證、連線受阻、等候逾時與登入狀態異常；未知原因不再一律提示帳密錯誤。",
+        "新增格式受限的參考編號，供資訊組核對錯誤分類與階段；應用診斷不記錄帳密、登入憑證或原始官方回應。",
+        "官方錯誤讀取及登入狀態補查均設等待上限，保留既有 CSRF 與送單防重保護。162 項測試及 GitHub CI 通過。",
+        "缺少或格式不正確的登入欄位會在本站擋下，提示輸入資料問題，不會送至官方登入。"
+      ],
+      "services": [
+        {
+          "label": "追綠光",
+          "href": "https://hua-greenlight-umydisxveq-de.a.run.app/"
+        }
+      ],
+      "sources": [
+        {
+          "label": "登入修正紀錄",
+          "href": "https://github.com/hua-urban/greenlight-connect-test/pull/4"
+        },
+        {
+          "label": "輸入資料分類補強",
+          "href": "https://github.com/hua-urban/greenlight-connect-test/commit/3c85be9484953758337aaa03307aec01717eef23"
+        }
+      ],
+      "sourceNote": "部署後核對正式前端檔案、會員資料及安全錯誤回應；未代會員輸入 BNI 帳密，未送出真實單據。"
+    },
+    {
       "id": "five-pr-release-20261104",
       "date": "2026-11-04",
       "status": "已上線",
