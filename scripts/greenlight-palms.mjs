@@ -18,3 +18,11 @@ export function selectFullCyclePalms(source) {
   }
   return full;
 }
+
+export function assertNoSharpDrop(label, count, previousCount, minRatio = 0.8) {
+  if (!Number.isInteger(count) || count < 1) throw new Error(`Refusing to sync ${label}: source returned no rows.`);
+  if (Number.isInteger(previousCount) && previousCount > 0 && count < previousCount * minRatio) {
+    throw new Error(`Refusing to sync ${label}: ${count} is below 80% of the last published snapshot (${previousCount}); existing files are unchanged.`);
+  }
+  return count;
+}
