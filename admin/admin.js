@@ -4,8 +4,8 @@ const SERVICES = [
   {
     title: "房地產協作平台",
     category: "會員與分組",
-    description: "整合、出售、出租與貸款活化的會內協作平台。第一版程式已完成，Google 後端待初始化及授權，目前入口顯示準備中。",
-    use: [{ label: "開啟房地產協作平台", href: "https://hua-urban.com/property-platform/" }],
+    description: "整合、出售、出租與貸款活化的會內協作平台。第一版待董顧確認，官網入口預留中，尚未開放。",
+    use: [{ status: "入口預留，確認後才啟用" }],
     data: [{ status: "案件及圖片採私人儲存，不在公開官網顯示" }],
     maintenance: [{ label: "建置與交接紀錄", href: "./updates/#property-platform-20261105" }, { status: "完整原始碼由資訊組私有 GitHub 專案管理" }]
   },
