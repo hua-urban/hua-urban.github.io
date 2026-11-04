@@ -244,6 +244,20 @@
     return {members: records, pending: pending};
   }
 
+  // Without a confirmed roster, keep showing the published PALMS rows rather than a blank page.
+  function weeklyDashboardRows(rosterResult, palmsRows, leftMembers) {
+    if (rosterResult && rosterResult.ok && rosterResult.snapshot) {
+      var reconciled = reconcileWeeklyRows(rosterResult.snapshot.members, palmsRows);
+      return {confirmed: true, members: reconciled.members, pending: reconciled.pending, leftMembers: []};
+    }
+    return {
+      confirmed: false,
+      members: Array.isArray(palmsRows) ? palmsRows : [],
+      pending: [],
+      leftMembers: Array.isArray(leftMembers) ? leftMembers : []
+    };
+  }
+
   var defaultClient = createMemberRegistryClient();
   return {
     apiUrl: API_URL,
@@ -251,6 +265,7 @@
     load: defaultClient.load,
     createMemberRegistryClient: createMemberRegistryClient,
     normalizeNameKey: normalizeNameKey,
-    reconcileWeeklyRows: reconcileWeeklyRows
+    reconcileWeeklyRows: reconcileWeeklyRows,
+    weeklyDashboardRows: weeklyDashboardRows
   };
 });

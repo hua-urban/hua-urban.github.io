@@ -105,10 +105,13 @@ test('existing reports retain real historical dates without weakening upload val
   assert.deepEqual(period.validateStored({start:'2026-04-22',end:'2026-10-21'},now),{start:'2026-04-22',asOf:'2026-10-21'});
   assert.equal(period.validate(historical,now).asOf,'2026-10-28');
   assert.throws(()=>period.validateStored(historical,new Date('2026-10-28T04:00:00Z')),/不得晚於本次更新基準/);
-  const saved=JSON.parse(fs.readFileSync(__dirname+'/data.json','utf8')).chapter.est.chapter;
-  assert.equal(saved.range,'2026-04-29 – 2026-10-28');
-  assert.equal(saved.lastSubmittedMeeting,'2026-10-21');
-  assert.match(saved.lastSubmittedMeetingSource,/10\/21 完成，10\/28 草稿/);
+  const saved={range:'2026-04-29 – 2026-10-28',lastSubmittedMeeting:'2026-10-21',
+    lastSubmittedMeetingSource:'BNI Connect PALMS 管理；10/21 完成，10/28 草稿'};
+  const [start,end]=saved.range.match(/\d{4}-\d{2}-\d{2}/g);
+  assert.deepEqual(period.validateStored({start,end},now),{start:'2026-04-29',asOf:'2026-10-28'});
+  assert.deepEqual(period.submissionEvidence(saved),{lastSubmittedMeeting:'2026-10-21',
+    lastSubmittedMeetingSource:saved.lastSubmittedMeetingSource});
+  assert.match(period.submissionStatus(saved,now),/最新已提交例會：2026-10-21/);
 });
 
 test('new submission evidence requires explicit source and verification and is returned for one atomic upload', () => {

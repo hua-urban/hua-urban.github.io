@@ -287,8 +287,9 @@ const nameKey = n => {
 const LEFT = new Set((Array.isArray(LEFTRAW) ? LEFTRAW : []).map(nameKey));
 
 const ALL = RAW.map(r => {
-  const m = {no:r[0], name:r[1], weeks:r[2], P:r[3], A:r[4], L:r[5], Med:r[6], S:r[7],
-             RG:r[8], RR:r[9], V:r[10], O2O:r[11], CEU:r[12], TYFCB:r[13]};
+  const v = i => Number(r[i]);
+  const m = {no:r[0], name:r[1], weeks:v(2), P:v(3), A:v(4), L:v(5), Med:v(6), S:v(7),
+             RG:v(8), RR:v(9), V:v(10), O2O:v(11), CEU:v(12), TYFCB:v(13)};
   m.sc = scoreOf(m);
   m.total = Object.values(m.sc).reduce((a,b) => a+b, 0);
   m.light = lightOf(m.total);
@@ -568,7 +569,7 @@ function render(){
       : `<span class="gap">離綠燈 <b>${GREEN - m.total}</b> 分</span>`;
     const aria = `${m.shortName}，${L.name}，${m.total} 分，${m.total >= GREEN ? '已達綠燈' : `離綠燈 ${GREEN - m.total} 分`}`;
     return `<button class="card ${L.cls}" data-name="${esc(m.name)}" aria-label="${esc(aria)}">
-      <div class="card-top"><span class="name">${esc(m.shortName)}</span><span class="rank num">#${m.no}</span></div>
+      <div class="card-top"><span class="name">${esc(m.shortName)}</span><span class="rank num">${VIEW.palmsRanking ? '排名 ' : ''}#${esc(m.no)}</span></div>
       <div class="score num">${m.total}<small>/100</small></div>
       <div class="card-bot"><span class="pill">${L.name}</span>${gap}</div>
     </button>`;
@@ -682,7 +683,7 @@ function openSheet(name){
       <div class="row">
         <div>
           <h2 class="sheet-name" id="sheetName">${esc(m.name)}</h2>
-          <p class="sheet-sub">會員編號 ${m.no}　·　這段期間計入 ${m.weeks} 週　·　${
+          <p class="sheet-sub">${VIEW.palmsRanking ? 'PALMS 排名' : '會員編號'} ${esc(m.no)}　·　這段期間計入 ${m.weeks} 週　·　${
             m.A === 0 ? '沒缺席過' : `缺席 ${m.A} 次（出席率 ${m.attend}%）`}</p>
         </div>
         <div style="display:flex; gap:12px; align-items:flex-start">
@@ -1431,7 +1432,7 @@ function renderLeaveList(){
     .sort((a, b) => a.no - b.no)
     .map(m => `<label class="leave-item${m.hasLeft ? ' on' : ''}">
         <input type="checkbox" data-leave="${esc(m.name)}"${m.hasLeft ? ' checked' : ''}>
-        <span class="lno">#${m.no}</span><span>${esc(m.shortName)}</span>
+        <span class="lno">#${esc(m.no)}</span><span>${esc(m.shortName)}</span>
       </label>`).join('');
 }
 

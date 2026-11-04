@@ -219,10 +219,10 @@
   </main>
 
   <script src="./weekly-period.js?v=20261029-thursday"></script>
-  <script src="../assets/member-registry.js"></script>
+  <script src="../assets/member-registry.js?v=20261104"></script>
   <script src="export.js?v=20261005"></script>
   <script src="dashboard-template.js?v=20261029-thursday"></script>
-  <script src="dashboard-core.js?v=20261029-thursday"></script>
+  <script src="dashboard-core.js?v=20261104"></script>
   <script>
     (function () {
       'use strict';
@@ -278,11 +278,16 @@
         var rosterResult = results[1].status === 'fulfilled' ? results[1].value : null;
         var data = dataResult.status === 'fulfilled' ? dataResult.value : null;
         var est = data && data.chapter && data.chapter.est;
+        var weekly = window.HuaMembers.weeklyDashboardRows(
+          rosterResult,
+          est && Array.isArray(est.members) ? est.members : [],
+          data && data.leftMembers
+        );
 
-        if (rosterResult && rosterResult.ok && rosterResult.latestConfirmed && rosterResult.snapshot) {
+        if (weekly.confirmed) {
           registryStatus.textContent = '會員名單｜名單確認日期：' + rosterResult.snapshot.effectiveAsOf;
         } else {
-          registryStatus.textContent = '目前無法確認會員名單是否最新；紅綠燈暫時保留既有資料。名單確認日期：未確認。';
+          registryStatus.textContent = '名單未確認：目前無法確認會員名單是否最新，下方暫依 PALMS 報告姓名顯示既有資料。名單確認日期：未確認。';
         }
 
         if (dataResult.status !== 'fulfilled') {
@@ -299,31 +304,25 @@
           status.textContent = 'PALMS 報告日期：未提供；目前沒有可用的最新週期報告。';
         }
 
-        if (!rosterResult || !rosterResult.ok || !rosterResult.snapshot) return;
-
-        var reconciliation = window.HuaMembers.reconcileWeeklyRows(
-          rosterResult.snapshot.members,
-          est && Array.isArray(est.members) ? est.members : []
-        );
-        if (reconciliation.members.length) {
+        if (weekly.members.length) {
           try {
             var monthlyResponse = await fetch('monthly.json', {cache:'no-store'});
             if (!monthlyResponse.ok) throw new Error('LTNA HTTP ' + monthlyResponse.status);
             var monthlyData = await monthlyResponse.json();
             var latest = (monthlyData.months || []).slice().sort(function(a,b){return b.month.localeCompare(a.month);})[0] || null;
             TrafficDashboard.mount(root, {
-              members: reconciliation.members,
+              members: weekly.members,
               chapter: est.chapter,
               updatedAt: est.updatedAt,
               prev: {updatedAt:data.updatedAt,chapter:data.chapter,members:data.members},
-              leftMembers: []
-            }, {view:{est:true,toggle:false}, latestOfficialChapter:latest, compact:true});
+              leftMembers: weekly.leftMembers
+            }, {view:{est:true,toggle:false,palmsRanking:!weekly.confirmed}, latestOfficialChapter:latest, compact:true});
           } catch (error) {
             status.textContent += '；最新週期畫面載入失敗，資料未確認最新。';
             console.error(error);
           }
         }
-        renderPendingMembers(root, reconciliation.pending);
+        renderPendingMembers(root, weekly.pending);
       }
 
       function element(tag, className, text) {

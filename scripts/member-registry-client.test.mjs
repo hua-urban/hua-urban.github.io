@@ -6,7 +6,8 @@ const require = createRequire(import.meta.url);
 const {
   createMemberRegistryClient,
   normalizeNameKey,
-  reconcileWeeklyRows
+  reconcileWeeklyRows,
+  weeklyDashboardRows
 } = require('../assets/member-registry.js');
 
 const memberA = {
@@ -153,4 +154,18 @@ test('new current member without a PALMS row is pending and receives no numeric 
   assert.deepEqual(result.pending, [{
     memberId: memberA.memberId, memberNo: '003', name: '王常殷 Hubert', status: '待PALMS資料'
   }]);
+});
+
+test('weekly rows fall back to the PALMS report names when the roster cannot be confirmed', () => {
+  const palms = [[1, 'Hubert Wang', 26, 25, 0, 0, 0, 0, 4, 0, 3, 2, 1, 500]];
+  const left = ['離會者'];
+  for (const roster of [null, {ok: false, status: 'unavailable', snapshot: null}]) {
+    assert.deepEqual(weeklyDashboardRows(roster, palms, left),
+      {confirmed: false, members: palms, pending: [], leftMembers: left});
+  }
+  const confirmed = weeklyDashboardRows({ok: true, latestConfirmed: true, snapshot: {members: [memberA, memberB]}}, palms, left);
+  assert.equal(confirmed.confirmed, true);
+  assert.deepEqual(confirmed.members.map(row => row[0]), ['003']);
+  assert.deepEqual(confirmed.pending.map(member => member.memberNo), ['017']);
+  assert.deepEqual(confirmed.leftMembers, [], 'the central roster already excludes departed members');
 });
