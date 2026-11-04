@@ -434,8 +434,16 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
         const minX=w/2+8,maxX=width-w/2-8,minY=104+h/2,maxY=height-60-h/2;
         const x=THREE.MathUtils.clamp((projected.x*.5+.5)*width,minX,maxX);
         const y=THREE.MathUtils.clamp((-projected.y*.5+.5)*height,minY,maxY);
-        return {...item,w,h,x,y,baseX:x,baseY:y,minX,maxX,minY,maxY,hidden:projected.z>1};
+        // Carry the previous screen offset forward. Restarting from the anchor on
+        // every frame can reverse pair ordering after subpixel camera movement.
+        const previous=item.layout;
+        let dx=previous?(previous.x-previous.baseX)*.985:0;
+        let dy=previous?(previous.y-previous.baseY)*.985:0;
+        const length=Math.hypot(dx,dy);if(length>maxShift){dx*=maxShift/length;dy*=maxShift/length;}
+        return {...item,w,h,x:THREE.MathUtils.clamp(x+dx,minX,maxX),y:THREE.MathUtils.clamp(y+dy,minY,maxY),baseX:x,baseY:y,minX,maxX,minY,maxY,hidden:projected.z>1};
       });
+      // Leave a settled layout alone while the camera is effectively stationary.
+      if(items.every((item,i)=>{const old=labels[i].layout;return old&&old.hidden===item.hidden&&old.w===item.w&&old.h===item.h&&Math.abs(old.baseX-item.baseX)<.35&&Math.abs(old.baseY-item.baseY)<.35;}))return;
       const overlap=(a,b)=>Math.abs(a.x-b.x)<(a.w+b.w)/2+gap&&Math.abs(a.y-b.y)<(a.h+b.h)/2+gap;
       function capacity(item,axis,direction){
         const other=axis==='x'?'y':'x',base=axis==='x'?item.baseX:item.baseY,otherBase=axis==='x'?item.baseY:item.baseX;
@@ -480,7 +488,12 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
           item.x=best.x;item.y=best.y;
         }
       }
-      for(const item of items){item.el.style.left=`${item.x}px`;item.el.style.top=`${item.y}px`;item.el.style.visibility=item.hidden?'hidden':'visible';}
+      for(let i=0;i<items.length;i++){
+        const item=items[i],old=labels[i].layout;
+        if(old){const oldDx=old.x-old.baseX,oldDy=old.y-old.baseY;
+          const dx=item.x-item.baseX-oldDx,dy=item.y-item.baseY-oldDy,length=Math.hypot(dx,dy);
+          if(length>2){item.x=THREE.MathUtils.clamp(item.baseX+oldDx+dx*2/length,item.minX,item.maxX);item.y=THREE.MathUtils.clamp(item.baseY+oldDy+dy*2/length,item.minY,item.maxY);}}
+        labels[i].layout={x:item.x,y:item.y,baseX:item.baseX,baseY:item.baseY,w:item.w,h:item.h,hidden:item.hidden};item.el.style.left=`${item.x}px`;item.el.style.top=`${item.y}px`;item.el.style.visibility=item.hidden?'hidden':'visible';}
     }
     function animate(now){if(disposed)return;raf=requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.05)||0;last=now;if(document.hidden)return;
       const moving=!paused&&!reduced;if(moving)time+=dt;
