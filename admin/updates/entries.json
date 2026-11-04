@@ -1,6 +1,27 @@
 {
-  "asOf": "2026-11-04",
+  "asOf": "2026-11-05",
   "entries": [
+    {
+      "id": "property-platform-20261105",
+      "date": "2026-11-05",
+      "status": "待啟用",
+      "statusKind": "pending",
+      "category": "房地產協作",
+      "title": "建立房地產協作平台第一版與Google部署來源",
+      "summary": [
+        "完成會員共用密碼、個別管理帳號、案件填報、九長審核、摘要發布、核准資料下載與資訊組異動流程。",
+        "完整來源由華都更私有GitHub專案管理，官網僅發布公開入口；案件與圖片不放在公開庫。",
+        "本機核心流程已試用，四組後端測試通過。Google專案已建立，正式初始化、帳密設定及授權部署仍待完成。"
+      ],
+      "services": [
+        {
+          "label": "房地產協作平台",
+          "href": "https://hua-urban.com/property-platform/"
+        }
+      ],
+      "sources": [],
+      "sourceNote": "入口頁上線不代表Google案件後端已啟用；本次未購買Google訂閱、未寫入正式案件或變更中央會員名冊。"
+    },
     {
       "id": "greenlight-login-classification-20261104",
       "date": "2026-11-04",
