@@ -2,6 +2,58 @@
   "asOf": "2026-11-04",
   "entries": [
     {
+      "id": "five-pr-release-20261104",
+      "date": "2026-11-04",
+      "status": "已上線",
+      "statusKind": "live",
+      "category": "資訊組維護",
+      "title": "完成五項系統修正、審核與正式發布",
+      "summary": [
+        "官網：名冊暫時不可用時，最新週期統計仍顯示已發布 PALMS 資料；備援資料的排名與正常會員編號明確區分，並加強顯示欄位處理及同步檢查。",
+        "產業鏈分組：移除過期預設名冊，來源皆失敗時顯示提示；公開快照改用必要欄位。保留原有會員編號編輯與跨組編輯方式，55 位會員及分組內容不變。",
+        "PALMS 後端：補上資料重驗及文字檢查，保留不限次數上傳。28 項測試、62 次連續模擬上傳及 4 種現行資料契約驗證通過；正式統計未被測試資料覆蓋。",
+        "追綠光：未送出的草稿會列出原因；收件人配對問題限於該筆處理，名冊短暫中斷可沿用最後正常資料。95 項測試與正式端點檢查通過，Cloud Run 已切換新版。",
+        "總簡報：修正未解鎖時的權限還原紀錄，補上整合卡住與內容警告通知，並調整權限錯誤重試；線上 Apps Script 已更新為 v3。各專案測試及 10 個桌機／手機情境通過。"
+      ],
+      "services": [
+        {
+          "label": "會員紅綠燈",
+          "href": "https://hua-urban.com/traffic-light/?v=est"
+        },
+        {
+          "label": "產業鏈分組",
+          "href": "https://hua-urban.com/bni-pt-groups/"
+        },
+        {
+          "label": "追綠光",
+          "href": "https://hua-greenlight-umydisxveq-de.a.run.app/"
+        }
+      ],
+      "sources": [
+        {
+          "label": "官網修正",
+          "href": "https://github.com/hua-urban/hua-urban.github.io/pull/12"
+        },
+        {
+          "label": "分組修正",
+          "href": "https://github.com/hua-urban/bni-pt-groups/pull/3"
+        },
+        {
+          "label": "PALMS 後端修正",
+          "href": "https://github.com/hua-urban/htl-api/pull/2"
+        },
+        {
+          "label": "追綠光修正",
+          "href": "https://github.com/hua-urban/greenlight-connect-test/pull/3"
+        },
+        {
+          "label": "總簡報修正",
+          "href": "https://github.com/hua-urban/bni-merger/pull/15"
+        }
+      ],
+      "sourceNote": "正式 Pages 發布成功並核對檔案內容；Vercel 與 Cloud Run 端點正常，Apps Script 程式讀回一致。畫面驗證使用隔離來源，沒有送出真實 BNI 單據或測試寫入中央名冊。"
+    },
+    {
       "id": "chapter-cors-backend-20261104",
       "date": "2026-11-04",
       "status": "已上線",
