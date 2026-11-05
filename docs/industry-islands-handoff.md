@@ -59,4 +59,4 @@ B/D/E同次更新為低角度預設自動導覽；按原有「自動導覽」可
 
 ## 島嶼製作洽詢入口
 
-總覽與A/B/D/E頁底部加入靜態引流區，樣式共用industry-islands/island-contact.css；不需額外JavaScript。個人首頁與LINE網址沿用擁有者首頁的公開入口。未來新增C組時可沿用相同區塊與樣式。未加入追蹤、表單、付費或外部套件。
+依擁有者更新要求，僅E組頁底部保留靜態引流區，樣式共用industry-islands/island-contact.css；不需額外JavaScript。個人首頁與LINE網址沿用擁有者首頁的公開入口。總覽及A/B/C/D組不放製作洽詢引流區。未加入追蹤、表單、付費或外部套件。
