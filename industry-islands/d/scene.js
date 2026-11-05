@@ -1,16 +1,18 @@
 import * as THREE from 'three';
 import { OrbitControls } from '../lib/OrbitControls.js';
 
-// This pure layout is shared by rendered roads and headless connectivity checks.
+// Districts, labels, roads and collaboration endpoints share this layout.
+// Large-space energy/materials sit west; business/digital services sit east.
+// Swapping graph occupants keeps the physical road geometry unchanged.
 export const ROAD_LAYOUT = {
-  nodes: {digital:[-4.6,-1.8],leasing:[-1.4,-3.35],materials:[1.3,-1.85],design:[4.7,-2.3],energy:[5,1.1],business:[-5.2,1],center:[-.1,.9],west:[-3.35,2.7],east:[3.3,2.75],logistics:[-5.4,6.65],collaboration:[4.7,6.65]},
+  nodes: {materials:[-4.6,-1.8],leasing:[-1.4,-3.35],digital:[1.3,-1.85],design:[4.7,-2.3],business:[5,1.1],energy:[-5.2,1],center:[-.1,.9],west:[-3.35,2.7],east:[3.3,2.75],logistics:[-5.4,6.65],collaboration:[4.7,6.65]},
   links: [
-    ['digital','leasing',[[-3.5,-2.8]]], ['leasing','design',[[.6,-3.4],[2.8,-3.3]]],
-    ['design','energy',[[5.7,-.8]]], ['energy','east',[[4.4,2.4]]],
-    ['east','west',[[1.8,2.9],[-.7,2.7]]], ['west','business',[[-4.7,2.2]]],
-    ['business','digital',[[-5.8,-.3]]], ['leasing','materials',[[0,-2.9]]],
-    ['materials','design',[[3,-2.1]]], ['materials','center',[[1,-.5]]],
-    ['center','business',[[-2.4,.6]]], ['center','energy',[[2.5,.65]]],
+    ['materials','leasing',[[-3.5,-2.8]]], ['leasing','design',[[.6,-3.4],[2.8,-3.3]]],
+    ['design','business',[[5.7,-.8]]], ['business','east',[[4.4,2.4]]],
+    ['east','west',[[1.8,2.9],[-.7,2.7]]], ['west','energy',[[-4.7,2.2]]],
+    ['energy','materials',[[-5.8,-.3]]], ['leasing','digital',[[0,-2.9]]],
+    ['digital','design',[[3,-2.1]]], ['digital','center',[[1,-.5]]],
+    ['center','energy',[[-2.4,.6]]], ['center','business',[[2.5,.65]]],
     ['center','west',[[-1.9,1.65]]], ['center','east',[[1.6,1.8]]],
     ['west','logistics',[[-3.7,3.7],[-4.4,5]],true],
     ['east','collaboration',[[3.6,4],[4.2,5.4]],true],
@@ -390,7 +392,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
       for(const x of [-.15,.15])for(const z of [-.16,.16]){const o=cyl(g,x,.1,z,.07,.04,P.dark);o.rotation.z=Math.PI/2;}
       vehicles.push({g,path,length:path.getLength(),offset,truck:isTruck});
     }
-    const ringRoute=[...shortest('digital','leasing'),...shortest('leasing','design'),...shortest('design','energy'),...shortest('energy','east'),...shortest('east','west'),...shortest('west','business'),...shortest('business','digital')];
+    const ringRoute=[...shortest('materials','leasing'),...shortest('leasing','design'),...shortest('design','business'),...shortest('business','east'),...shortest('east','west'),...shortest('west','energy'),...shortest('energy','materials')];
     const ringPath=routeCurve(ringRoute,.13,.16);vehicle(ringPath,false,.13);vehicle(ringPath,false,.59);
     vehicle(routeCurve(shortest('energy','logistics'),-.1,.25),true,.1);
     // Curved sea lanes connect the harbor and collaboration cove, staying south of both islands.
