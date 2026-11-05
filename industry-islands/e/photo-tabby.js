@@ -1,8 +1,10 @@
+import { createCatWalker } from './cat-walker.js?v=walk1';
 // A separate photo-reference tabby shares the original's tracked geometry while
 // owning its pose and coat materials. The original actor is never animated here.
 export function createPhotoTabby({ THREE, parent, source, parts, palette,
   earGeometry, material, routeCurve, shortest }) {
   const root = source.clone(true);
+  root.rotation.set(0,0,0);
   root.name = 'round-tabby-cat';
   root.scale.setScalar(.94);
   parent.add(root);
@@ -39,26 +41,13 @@ export function createPhotoTabby({ THREE, parent, source, parts, palette,
     return { path, duration: path.getLength() / .195 };
   });
   const idle = 5.1;
-  const cycle = routes.reduce((sum, route) => sum + route.duration + idle, 0);
-  const start = routes[0].duration * .62;
+  const walker=createCatWalker({root,routes,speed:.195,idle,startProgress:.62});
   const smooth = (value, from, to) => THREE.MathUtils.smoothstep(value, from, to);
   function update(elapsed, dt = 0) {
-    let phase = ((elapsed + start) % cycle + cycle) % cycle;
-    let route = routes[0];
-    for (const candidate of routes) {
-      route = candidate;
-      if (phase < route.duration + idle) break;
-      phase -= route.duration + idle;
-    }
-    const walking = phase < route.duration;
-    const progress = Math.min(phase / route.duration, 1);
-    root.position.copy(route.path.getPointAt(progress));
-    const direction = route.path.getTangentAt(progress);
-    const heading = Math.atan2(direction.x, direction.z);
-    const difference = Math.atan2(Math.sin(heading - root.rotation.y), Math.cos(heading - root.rotation.y));
-    root.rotation.y += difference * (dt > 0 ? Math.min(1, dt * 5) : 1);
-    const timeAtStop = Math.max(0, phase - route.duration);
-    const sitting = walking ? 0 : smooth(timeAtStop, 0, .9) *
+    const motion=walker.update(dt),{walking,progress}=motion;
+    const route=routes[motion.routeIndex],phase=progress*route.duration;
+    const timeAtStop=motion.idleTime;
+    const sitting = walking||motion.turning ? 0 : smooth(timeAtStop, 0, .9) *
       (1 - smooth(timeAtStop, idle - .85, idle));
     const stride = walking ? Math.min(1, phase * 3, (route.duration - phase) * 3) : 0;
     const gait = elapsed * 6.7;

@@ -27,6 +27,9 @@
 ```sh
 python3 -m http.server 8775 --bind 127.0.0.1
 node scripts/check-industry-islands.mjs
+node scripts/check-label-stability.cjs
+node scripts/check-cat-locomotion.mjs
+node scripts/check-cat-interactions.mjs
 ```
 
 預覽 `/industry-islands/`。跨組連結指向正式網址，因此發布後應實測完整跳轉。檢查三組八主題、B三情境／D四情境／E三情境、三條雙向連線、日夜／暫停／減少動態、手機無溢出。手機效能仍依實際裝置確認。
