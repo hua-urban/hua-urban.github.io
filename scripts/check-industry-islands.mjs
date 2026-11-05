@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 const base=path.resolve('industry-islands');
 const topics={};
-for(const group of ['d','e']){
+for(const group of ['b','d','e']){
  const dir=path.join(base,group);
  const mod=await import('data:text/javascript;base64,'+Buffer.from(fs.readFileSync(path.join(dir,'data.js'),'utf8')).toString('base64'));
  topics[group]=new Set(mod.topics.map(t=>t.id));
@@ -21,3 +21,7 @@ for(const group of ['d','e']){
 for(const [d,e] of [['energy','industry'],['leasing','land'],['digital','ai']])if(!topics.d.has(d)||!topics.e.has(e))throw Error('Invalid cross-group route');
 for(const file of ['index.html','cross-group.js','cross-group.css','lib/three.module.js','lib/three.core.js','lib/THREE-LICENSE.txt'])if(!fs.existsSync(path.join(base,file)))throw Error('Missing '+file);
 console.log('All island structure checks passed.');
+
+const registry=await import('data:text/javascript;base64,'+Buffer.from(fs.readFileSync(path.join(base,'groups.js'),'utf8')).toString('base64'));
+for(const r of registry.routes)for(const g of Object.keys(registry.sites))if(r[g]&&!topics[g]?.has(r[g]))throw Error('Invalid registry topic '+g+':'+r[g]);
+console.log('Cross-group registry references valid.');
