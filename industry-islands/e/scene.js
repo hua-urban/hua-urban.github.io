@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from '../lib/OrbitControls.js';
+import { createCreamCat } from './cream-cat.js?v=cream1';
+import { createPhotoTabby } from './photo-tabby.js?v=tabby2-1';
 
 // This pure layout is shared by rendered roads and headless connectivity checks.
 export const ROAD_LAYOUT = {
@@ -475,6 +477,8 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
       catTail.forEach((joint,i)=>{joint.rotation.z=Math.sin(elapsed*1.1-i*.55)*(.08+i*.018);joint.rotation.x=(i?-.14:-.9)+Math.sin(elapsed*.9-i*.35)*.04;});
     }
     updateCat(0);
+    const creamCat=createCreamCat({THREE,parent:landscape,oval:catOval,mesh,cylinder:cyl,box,material,earGeometry:earGeo,unitCylinder,keep,routeCurve,shortest});
+    const extraTabby=createPhotoTabby({THREE,parent:landscape,source:cat,parts:{body:catBody,torso:catTorso,chest:catChest,head:catHead,legs:catLegs,tail:catTail,eyes:catEyes},palette:{fur,darkFur,faceFur,chestFur,lightFur,earPink,nosePink,catEye,pupil},earGeometry:earGeo,material,routeCurve,shortest});
     function vehicle(path,isTruck=false,offset=0) {
       const g=new THREE.Group();landscape.add(g);
       const color=isTruck?P.cream:P.brick;
@@ -618,7 +622,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     }
     function animate(now){if(disposed)return;raf=requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.05)||0;last=now;if(document.hidden)return;
       const moving=!paused&&!reduced;if(moving)time+=dt;
-      if(moving){updateCat(time,dt);fans.forEach(g=>g.rotation.y=time*4);
+      if(moving){updateCat(time,dt);creamCat.update(time,dt);extraTabby.update(time,dt);fans.forEach(g=>g.rotation.y=time*4);
         walkers.forEach(w=>{const phase=(time*.23/w.length+w.offset)%2,u=phase<1?phase:2-phase;locate(w.g,w.path,u);if(phase>1)w.g.rotation.y+=Math.PI;w.limbs.forEach((l,i)=>l.rotation.x=Math.sin(time*7+w.offset*10)*(i%2?1:-1)*.48);});
         vehicles.forEach(o=>{const phase=(time*(o.truck?.52:.72)/o.length+o.offset)%(o.truck?2:1),u=o.truck?(phase<1?phase:2-phase):phase;locate(o.g,o.path,u);if(o.truck&&phase>1)o.g.rotation.y+=Math.PI;});
         boats.forEach(b=>{const p=(time*.016+b.offset)%2,u=p<1?p:2-p;locate(b.g,b.path,u,Math.sin(time*1.7)*.018);if(p>1)b.g.rotation.y+=Math.PI;});
