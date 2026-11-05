@@ -4,6 +4,7 @@ import * as THREE from '../industry-islands/lib/three.module.js';
 import {createCreamCat} from '../industry-islands/e/cream-cat.js';
 import {createPhotoTabby} from '../industry-islands/e/photo-tabby.js';
 import {createCatWalker} from '../industry-islands/e/cat-walker.js';
+import {createCatInteractions} from '../industry-islands/e/cat-interactions.js';
 
 const source=fs.readFileSync(new URL('../industry-islands/e/scene.js',import.meta.url),'utf8');
 const layoutSource=source.slice(source.indexOf('export const ROAD_LAYOUT'),source.indexOf('// A schematic miniature'));
@@ -49,5 +50,19 @@ assert(states.every(s=>s.maxTurnSpeed<=2.8+1e-8),'Cats must turn smoothly rather
 assert(states.every((s,index)=>expectedStops[index].every(id=>s.visited.has(id))),'Each cat must complete its whole route, including reversals');
 actors.forEach(actor=>landscape.remove(actor.root));
 }
+// Use the actual three scene actors to ensure their heads follow the torso.
+const posed=build(THREE,landscape,material,mesh,box,cyl,unitCylinder,keep,P,routeCurve,shortest,createCreamCat,createPhotoTabby,createCatWalker);
+const gestures=createCatInteractions({actors:posed,random:()=>.7,soundEnabled:false});
+posed.forEach(a=>gestures.pet(a.root.name,{side:1}));
+for(let frame=1;frame<=132;frame++)gestures.update(frame/60,1/60);
+for(const actor of posed){
+ const body=actor.root.getObjectByName('cat-body'),head=actor.root.getObjectByName('cat-head');
+ assert(body.rotation.z>1.9,actor.root.name+': torso must recline');
+ assert(Math.abs(head.rotation.z)<.12,actor.root.name+': head must roll with the torso, not remain upright');
+ const up=new THREE.Vector3(0,1,0).applyQuaternion(body.quaternion).applyQuaternion(head.quaternion);
+ assert(up.y<0,actor.root.name+': head must turn onto its side with the belly pose');
+}
+gestures.dispose();posed.forEach(a=>landscape.remove(a.root));
+console.log('PASS actual three cat heads follow torso while reclining');
 kept.forEach(g=>g.dispose());mats.forEach(m=>m.dispose());
 

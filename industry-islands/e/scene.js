@@ -3,7 +3,7 @@ import { OrbitControls } from '../lib/OrbitControls.js';
 import { createCreamCat } from './cream-cat.js?v=pet1';
 import { createPhotoTabby } from './photo-tabby.js?v=pet1';
 import { createCatWalker } from './cat-walker.js?v=walk1';
-import { createCatInteractions } from './cat-interactions.js?v=pet2';
+import { createCatInteractions } from './cat-interactions.js?v=pet3';
 
 // This pure layout is shared by rendered roads and headless connectivity checks.
 export const ROAD_LAYOUT = {
