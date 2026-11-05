@@ -100,7 +100,9 @@ export function createCatInteractions({ actors, random = Math.random, soundEnabl
           node.position.y=blend(base.position.y,.335,side);
           node.position.z+=side*.055;
           node.rotation.x=blend(base.rotation.x,-.06,side);
-          node.rotation.z=blend(base.rotation.z,action.direction*.55-roll,side);
+          // The head rolls with the torso. A small neck tilt keeps it relaxed,
+          // without cancelling the body roll and holding the face upright.
+          node.rotation.z=blend(base.rotation.z,action.direction*.08,side);
         } else if(name==='cat-torso'){
           node.scale.y=base.scale.y*(1+.04*side+Math.sin(t*1.7)*.008*belly);
           node.scale.z=base.scale.z*(1-.08*side);
