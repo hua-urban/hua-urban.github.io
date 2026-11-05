@@ -268,3 +268,7 @@ document.addEventListener("keydown", (event) => {
 });
 
 updateDirectory();
+
+
+// Public display settings are maintained in the chapter spreadsheet.
+if(window.HuaSiteContent){HuaSiteContent.load().then(function(data){HuaSiteContent.applyDirectory(SERVICES,data);updateDirectory();}).catch(function(){/* Retain the verified service defaults if the settings source is unavailable. */});}
