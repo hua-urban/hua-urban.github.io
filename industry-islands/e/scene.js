@@ -358,32 +358,38 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     // the miniature's normal disposal path; no textures or external assets.
     const cat = new THREE.Group(), catBody = new THREE.Group();
     cat.name='garden-tabby';cat.scale.setScalar(.9);landscape.add(cat);cat.add(catBody);
-    const fur=material('#a39787',{flatShading:true}), darkFur=material('#51483f'),
-      lightFur=material('#eee3cc'), earPink=material('#cc9389'), nosePink=material('#a96664'),
-      catEye=material('#b9cb72'), pupil=material('#25302c');
-    ellipsoid(catBody,0,.315,-.06,.162,.172,.265,fur);
-    ellipsoid(catBody,0,.275,.13,.13,.15,.13,lightFur);
+    // Photo reference: warm golden-brown mackerel tabby, amber round eyes,
+    // dark necklace/leg bands, brown paws and a small cream chin.
+    const fur=material('#775735'), darkFur=material('#29221b'),
+      faceFur=material('#90683b'), chestFur=material('#a17a49'),
+      lightFur=material('#dfcfad'), earPink=material('#ae8070'), nosePink=material('#98654e'),
+      catEye=material('#c99a43'), pupil=material('#161b16');
+    const catSphere=keep(new THREE.SphereGeometry(1,16,12));
+    function catOval(p,x,y,z,sx,sy,sz,m){const o=mesh(catSphere,m,p,x,y,z);o.scale.set(sx,sy,sz);return o;}
+    const catTorso=new THREE.Group();catTorso.position.set(0,.315,-.06);catBody.add(catTorso);
+    catOval(catTorso,0,0,0,.175,.18,.29,fur);
+    const catChest=catOval(catBody,0,.29,.13,.137,.16,.135,chestFur);
     const catHead=new THREE.Group();catHead.position.set(0,.465,.22);catBody.add(catHead);
-    ellipsoid(catHead,0,0,0,.18,.155,.16,fur);
+    catOval(catHead,0,0,0,.174,.16,.157,faceFur);
     const earGeo=keep(new THREE.ConeGeometry(1,1,3));
+    const catEyes=[];
     for(const side of [-1,1]){
-      const ear=mesh(earGeo,fur,catHead,side*.119,.155,-.015);ear.scale.set(.093,.18,.067);ear.rotation.z=-side*.19;
-      const inner=mesh(earGeo,earPink,catHead,side*.12,.16,.022);inner.scale.set(.057,.11,.014);inner.rotation.z=-side*.19;
-      ellipsoid(catHead,side*.077,.019,.135,.049,.05,.025,lightFur);
-      ellipsoid(catHead,side*.077,.02,.156,.034,.039,.012,catEye);
-      ellipsoid(catHead,side*.077,.02,.167,.01,.031,.005,pupil);
-      ellipsoid(catHead,side*.068,.034,.172,.008,.009,.003,P.white);
-      ellipsoid(catHead,side*.044,-.065,.144,.061,.043,.044,lightFur);
-      // Cheek bars and four flank stripes sit on both visible sides.
+      const ear=mesh(earGeo,fur,catHead,side*.116,.175,-.015);ear.scale.set(.089,.23,.067);ear.rotation.z=-side*.18;
+      const inner=mesh(earGeo,earPink,catHead,side*.117,.182,.022);inner.scale.set(.055,.15,.014);inner.rotation.z=-side*.18;
+      const eye=new THREE.Group();eye.position.set(side*.078,.015,.132);catHead.add(eye);catEyes.push(eye);
+      catOval(eye,0,0,0,.051,.054,.019,darkFur);
+      catOval(eye,0,0,.016,.044,.047,.009,catEye);
+      catOval(eye,0,0,.025,.029,.035,.004,pupil);
+      catOval(eye,-.011,.017,.03,.009,.01,.002,P.white);
+      catOval(eye,.014,-.016,.03,.003,.004,.0015,lightFur);
+      catOval(catHead,side*.043,-.068,.142,.058,.038,.042,lightFur);
+      // Short cheek marks follow the face rather than forming heavy brows.
       for(const [y,z] of [[-.013,.112],[-.041,.102]]){
-        const bar=box(catHead,side*.145,y,z,.044,.014,.045,darkFur);bar.rotation.z=side*.25;
-      }
-      for(const z of [-.23,-.12,-.01,.1]){
-        const stripe=box(catBody,side*.148,.34,z,.022,.155,.033,darkFur);stripe.rotation.x=-.23;stripe.rotation.z=-side*.22;
+        const bar=catOval(catHead,side*.143,y,z,.026,.008,.026,darkFur);bar.rotation.z=side*.25;
       }
     }
-    ellipsoid(catHead,0,-.054,.185,.027,.019,.014,nosePink);
-    ellipsoid(catHead,0,-.108,.139,.065,.021,.03,lightFur);
+    catOval(catHead,0,-.054,.184,.027,.019,.014,nosePink);
+    catOval(catHead,0,-.108,.139,.061,.023,.032,lightFur);
     // A cylinder between two points also gives crisp, inexpensive whiskers and M.
     function catStroke(parent,a,b,r,m){
       const start=new THREE.Vector3(...a),end=new THREE.Vector3(...b),delta=end.clone().sub(start);
@@ -391,16 +397,34 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
       line.scale.set(r,delta.length(),r);line.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),delta.normalize());return line;
     }
     const forehead=[[-.075,.08,.126],[-.05,.115,.111],[0,.074,.144],[.05,.115,.111],[.075,.08,.126]];
-    for(let i=1;i<forehead.length;i++)catStroke(catHead,forehead[i-1],forehead[i],.009,darkFur);
+    for(let i=1;i<forehead.length;i++)catStroke(catHead,forehead[i-1],forehead[i],.0055,darkFur);
+    for(const x of [-.045,0,.045]){
+      const points=Array.from({length:12},(_,i)=>{const a=.65+i*1.5/11;return new THREE.Vector3(x,Math.sin(a)*.161,Math.cos(a)*.158);});
+      mesh(keep(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),16,.007,4,false)),darkFur,catHead);
+    }
     catStroke(catHead,[0,-.069,.18],[0,-.09,.177],.004,darkFur);
-    for(const side of [-1,1])for(let i=0;i<3;i++)catStroke(catHead,[side*.06,-.065,.179],[side*(.21+i*.01),-.05-i*.022,.16-i*.025],.0026,lightFur);
-    for(const z of [-.22,-.1,.02])box(catBody,0,.477,z,.095,.016,.035,darkFur);
+    for(const side of [-1,1])for(let i=0;i<3;i++)catStroke(catHead,[side*.06,-.065,.179],[side*(.23+i*.01),-.05-i*.022,.16-i*.025],.0023,lightFur);
+    // Curved bands hug the coat. They stay attached as the body settles to sit.
+    for(const z of [-.2,-.09,.025,.14]){
+      const positions=[],indices=[];
+      for(let i=0;i<=24;i++){
+        const a=-2.12+i*4.24/24,halfWidth=.012*(.3+.7*Math.cos(a*.55)**2);
+        for(const side of [-1,1]){const zz=z+Math.sin(a*2)*.012+side*halfWidth,section=Math.sqrt(1-(zz/.29)**2);positions.push(Math.sin(a)*(.175*section+.001),Math.cos(a)*(.18*section+.001),zz);}
+        if(i<24){const j=i*2;indices.push(j,j+1,j+2,j+1,j+3,j+2);}
+      }
+      const geometry=keep(new THREE.BufferGeometry());geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setIndex(indices);geometry.computeVertexNormals();
+      mesh(geometry,darkFur,catTorso);
+    }
+    for(const y of [.285,.35]){
+      const points=Array.from({length:15},(_,i)=>{const a=-1.5+i*3/14;return new THREE.Vector3(Math.sin(a)*.133,y,.13+Math.cos(a)*.133);});
+      mesh(keep(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),18,.012,5,false)),darkFur,catBody);
+    }
     const catLegs=[];
     for(const z of [.12,-.23])for(const side of [-1,1]){
       const leg=new THREE.Group();leg.position.set(side*.109,.245,z);catBody.add(leg);
-      ellipsoid(leg,0,-.09,0,.043,.11,.047,fur);
-      cyl(leg,0,-.11,0,.044,.028,darkFur);
-      ellipsoid(leg,0,-.205,.017,.052,.034,.07,lightFur);catLegs.push(leg);
+      catOval(leg,0,-.09,0,.046,.11,.049,fur);
+      for(const y of [-.052,-.112,-.168])cyl(leg,0,y,0,.047,y===-.168?.017:.023,darkFur);
+      catOval(leg,0,-.205,.017,.052,.034,.07,fur);catLegs.push(leg);
     }
     const catTail=[];let tailParent=catBody;
     for(let i=0;i<5;i++){
@@ -411,7 +435,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
       cyl(joint,0,.067,0,radius*1.025,.025,darkFur);
       catTail.push(joint);tailParent=joint;
     }
-    ellipsoid(tailParent,0,.098,0,.019,.024,.019,darkFur);
+    catOval(tailParent,0,.098,0,.019,.024,.019,darkFur);
     // Each leg of the stroll uses the same road graph as the walkers. Stops at
     // junctions give a quiet look around without cutting across gardens.
     const catStops=['center','talent','ai','property','finance','center'];
@@ -419,7 +443,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
       const path=routeCurve(shortest(catStops[i],to),0,.16);
       return {path,duration:path.getLength()/.24,from:catStops[i],to};
     });
-    const catIdle=2.8,catCycle=catRoutes.reduce((sum,r)=>sum+r.duration+catIdle,0);
+    const catIdle=4.2,catCycle=catRoutes.reduce((sum,r)=>sum+r.duration+catIdle,0);
     let catGait=0;
     // Start just beyond the central fountain and set the pose before first render.
     const catStartTime=catRoutes[0].duration*.15;
@@ -436,11 +460,19 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
       cat.rotation.y+=difference*(dt?Math.min(1,dt*6):1);
       if(walking)catGait+=dt*8;
       const settle=walking?Math.min(1,phase*4):Math.max(0,1-(phase-route.duration)*5);
-      catLegs.forEach((leg,i)=>{leg.rotation.x=Math.sin(catGait+(i===0||i===3?0:Math.PI))*.32*settle;});
+      const idleTime=Math.max(0,phase-route.duration);
+      const sitting=walking?0:THREE.MathUtils.smoothstep(idleTime,0,.6)*(1-THREE.MathUtils.smoothstep(idleTime,catIdle-.6,catIdle));
+      catLegs.forEach((leg,i)=>{leg.rotation.x=Math.sin(catGait+(i===0||i===3?0:Math.PI))*.32*settle-(i>1?.5*sitting:0);leg.position.y=.245-(i>1?.005*sitting:0);});
       catBody.position.y=walking?Math.sin(catGait*2)*.007:0;
-      catHead.rotation.y=walking?Math.sin(elapsed*1.1)*.05:Math.sin((phase-route.duration)*2)*.38;
-      catHead.rotation.z=walking?0:Math.sin((phase-route.duration)*1.6)*.07;
-      catTail.forEach((joint,i)=>{joint.rotation.z=Math.sin(elapsed*1.7-i*.55)*(.12+i*.025);joint.rotation.x=(i?-.14:-.9)+Math.sin(elapsed*1.3-i*.35)*.055;});
+      catTorso.scale.set(1,1+sitting*.2,1-sitting*.18);catTorso.position.y=.315+sitting*.025;
+      catChest.position.y=.29+sitting*.065;
+      catHead.position.y=.465+sitting*.075;
+      catHead.rotation.y=walking?Math.sin(elapsed*.8)*.035:Math.sin(idleTime*.95)*.2*sitting;
+      catHead.rotation.x=sitting*(.04+Math.sin(idleTime*.8)*.06);
+      catHead.rotation.z=sitting*(.18+Math.sin(idleTime*1.2)*.045);
+      const blinkPhase=elapsed%7.4,blink=blinkPhase<.16?1-Math.sin(blinkPhase/.16*Math.PI)*.92:1;
+      catEyes.forEach(eye=>eye.scale.y=blink);
+      catTail.forEach((joint,i)=>{joint.rotation.z=Math.sin(elapsed*1.1-i*.55)*(.08+i*.018);joint.rotation.x=(i?-.14:-.9)+Math.sin(elapsed*.9-i*.35)*.04;});
     }
     updateCat(0);
     function vehicle(path,isTruck=false,offset=0) {
