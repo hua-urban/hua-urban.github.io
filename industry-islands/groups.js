@@ -2,10 +2,16 @@
 export const sites={
  a:{name:'Ａ組・地主改建',url:'https://hua-urban.com/industry-islands/a/'},
  b:{name:'Ｂ組・老屋現金流',url:'https://hua-urban.com/industry-islands/b/'},
+ c:{name:'Ｃ組・傳承安居',url:'https://hua-urban.com/industry-islands/c/'},
  d:{name:'Ｄ組・商用空間',url:'https://hua-urban.com/industry-islands/d/'},
  e:{name:'Ｅ組・房產與事業',url:'https://hua-urban.com/industry-islands/e/'}
 };
 export const routes=[
+ {name:'家庭資產與風險盤點',c:'finance',e:'finance',desc:'從退休與傳承需求，接到生活風險與財務問題的整理。'},
+ {name:'房產活化與使用',c:'rental',b:'assets',desc:'從家庭房屋的使用安排，接到老屋房源與使用需求的評估。'},
+ {name:'地主共識與更新',c:'owners',a:'owners',desc:'從高齡安居與更新的需要，接到社區地主溝通及共識準備。'},
+ {name:'安居空間與設計',c:'design',d:'design',desc:'從長輩與家人的日常動線，接到空間改善與設計條件的討論。'},
+ {name:'工程物料與設備',c:'supply',e:'industry',desc:'從工程與循環材料供應，接到物料包裝、搬運及現場設備需求。'},
  {name:'改建前的老屋使用',a:'transition',b:'assets',desc:'改建規劃期間仍有使用或管理需求時，先與老屋評估專業釐清條件。'},
  {name:'改建工程與材料',a:'construction',d:'materials',desc:'由改建工程的需求與分工，接到材料、工法及施工條件的討論。'},
  {name:'資金安排與風險盤點',a:'funding',e:'finance',desc:'把改建期間的資金安排與生活風險放在一起盤點，再由相應專業確認。'},

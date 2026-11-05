@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 const base=path.resolve('industry-islands');
 const topics={};
-for(const group of ['a','b','d','e']){
+for(const group of ['a','b','c','d','e']){
  const dir=path.join(base,group);
  const mod=await import('data:text/javascript;base64,'+Buffer.from(fs.readFileSync(path.join(dir,'data.js'),'utf8')).toString('base64'));
  topics[group]=new Set(mod.topics.map(t=>t.id));
