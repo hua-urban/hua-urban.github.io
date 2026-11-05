@@ -1539,7 +1539,7 @@ section[id]{scroll-margin-top:68px}
     <div class="stat-inner">
       <!-- 人數與名冊區、九長版介紹圖同步（2026-09-08 校正：原寫 56，名冊與圖皆為 54，
            是兩次退會後漏改的舊值）。異動時三處要一起改：本列／名冊區 roster-ct／hero 介紹圖。 -->
-      <div class="stat-item"><div class="stat-num">55 <span class="u">位</span></div><div class="stat-lbl">現任夥伴</div></div>
+      <div class="stat-item"><div class="stat-num" id="currentMemberCount">54 <span class="u">位</span></div><div class="stat-lbl">現任夥伴</div></div>
       <div class="stat-item"><div class="stat-num">白金</div><div class="stat-lbl">分會等級</div></div>
       <div class="stat-item"><div class="stat-num">2026</div><div class="stat-lbl">成會年份</div></div>
       <div class="stat-item"><div class="stat-num">5 <span class="u">條</span></div><div class="stat-lbl">產業鏈</div></div>
@@ -1792,7 +1792,7 @@ section[id]{scroll-margin-top:68px}
         <svg class="srch-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="rSearch" placeholder="搜尋姓名或專業..." oninput="filterR()">
       </div>
-      <div class="roster-ct">顯示 <span id="rv">55</span> / 共 <span id="rosterTotal">55</span> 位會員</div>
+      <div class="roster-ct">顯示 <span id="rv">54</span> / 共 <span id="rosterTotal">54</span> 位會員</div>
       <p id="rosterStatus" class="roster-status" role="status" aria-live="polite">正在確認會員名單…</p>
     </div>
     <div class="tbl-wrap">
@@ -1826,7 +1826,6 @@ section[id]{scroll-margin-top:68px}
           <tr data-n="蔡明璋" data-p="合法隔套置產投資-台北市大安中正區" data-role=""><td><span class="m-num">24</span></td><td><span class="m-name">蔡明璋</span></td><td><span class="m-prof">合法隔套置產投資－台北市大安、中正區</span></td></tr>
           <tr data-n="王佳筠" data-p="建案代銷專案管理-北部" data-role=""><td><span class="m-num">25</span></td><td><span class="m-name">王佳筠</span></td><td><span class="m-prof">建案代銷專案管理－北部</span></td></tr>
           <tr data-n="楊之慧" data-p="金融業-後台交割" data-role=""><td><span class="m-num">26</span></td><td><span class="m-name">楊之慧</span></td><td><span class="m-prof">金融業－後台交割</span></td></tr>
-          <tr data-n="陳黎玲Jossie" data-p="會展空間裝修設計-新竹以北" data-role=""><td><span class="m-num">27</span></td><td><span class="m-name">陳黎玲 Jossie</span></td><td><span class="m-prof">會展空間裝修設計－新竹以北</span></td></tr>
           <tr data-n="林佩君" data-p="仲介經紀人-台北市中山區" data-role=""><td><span class="m-num">28</span></td><td><span class="m-name">林佩君</span></td><td><span class="m-prof">仲介經紀人－台北市中山區</span></td></tr>
           <tr data-n="林媜媁Wei" data-p="資通訊業-財務分析師" data-role=""><td><span class="m-num">29</span></td><td><span class="m-name">林媜媁 Wei</span></td><td><span class="m-prof">資通訊業－財務分析師</span></td></tr>
           <tr data-n="李慧如Eva" data-p="再造回收過濾鐵網太空包" data-role=""><td><span class="m-num">30</span></td><td><span class="m-name">李慧如 Eva</span></td><td><span class="m-prof">再造回收過濾鐵網、太空包</span></td></tr>
@@ -2698,6 +2697,8 @@ window.renderRosterRoles();
     });
     tbody.replaceChildren.apply(tbody,rows);
     document.getElementById('rosterTotal').textContent=String(members.length);
+    var currentCount=document.getElementById('currentMemberCount');
+    if(currentCount){var unit=document.createElement('span');unit.className='u';unit.textContent='位';currentCount.replaceChildren(document.createTextNode(String(members.length)+' '),unit);}
     window.renderRosterRoles();
     filterR();
     status.textContent='會員名單｜名單確認日期：'+result.snapshot.effectiveAsOf;
@@ -2715,4 +2716,5 @@ HuaSiteContent.load().then(function(data){HuaSiteContent.applyHome(data,document
 </script>
 </body>
 </html>
+
 

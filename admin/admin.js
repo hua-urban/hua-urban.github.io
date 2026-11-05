@@ -46,7 +46,7 @@ const SERVICES = [
     category: "活動與來賓",
     description: "查看服務內容與目前提供的功能。",
     use: [{ label: "開啟新人茶敘", href: "https://hua-urban.com/huadu-tea/" }],
-    data: [{ status: "報名資料管理入口待核對" }],
+    data: [{ label: "新人茶敘後台紀錄表", href: "https://docs.google.com/spreadsheets/d/1hciQzhe8K8oN9gPpwHPNWk5nthdP2D7vHATrPsbe9tc/edit#gid=170565218" }],
     maintenance: [{ label: "公開 GitHub 專案", href: "https://github.com/hua-urban/huadu-tea" }]
   },
   {
@@ -272,3 +272,4 @@ updateDirectory();
 
 // Public display settings are maintained in the chapter spreadsheet.
 if(window.HuaSiteContent){HuaSiteContent.load().then(function(data){HuaSiteContent.applyDirectory(SERVICES,data);updateDirectory();}).catch(function(){/* Retain the verified service defaults if the settings source is unavailable. */});}
+
