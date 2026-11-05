@@ -2,6 +2,41 @@
   "asOf": "2026-11-05",
   "entries": [
     {
+      "id": "website-sheet-editing-20261105",
+      "date": "2026-11-05",
+      "status": "已上線",
+      "statusKind": "live",
+      "category": "管理中心",
+      "title": "以共用試算表管理官網顯示內容與組聚時間",
+      "summary": [
+        "沿用原會員管理試算表，Groups B/D 欄可直接修改組名與固定組聚時段；會員存檔不再覆蓋這兩欄。",
+        "新增「網站內容設定」及「服務連結」分頁，首頁公告、分會介紹與已接線的服務入口重新整理即可更新；管理中心新增三個直接編輯入口。",
+        "首頁停止使用另一份寫死的組聚時間推算，與產業鏈分組頁共用來源；原有活動行事曆繼續使用既有資料表。",
+        "設定以純文字顯示並限制網址格式。26 項回歸測試及 3 項 Chrome 頁面驗證通過。"
+      ],
+      "services": [
+        {
+          "label": "管理中心",
+          "href": "https://hua-urban.com/admin/"
+        },
+        {
+          "label": "產業鏈分組",
+          "href": "https://hua-urban.com/bni-pt-groups/"
+        }
+      ],
+      "sources": [
+        {
+          "label": "修改與驗證紀錄",
+          "href": "https://github.com/hua-urban/hua-urban.github.io/pull/20"
+        },
+        {
+          "label": "試算表編輯說明",
+          "href": "https://github.com/hua-urban/hua-urban.github.io/blob/master/docs/website-sheet-editing.md"
+        }
+      ],
+      "sourceNote": "同一華都更 Apps Script 專案部署版本 7/8；沿用原網址、共用權限與 OAuth 範圍。會員及報名流程未搬移至網站文字設定。"
+    },
+    {
       "id": "property-platform-20261105",
       "date": "2026-11-05",
       "status": "待啟用",
