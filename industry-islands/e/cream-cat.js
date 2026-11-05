@@ -1,3 +1,4 @@
+import { createCatWalker } from './cat-walker.js?v=walk1';
 // The cream-white companion uses the garden's tracked primitives and materials.
 // Its round cheeks, short ears and full coat are separate from the original tabby.
 export function createCreamCat({ THREE, parent, oval, mesh, cylinder, box, material,
@@ -7,6 +8,7 @@ export function createCreamCat({ THREE, parent, oval, mesh, cylinder, box, mater
   root.scale.setScalar(.97);
   parent.add(root);
   const body = new THREE.Group();
+  body.name='cat-body';
   root.add(body);
   const coat = material('#f2eadb'), white = material('#fff9ed'),
     cap = material('#aa9277'), cheek = material('#b59c7f'), back = material('#a58a6e'),
@@ -32,10 +34,13 @@ export function createCreamCat({ THREE, parent, oval, mesh, cylinder, box, mater
     return object;
   }
   const torso = round(body, 0, .315, -.075, .207, .196, .285, back);
+  torso.name='cat-torso';
   const haunches = round(body, 0, .285, -.235, .202, .183, .17, back);
+  haunches.name='cat-hips';
   round(body, 0, .205, -.055, .175, .115, .257, white);
-  round(body, 0, .305, .115, .165, .177, .154, white);
+  const chest=round(body, 0, .305, .115, .165, .177, .154, white);chest.name='cat-chest';
   const head = new THREE.Group();
+  head.name='cat-head';
   head.position.set(0, .49, .215);
   body.add(head);
   round(head, 0, 0, 0, .207, .18, .169, cap);
@@ -86,6 +91,7 @@ export function createCreamCat({ THREE, parent, oval, mesh, cylinder, box, mater
   const legs = [];
   for (const z of [.145, -.238]) for (const side of [-1, 1]) {
     const joint = new THREE.Group();
+    joint.name=`cat-leg-${z>0?'front':'back'}-${side<0?'left':'right'}`;
     joint.position.set(side * .125, .245, z);
     body.add(joint);
     round(joint, 0, -.085, 0, .057, .105, .06, coat);
@@ -97,6 +103,7 @@ export function createCreamCat({ THREE, parent, oval, mesh, cylinder, box, mater
   let tailParent = body;
   for (let i = 0; i < 6; i++) {
     const joint = new THREE.Group();
+    joint.name=`cat-tail-${i}`;
     joint.position.set(i ? 0 : .025, i ? .076 : .30, i ? 0 : -.31);
     tailParent.add(joint);
     const r = .049 - i * .004;
@@ -110,26 +117,13 @@ export function createCreamCat({ THREE, parent, oval, mesh, cylinder, box, mater
     return { path, duration: path.getLength() / .205 };
   });
   const idle = 5.5;
-  const cycle = routes.reduce((sum, route) => sum + route.duration + idle, 0);
-  const start = routes[0].duration * .28;
+  const walker=createCatWalker({root,routes,speed:.205,idle,startProgress:.28});
   const smooth = (value, from, to) => THREE.MathUtils.smoothstep(value, from, to);
   function update(elapsed, dt = 0) {
-    let phase = ((elapsed + start) % cycle + cycle) % cycle;
-    let route = routes[0];
-    for (const candidate of routes) {
-      route = candidate;
-      if (phase < route.duration + idle) break;
-      phase -= route.duration + idle;
-    }
-    const walking = phase < route.duration;
-    const progress = Math.min(phase / route.duration, 1);
-    root.position.copy(route.path.getPointAt(progress));
-    const direction = route.path.getTangentAt(progress);
-    const heading = Math.atan2(direction.x, direction.z);
-    const delta = Math.atan2(Math.sin(heading - root.rotation.y), Math.cos(heading - root.rotation.y));
-    root.rotation.y += delta * (dt > 0 ? Math.min(1, dt * 5) : 1);
-    const restTime = Math.max(0, phase - route.duration);
-    const rest = walking ? 0 : smooth(restTime, .15, 1.25) *
+    const motion=walker.update(dt),{walking,progress}=motion;
+    const route=routes[motion.routeIndex],phase=progress*route.duration;
+    const restTime=motion.idleTime;
+    const rest = walking||motion.turning ? 0 : smooth(restTime, .15, 1.25) *
       (1 - smooth(restTime, idle - 1.15, idle));
     const gait = elapsed * 7;
     const stride = walking ? Math.min(1, phase * 2, (route.duration - phase) * 2) : 0;

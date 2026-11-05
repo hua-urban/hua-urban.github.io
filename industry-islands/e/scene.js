@@ -1,7 +1,9 @@
 import * as THREE from 'three';
 import { OrbitControls } from '../lib/OrbitControls.js';
-import { createCreamCat } from './cream-cat.js?v=cream1';
-import { createPhotoTabby } from './photo-tabby.js?v=tabby2-1';
+import { createCreamCat } from './cream-cat.js?v=pet1';
+import { createPhotoTabby } from './photo-tabby.js?v=pet1';
+import { createCatWalker } from './cat-walker.js?v=walk1';
+import { createCatInteractions } from './cat-interactions.js?v=pet2';
 
 // This pure layout is shared by rendered roads and headless connectivity checks.
 export const ROAD_LAYOUT = {
@@ -359,6 +361,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     // Original little garden tabby. Shared primitives and tracked materials follow
     // the miniature's normal disposal path; no textures or external assets.
     const cat = new THREE.Group(), catBody = new THREE.Group();
+    catBody.name='cat-body';
     cat.name='garden-tabby';cat.scale.setScalar(.9);landscape.add(cat);cat.add(catBody);
     // Photo reference: warm golden-brown mackerel tabby, amber round eyes,
     // dark necklace/leg bands, brown paws and a small cream chin.
@@ -369,9 +372,12 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     const catSphere=keep(new THREE.SphereGeometry(1,16,12));
     function catOval(p,x,y,z,sx,sy,sz,m){const o=mesh(catSphere,m,p,x,y,z);o.scale.set(sx,sy,sz);return o;}
     const catTorso=new THREE.Group();catTorso.position.set(0,.315,-.06);catBody.add(catTorso);
+    catTorso.name='cat-torso';
     catOval(catTorso,0,0,0,.175,.18,.29,fur);
     const catChest=catOval(catBody,0,.29,.13,.137,.16,.135,chestFur);
+    catChest.name='cat-chest';
     const catHead=new THREE.Group();catHead.position.set(0,.465,.22);catBody.add(catHead);
+    catHead.name='cat-head';
     catOval(catHead,0,0,0,.174,.16,.157,faceFur);
     const earGeo=keep(new THREE.ConeGeometry(1,1,3));
     const catEyes=[];
@@ -426,11 +432,12 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
       const leg=new THREE.Group();leg.position.set(side*.109,.245,z);catBody.add(leg);
       catOval(leg,0,-.09,0,.046,.11,.049,fur);
       for(const y of [-.052,-.112,-.168])cyl(leg,0,y,0,.047,y===-.168?.017:.023,darkFur);
-      catOval(leg,0,-.205,.017,.052,.034,.07,fur);catLegs.push(leg);
+      catOval(leg,0,-.205,.017,.052,.034,.07,fur);leg.name=`cat-leg-${z>0?'front':'back'}-${side<0?'left':'right'}`;catLegs.push(leg);
     }
     const catTail=[];let tailParent=catBody;
     for(let i=0;i<5;i++){
       const joint=new THREE.Group();joint.position.set(0,i?.092:.36,i?0:-.295);tailParent.add(joint);
+      joint.name=`cat-tail-${i}`;
       joint.rotation.x=i?-.14:-.9;
       const radius=.035-i*.004;
       cyl(joint,0,.048,0,radius,.102,i===4?darkFur:fur);
@@ -445,25 +452,15 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
       const path=routeCurve(shortest(catStops[i],to),0,.16);
       return {path,duration:path.getLength()/.24,from:catStops[i],to};
     });
-    const catIdle=4.2,catCycle=catRoutes.reduce((sum,r)=>sum+r.duration+catIdle,0);
+    const catIdle=4.2,catWalker=createCatWalker({root:cat,routes:catRoutes,speed:.24,idle:catIdle,startProgress:.15});
     let catGait=0;
     // Start just beyond the central fountain and set the pose before first render.
-    const catStartTime=catRoutes[0].duration*.15;
     function updateCat(elapsed,dt=0){
-      let phase=(elapsed+catStartTime)%catCycle,route=catRoutes[0];
-      for(let i=0;i<catRoutes.length;i++){
-        route=catRoutes[i];
-        if(phase<route.duration+catIdle)break;phase-=route.duration+catIdle;
-      }
-      const walking=phase<route.duration,catProgress=Math.min(phase/route.duration,1);
-      const point=route.path.getPointAt(catProgress),direction=route.path.getTangentAt(catProgress);
-      cat.position.copy(point);
-      const heading=Math.atan2(direction.x,direction.z),difference=Math.atan2(Math.sin(heading-cat.rotation.y),Math.cos(heading-cat.rotation.y));
-      cat.rotation.y+=difference*(dt?Math.min(1,dt*6):1);
+      const motion=catWalker.update(dt),{walking,idleTime}=motion;
+      const duration=catRoutes[motion.routeIndex].duration,phase=motion.progress*duration;
       if(walking)catGait+=dt*8;
-      const settle=walking?Math.min(1,phase*4):Math.max(0,1-(phase-route.duration)*5);
-      const idleTime=Math.max(0,phase-route.duration);
-      const sitting=walking?0:THREE.MathUtils.smoothstep(idleTime,0,.6)*(1-THREE.MathUtils.smoothstep(idleTime,catIdle-.6,catIdle));
+      const settle=walking?Math.min(1,phase*4,(duration-phase)*4):0;
+      const sitting=walking||motion.turning?0:THREE.MathUtils.smoothstep(idleTime,0,.6)*(1-THREE.MathUtils.smoothstep(idleTime,catIdle-.6,catIdle));
       catLegs.forEach((leg,i)=>{leg.rotation.x=Math.sin(catGait+(i===0||i===3?0:Math.PI))*.32*settle-(i>1?.5*sitting:0);leg.position.y=.245-(i>1?.005*sitting:0);});
       catBody.position.y=walking?Math.sin(catGait*2)*.007:0;
       catTorso.scale.set(1,1+sitting*.2,1-sitting*.18);catTorso.position.y=.315+sitting*.025;
@@ -501,6 +498,11 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     }
     boat(seaLane,.12);boat(seaLane,.68,true);
     for(let i=0;i<5;i++){const g=new THREE.Group(),wings=[];landscape.add(g);for(const side of [-1,1])wings.push(box(g,side*.13,0,0,.26,.025,.075,P.white));birds.push({g,wings,offset:i*.8});}
+    const catActors=[{root:cat,update:updateCat},creamCat,extraTabby];
+    const catInteractions=createCatInteractions({actors:catActors});
+    catActors.forEach(({root})=>root.traverse(object=>{if(object.isMesh){object.userData.catId=root.name;pickables.push(object);}}));
+    const onCatVisibility=()=>{if(document.hidden)catInteractions.stopSound();};
+    document.addEventListener('visibilitychange',onCatVisibility);
     // Collaboration overlays are graph routes; roads and bridges remain visible when these are off.
     const routeGroup=new THREE.Group();landscape.add(routeGroup);const routeDots=[];
     let showRoutes=true, selected='industry', connected=null;
@@ -544,8 +546,8 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
     function intersect(e){const r=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);raycaster.setFromCamera(pointer,camera);return raycaster.intersectObjects(pickables,false)[0];}
     const onDown=e=>{pointerDown={x:e.clientX,y:e.clientY};};
-    const onUp=e=>{if(pointerDown&&Math.hypot(e.clientX-pointerDown.x,e.clientY-pointerDown.y)<6){const hit=intersect(e);if(hit){const id=hit.object.userData.topicId;select(id);onSelect(id);}}pointerDown=null;};
-    const onMove=e=>{renderer.domElement.style.cursor=intersect(e)?'pointer':pointerDown?'grabbing':'grab';};
+    const onUp=e=>{if(pointerDown&&Math.hypot(e.clientX-pointerDown.x,e.clientY-pointerDown.y)<6){const hit=intersect(e);if(hit){const catId=hit.object.userData.catId;if(catId){if(!paused&&!reduced){stopTour();const view=catActors.find(actor=>actor.root.name===catId).root.worldToLocal(camera.position.clone());if(catInteractions.pet(catId,{side:view.x<0?-1:1}))container.dispatchEvent(new CustomEvent('island-cat-petted'));}}else{const id=hit.object.userData.topicId;select(id);onSelect(id);}}}pointerDown=null;};
+    const onMove=e=>{const hit=intersect(e),inactiveCat=hit?.object.userData.catId&&(paused||reduced);renderer.domElement.style.cursor=hit&&!inactiveCat?'pointer':pointerDown?'grabbing':'grab';};
     const onCancel=()=>{pointerDown=null;};
     renderer.domElement.addEventListener('pointerdown',onDown);renderer.domElement.addEventListener('pointerup',onUp);renderer.domElement.addEventListener('pointermove',onMove);renderer.domElement.addEventListener('pointercancel',onCancel);
     function setNight(value){const night=!!value;hemi.intensity=night?1.1:2.35;sun.intensity=night?.65:2.6;fill.intensity=night?.7:1;sun.color.set(night?'#96b8e7':'#ffedce');hemi.color.set(night?'#8098c6':'#e7f5fb');P.water.color.set(night?'#204e65':'#6aadb0');P.shallow.color.set(night?'#39717c':'#a0cbbb');P.window.emissiveIntensity=night?2.2:.04;P.route.emissiveIntensity=night?1.1:.2;scene.fog.color.set(night?'#193c56':'#c7e3e4');renderer.toneMappingExposure=night?1:1.02;}
@@ -622,7 +624,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     }
     function animate(now){if(disposed)return;raf=requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.05)||0;last=now;if(document.hidden)return;
       const moving=!paused&&!reduced;if(moving)time+=dt;
-      if(moving){updateCat(time,dt);creamCat.update(time,dt);extraTabby.update(time,dt);fans.forEach(g=>g.rotation.y=time*4);
+      if(moving){catInteractions.update(time,dt);fans.forEach(g=>g.rotation.y=time*4);
         walkers.forEach(w=>{const phase=(time*.23/w.length+w.offset)%2,u=phase<1?phase:2-phase;locate(w.g,w.path,u);if(phase>1)w.g.rotation.y+=Math.PI;w.limbs.forEach((l,i)=>l.rotation.x=Math.sin(time*7+w.offset*10)*(i%2?1:-1)*.48);});
         vehicles.forEach(o=>{const phase=(time*(o.truck?.52:.72)/o.length+o.offset)%(o.truck?2:1),u=o.truck?(phase<1?phase:2-phase):phase;locate(o.g,o.path,u);if(o.truck&&phase>1)o.g.rotation.y+=Math.PI;});
         boats.forEach(b=>{const p=(time*.016+b.offset)%2,u=p<1?p:2-p;locate(b.g,b.path,u,Math.sin(time*1.7)*.018);if(p>1)b.g.rotation.y+=Math.PI;});
@@ -635,6 +637,6 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     }
     walkers.forEach(w=>locate(w.g,w.path,w.offset%1));vehicles.forEach(o=>locate(o.g,o.path,o.offset));boats.forEach(o=>locate(o.g,o.path,o.offset));birds.forEach((b,i)=>b.g.position.set(-5+i*.7,4+i*.1,-4));
     select(districtMap.has('industry')?'industry':topics[0]?.id);raf=requestAnimationFrame(animate);onReady();
-    return {select,connect,setPaused(value){paused=!!value;},setNight,setRoutes(value){showRoutes=!!value;routeGroup.visible=showRoutes;seaRoute.visible=showRoutes;},setReducedMotion(value){reduced=!!value;controls.enableDamping=!reduced;},resetView(){stopTour();controls.target.copy(fitTarget);camera.position.copy(defaultPosition);controls.update();},tour(value){touring=!!value;},dispose(){disposed=true;cancelAnimationFrame(raf);observer.disconnect();controls.removeEventListener('start',stopTour);controls.dispose();renderer.domElement.removeEventListener('pointerdown',onDown);renderer.domElement.removeEventListener('pointerup',onUp);renderer.domElement.removeEventListener('pointermove',onMove);renderer.domElement.removeEventListener('pointercancel',onCancel);labels.forEach(({el})=>el.remove());geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());renderer.dispose();renderer.domElement.remove();}};
+    return {select,connect,setPaused(value){paused=!!value;if(paused)catInteractions.stopSound();},setNight,setRoutes(value){showRoutes=!!value;routeGroup.visible=showRoutes;seaRoute.visible=showRoutes;},setReducedMotion(value){reduced=!!value;controls.enableDamping=!reduced;if(reduced)catInteractions.stopSound();},resetView(){stopTour();controls.target.copy(fitTarget);camera.position.copy(defaultPosition);controls.update();},tour(value){touring=!!value;},dispose(){disposed=true;catInteractions.dispose();document.removeEventListener('visibilitychange',onCatVisibility);cancelAnimationFrame(raf);observer.disconnect();controls.removeEventListener('start',stopTour);controls.dispose();renderer.domElement.removeEventListener('pointerdown',onDown);renderer.domElement.removeEventListener('pointerup',onUp);renderer.domElement.removeEventListener('pointermove',onMove);renderer.domElement.removeEventListener('pointercancel',onCancel);labels.forEach(({el})=>el.remove());geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());renderer.dispose();renderer.domElement.remove();}};
   } catch(error){if(renderer){renderer.dispose();renderer.domElement.remove();}onError(error);throw error;}
 }
