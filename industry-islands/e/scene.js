@@ -354,6 +354,95 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     // Walkers cross the two bridges and the town, following precisely the same graph as routes.
     const trips=[['talent','finance'],['ai','land'],['property','learning'],['industry','overseas'],['overseas','ai'],['learning','talent'],['finance','industry'],['property','talent'],['land','learning'],['overseas','learning'],['ai','industry'],['talent','property']];
     trips.forEach(([a,b],i)=>{const p=person(i%3?P.brick:P.dark,.42);const path=routeCurve(shortest(a,b),i%2?.32:-.32,.16);if(path)walkers.push({...p,path,length:path.getLength(),offset:i*.083});});
+    // Original little garden tabby. Shared primitives and tracked materials follow
+    // the miniature's normal disposal path; no textures or external assets.
+    const cat = new THREE.Group(), catBody = new THREE.Group();
+    cat.name='garden-tabby';cat.scale.setScalar(.9);landscape.add(cat);cat.add(catBody);
+    const fur=material('#a39787',{flatShading:true}), darkFur=material('#51483f'),
+      lightFur=material('#eee3cc'), earPink=material('#cc9389'), nosePink=material('#a96664'),
+      catEye=material('#b9cb72'), pupil=material('#25302c');
+    ellipsoid(catBody,0,.315,-.06,.162,.172,.265,fur);
+    ellipsoid(catBody,0,.275,.13,.13,.15,.13,lightFur);
+    const catHead=new THREE.Group();catHead.position.set(0,.465,.22);catBody.add(catHead);
+    ellipsoid(catHead,0,0,0,.18,.155,.16,fur);
+    const earGeo=keep(new THREE.ConeGeometry(1,1,3));
+    for(const side of [-1,1]){
+      const ear=mesh(earGeo,fur,catHead,side*.119,.155,-.015);ear.scale.set(.093,.18,.067);ear.rotation.z=-side*.19;
+      const inner=mesh(earGeo,earPink,catHead,side*.12,.16,.022);inner.scale.set(.057,.11,.014);inner.rotation.z=-side*.19;
+      ellipsoid(catHead,side*.077,.019,.135,.049,.05,.025,lightFur);
+      ellipsoid(catHead,side*.077,.02,.156,.034,.039,.012,catEye);
+      ellipsoid(catHead,side*.077,.02,.167,.01,.031,.005,pupil);
+      ellipsoid(catHead,side*.068,.034,.172,.008,.009,.003,P.white);
+      ellipsoid(catHead,side*.044,-.065,.144,.061,.043,.044,lightFur);
+      // Cheek bars and four flank stripes sit on both visible sides.
+      for(const [y,z] of [[-.013,.112],[-.041,.102]]){
+        const bar=box(catHead,side*.145,y,z,.044,.014,.045,darkFur);bar.rotation.z=side*.25;
+      }
+      for(const z of [-.23,-.12,-.01,.1]){
+        const stripe=box(catBody,side*.148,.34,z,.022,.155,.033,darkFur);stripe.rotation.x=-.23;stripe.rotation.z=-side*.22;
+      }
+    }
+    ellipsoid(catHead,0,-.054,.185,.027,.019,.014,nosePink);
+    ellipsoid(catHead,0,-.108,.139,.065,.021,.03,lightFur);
+    // A cylinder between two points also gives crisp, inexpensive whiskers and M.
+    function catStroke(parent,a,b,r,m){
+      const start=new THREE.Vector3(...a),end=new THREE.Vector3(...b),delta=end.clone().sub(start);
+      const line=mesh(unitCylinder,m,parent);line.position.copy(start).add(end).multiplyScalar(.5);
+      line.scale.set(r,delta.length(),r);line.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),delta.normalize());return line;
+    }
+    const forehead=[[-.075,.08,.126],[-.05,.115,.111],[0,.074,.144],[.05,.115,.111],[.075,.08,.126]];
+    for(let i=1;i<forehead.length;i++)catStroke(catHead,forehead[i-1],forehead[i],.009,darkFur);
+    catStroke(catHead,[0,-.069,.18],[0,-.09,.177],.004,darkFur);
+    for(const side of [-1,1])for(let i=0;i<3;i++)catStroke(catHead,[side*.06,-.065,.179],[side*(.21+i*.01),-.05-i*.022,.16-i*.025],.0026,lightFur);
+    for(const z of [-.22,-.1,.02])box(catBody,0,.477,z,.095,.016,.035,darkFur);
+    const catLegs=[];
+    for(const z of [.12,-.23])for(const side of [-1,1]){
+      const leg=new THREE.Group();leg.position.set(side*.109,.245,z);catBody.add(leg);
+      ellipsoid(leg,0,-.09,0,.043,.11,.047,fur);
+      cyl(leg,0,-.11,0,.044,.028,darkFur);
+      ellipsoid(leg,0,-.205,.017,.052,.034,.07,lightFur);catLegs.push(leg);
+    }
+    const catTail=[];let tailParent=catBody;
+    for(let i=0;i<5;i++){
+      const joint=new THREE.Group();joint.position.set(0,i?.092:.36,i?0:-.295);tailParent.add(joint);
+      joint.rotation.x=i?-.14:-.9;
+      const radius=.035-i*.004;
+      cyl(joint,0,.048,0,radius,.102,i===4?darkFur:fur);
+      cyl(joint,0,.067,0,radius*1.025,.025,darkFur);
+      catTail.push(joint);tailParent=joint;
+    }
+    ellipsoid(tailParent,0,.098,0,.019,.024,.019,darkFur);
+    // Each leg of the stroll uses the same road graph as the walkers. Stops at
+    // junctions give a quiet look around without cutting across gardens.
+    const catStops=['center','talent','ai','property','finance','center'];
+    const catRoutes=catStops.slice(1).map((to,i)=>{
+      const path=routeCurve(shortest(catStops[i],to),0,.16);
+      return {path,duration:path.getLength()/.24,from:catStops[i],to};
+    });
+    const catIdle=2.8,catCycle=catRoutes.reduce((sum,r)=>sum+r.duration+catIdle,0);
+    let catGait=0;
+    // Start just beyond the central fountain and set the pose before first render.
+    const catStartTime=catRoutes[0].duration*.15;
+    function updateCat(elapsed,dt=0){
+      let phase=(elapsed+catStartTime)%catCycle,route=catRoutes[0];
+      for(let i=0;i<catRoutes.length;i++){
+        route=catRoutes[i];
+        if(phase<route.duration+catIdle)break;phase-=route.duration+catIdle;
+      }
+      const walking=phase<route.duration,catProgress=Math.min(phase/route.duration,1);
+      const point=route.path.getPointAt(catProgress),direction=route.path.getTangentAt(catProgress);
+      cat.position.copy(point);
+      const heading=Math.atan2(direction.x,direction.z),difference=Math.atan2(Math.sin(heading-cat.rotation.y),Math.cos(heading-cat.rotation.y));
+      cat.rotation.y+=difference*(dt?Math.min(1,dt*6):1);
+      if(walking)catGait+=dt*8;
+      const settle=walking?Math.min(1,phase*4):Math.max(0,1-(phase-route.duration)*5);
+      catLegs.forEach((leg,i)=>{leg.rotation.x=Math.sin(catGait+(i===0||i===3?0:Math.PI))*.32*settle;});
+      catBody.position.y=walking?Math.sin(catGait*2)*.007:0;
+      catHead.rotation.y=walking?Math.sin(elapsed*1.1)*.05:Math.sin((phase-route.duration)*2)*.38;
+      catHead.rotation.z=walking?0:Math.sin((phase-route.duration)*1.6)*.07;
+      catTail.forEach((joint,i)=>{joint.rotation.z=Math.sin(elapsed*1.7-i*.55)*(.12+i*.025);joint.rotation.x=(i?-.14:-.9)+Math.sin(elapsed*1.3-i*.35)*.055;});
+    }
+    updateCat(0);
     function vehicle(path,isTruck=false,offset=0) {
       const g=new THREE.Group();landscape.add(g);
       const color=isTruck?P.cream:P.brick;
@@ -402,7 +491,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     let width=0,height=0,paused=false,reduced=false,touring=false,disposed=false,raf=0,time=0,last=0,pointerDown=null;
     const defaultPosition=new THREE.Vector3(), fitTarget=mapPoint(new THREE.Vector3(0,.25,1.1));
     function fit() {
-      controls.target.copy(fitTarget);const dir=new THREE.Vector3(.22,.82,1).normalize(),right=new THREE.Vector3().crossVectors(new THREE.Vector3(0,1,0),dir).normalize(),up=new THREE.Vector3().crossVectors(dir,right).normalize();
+      controls.target.copy(fitTarget);const dir=new THREE.Vector3(.22,.48,1).normalize(),right=new THREE.Vector3().crossVectors(new THREE.Vector3(0,1,0),dir).normalize(),up=new THREE.Vector3().crossVectors(dir,right).normalize();
       const tan=Math.tan(THREE.MathUtils.degToRad(camera.fov/2));let distance=22;
       function include(p,padX=12,padY=12){const r=p.clone().sub(fitTarget),depth=r.dot(dir),usableX=Math.max(.3,1-2*padX/width),usableY=Math.max(.3,1-2*padY/height);distance=Math.max(distance,depth+Math.abs(r.dot(right))/(tan*camera.aspect*usableX),depth+Math.abs(r.dot(up))/(tan*usableY));}
       // Natural shoreline and district labels are fitted together. UI bars get explicit breathing room.
@@ -497,13 +586,13 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     }
     function animate(now){if(disposed)return;raf=requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.05)||0;last=now;if(document.hidden)return;
       const moving=!paused&&!reduced;if(moving)time+=dt;
-      if(moving){fans.forEach(g=>g.rotation.y=time*4);
+      if(moving){updateCat(time,dt);fans.forEach(g=>g.rotation.y=time*4);
         walkers.forEach(w=>{const phase=(time*.23/w.length+w.offset)%2,u=phase<1?phase:2-phase;locate(w.g,w.path,u);if(phase>1)w.g.rotation.y+=Math.PI;w.limbs.forEach((l,i)=>l.rotation.x=Math.sin(time*7+w.offset*10)*(i%2?1:-1)*.48);});
         vehicles.forEach(o=>{const phase=(time*(o.truck?.52:.72)/o.length+o.offset)%(o.truck?2:1),u=o.truck?(phase<1?phase:2-phase):phase;locate(o.g,o.path,u);if(o.truck&&phase>1)o.g.rotation.y+=Math.PI;});
         boats.forEach(b=>{const p=(time*.016+b.offset)%2,u=p<1?p:2-p;locate(b.g,b.path,u,Math.sin(time*1.7)*.018);if(p>1)b.g.rotation.y+=Math.PI;});
         birds.forEach((b,i)=>{const a=time*.105+b.offset;b.g.position.set(Math.cos(a)*9,3.7+Math.sin(a*2)*.4,1+Math.sin(a)*7);b.g.rotation.y=-a;b.wings.forEach((w,j)=>w.rotation.z=Math.sin(time*5+i)*.35*(j?-1:1));});
         waves.forEach(w=>{w.g.position.x=Math.sin(time*.5+w.phase)*.08;});
-        if(touring){const d=defaultPosition.clone().sub(fitTarget).length(),a=time*.045;camera.position.lerp(new THREE.Vector3(Math.sin(a)*d*.45,d*.66,Math.cos(a)*d*.7).add(fitTarget),.015);}
+        if(touring){const d=defaultPosition.clone().sub(fitTarget).length(),a=time*.045;camera.position.lerp(new THREE.Vector3(Math.sin(a)*.88,.45,Math.cos(a)*.88).normalize().multiplyScalar(d).add(fitTarget),.015);}
       }
       if(!paused&&!reduced)routeDots.forEach(o=>{o.dot.position.copy(o.path.getPointAt((time*.12+o.offset)%1));});
       controls.update();placeLabels();renderer.render(scene,camera);
