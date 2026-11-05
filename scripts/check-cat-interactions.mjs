@@ -30,12 +30,22 @@ assert(Math.abs(head.rotation.z)<.12,'Head must follow body roll instead of coun
 assert(Math.abs(body.rotation.z+head.rotation.z)>1.9,'Head and torso must lie on the same side');
 root.updateMatrixWorld(true);
 body.traverse(n=>{ if(!n.geometry)return; const e=n.matrixWorld.elements; const r=n.geometry.type==='CylinderGeometry'?Math.hypot(e[1],e[9])+.5*Math.abs(e[5]):Math.hypot(e[1],e[5],e[9]); assert(e[13]-r>=.178-1e-9); });
+// The cat stays reclined; front paws plant before the hindquarters rise.
+for(let i=0;i<140;i++)api.update(20,.05);
+assert.equal(api.getState()[0].action,'belly');
+assert(Math.abs(body.rotation.z)>1.9,'Stay belly-up for a full seven-second rest');
+for(let i=0;i<24;i++)api.update(20,.05);
+assert(Math.abs(body.rotation.z)>.9&&Math.abs(body.rotation.z)<1.2,'Return to flank before pushing up');
+for(let i=0;i<38;i++)api.update(20,.05);
+assert(Math.abs(body.rotation.z)<.01,'Plant front paws with the torso upright');
+assert(Math.abs(root.getObjectByName('cat-leg-front-left').rotation.x-.03)<.01,'Front paw planted first');
+assert(Math.abs(root.getObjectByName('cat-leg-back-left').rotation.x-.03)>.2,'Hind paw still tucked while front pushes');
 assert(api.pet(root.name)); assert.equal(api.getState()[0].elapsed,0);
-for(let i=0;i<120;i++) api.update(25,.05);
+for(let i=0;i<292;i++) api.update(25,.05);
 assert.equal(api.getState()[0].action,null); assert.equal(calls,frozenCalls);
 assert.deepEqual(transforms(),initial); assert.deepEqual([...root.position,...root.quaternion,...root.scale],frozenRoot);
 api.update(26,.05); assert.equal(calls,frozenCalls+1);
-root.position.y=.265;api.pet(root.name);for(let i=0;i<44;i++)api.update(26,.05);root.updateMatrixWorld(true);body.traverse(n=>{if(!n.geometry)return;const e=n.matrixWorld.elements;const r=n.geometry.type==='CylinderGeometry'?Math.hypot(e[1],e[9])+.5*Math.abs(e[5]):Math.hypot(e[1],e[5],e[9]);assert(e[13]-r>=.273-1e-9,'Belly pose must rest on current bridge level');});for(let i=0;i<76;i++)api.update(26,.05);
+root.position.y=.265;api.pet(root.name);for(let i=0;i<44;i++)api.update(26,.05);root.updateMatrixWorld(true);body.traverse(n=>{if(!n.geometry)return;const e=n.matrixWorld.elements;const r=n.geometry.type==='CylinderGeometry'?Math.hypot(e[1],e[9])+.5*Math.abs(e[5]):Math.hypot(e[1],e[5],e[9]);assert(e[13]-r>=.273-1e-9,'Belly pose must rest on current bridge level');});for(let i=0;i<248;i++)api.update(26,.05);
 api.pet(root.name); api.update(26,.05); api.dispose(); assert.deepEqual(transforms(),initial);
 api.update(27,.05); assert.equal(calls,frozenCalls+1); assert.equal(api.pet(root.name),false);
 api.stopSound();
