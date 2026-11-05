@@ -6,8 +6,8 @@
   'use strict';
   var ENDPOINT='https://script.google.com/macros/s/AKfycbwFOmaT_WgI1cCUWDBi4rAVhnrAuu1_dtRx2mvIDSlUCL8rVEowTrcWi6uj8gd3wjGE/exec?action=siteContent';
   var COPY=['home.announcement.title','home.announcement.body','home.about.title','home.about.p1','home.about.p2'];
-  var IDS=['membership','groups','website','guest','tea','training','trafficLight','greenlight','slides','calendar','lineBot'];
-  var DEFAULTS={membership:'/admin/members/',groups:'/bni-pt-groups/',website:'/',guest:'/guest/',tea:'/huadu-tea/',training:'/bni-training/',trafficLight:'/traffic-light/?v=est',greenlight:'/greenlight/',calendar:'/#calendar'};
+  var IDS=['membership','groups','website','guest','tea','training','trafficLight','greenlight','slides','calendar','lineBot','propertyPlatform','warmbox','aiSurvey','lottery','mergeSlides','trainingExplorer','eGrid','powerteamLegacy','deployment','updates'];
+  var DEFAULTS={membership:'/admin/members/',groups:'/bni-pt-groups/',website:'/',guest:'/guest/',tea:'/huadu-tea/',training:'/bni-training/',trafficLight:'/traffic-light/?v=est',greenlight:'/greenlight/',calendar:'/#calendar',"warmbox":"https://hua-urban.com/bni-warmbox/","aiSurvey":"https://hua-urban.com/bni-ai-survey/","lottery":"https://hua-urban.com/lottery/","trainingExplorer":"https://bni-train.autolab.cloud/explorer/","eGrid":"https://hua-urban.com/e-team-grid/","powerteamLegacy":"https://hua-urban.com/bni-powerteam/","updates":"https://hua-urban.com/admin/updates/"};
   var pending;
   function safeUrl(value){
     if(typeof value!=='string')return null;
@@ -48,8 +48,8 @@
     });
   }
   function applyDirectory(services,data){
-    var names={'會員名單':'membership','產業鏈分組':'groups','官網與活動牆':'website','來賓報名':'guest','新人茶敘':'tea','培訓進度回報':'training','會員紅綠燈':'trafficLight','追綠光':'greenlight','每週會員簡報':'slides','LINE 小幫手':'lineBot'};
-    services.forEach(function(item){var id=item.siteServiceId||names[item.title];if(!id)return;item.siteServiceId=id;var s=data.services.find(function(s){return s.id===id;});if(!s)return;if(s.title)item.title=s.title;item.description=s.description;item.use=s.enabled?[{label:'開啟'+(s.title||item.title),href:s.url}]:[{status:'目前未提供入口'}];});
+    var names={'會員名單':'membership','產業鏈分組':'groups','官網與活動牆':'website','來賓報名':'guest','新人茶敘':'tea','培訓進度回報':'training','會員紅綠燈':'trafficLight','追綠光':'greenlight','每週會員簡報':'slides','LINE 小幫手':'lineBot','紅綠燈統計':'trafficLight',"房地產協作平台":"propertyPlatform","新人保溫箱":"warmbox","AI 應用問卷":"aiSurvey","晨光抽獎":"lottery","總簡報整合":"mergeSlides","教育訓練跨分會查詢":"trainingExplorer","E 組九宮格":"eGrid","Power Team 舊服務":"powerteamLegacy","部署與系統維護":"deployment","資訊組更新日誌":"updates"};
+    services.forEach(function(item){var id=item.siteServiceId||names[item.title];if(!id)return;item.siteServiceId=id;var s=data.services.find(function(s){return s.id===id;});if(!s)return;if(s.title)item.title=s.title;item.description=s.description;item.use=s.enabled?[{label:'開啟'+(s.title||item.title),href:s.url}].concat(item.use.slice(1)):[{status:'目前未提供入口'}];});
   }
   return {safeUrl:safeUrl,normalize:normalize,load:load,applyHome:applyHome,applyDirectory:applyDirectory,endpoint:ENDPOINT};
 });
