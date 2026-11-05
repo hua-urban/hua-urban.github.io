@@ -36,7 +36,7 @@ export function createCatInteractions({ actors, random = Math.random, soundEnabl
       quaternion: node.quaternion.clone(), rotation: node.rotation.clone(), scale: node.scale.clone() }));
     const baseRoll=cat.body.rotation.z;
     const direction=Math.abs(baseRoll)>.5?Math.sign(baseRoll):side===-1||side===1?side:random()<.5?-1:1;
-    cat.action = { mode, time: 0, duration: mode === 'scratch' ? 2.6 : 6,
+    cat.action = { mode, time: 0, duration: mode === 'scratch' ? 2.6 : 14.6,
       direction, poses };
   }
   function support(cat) {
@@ -62,11 +62,17 @@ export function createCatInteractions({ actors, random = Math.random, soundEnabl
     restore(cat);
     const weight = action.mode === 'scratch'
       ? smooth(t / .4) * smooth((action.duration - t) / .45)
-      : smooth(t / .5) * smooth((action.duration - t) / .6);
+      : smooth(t / .5) * (1-smooth((t-12.8)/1.8));
     // Like a resting cat: crouch, settle onto a flank, then open the belly a
     // little. Never rotate the whole standing figure straight through 180°.
-    const side=smooth((t-.45)/.9)*smooth((action.duration-.6-t)/.9);
-    const belly=smooth((t-1.35)/.85)*smooth((action.duration-1.4-t)/.85);
+    // Rest with the belly open for seven seconds. Recovery is not a reversed
+    // roll: tuck the paws, return to the flank, plant the front paws, then
+    // bring the hindquarters up and settle before the route resumes.
+    const side=smooth((t-.45)/.9)*(1-smooth((t-10.8)/1.5));
+    const belly=smooth((t-1.35)/.85)*(1-smooth((t-9.2)/1.2));
+    const frontPlant=smooth((t-10.8)/1.5);
+    const hindPlant=smooth((t-12)/1.8);
+    const push=smooth((t-11)/1.2)*(1-smooth((t-13)/1.2));
     const bodyBase=action.poses.find(base=>base.node===cat.body);
     const roll=blend(blend(bodyBase.rotation.z,action.direction*1.15,side),action.direction*2.05,belly);
     for (const base of action.poses) {
@@ -85,6 +91,7 @@ export function createCatInteractions({ actors, random = Math.random, soundEnabl
       } else {
         if (name === 'cat-body') {
           node.rotation.z=roll;
+          node.rotation.x-=.12*push;
           // Roll about the torso, rather than orbiting around the feet.
           node.position.x+=.3*(Math.sin(roll)-Math.sin(base.rotation.z));
           node.position.y+=.3*(Math.cos(base.rotation.z)-Math.cos(roll))-.07*weight-.05*side-.015*belly;
@@ -93,7 +100,8 @@ export function createCatInteractions({ actors, random = Math.random, soundEnabl
           const front = name.includes('-front-');
           const pawSide = name.endsWith('-right') ? 1 : -1;
           const folded=blend(front?-.8:-.9,front?-1.05:-.58,belly);
-          node.rotation.x=blend(base.rotation.x,folded,weight)+Math.sin(t*5+pawSide)*.035*belly;
+          const legWeight=weight*(1-(front?frontPlant:hindPlant));
+          node.rotation.x=blend(base.rotation.x,folded,legWeight)+Math.sin(t*5+pawSide)*.035*belly;
           node.rotation.z=blend(base.rotation.z,-pawSide*.22,side);
           node.position.x=blend(base.position.x,action.direction*.07+pawSide*.03,side);
         } else if (name === 'cat-head') {
