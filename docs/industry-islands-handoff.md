@@ -8,7 +8,7 @@
 
 - 原始碼：https://github.com/hua-urban/hua-urban.github.io/tree/master/industry-islands
 - 正式總覽：https://hua-urban.com/industry-islands/
-- 個人頁：https://yitsen-sites.milkyhawk32.chatgpt.site/resources
+- 個人頁：https://yitsen-sites.yitsenliuai.chatgpt.site/resources
 - 個人頁仍由既有 Sites 發布；來源是 yitsen-sites-portal 專案 `dist/sites.json` 的三筆 category=bni 公開成果卡。新增入口後以 `node build-site.mjs` 及既有 Sites source workflow 發布。個人頁需要擁有者或合法編輯權限，華都更 repo 權限不自動授予個人頁權限。
 
 維護群島只需正常 GitHub 協作權限送 PR，不需要 API 金鑰、共享個人 token 或密碼。Pages及網域沿用官網管理者設定。
@@ -21,7 +21,7 @@
 4. 檢查總覽、四島及各條雙向連線。網址不變時，個人頁無需重新發布。
 5. 僅新增或更換成果入口時，才修改個人頁成果卡。
 
-原 ChatGPT Sites D/E 網址暫保留且不自動同步。正式維運集中在華都更官網；若要退役舊址，另行決定轉址或停止發布。
+2026-11-05已依擁有者確認，永久刪除本次建立的D/E舊版ChatGPT Sites；正式維運集中在華都更GitHub Pages。
 
 ## B組新增
 
@@ -56,3 +56,7 @@ B/D/E同次更新為低角度預設自動導覽；按原有「自動導覽」可
 頭部跟隨身體同側翻躺，僅保留小幅頸部側傾，避免反向抵消身體旋轉造成頭部直立。
 
 翻肚互動延長至14.6秒：2.2秒完成翻躺後，放鬆停留約7秒；9.2秒開始收回肚子，10.8秒起前腳先落地、撐起胸口，後腳稍晚伸開，14.6秒回復原姿態與路線。頭仍隨身體轉動，整段沿用暫停／減少動態。
+
+## 島嶼製作洽詢入口
+
+總覽與A/B/D/E頁底部加入靜態引流區，樣式共用industry-islands/island-contact.css；不需額外JavaScript。個人首頁與LINE網址沿用擁有者首頁的公開入口。未來新增C組時可沿用相同區塊與樣式。未加入追蹤、表單、付費或外部套件。

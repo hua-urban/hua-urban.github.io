@@ -1,0 +1,13 @@
+.island-contact{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:32px;width:92%;max-width:1120px;margin:48px auto;padding:40px 44px;border:1px solid #426758;border-radius:24px;background:#25483e;color:#f8f4e9;font-family:system-ui,"PingFang TC",sans-serif;text-align:left}
+.island-contact::after{content:"";position:absolute;z-index:-1;width:300px;height:300px;right:-110px;top:-130px;border:1px solid #6c8b6f;border-radius:45% 55% 60% 40%;transform:rotate(-18deg);opacity:.4;pointer-events:none}
+.island-contact .island-contact-kicker{margin:0 0 12px;color:#dbd4ad;font-size:12px;letter-spacing:.12em;line-height:1.7}
+.island-contact h2{margin:0 0 16px;color:#f8f4e9;font:500 clamp(24px,2.5vw,32px)/1.5 Georgia,"Songti TC",serif;letter-spacing:.02em}
+.island-contact h2 span{display:inline-block}
+.island-contact-copy>p:last-child{margin:0;color:#dce6dd;font-size:14px;line-height:1.9}
+.island-contact-actions{display:flex;flex-direction:column;gap:12px;flex:0 0 232px}
+.island-contact-actions a{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:50px;padding:13px 18px;border:1px solid #cbd7c5;border-radius:12px;color:#f8f4e9;font-size:14px;font-weight:600;line-height:1.6;text-decoration:none}
+.island-contact-actions a:hover{background:#3b6251}
+.island-contact-actions .island-contact-line{border-color:#e7d7a9;background:#e7d7a9;color:#25483e}
+.island-contact-actions .island-contact-line:hover{background:#f5e7be}
+.island-contact-actions a:focus-visible{outline:3px solid #f6e8b8;outline-offset:4px}
+@media(max-width:700px){.island-contact{flex-direction:column;align-items:stretch;gap:24px;margin:32px auto;padding:28px 24px;border-radius:20px}.island-contact-actions{flex-basis:auto}.island-contact-copy>p:last-child br{display:none}.island-contact h2{font-size:26px}}
