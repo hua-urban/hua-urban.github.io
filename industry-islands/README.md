@@ -10,9 +10,9 @@
 
 ## 檔案
 
-- `index.html`：群島總覽、五組預留與三條需求直達入口。
-- `cross-group.js`、`cross-group.css`：三島共用切換、展開式群島總覽與跨組卡片。
-- `b/`、`d/`、`e/`：各組獨立 HTML、style、data、app、scene、企劃。
+- `index.html`：群島總覽、五組架構與跨組需求直達入口。
+- `cross-group.js`、`cross-group.css`：四島共用切換、展開式群島總覽與跨組卡片。
+- `a/`、`b/`、`d/`、`e/`：各組獨立 HTML、style、data、app、scene、企劃。
 - `data.js`：八主題、服務、夥伴、需求提問、協作情境。
 - `scene.js`：各組不同岸線、位置、建築、地標、配色與動態；保留 createIsland 控制器。
 - `app.js`：URL topic 選取、日夜、暫停、導覽、減少動態及需求提問。
@@ -33,10 +33,12 @@ node scripts/check-industry-islands.mjs
 
 ## 擴充及回復
 
-新增 `a/` 或 `c/` 的各組內容，再更新總覽和共用 groups.js 的 sites/routes。每組採獨立地形、位置和建築；內容完成、審閱及驗收後才啟用連結。預留位置不連到空頁。
+新增 `c/` 的各組內容，再更新總覽和共用 groups.js 的 sites/routes。每組採獨立地形、位置和建築；內容完成、審閱及驗收後才啟用連結。預留位置不連到空頁。
 
 不提交 Drive 原始逐字稿、私人聯絡、客戶識別資料或後台。分享與構想不當作共同實績，更新時同步來源和狀態。場景是協作示意。
 
 回復使用 revert PR 撤銷 merge commit（squash 則撤銷該提交），合回 master 並確認 Pages build；不 force push。靜態網站無資料庫遷移。
 
 B組於2026-11-05加入，內容依8/28、9/11、10/23簡報整理，14位夥伴依10/23所列。資源缺口與專業能力分別呈現，不採收入挑戰或個案數字作成效承諾。跨組導航集中在groups.js，cross-group.js負責介面。
+
+2026-11-05新增A組地主改建協作島，依9/3、10/1、10/15組聚資料表重整。A三情境／八主題，新增A transition↔B assets、A construction↔D materials、A funding↔E finance三條雙向整頁連線。ABDE已開放，C保留；群島摘要由groups.js產生。
