@@ -36,9 +36,9 @@ const SERVICES = [
   {
     title: "來賓報名",
     category: "活動與來賓",
-    description: "公開來賓報名頁；報名資料管理入口未列入公開目錄。",
+    description: "來賓報名頁與報名紀錄管理。",
     use: [{ label: "開啟來賓報名", href: "https://hua-urban.com/guest/" }],
-    data: [{ status: "報名資料管理入口待核對" }],
+    data: [{ label: "來賓後台紀錄表", href: "https://docs.google.com/spreadsheets/d/1YYTsOkPYuFXCphzIADMTQqbifFPKTZbqbjDbNj5LBTk/edit#gid=2004818885" }],
     maintenance: [{ status: "登入後台後查看" }]
   },
   {
