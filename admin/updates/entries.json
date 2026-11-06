@@ -2,6 +2,32 @@
   "asOf": "2026-11-06",
   "entries": [
     {
+      "id": "training-backend-reference-audit-20261106",
+      "date": "2026-11-06",
+      "status": "已核對",
+      "statusKind": "live",
+      "category": "資訊組維護",
+      "title": "盤點其他排程與服務的舊培訓後端引用",
+      "summary": [
+        "掃描華都更帳號可存取的 17 個非空 GitHub 專案預設分支，共 383 份程式、排程、設定及說明檔；本次未發現其他舊培訓後端網址引用，無需額外切換服務。",
+        "已再次確認正式培訓頁使用華都更官方新後端；匿名名冊查詢成功，回傳 54 位現任會員。名冊每日對帳的舊網址已於前一筆修正。",
+        "維護規則：後端更換必須同步搜尋完整舊部署識別碼，核對前端、GitHub Actions 與其他依賴服務；保存舊／新端點對照及實際查詢結果，完成正式發布後再確認監測與後續排程。"
+      ],
+      "services": [
+        {
+          "label": "培訓進度回報",
+          "href": "/bni-training/"
+        }
+      ],
+      "sources": [
+        {
+          "label": "先前對帳設定修正",
+          "href": "https://github.com/hua-urban/bni-pt-groups/commit/7c139c9adaba0d3ae83b8e5535d567c3b55802c1"
+        }
+      ],
+      "sourceNote": "盤點範圍為此次可存取專案的預設分支文字來源（單檔小於300KB，排除依賴套件及鎖定檔）；不含 Git 歷史、本機備份、GitHub Secrets、雲端環境變數或未入庫的 Apps Script。未手動觸發排程或發送通知。"
+    },
+    {
       "id": "roster-training-endpoint-403-20261106",
       "date": "2026-11-06",
       "status": "已上線",
