@@ -1,4 +1,4 @@
-import {createCeilingFan} from './ceiling-fan.js?v=label-light1';
+import {createCeilingFan} from './ceiling-fan.js?v=orange-tip1';
 import {createSupplyWarehouse} from './supply-warehouse.js?v=full-campus1';
 
 // A schematic HVLS display pavilion; dimensions are for the miniature only.
