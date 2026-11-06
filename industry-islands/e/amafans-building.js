@@ -56,16 +56,16 @@ export async function createAmaFansPavilion({THREE,root,box,cyl,mesh,material,ke
     texture.colorSpace=THREE.SRGBColorSpace;badgeMaterial.needsUpdate=true;
   });
   badgeTexture.colorSpace=THREE.SRGBColorSpace;badgeMaterial.map=badgeTexture;
-  const sign=mesh(keep(new THREE.PlaneGeometry(2.15,1.075)),badgeMaterial,pavilion,1.365,3.11,-2.2);
+  const sign=mesh(keep(new THREE.PlaneGeometry(2.15,1.075)),badgeMaterial,pavilion,1.365,2.93,-2.2);
   sign.rotation.y=Math.PI/2;sign.name='amafans-side-brand-sign';sign.castShadow=false;
   const badgeBackMaterial=new THREE.MeshBasicMaterial({map:badgeTexture,color:'#020303',transparent:true,alphaTest:.1,side:THREE.BackSide,toneMapped:false});
-  const signBack=mesh(sign.geometry,badgeBackMaterial,pavilion,1.365,3.11,-2.2);signBack.rotation.y=Math.PI/2;
+  const signBack=mesh(sign.geometry,badgeBackMaterial,pavilion,1.365,2.93,-2.2);signBack.rotation.y=Math.PI/2;
   signBack.name='amafans-sign-dark-backing';signBack.castShadow=false;signBack.userData={role:'sign-backing'};
   for(const z of [-2.85,-1.55]){
     box(pavilion,1.325,2.63,z,.08,.045,.045,steel).name='amafans-sign-wall-standoff';
-    box(pavilion,1.345,2.90,z,.025,.55,.025,steel).name='amafans-sign-roof-bracket';
+    box(pavilion,1.345,2.81,z,.025,.37,.025,steel).name='amafans-sign-roof-bracket';
   }
-  sign.userData={topicId:'industry',role:'brand-sign',externalUrl:'https://www.amafans.com/',externalURL:'https://www.amafans.com/',badgeStyle:'exact-photo-cutout',placement:'side-wall-roof-edge',fanMarkAboveRoof:true,wallWidthRatio:2.15/2.28,roofCutFraction:(3.11+1.075/2-2.73)/1.075};
+  sign.userData={topicId:'industry',role:'brand-sign',externalUrl:'https://www.amafans.com/',externalURL:'https://www.amafans.com/',badgeStyle:'exact-photo-cutout',placement:'side-wall-roof-edge',fanMarkAboveRoof:true,wallWidthRatio:2.15/2.28,roofCutFraction:(2.93+1.075/2-2.73)/1.075};
   pickables.push(sign);
   const badges=[sign];
   pavilion.traverse(object=>{object.userData.topicId='industry';if(object.isMesh&&!object.userData.externalUrl)pickables.push(object);});
