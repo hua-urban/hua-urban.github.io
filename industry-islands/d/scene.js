@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from '../lib/OrbitControls.js';
-import {createVentilationCampus,CAMPUS_OFFSET} from './ventilation-campus.js?v=full-campus1';
+import {createVentilationCampus,CAMPUS_OFFSET} from './ventilation-campus.js?v=full-campus2';
 
 // Districts, labels, roads and collaboration endpoints share this layout.
 // Large-space energy/materials sit west; business/digital services sit east.
