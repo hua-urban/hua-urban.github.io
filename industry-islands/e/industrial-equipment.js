@@ -1,4 +1,4 @@
-import {createWaterCoolingFan} from './water-cooling-fan.js?v=warehouse1';
+import {createWaterCoolingFan} from './water-cooling-fan.js?v=label-light1';
 
 // Small teaching display positions, not an installation drawing or an airflow simulation.
 export const EQUIPMENT_VIEWS={
@@ -36,7 +36,7 @@ export async function createEquipmentDisplay({THREE,parent,keep,material,pickabl
       const geometry=keep(new THREE.BufferGeometry());geometry.setAttribute('position',new THREE.BufferAttribute(positions,3));
       geometry.setAttribute('normal',new THREE.BufferAttribute(new Float32Array(buffer,part.normal.byteOffset,part.normal.count),3));
       geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(buffer,part.index.byteOffset,part.index.count),1));geometry.computeBoundingSphere();
-      const surface=material(new THREE.Color(...part.color),{roughness:.62,metalness:.12,side:THREE.DoubleSide});
+      const surface=material(part.rotor?new THREE.Color('#17191a'):new THREE.Color(...part.color),{roughness:.62,metalness:.12,side:THREE.DoubleSide});
       const object=new THREE.Mesh(geometry,surface);object.name=`${id}-${part.name}`;object.castShadow=true;object.receiveShadow=true;
       object.userData={topicId:'industry',equipment:id,role:part.rotor?'rotating-part':'fixed-part'};
       (part.rotor?rotor:root).add(object);pickables.push(object);

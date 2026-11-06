@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from '../lib/OrbitControls.js';
-import {createVentilationCampus,CAMPUS_OFFSET} from './ventilation-campus.js?v=ceiling-drop2';
+import {createVentilationCampus,CAMPUS_OFFSET} from './ventilation-campus.js?v=label-light1';
 
 // Districts, labels, roads and collaboration endpoints share this layout.
 // Large-space energy/materials sit west; business/digital services sit east.
@@ -492,7 +492,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     const onMove=e=>{renderer.domElement.style.cursor=intersect(e)?'pointer':pointerDown?'grabbing':'grab';};
     const onCancel=()=>{pointerDown=null;};
     renderer.domElement.addEventListener('pointerdown',onDown);renderer.domElement.addEventListener('pointerup',onUp);renderer.domElement.addEventListener('pointermove',onMove);renderer.domElement.addEventListener('pointercancel',onCancel);
-    function setNight(value){const night=!!value;hemi.intensity=night?1.1:2.35;sun.intensity=night?.65:2.6;fill.intensity=night?.7:1;sun.color.set(night?'#96b8e7':'#ffedce');hemi.color.set(night?'#8098c6':'#e7f5fb');P.water.color.set(night?'#204e65':'#438da2');P.shallow.color.set(night?'#39717c':'#7bb6b5');P.window.emissiveIntensity=night?2.2:.04;P.route.emissiveIntensity=night?1.1:.2;scene.fog.color.set(night?'#193c56':'#c7e3e4');renderer.toneMappingExposure=night?1:1.02;}
+    function setNight(value){const night=!!value;ventilationCampus.setNight(night);hemi.intensity=night?1.1:2.35;sun.intensity=night?.65:2.6;fill.intensity=night?.7:1;sun.color.set(night?'#96b8e7':'#ffedce');hemi.color.set(night?'#8098c6':'#e7f5fb');P.water.color.set(night?'#204e65':'#438da2');P.shallow.color.set(night?'#39717c':'#7bb6b5');P.window.emissiveIntensity=night?2.2:.04;P.route.emissiveIntensity=night?1.1:.2;scene.fog.color.set(night?'#193c56':'#c7e3e4');renderer.toneMappingExposure=night?1:1.02;}
     const projected=new THREE.Vector3(),pos=new THREE.Vector3(),tangent=new THREE.Vector3();
     function locate(g,path,u,yOffset=0) {path.getPointAt(u,pos);path.getTangentAt(u,tangent);g.position.copy(pos);g.position.y+=yOffset;g.rotation.y=Math.atan2(tangent.x,tangent.z);}
     function placeLabels(){

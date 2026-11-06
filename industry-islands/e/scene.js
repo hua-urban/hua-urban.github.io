@@ -4,9 +4,9 @@ import { createCreamCat } from './cream-cat.js?v=pet1';
 import { createPhotoTabby } from './photo-tabby.js?v=pet1';
 import { createCatWalker } from './cat-walker.js?v=walk1';
 import { createCatInteractions } from './cat-interactions.js?v=pet4';
-import {createEquipmentDisplay,EQUIPMENT_VIEWS} from './industrial-equipment.js?v=ceiling-drop2';
+import {createEquipmentDisplay,EQUIPMENT_VIEWS} from './industrial-equipment.js?v=label-light1';
 import { createStandingFanTable } from './standing-fan-table.js?v=standing1';
-import { createAmaFansPavilion } from './amafans-building.js?v=ceiling-drop2';
+import { createAmaFansPavilion } from './amafans-building.js?v=label-light1';
 
 // This pure layout is shared by rendered roads and headless connectivity checks.
 export const ROAD_LAYOUT = {
@@ -184,7 +184,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     // Reused geometry keeps the detailed miniature economical to render.
     const pickables=[], districtMap=new Map(), labels=[], fans=[], walkers=[], vehicles=[], boats=[], birds=[], waves=[];
     const treeData=[], buildingPlots=[], ownedCleanups=[];
-    let amaFansPavilion,standingFanTable,equipmentDisplay;
+    let amaFansPavilion,standingFanTable,equipmentDisplay,ceilingLightController;
     const inFactoryClearance=(x,z)=>x>6.6&&x<13.2&&z>-2.7&&z<3.35;
     function tree(x,z,s=1,y=.08) {treeData.push({x,z,s,y,rot:random()*6.28});}
     function lamp(x,z) {cyl(landscape,x,.42,z,.027,.65,P.dark);ellipsoid(landscape,x,.78,z,.1,.08,.1,P.window);}
@@ -251,7 +251,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
         tree(x+.95,z-1.25,.65);
       } else if(topic.id==='industry') {
         const pavilion=await createAmaFansPavilion({THREE,root,box,cyl,mesh,material,keep,pickables,buildingPlots});
-        amaFansPavilion=pavilion.pavilion;
+        amaFansPavilion=pavilion.pavilion;ceilingLightController=pavilion.fan;
         fans.push(pavilion.rotor);ownedCleanups.push(pavilion.dispose);
         // A dedicated off-road factory lot on the enlarged eastern headland.
         box(landscape,8.5,.105,.2,3.45,.055,5.0,P.pavement).name='amafans-off-road-yard';
@@ -538,7 +538,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     let width=0,height=0,paused=false,reduced=false,touring=false,disposed=false,raf=0,time=0,last=0,pointerDown=null;
     const defaultPosition=new THREE.Vector3(), fitTarget=mapPoint(new THREE.Vector3(0,.25,1.1));
     function fit() {
-      labels.forEach(item=>item.layout=null);
+      labels.forEach(item=>{item.layout=null;item.protectionSides=null;item.pairConstraints=null;});
       controls.target.copy(fitTarget);const dir=new THREE.Vector3(.22,.48,1).normalize(),right=new THREE.Vector3().crossVectors(new THREE.Vector3(0,1,0),dir).normalize(),up=new THREE.Vector3().crossVectors(dir,right).normalize();
       const tan=Math.tan(THREE.MathUtils.degToRad(camera.fov/2));let distance=22;
       function include(p,padX=12,padY=12){const r=p.clone().sub(fitTarget),depth=r.dot(dir),usableX=Math.max(.3,1-2*padX/width),usableY=Math.max(.3,1-2*padY/height);distance=Math.max(distance,depth+Math.abs(r.dot(right))/(tan*camera.aspect*usableX),depth+Math.abs(r.dot(up))/(tan*usableY));}
@@ -579,18 +579,22 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     const onMove=e=>{const hit=intersect(e),inactiveCat=hit?.object.userData.catId&&(paused||reduced);renderer.domElement.style.cursor=hit&&!inactiveCat?'pointer':pointerDown?'grabbing':'grab';};
     const onCancel=()=>{pointerDown=null;};
     renderer.domElement.addEventListener('pointerdown',onDown);renderer.domElement.addEventListener('pointerup',onUp);renderer.domElement.addEventListener('pointermove',onMove);renderer.domElement.addEventListener('pointercancel',onCancel);
-    function setNight(value){const night=!!value;hemi.intensity=night?1.1:2.35;sun.intensity=night?.65:2.6;fill.intensity=night?.7:1;sun.color.set(night?'#96b8e7':'#ffedce');hemi.color.set(night?'#8098c6':'#e7f5fb');P.water.color.set(night?'#204e65':'#6aadb0');P.shallow.color.set(night?'#39717c':'#a0cbbb');P.window.emissiveIntensity=night?2.2:.04;P.route.emissiveIntensity=night?1.1:.2;scene.fog.color.set(night?'#193c56':'#c7e3e4');renderer.toneMappingExposure=night?1:1.02;}
+    function setNight(value){const night=!!value;ceilingLightController?.setNight(night);hemi.intensity=night?1.1:2.35;sun.intensity=night?.65:2.6;fill.intensity=night?.7:1;sun.color.set(night?'#96b8e7':'#ffedce');hemi.color.set(night?'#8098c6':'#e7f5fb');P.water.color.set(night?'#204e65':'#6aadb0');P.shallow.color.set(night?'#39717c':'#a0cbbb');P.window.emissiveIntensity=night?2.2:.04;P.route.emissiveIntensity=night?1.1:.2;scene.fog.color.set(night?'#193c56':'#c7e3e4');renderer.toneMappingExposure=night?1:1.02;}
     const projected=new THREE.Vector3(),pos=new THREE.Vector3(),tangent=new THREE.Vector3();
     function locate(g,path,u,yOffset=0) {path.getPointAt(u,pos);path.getTangentAt(u,tangent);g.position.copy(pos);g.position.y+=yOffset;g.rotation.y=Math.atan2(tangent.x,tangent.z);}
-    // Reserve the whole pavilion silhouette, including roof, as the camera orbits.
-    const fanCorners=[];
+    // Protect equipment silhouettes separately: a union of the whole factory spans
+    // empty streets and makes a nearby district choose the opposite edge mid-orbit.
+    const fanRegions=[];
     landscape.updateMatrixWorld(true);
-    const fanBox=new THREE.Box3().setFromObject(amaFansPavilion);
-    fanBox.union(new THREE.Box3().setFromObject(standingFanTable.root));
-    fanBox.union(new THREE.Box3().setFromObject(equipmentDisplay.group));
-    for(const x of [fanBox.min.x,fanBox.max.x])for(const y of [fanBox.min.y,fanBox.max.y])for(const z of [fanBox.min.z,fanBox.max.z])fanCorners.push(new THREE.Vector3(x,y,z));
-    const standingCorners=[],standingBox=new THREE.Box3().setFromObject(standingFanTable.root);
-    for(const x of [standingBox.min.x,standingBox.max.x])for(const y of [standingBox.min.y,standingBox.max.y])for(const z of [standingBox.min.z,standingBox.max.z])standingCorners.push(new THREE.Vector3(x,y,z));
+    function equipmentCorners(object){
+      const bounds=new THREE.Box3().setFromObject(object),corners=[];
+      for(const x of [bounds.min.x,bounds.max.x])for(const y of [bounds.min.y,bounds.max.y])for(const z of [bounds.min.z,bounds.max.z])corners.push(new THREE.Vector3(x,y,z));
+      return corners;
+    }
+    const standingCorners=equipmentCorners(standingFanTable.root);
+    for(const object of [amaFansPavilion.getObjectByName('amafans-cad-ceiling-fan'),standingFanTable.root,...Object.values(equipmentDisplay.devices)]){
+      if(object)fanRegions.push(equipmentCorners(object));
+    }
     function screenBounds(corners){
       const points=corners.map(p=>p.clone().project(camera));
       if(points.some(p=>p.z>1))return null;
@@ -598,95 +602,107 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
         right:Math.max(...points.map(p=>(p.x*.5+.5)*width))+10,bottom:Math.max(...points.map(p=>(-p.y*.5+.5)*height))+10};
     }
     function placeLabels(){
-      const reserved=screenBounds(fanCorners),standingReserved=screenBounds(standingCorners);
+      const regions=fanRegions.map(screenBounds).filter(Boolean),standingReserved=screenBounds(standingCorners);
       container.dataset.standingFanBounds=JSON.stringify(standingReserved);
-      container.dataset.fanBounds=JSON.stringify(reserved);
-      const maxShift=40,gap=3.2;
+      container.dataset.fanBounds=JSON.stringify(regions.length?{x:Math.min(...regions.map(r=>r.x)),y:Math.min(...regions.map(r=>r.y)),right:Math.max(...regions.map(r=>r.right)),bottom:Math.max(...regions.map(r=>r.bottom))}:null);
+      const gap=3.2,maxShift=width<600?100:80;
       const items=labels.map(item=>{
         projected.copy(mapPoint(item.anchor)).project(camera);
-        const w=item.width||90,h=item.height||30;
-        const minX=w/2+8,maxX=width-w/2-8,minY=104+h/2,maxY=height-60-h/2;
-        const pinToStanding=item.el.dataset.topic==='industry'&&!!standingReserved;
-        const x=THREE.MathUtils.clamp(pinToStanding?(standingReserved.x+standingReserved.right)/2:(projected.x*.5+.5)*width,minX,maxX);
-        const y=THREE.MathUtils.clamp(pinToStanding?standingReserved.y-h/2-8:(-projected.y*.5+.5)*height,minY,maxY);
-        // Carry the previous screen offset forward. Restarting from the anchor on
-        // every frame can reverse pair ordering after subpixel camera movement.
-        const previous=item.layout;
-        let dx=previous&&!pinToStanding?(previous.x-previous.baseX)*.985:0;
-        let dy=previous&&!pinToStanding?(previous.y-previous.baseY)*.985:0;
-        const length=Math.hypot(dx,dy);if(length>maxShift){dx*=maxShift/length;dy*=maxShift/length;}
-        return {...item,w,h,pinToStanding,x:THREE.MathUtils.clamp(x+dx,minX,maxX),y:THREE.MathUtils.clamp(y+dy,minY,maxY),baseX:x,baseY:y,minX,maxX,minY,maxY,hidden:projected.z>1};
+        const w=item.width||90,h=item.height||30;let minX=w/2+8,maxX=width-w/2-8,minY=104+h/2,maxY=height-60-h/2;
+        const pinned=item.el.dataset.topic==='industry'&&standingReserved;
+        let baseX=THREE.MathUtils.clamp(pinned?(standingReserved.x+standingReserved.right)/2:(projected.x*.5+.5)*width,minX,maxX);
+        let baseY=THREE.MathUtils.clamp(pinned?standingReserved.y-h/2-8:(-projected.y*.5+.5)*height,minY,maxY);
+        if(!pinned){
+          const sides=item.protectionSides||(item.protectionSides={});
+          minX=Math.max(minX,baseX-maxShift);maxX=Math.min(maxX,baseX+maxShift);
+          minY=Math.max(minY,baseY-maxShift);maxY=Math.min(maxY,baseY+maxShift);
+          regions.forEach((r,k)=>{
+            const left=r.x-w/2-4,right=r.right+w/2+4,top=r.y-h/2-4,bottom=r.bottom+h/2+4;
+            if(baseX<left-40||baseX>right+40||baseY<top-40||baseY>bottom+40)delete sides[k];
+            const options=[['left',baseX-left],['right',right-baseX],['top',baseY-top],['bottom',bottom-baseY]].map(([side,distance])=>{
+              const horizontal=side==='left'||side==='right',other=horizontal?baseY:baseX,lo=horizontal?top:left,hi=horizontal?bottom:right;
+              const proximity=THREE.MathUtils.clamp(Math.min(other-lo+40,hi-other+40)/40,0,1);
+              const target=side==='left'?maxX+(left-maxX)*proximity:side==='right'?minX+(right-minX)*proximity:side==='top'?maxY+(top-maxY)*proximity:minY+(bottom-minY)*proximity;
+              const feasible=side==='left'?target>=minX:side==='right'?target<=maxX:side==='top'?target>=minY:target<=maxY;
+              return {side,distance,target,feasible};
+            });
+            const nearest=options.filter(o=>o.feasible).sort((a,b)=>a.distance-b.distance)[0],prior=options.find(o=>o.side===sides[k]&&o.feasible);
+            const selected=prior&&!(nearest&&nearest.distance< -12&&prior.distance>12)?prior:nearest;
+            if(!selected)return;sides[k]=selected.side;
+            if(selected.side==='left')maxX=Math.min(maxX,selected.target);
+            if(selected.side==='right')minX=Math.max(minX,selected.target);
+            if(selected.side==='top')maxY=Math.min(maxY,selected.target);
+            if(selected.side==='bottom')minY=Math.max(minY,selected.target);
+          });
+        }
+        if(pinned){minX=Math.max(minX,baseX-20);maxX=Math.min(maxX,baseX+20);minY=Math.max(minY,baseY-20);maxY=Math.min(maxY,baseY);}
+        const old=item.layout,dx=old?(old.x-old.baseX)*.985:0,dy=old?(old.y-old.baseY)*.985:0;
+        return {...item,w,h,pinned,baseX,baseY,minX,maxX,minY,maxY,x:THREE.MathUtils.clamp(baseX+dx,minX,maxX),y:THREE.MathUtils.clamp(baseY+dy,minY,maxY),hidden:projected.z>1};
       });
-      // Leave a settled layout alone while the camera is effectively stationary.
-      if(items.every((item,i)=>{const old=labels[i].layout;return old&&old.hidden===item.hidden&&old.w===item.w&&old.h===item.h&&Math.abs(old.baseX-item.baseX)<.35&&Math.abs(old.baseY-item.baseY)<.35;}))return;
-      const overlap=(a,b)=>Math.abs(a.x-b.x)<(a.w+b.w)/2+gap&&Math.abs(a.y-b.y)<(a.h+b.h)/2+gap;
+      const pairs=labels[0].pairConstraints||(labels[0].pairConstraints={});
       function capacity(item,axis,direction){
-        if(item.pinToStanding)return 0;
+
         const other=axis==='x'?'y':'x',base=axis==='x'?item.baseX:item.baseY,otherBase=axis==='x'?item.baseY:item.baseX;
         const radius=Math.sqrt(Math.max(0,maxShift*maxShift-(item[other]-otherBase)**2));
         const low=Math.max(base-radius,axis==='x'?item.minX:item.minY),high=Math.min(base+radius,axis==='x'?item.maxX:item.maxY);
         return Math.max(0,direction<0?item[axis]-low:high-item[axis]);
       }
-      // Resolve pairs together rather than offsetting individual district names. Most pairs
-      // separate vertically; horizontal space is used when the UI boundary constrains that.
-      for(let pass=0;pass<24;pass++){
-        let collisions=0;
+      for(let pass=0;pass<32;pass++){
         for(let i=0;i<items.length;i++)for(let j=i+1;j<items.length;j++){
-          const a=items[i],b=items[j];if(a.hidden||b.hidden||!overlap(a,b))continue;collisions++;
-          const choices=['y','x'].map(axis=>{
-            const lower=a[axis]<=b[axis]?a:b,upper=lower===a?b:a,size=axis==='x'?'w':'h';
-            const required=(lower[size]+upper[size])/2+gap-(upper[axis]-lower[axis]);
-            const lowCap=capacity(lower,axis,-1),highCap=capacity(upper,axis,1);
-            return {axis,lower,upper,required,lowCap,highCap,possible:lowCap+highCap>=required-.001};
-          });
-          const c=choices.find(c=>c.possible)||choices.sort((a,b)=>(b.lowCap+b.highCap)/b.required-(a.lowCap+a.highCap)/a.required)[0];
-          const amount=Math.min(c.required,c.lowCap+c.highCap);
-          let lowMove=Math.min(amount/2,c.lowCap),highMove=Math.min(amount-lowMove,c.highCap);
-          lowMove=Math.min(c.lowCap,amount-highMove);
-          c.lower[c.axis]-=lowMove;c.upper[c.axis]+=highMove;
+          const a=items[i],b=items[j];if(a.hidden||b.hidden)continue;
+          const ox=(a.w+b.w)/2+gap-Math.abs(a.x-b.x),oy=(a.h+b.h)/2+gap-Math.abs(a.y-b.y),key=`${i}:${j}`;
+          if(ox< -40||oy< -40){delete pairs[key];continue;}
+          if(ox<=0||oy<=0){const prior=pairs[key];if(prior&&((a[prior.axis]<=b[prior.axis])!==prior.forward))delete pairs[key];continue;}
+          const cached=pairs[key];if(cached){const low=cached.forward?a:b,high=cached.forward?b:a,size=cached.axis==='x'?'w':'h',need=(a[size]+b[size])/2+gap-(high[cached.axis]-low[cached.axis]);if(capacity(low,cached.axis,-1)+capacity(high,cached.axis,1)<need-.01)delete pairs[key];}
+          if(!pairs[key]){
+            const choices=['y','x'].map(axis=>{const forward=a[axis]<=b[axis],low=forward?a:b,high=forward?b:a,need=axis==='x'?ox:oy;return {axis,forward,need,room:capacity(low,axis,-1)+capacity(high,axis,1)};});
+            pairs[key]=choices.sort((a,b)=>a.need-b.need).find(c=>c.room>=c.need-.001)||choices.sort((a,b)=>b.room/b.need-a.room/a.need)[0];
+          }
+          const {axis,forward}=pairs[key],low=forward?a:b,high=forward?b:a,size=axis==='x'?'w':'h';
+          const need=(a[size]+b[size])/2+gap-(high[axis]-low[axis]),lc=capacity(low,axis,-1),hc=capacity(high,axis,1);
+          let lm=Math.min(need/2,lc),hm=Math.min(need-lm,hc);lm=Math.min(lc,need-hm);low[axis]-=lm;high[axis]+=hm;
         }
-        if(!collisions)break;
       }
-      // A small local fallback handles three-way collisions without moving a label farther
-      // than 40 px from its original clamped projection. Clear desktop layouts stay exact.
-      if(items.some((a,i)=>items.slice(i+1).some(b=>overlap(a,b)))){
-        const offsets=[[0,0],[0,-40],[0,40],[-40,0],[40,0]];
-        for(const dx of [-32,-16,0,16,32])for(const dy of [-32,-16,0,16,32])if(dx*dx+dy*dy<=1600)offsets.push([dx,dy]);
-        const score=(item,x,y)=>{
-          let result=(x-item.baseX)**2+(y-item.baseY)**2;
-          for(const other of items){if(other===item||other.hidden)continue;const ox=(item.w+other.w)/2+gap-Math.abs(x-other.x),oy=(item.h+other.h)/2+gap-Math.abs(y-other.y);if(ox>0&&oy>0)result+=100000+ox*oy*100;}
-          return result;
-        };
+      const overlapArea=(item,x,y)=>items.reduce((sum,other)=>{
+        if(other===item||other.hidden)return sum;
+        const ox=(item.w+other.w)/2+gap-Math.abs(x-other.x),oy=(item.h+other.h)/2+gap-Math.abs(y-other.y);
+        return sum+(ox>0&&oy>0?100000+ox*oy*10:0);
+      },0)+(!item.pinned?regions.reduce((sum,r)=>{
+        const ox=Math.min(x+item.w/2,r.right)-Math.max(x-item.w/2,r.x),oy=Math.min(y+item.h/2,r.bottom)-Math.max(y-item.h/2,r.y);
+        return sum+(ox>0&&oy>0?10000+ox*oy:0);
+      },0):0);
+      if(items.some(item=>overlapArea(item,item.x,item.y)>0)){
         for(let pass=0;pass<3;pass++)for(const item of items){
-          if(item.hidden||item.pinToStanding||!items.some(other=>other!==item&&!other.hidden&&overlap(item,other)))continue;
-          let best={x:item.x,y:item.y,value:score(item,item.x,item.y)};
-          for(const [dx,dy] of offsets){const x=THREE.MathUtils.clamp(item.baseX+dx,item.minX,item.maxX),y=THREE.MathUtils.clamp(item.baseY+dy,item.minY,item.maxY),value=score(item,x,y);if(value<best.value)best={x,y,value};}
+          if(item.pinned||item.hidden||!overlapArea(item,item.x,item.y))continue;
+          const old=item.layout||item,score=(x,y)=>overlapArea(item,x,y)*1000+(x-item.baseX)**2+(y-item.baseY)**2+2*((x-old.x)**2+(y-old.y)**2);
+          let best={x:item.x,y:item.y,score:score(item.x,item.y)};
+          for(let dx=-maxShift;dx<=maxShift;dx+=10)for(let dy=-maxShift;dy<=maxShift;dy+=10){
+            if(dx*dx+dy*dy>maxShift*maxShift)continue;
+            const x=THREE.MathUtils.clamp(item.baseX+dx,item.w/2+8,width-item.w/2-8),y=THREE.MathUtils.clamp(item.baseY+dy,104+item.h/2,height-60-item.h/2),value=score(x,y);
+            if(value<best.score)best={x,y,score:value};
+          }
           item.x=best.x;item.y=best.y;
         }
       }
+      const desired=items.map(item=>({x:item.x,y:item.y}));
       for(let i=0;i<items.length;i++){
         const item=items[i],old=labels[i].layout;
-        if(old&&!item.pinToStanding){const oldDx=old.x-old.baseX,oldDy=old.y-old.baseY;
-          const dx=item.x-item.baseX-oldDx,dy=item.y-item.baseY-oldDy,length=Math.hypot(dx,dy);
-          if(length>2){item.x=THREE.MathUtils.clamp(item.baseX+oldDx+dx*2/length,item.minX,item.maxX);item.y=THREE.MathUtils.clamp(item.baseY+oldDy+dy*2/length,item.minY,item.maxY);}}
-        // Apply after smoothing: an interpolated label must never cross the fan.
-        const protectedArea=item.pinToStanding?standingReserved:reserved;
-        if(protectedArea&&!item.hidden){
-          const hits=(x,y)=>x+item.w/2>protectedArea.x&&x-item.w/2<protectedArea.right&&y+item.h/2>protectedArea.y&&y-item.h/2<protectedArea.bottom;
-          if(hits(item.x,item.y)){
-            const candidates=[
-              [item.x,protectedArea.y-item.h/2-4],[item.x,protectedArea.bottom+item.h/2+4],
-              [protectedArea.x-item.w/2-4,item.y],[protectedArea.right+item.w/2+4,item.y]
-            ].map(([x,y])=>({x:THREE.MathUtils.clamp(x,item.minX,item.maxX),y:THREE.MathUtils.clamp(y,item.minY,item.maxY)}))
-              .filter(p=>!hits(p.x,p.y));
-            candidates.sort((a,b)=>{
-              const score=p=>Math.hypot(p.x-item.baseX,p.y-item.baseY)+items.filter(o=>o!==item&&!o.hidden&&overlap({...item,...p},o)).length*1000;
-              return score(a)-score(b);
-            });
-            if(candidates.length)Object.assign(item,candidates[0]);else item.hidden=true;
-          }
+        if(old){const dx=old.x-old.baseX,dy=old.y-old.baseY,r=Math.hypot(dx,dy),scale=Math.min(1,maxShift/(r||1));item.x=item.baseX+dx*scale;item.y=item.baseY+dy*scale;}
+      }
+      for(let i=0;i<items.length;i++){
+        const item=items[i],old=labels[i].layout;
+        if(old){
+          const origin={x:item.x,y:item.y},target=desired[i];
+          const score=(x,y)=>overlapArea(item,x,y)*10000+(x-target.x)**2+(y-target.y)**2;
+          let best={...origin,score:score(origin.x,origin.y)};
+          const dx=target.x-origin.x,dy=target.y-origin.y,length=Math.hypot(dx,dy),candidates=[[origin.x+dx*Math.min(1,2/(length||1)),origin.y+dy*Math.min(1,2/(length||1))]];
+          for(const radius of [1,2])for(let angle=0;angle<32;angle++){const a=angle*Math.PI/16;candidates.push([origin.x+Math.cos(a)*radius,origin.y+Math.sin(a)*radius]);}
+          for(const [px,py] of candidates){const x=THREE.MathUtils.clamp(px,item.pinned?item.minX:item.w/2+8,item.pinned?item.maxX:width-item.w/2-8),y=THREE.MathUtils.clamp(py,item.pinned?item.minY:104+item.h/2,item.pinned?item.maxY:height-60-item.h/2);if(Math.hypot(x-item.baseX,y-item.baseY)>maxShift)continue;const value=score(x,y);if(value<best.score)best={x,y,score:value};}
+          item.x=best.x;item.y=best.y;
         }
-        labels[i].layout={x:item.x,y:item.y,baseX:item.baseX,baseY:item.baseY,w:item.w,h:item.h,hidden:item.hidden};item.el.style.left=`${item.x}px`;item.el.style.top=`${item.y}px`;item.el.style.visibility=item.hidden?'hidden':'visible';}
+        labels[i].layout={x:item.x,y:item.y,baseX:item.baseX,baseY:item.baseY,w:item.w,h:item.h,hidden:item.hidden};
+        item.el.style.left=`${item.x}px`;item.el.style.top=`${item.y}px`;item.el.style.visibility=item.hidden?'hidden':'visible';
+      }
     }
     function animate(now){if(disposed)return;raf=requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.05)||0;last=now;if(document.hidden)return;
       const moving=!paused&&!reduced;if(moving)time+=dt;
