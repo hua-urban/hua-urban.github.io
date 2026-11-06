@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from '../lib/OrbitControls.js';
+import {createVentilationCampus,CAMPUS_OFFSET} from './ventilation-campus.js?v=ventilation-1final';
 
 // Districts, labels, roads and collaboration endpoints share this layout.
 // Large-space energy/materials sit west; business/digital services sit east.
@@ -55,7 +56,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     const camera = new THREE.PerspectiveCamera(36, 1, .1, 180);
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true; controls.dampingFactor = .065; controls.enablePan = false;
-    controls.minDistance = 20; controls.maxDistance = 70;
+    controls.minDistance = 2.8; controls.maxDistance = 70;
     controls.minPolarAngle = .25; controls.maxPolarAngle = 1.2;
     controls.target.set(0, .25, 1.1);
     const hemi = new THREE.HemisphereLight(0xe7f5fb, 0xb2ad83, 2.35); scene.add(hemi);
@@ -119,7 +120,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
       g.rotateX(-Math.PI/2);return mesh(g,m,landscape,0,y,0);
     }
     const sea=mesh(keep(new THREE.PlaneGeometry(240,240)),P.water,scene,0,-.46,0);sea.rotation.x=-Math.PI/2;sea.castShadow=false;
-    const mainCoast=[[-8,.7],[-7.5,-2.3],[-5.8,-6.3],[-2.5,-7.15],[1,-6.8],[4.6,-5.5],[6.7,-3],[7.8,-.3],[7.25,.65],[6.9,1.8],[7.1,2.5],[5.6,3.7],[3.1,4.1],[.4,3.65],[-1.5,3.55],[-2.8,3.35],[-4.2,3.8],[-5.8,3.2],[-7.6,2]];
+    const mainCoast=[[-8,4.4],[-11.5,4.4],[-14.8,4.1],[-15.4,1.4],[-15,-2.8],[-13.6,-4.1],[-9,-3.8],[-7,-4.1],[-5.8,-6.3],[-2.5,-7.15],[1,-6.8],[4.6,-5.5],[6.7,-3],[7.8,-.3],[7.25,.65],[6.9,1.8],[7.1,2.5],[5.6,3.7],[3.1,4.1],[.4,3.65],[-1.5,3.55],[-2.8,3.35],[-4.2,3.8],[-5.8,3.2],[-7,4.3]];
     const portCoast=[[-8,6.2],[-7.4,5.35],[-5.3,5.2],[-3.5,5.75],[-3.05,6.8],[-3.05,8.35],[-4.5,8.85],[-6.8,8.8],[-8,7.9]];
     const learnCoast=[[2.7,6.7],[3.4,5.3],[5.3,5.15],[7,5.8],[7.8,7.1],[7.1,8.5],[5.5,9],[3.6,8.3]];
     for(const outline of [mainCoast,portCoast,learnCoast]) {
@@ -178,21 +179,21 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     }
     // Reused geometry keeps the detailed miniature economical to render.
     const pickables=[], districtMap=new Map(), labels=[], fans=[], walkers=[], vehicles=[], boats=[], birds=[], waves=[];
-    const treeData=[], buildingPlots=[];
+    const treeData=[], buildingPlots=[];let businessFanRoom,logisticsFanRoom;
     function tree(x,z,s=1,y=.08) {treeData.push({x,z,s,y,rot:random()*6.28});}
     function lamp(x,z) {cyl(landscape,x,.42,z,.027,.65,P.dark);ellipsoid(landscape,x,.78,z,.1,.08,.1,P.window);}
     function building(parent,x,z,w,d,h,kind='office',accent=P.cream) {
       buildingPlots.push({x:x+parent.position.x,z:z+parent.position.z,w,d});
       const g=new THREE.Group();g.position.set(x,.09,z);parent.add(g);
       box(g,0,.035,0,w+.13,.07,d+.13,P.pavement);
-      const body=box(g,0,h/2+.06,0,w,h,d,accent);
+      const body=box(g,0,h/2+.06,0,w,h,d,accent);g.body=body;
       if(parent.userData.topicId){body.userData.topicId=parent.userData.topicId;pickables.push(body);}
       if(kind==='house') {
         const roof=mesh(coneGeo,P.roof,g,0,h+.25,0);roof.scale.set(w*.8,.45,d*.8);roof.rotation.y=Math.PI/4;
         box(g,0,.25,d/2+.015,.16,.36,.025,P.wood);
       } else {
-        box(g,0,h+.1,0,w+.09,.12,d+.09,kind==='factory'?P.brick:P.white);
-        if(kind==='office')box(g,-w*.15,h+.2,0,w*.4,.15,d*.45,P.dark);
+        g.roof=box(g,0,h+.1,0,w+.09,.12,d+.09,kind==='factory'?P.brick:P.white);
+        if(kind==='office')g.rooftop=box(g,-w*.15,h+.2,0,w*.4,.15,d*.45,P.dark);
       }
       // Windows are strips on both street-facing facades rather than individual high-cost panes.
       for(let level=.37;level<h-.02;level+=.4) {
@@ -271,11 +272,6 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
         // Clerestory workshop roof, solar panels, equipment crates and a visible HVLS fan.
         for(let j=0;j<3;j++)box(root,.03+j*.42,1.12,-.6,.31,.05,.55,P.glass);
         for(let j=0;j<4;j++){const xx=-.9+j*.37;box(root,xx,.3,.62,.29,.34,.32,j%2?P.dark:P.wood);box(root,xx,.49,.62,.32,.045,.35,P.cream);for(const zz of [.46,.78])box(root,xx,.3,zz,.22,.035,.02,P.gold);}
-        const frame=new THREE.Group();frame.position.set(1.25,.09,.73);root.add(frame);
-        for(const a of [-.48,.48])for(const b of [-.3,.3])cyl(frame,a,.63,b,.027,1.2,P.dark);
-        box(frame,0,1.26,0,1.07,.07,.75,P.wood);
-        const fan=new THREE.Group();fan.position.y=1.1;frame.add(fan);cyl(fan,0,0,0,.09,.1,P.gold);
-        for(let k=0;k<6;k++){const a=k*Math.PI/3,o=box(fan,Math.sin(a)*.22,0,Math.cos(a)*.22,.085,.025,.43,P.dark);o.rotation.y=a;}fans.push(fan);
         box(root,1.8,.18,-.5,.35,.2,.6,P.wood);
       } else if(topic.id==='digital') {
         building(root,-.9,-.3,.85,.7,1.65,'office',P.white);building(root,.1,-.65,.75,.8,1.95,'office',P.cream);
@@ -284,13 +280,13 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
         const dish=ellipsoid(root,.1,2.3,-.65,.23,.06,.23,P.white);dish.rotation.z=.35;cyl(root,.1,2.18,-.65,.025,.4,P.dark);
         tree(x-1.5,z+.35,.7);
       } else if(topic.id==='business') {
-        building(root,-.9,-.45,.73,.8,1.12,'office',P.cream);building(root,.15,-.75,.8,.64,.87,'office',P.brick);
+        businessFanRoom=building(root,-.9,-.45,.73,.8,1.12,'office',P.cream);building(root,.15,-.75,.8,.64,.87,'office',P.brick);
         building(root,.95,.55,.65,.6,1.15,'office',P.white);
         cyl(root,0,.14,.6,.59,.1,P.sand);cyl(root,0,.5,.6,.25,.08,P.wood);
         for(let j=0;j<4;j++){const a=j*Math.PI/2,p=person(j%2?P.dark:P.brick,.48);p.g.position.set(x+Math.sin(a)*.43,.18,z+.6+Math.cos(a)*.43);p.g.rotation.y=a+Math.PI;}
         tree(x-1.1,z+.9,.85);tree(x+.7,z-1.25,.7);
       } else if(topic.id==='logistics') {
-        building(root,-.6,-.35,1.1,.8,.7,'factory',P.cream);building(root,.8,-.25,.6,.65,.75,'office',P.white);
+        logisticsFanRoom=building(root,-.6,-.35,1.1,.8,1.25,'factory',P.cream);building(root,.8,-.25,.6,.65,.75,'office',P.white);
         box(root,-.1,.1,1.05,3,.12,.7,P.pavement);box(root,-.1,-.04,1.52,3.2,.28,.18,P.rock);
         for(let j=0;j<5;j++){const colors=[P.brick,P.dark,P.grassLight];box(root,-1.1+j*.48,.3,.7,.4,.32,.65,colors[j%3]);if(j<2)box(root,-1.1+j*.48,.62,.7,.4,.3,.65,colors[(j+1)%3]);}
         // A working harbor crane and timber piers extend into the water.
@@ -322,6 +318,31 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     box(harborTower,0,1.5,0,.6,.34,.5,P.glass);
     box(harborTower,0,1.71,0,.71,.08,.61,P.dark);
     cyl(harborTower,0,1.96,0,.025,.48,P.gold);
+    const ventilationCampus=await createVentilationCampus({THREE,parent:landscape,keep,material,pickables,box,cyl,mesh});
+    // Put the ceiling fan inside the existing business room rather than duplicating it on the campus.
+    const roomGlass=material('#b7dedb',{transparent:true,opacity:.23,depthWrite:false,roughness:.18,side:THREE.DoubleSide});
+    businessFanRoom.body.visible=false;businessFanRoom.roof.material=roomGlass;businessFanRoom.roof.castShadow=false;businessFanRoom.rooftop.visible=false;
+    box(businessFanRoom,0,.19,0,.73,.25,.8,P.cream);
+    for(const x of [-.35,.35])box(businessFanRoom,x,.73,0,.025,.85,.8,roomGlass);
+    for(const z of [-.39,.39])box(businessFanRoom,0,.73,z,.73,.85,.025,roomGlass);
+    for(const x of [-.35,.35])for(const z of [-.39,.39])box(businessFanRoom,x,.7,z,.035,1.06,.035,P.brick);
+    for(const fanPart of [ventilationCampus.pavilion.pavilion.getObjectByName('amafans-fixed-suspension'),ventilationCampus.pavilion.rotor]){
+      businessFanRoom.add(fanPart);fanPart.scale.setScalar(.36);fanPart.traverse(object=>{object.userData.topicId='business';});
+      if(fanPart===ventilationCampus.pavilion.rotor)fanPart.position.set(0,.22+(1.49+1.01/3)*.36,0);else fanPart.position.set(0,.22,0);
+    }
+    // The existing warehouse gets closed walls and a near-roof exhaust opening facing outdoors.
+    logisticsFanRoom.body.visible=false;
+    for(const x of [-.535,.535])box(logisticsFanRoom,x,.685,0,.03,1.25,.8,P.cream);
+    box(logisticsFanRoom,0,.685,.385,1.1,1.25,.03,P.cream);
+    box(logisticsFanRoom,0,.40,-.385,1.1,.68,.03,P.cream);
+    box(logisticsFanRoom,0,1.29,-.385,1.1,.08,.03,P.cream);
+    for(const x of [-.41,.41])box(logisticsFanRoom,x,1,-.385,.28,.52,.03,P.cream);
+    const warehouseExhaust=ventilationCampus.equipment.devices.exhaust;
+    logisticsFanRoom.add(warehouseExhaust);warehouseExhaust.traverse(object=>{object.userData.topicId='logistics';});warehouseExhaust.scale.multiplyScalar(.52/.78);warehouseExhaust.position.set(0,1,-.414);warehouseExhaust.rotation.y=Math.PI;
+    ventilationCampus.views.warehouse={target:[4.1-CAMPUS_OFFSET[0],.95,.65-CAMPUS_OFFSET[1]],direction:[.65,.5,1],distance:3.4,span:1.7};
+    ventilationCampus.views.exhaust={target:[-6-CAMPUS_OFFSET[0],1.09,5.886-CAMPUS_OFFSET[1]],direction:[.45,.45,-1],distance:3.2,span:1.8};
+    // A short pedestrian apron connects the energy district to its expanded demonstration base.
+    box(landscape,-7.05,.105,1.05,2.05,.04,.52,P.sand);
     // Civic green, market stalls, benches and small street furniture fill the shared center.
     cyl(landscape,-.35,.14,.15,.6,.14,P.sand);cyl(landscape,-.35,.25,.15,.36,.15,P.rock);cyl(landscape,-.35,.34,.15,.29,.04,P.shallow);
     for(let i=0;i<3;i++){const x=-2.3+i*.7;box(landscape,x,.4,-.3,.5,.55,.45,P.wood);const awning=box(landscape,x,.75,-.3,.62,.08,.6,i%2?P.white:P.brick);awning.rotation.z=-.1;}
@@ -330,7 +351,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     const distToRoad=(x,z)=>Math.min(...edges.map(e=>Math.min(...e.path.getPoints(22).map(p=>Math.hypot(p.x-x,p.z-z)))));
     for(let i=0;i<110;i++){
       const x=-7+random()*13.7,z=-4.6+random()*7.5;
-      if((z<-3.6||x<-6.15||x>6.25||z>3)&&distToRoad(x,z)>.65)tree(x,z,.45+random()*.38);
+      if(x>-6.85&&(z<-3.6||x<-6.15||x>6.25||z>3)&&distToRoad(x,z)>.65)tree(x,z,.45+random()*.38);
     }
     for(let i=0;i<120;i++) {
       const x=-6.4+random()*11.1,z=-6.6+random()*2.2;
@@ -418,7 +439,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
       routeGroup.visible=showRoutes;
     }
     function select(id) {
-      if(!districtMap.has(id))return;selected=id;connected=null;
+      if(!districtMap.has(id))return;focusedEquipment=null;container.classList.remove('equipment-focus');selected=id;connected=null;
       const partners=(districtMap.get(id).topic.partners||[]).map(p=>Array.isArray(p)?p[0]:p.id).filter(p=>districtMap.has(p));
       districtMap.forEach((d,key)=>{d.halo.visible=key===id||partners.includes(key);d.glowMat.opacity=key===id?.35:.15;});
       labels.forEach(({el})=>{const active=el.dataset.topic===id;el.classList.toggle('active',active);el.classList.remove('route-endpoint');el.classList.toggle('partner',partners.includes(el.dataset.topic));el.setAttribute('aria-pressed',String(active));});
@@ -429,16 +450,29 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
       connected=[fromId,toId];labels.forEach(({el})=>{el.classList.remove('partner');el.classList.toggle('route-endpoint',connected.includes(el.dataset.topic));});districtMap.forEach((d,key)=>{d.halo.visible=connected.includes(key);d.glowMat.opacity=key===fromId?.35:.23;});
       drawRoutes([[fromId,toId]]);return true;
     }
+    let focusedEquipment=null;
     let width=0,height=0,paused=false,reduced=false,touring=false,disposed=false,raf=0,time=0,last=0,pointerDown=null;
     const defaultPosition=new THREE.Vector3(), fitTarget=mapPoint(new THREE.Vector3(0,.25,1.1));
     function fit() {
-      controls.target.copy(fitTarget);const dir=new THREE.Vector3(.22,.48,1).normalize(),right=new THREE.Vector3().crossVectors(new THREE.Vector3(0,1,0),dir).normalize(),up=new THREE.Vector3().crossVectors(dir,right).normalize();
+      const dir=new THREE.Vector3(.22,.48,1).normalize(),right=new THREE.Vector3().crossVectors(new THREE.Vector3(0,1,0),dir).normalize(),up=new THREE.Vector3().crossVectors(dir,right).normalize();
       const tan=Math.tan(THREE.MathUtils.degToRad(camera.fov/2));let distance=22;
       function include(p,padX=12,padY=12){const r=p.clone().sub(fitTarget),depth=r.dot(dir),usableX=Math.max(.3,1-2*padX/width),usableY=Math.max(.3,1-2*padY/height);distance=Math.max(distance,depth+Math.abs(r.dot(right))/(tan*camera.aspect*usableX),depth+Math.abs(r.dot(up))/(tan*usableY));}
       // Natural shoreline and district labels are fitted together. UI bars get explicit breathing room.
       for(const [x,z] of [...mainCoast,...portCoast,...learnCoast])include(mapPoint(v(x,z,.8)),20,82);
       labels.forEach(({el,anchor})=>include(mapPoint(anchor),Math.max(42,labels.find(item=>item.el===el)?.width/2||45)+10,112));
-      distance*=1.045;defaultPosition.copy(dir).multiplyScalar(distance).add(fitTarget);camera.position.copy(defaultPosition);controls.maxDistance=Math.max(70,distance*1.6);controls.update();
+      distance*=1.045;defaultPosition.copy(dir).multiplyScalar(distance).add(fitTarget);controls.maxDistance=Math.max(70,distance*1.6);
+      // Narrow screens need a greater overview distance; keep the landscape within fog and clipping.
+      camera.far=Math.max(180,distance*3);camera.updateProjectionMatrix();
+      scene.fog.near=Math.max(54,distance*1.2);scene.fog.far=Math.max(110,distance*2.5);
+      if(focusedEquipment)focusEquipment(focusedEquipment);else{controls.target.copy(fitTarget);camera.position.copy(defaultPosition);controls.update();}
+    }
+    function focusEquipment(id){
+      const view=ventilationCampus.views[id];if(!view)return false;
+      stopTour();focusedEquipment=id;container.classList.add('equipment-focus');
+      const target=mapPoint(new THREE.Vector3(view.target[0]+CAMPUS_OFFSET[0],view.target[1],view.target[2]+CAMPUS_OFFSET[1]));
+      const direction=new THREE.Vector3(...view.direction).transformDirection(landscape.matrix);
+      const distance=Math.max(view.distance,view.span/(2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*Math.min(camera.aspect,1)));
+      controls.target.copy(target);camera.position.copy(target).addScaledVector(direction,distance);controls.update();return true;
     }
     function measureLabels(){labels.forEach(item=>{item.width=(item.el.offsetWidth||90)+2;item.height=(item.el.offsetHeight||30)+2;});}
     function resize(){const w=Math.max(1,container.clientWidth),h=Math.max(1,container.clientHeight);if(w===width&&h===height)return;width=w;height=h;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);measureLabels();fit();}
@@ -527,7 +561,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     }
     function animate(now){if(disposed)return;raf=requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.05)||0;last=now;if(document.hidden)return;
       const moving=!paused&&!reduced;if(moving)time+=dt;
-      if(moving){fans.forEach(g=>g.rotation.y=time*4);
+      if(moving){ventilationCampus.update(time);fans.forEach(g=>g.rotation.y=time*4);
         walkers.forEach(w=>{const phase=(time*.23/w.length+w.offset)%2,u=phase<1?phase:2-phase;locate(w.g,w.path,u);if(phase>1)w.g.rotation.y+=Math.PI;w.limbs.forEach((l,i)=>l.rotation.x=Math.sin(time*7+w.offset*10)*(i%2?1:-1)*.48);});
         vehicles.forEach(o=>{const phase=(time*(o.truck?.52:.72)/o.length+o.offset)%(o.truck?2:1),u=o.truck?(phase<1?phase:2-phase):phase;locate(o.g,o.path,u);if(o.truck&&phase>1)o.g.rotation.y+=Math.PI;});
         boats.forEach(b=>{const p=(time*.016+b.offset)%2,u=p<1?p:2-p;locate(b.g,b.path,u,Math.sin(time*1.7)*.018);if(p>1)b.g.rotation.y+=Math.PI;});
@@ -540,6 +574,6 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     }
     walkers.forEach(w=>locate(w.g,w.path,w.offset%1));vehicles.forEach(o=>locate(o.g,o.path,o.offset));boats.forEach(o=>locate(o.g,o.path,o.offset));birds.forEach((b,i)=>b.g.position.set(-5+i*.7,4+i*.1,-4));
     select(districtMap.has('energy')?'energy':topics[0]?.id);raf=requestAnimationFrame(animate);onReady();
-    return {select,connect,setPaused(value){paused=!!value;},setNight,setRoutes(value){showRoutes=!!value;routeGroup.visible=showRoutes;seaRoute.visible=showRoutes;},setReducedMotion(value){reduced=!!value;controls.enableDamping=!reduced;},resetView(){stopTour();controls.target.copy(fitTarget);camera.position.copy(defaultPosition);controls.update();},tour(value){touring=!!value;},dispose(){disposed=true;cancelAnimationFrame(raf);observer.disconnect();controls.removeEventListener('start',stopTour);controls.dispose();renderer.domElement.removeEventListener('pointerdown',onDown);renderer.domElement.removeEventListener('pointerup',onUp);renderer.domElement.removeEventListener('pointermove',onMove);renderer.domElement.removeEventListener('pointercancel',onCancel);labels.forEach(({el})=>el.remove());geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());renderer.dispose();renderer.domElement.remove();}};
+    return {select,connect,focusEquipment,setPaused(value){paused=!!value;},setNight,setRoutes(value){showRoutes=!!value;routeGroup.visible=showRoutes;seaRoute.visible=showRoutes;},setReducedMotion(value){reduced=!!value;controls.enableDamping=!reduced;},resetView(){stopTour();focusedEquipment=null;container.classList.remove('equipment-focus');controls.target.copy(fitTarget);camera.position.copy(defaultPosition);controls.update();},tour(value){touring=!!value;if(touring){focusedEquipment=null;container.classList.remove('equipment-focus');controls.target.copy(fitTarget);camera.position.copy(defaultPosition);controls.update();}},dispose(){disposed=true;ventilationCampus.dispose();cancelAnimationFrame(raf);observer.disconnect();controls.removeEventListener('start',stopTour);controls.dispose();renderer.domElement.removeEventListener('pointerdown',onDown);renderer.domElement.removeEventListener('pointerup',onUp);renderer.domElement.removeEventListener('pointermove',onMove);renderer.domElement.removeEventListener('pointercancel',onCancel);labels.forEach(({el})=>el.remove());geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());renderer.dispose();renderer.domElement.remove();}};
   } catch(error){if(renderer){renderer.dispose();renderer.domElement.remove();}onError(error);throw error;}
 }

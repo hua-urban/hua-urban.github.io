@@ -1,7 +1,7 @@
-import {createSupplyWarehouse} from './supply-warehouse.js?v=warehouse1';
+import {createSupplyWarehouse} from './supply-warehouse.js?v=ventilation-1final';
 
 // A schematic HVLS display pavilion; dimensions are for the miniature only.
-export function createAmaFansPavilion({THREE,root,box,cyl,mesh,material,keep,pickables,buildingPlots}) {
+export function createAmaFansPavilion({THREE,root,box,cyl,mesh,material,keep,pickables,buildingPlots,includeWarehouse=true}) {
   const pavilion=new THREE.Group();pavilion.name='amafans-pavilion';
   pavilion.position.set(3.5,0,.3);root.add(pavilion);
   pavilion.userData={topicId:'industry',schematic:true};
@@ -12,29 +12,29 @@ export function createAmaFansPavilion({THREE,root,box,cyl,mesh,material,keep,pic
   const roofMaterial=material('#c4edf0',{transparent:true,opacity:.34,depthWrite:false,side:THREE.DoubleSide,roughness:.12,metalness:.12});
   const cladding=material('#e7e2d2',{roughness:.8});
   // Open sides and a clear roof keep both the long suspension and rotor visible.
-  const roof=box(pavilion,0,2.73,0,2.7,.025,2.10,roofMaterial);
+  const roof=box(pavilion,0,2.73,-1.2,2.7,.025,4.5,roofMaterial);
   roof.name='amafans-transparent-roof';roof.castShadow=false;
   roof.userData={topicId:'industry',role:'transparent-roof',opacity:.34};
   const glassEdge=material('#a0dde7',{transparent:true,opacity:.67,depthWrite:false,roughness:.22});
   const reflectionMaterial=material('#e9ffff',{transparent:true,opacity:.35,depthWrite:false,side:THREE.DoubleSide});
   for(const x of [-1.34,-.45,.45,1.34]) {
-    const seam=box(pavilion,x,2.747,0,.013,.009,2.10,glassEdge);
+    const seam=box(pavilion,x,2.747,-1.2,.013,.009,4.5,glassEdge);
     seam.name='amafans-glass-panel-division';seam.castShadow=false;
   }
-  for(const z of [-1.045,1.045]) {
+  for(const z of [-3.445,1.045]) {
     const edge=box(pavilion,0,2.747,z,2.7,.009,.013,glassEdge);
     edge.name='amafans-glass-roof-edge';edge.castShadow=false;
   }
   for(const x of [-.83,.06,.95]) {
-    const reflection=box(pavilion,x,2.751,-.16,.045,.002,1.5,reflectionMaterial);
+    const reflection=box(pavilion,x,2.751,-1.2,.045,.002,3.7,reflectionMaterial);
     reflection.rotation.y=-.25;reflection.name='amafans-glass-reflection';reflection.castShadow=false;
   }
-  for(const x of [-1.24,1.24])for(const z of [-.94,.94]) {
+  for(const x of [-1.24,1.24])for(const z of [-3.34,-.94,.94]) {
     box(pavilion,x,1.41,z,.055,2.56,.055,steel).name='amafans-steel-column';
     box(pavilion,x,.14,z,.16,.08,.16,steel);
   }
-  for(const z of [-.96,.96])box(pavilion,0,2.66,z,2.58,.075,.055,steel);
-  for(const x of [-1.26,1.26])box(pavilion,x,2.66,0,.055,.075,1.98,steel);
+  for(const z of [-3.36,-.96,.96])box(pavilion,0,2.66,z,2.58,.075,.055,steel);
+  for(const x of [-1.26,1.26])box(pavilion,x,2.66,-1.2,.055,.075,4.38,steel);
   // Low factory cladding anchors the pavilion while leaving the rotor and rod exposed.
   box(pavilion,1.24,.58,0,.055,.9,1.88,cladding).name='amafans-side-knee-wall';
   for(const z of [-.7,-.35,0,.35,.7])box(pavilion,1.272,.58,z,.012,.86,.012,steel);
@@ -70,8 +70,8 @@ export function createAmaFansPavilion({THREE,root,box,cyl,mesh,material,keep,pic
     const winglet=box(blade,.95,.036,.003,.021,.08,.105,orange);
     winglet.rotation.z=-.18;winglet.name='amafans-orange-winglet';
   }
-  const warehouse=createSupplyWarehouse({THREE,pavilion,material,keep,mesh});
-  buildingPlots.push({x:root.position.x+pavilion.position.x,z:root.position.z+pavilion.position.z,w:2.7,d:2.10});
+  const warehouse=createSupplyWarehouse({THREE,pavilion,material,keep,mesh,showContents:includeWarehouse});
+  buildingPlots.push({x:root.position.x+pavilion.position.x,z:root.position.z+pavilion.position.z-1.2,w:2.7,d:4.5});
   // The supplied physical badge photograph preserves the exact wordmark and pin outline.
   let disposed=false;
   const badgeMaterial=new THREE.MeshBasicMaterial({transparent:true,alphaTest:.1,side:THREE.DoubleSide,toneMapped:false});
