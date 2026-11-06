@@ -55,8 +55,9 @@ export async function createAmaFansPavilion({THREE,root,box,cyl,mesh,material,ke
     texture.colorSpace=THREE.SRGBColorSpace;badgeMaterial.needsUpdate=true;
   });
   badgeTexture.colorSpace=THREE.SRGBColorSpace;badgeMaterial.map=badgeTexture;
-  const sign=mesh(keep(new THREE.PlaneGeometry(1.85,.925)),badgeMaterial,pavilion,1.315,2.58,-2.2);
+  const sign=mesh(keep(new THREE.PlaneGeometry(1.85,.925)),badgeMaterial,pavilion,1.365,2.58,-2.2);
   sign.rotation.y=Math.PI/2;sign.name='amafans-side-brand-sign';sign.castShadow=false;
+  for(const z of [-2.78,-1.62])box(pavilion,1.325,2.45,z,.08,.035,.035,steel).name='amafans-sign-wall-standoff';
   sign.userData={topicId:'industry',role:'brand-sign',externalUrl:'https://www.amafans.com/',externalURL:'https://www.amafans.com/',badgeStyle:'exact-photo-cutout',placement:'side-wall-roof-edge',fanMarkAboveRoof:true};
   pickables.push(sign);
   const badges=[sign];
