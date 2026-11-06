@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from '../lib/OrbitControls.js';
-import {createVentilationCampus,CAMPUS_OFFSET} from './ventilation-campus.js?v=ventilation-1final';
+import {createVentilationCampus,CAMPUS_OFFSET} from './ventilation-campus.js?v=ceiling-cad1';
 
 // Districts, labels, roads and collaboration endpoints share this layout.
 // Large-space energy/materials sit west; business/digital services sit east.
@@ -326,10 +326,15 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     for(const x of [-.35,.35])box(businessFanRoom,x,.73,0,.025,.85,.8,roomGlass);
     for(const z of [-.39,.39])box(businessFanRoom,0,.73,z,.73,.85,.025,roomGlass);
     for(const x of [-.35,.35])for(const z of [-.39,.39])box(businessFanRoom,x,.7,z,.035,1.06,.035,P.brick);
-    for(const fanPart of [ventilationCampus.pavilion.pavilion.getObjectByName('amafans-fixed-suspension'),ventilationCampus.pavilion.rotor]){
-      businessFanRoom.add(fanPart);fanPart.scale.setScalar(.36);fanPart.traverse(object=>{object.userData.topicId='business';});
-      if(fanPart===ventilationCampus.pavilion.rotor)fanPart.position.set(0,.22+(1.49+1.01/3)*.36,0);else fanPart.position.set(0,.22,0);
-    }
+    const businessCeiling=ventilationCampus.pavilion.fan.root;
+    businessFanRoom.add(businessCeiling);
+    businessCeiling.scale.multiplyScalar(.36);
+    businessCeiling.position.set(0,1.20-ventilationCampus.pavilion.fan.data.bounds.max[1]*businessCeiling.scale.y,0);
+    businessCeiling.traverse(object=>{object.userData.topicId='business';});
+    const businessClampTop=businessCeiling.position.y+ventilationCampus.pavilion.fan.data.mountContactY*businessCeiling.scale.y;
+    box(businessFanRoom,0,businessClampTop+.002,0,.051,.004,.78,P.dark).name='business-fan-beam-lower-flange';
+    box(businessFanRoom,0,businessClampTop+.010,0,.009,.012,.78,P.dark).name='business-fan-beam-web';
+    box(businessFanRoom,0,businessClampTop+.018,0,.051,.004,.78,P.dark).name='business-fan-beam-upper-flange';
     // The existing warehouse gets closed walls and a near-roof exhaust opening facing outdoors.
     logisticsFanRoom.body.visible=false;
     for(const x of [-.535,.535])box(logisticsFanRoom,x,.685,0,.03,1.25,.8,P.cream);
@@ -339,7 +344,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     for(const x of [-.41,.41])box(logisticsFanRoom,x,1,-.385,.28,.52,.03,P.cream);
     const warehouseExhaust=ventilationCampus.equipment.devices.exhaust;
     logisticsFanRoom.add(warehouseExhaust);warehouseExhaust.traverse(object=>{object.userData.topicId='logistics';});warehouseExhaust.scale.multiplyScalar(.52/.78);warehouseExhaust.position.set(0,1,-.414);warehouseExhaust.rotation.y=Math.PI;
-    ventilationCampus.views.warehouse={target:[4.1-CAMPUS_OFFSET[0],.95,.65-CAMPUS_OFFSET[1]],direction:[.65,.5,1],distance:3.4,span:1.7};
+    ventilationCampus.views.warehouse={target:[4.1-CAMPUS_OFFSET[0],1.23,.65-CAMPUS_OFFSET[1]],direction:[.65,-.15,1],distance:2.8,span:1.2};
     ventilationCampus.views.exhaust={target:[-6-CAMPUS_OFFSET[0],1.09,5.886-CAMPUS_OFFSET[1]],direction:[.45,.45,-1],distance:3.2,span:1.8};
     // A short pedestrian apron connects the energy district to its expanded demonstration base.
     box(landscape,-7.05,.105,1.05,2.05,.04,.52,P.sand);
@@ -464,11 +469,11 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
       // Narrow screens need a greater overview distance; keep the landscape within fog and clipping.
       camera.far=Math.max(180,distance*3);camera.updateProjectionMatrix();
       scene.fog.near=Math.max(54,distance*1.2);scene.fog.far=Math.max(110,distance*2.5);
-      if(focusedEquipment)focusEquipment(focusedEquipment);else{controls.target.copy(fitTarget);camera.position.copy(defaultPosition);controls.update();}
+      if(focusedEquipment)focusEquipment(focusedEquipment);else{controls.maxPolarAngle=1.2;controls.target.copy(fitTarget);camera.position.copy(defaultPosition);controls.update();}
     }
     function focusEquipment(id){
       const view=ventilationCampus.views[id];if(!view)return false;
-      stopTour();focusedEquipment=id;container.classList.add('equipment-focus');
+      stopTour();focusedEquipment=id;controls.maxPolarAngle=id==='warehouse'?1.7:1.2;container.classList.add('equipment-focus');
       const target=mapPoint(new THREE.Vector3(view.target[0]+CAMPUS_OFFSET[0],view.target[1],view.target[2]+CAMPUS_OFFSET[1]));
       const direction=new THREE.Vector3(...view.direction).transformDirection(landscape.matrix);
       const distance=Math.max(view.distance,view.span/(2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*Math.min(camera.aspect,1)));
@@ -574,6 +579,6 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     }
     walkers.forEach(w=>locate(w.g,w.path,w.offset%1));vehicles.forEach(o=>locate(o.g,o.path,o.offset));boats.forEach(o=>locate(o.g,o.path,o.offset));birds.forEach((b,i)=>b.g.position.set(-5+i*.7,4+i*.1,-4));
     select(districtMap.has('energy')?'energy':topics[0]?.id);raf=requestAnimationFrame(animate);onReady();
-    return {select,connect,focusEquipment,setPaused(value){paused=!!value;},setNight,setRoutes(value){showRoutes=!!value;routeGroup.visible=showRoutes;seaRoute.visible=showRoutes;},setReducedMotion(value){reduced=!!value;controls.enableDamping=!reduced;},resetView(){stopTour();focusedEquipment=null;container.classList.remove('equipment-focus');controls.target.copy(fitTarget);camera.position.copy(defaultPosition);controls.update();},tour(value){touring=!!value;if(touring){focusedEquipment=null;container.classList.remove('equipment-focus');controls.target.copy(fitTarget);camera.position.copy(defaultPosition);controls.update();}},dispose(){disposed=true;ventilationCampus.dispose();cancelAnimationFrame(raf);observer.disconnect();controls.removeEventListener('start',stopTour);controls.dispose();renderer.domElement.removeEventListener('pointerdown',onDown);renderer.domElement.removeEventListener('pointerup',onUp);renderer.domElement.removeEventListener('pointermove',onMove);renderer.domElement.removeEventListener('pointercancel',onCancel);labels.forEach(({el})=>el.remove());geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());renderer.dispose();renderer.domElement.remove();}};
+    return {select,connect,focusEquipment,setPaused(value){paused=!!value;},setNight,setRoutes(value){showRoutes=!!value;routeGroup.visible=showRoutes;seaRoute.visible=showRoutes;},setReducedMotion(value){reduced=!!value;controls.enableDamping=!reduced;},resetView(){stopTour();focusedEquipment=null;controls.maxPolarAngle=1.2;container.classList.remove('equipment-focus');controls.target.copy(fitTarget);camera.position.copy(defaultPosition);controls.update();},tour(value){touring=!!value;if(touring){focusedEquipment=null;controls.maxPolarAngle=1.2;container.classList.remove('equipment-focus');controls.target.copy(fitTarget);camera.position.copy(defaultPosition);controls.update();}},dispose(){disposed=true;ventilationCampus.dispose();cancelAnimationFrame(raf);observer.disconnect();controls.removeEventListener('start',stopTour);controls.dispose();renderer.domElement.removeEventListener('pointerdown',onDown);renderer.domElement.removeEventListener('pointerup',onUp);renderer.domElement.removeEventListener('pointermove',onMove);renderer.domElement.removeEventListener('pointercancel',onCancel);labels.forEach(({el})=>el.remove());geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());renderer.dispose();renderer.domElement.remove();}};
   } catch(error){if(renderer){renderer.dispose();renderer.domElement.remove();}onError(error);throw error;}
 }
