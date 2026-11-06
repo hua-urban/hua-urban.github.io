@@ -286,7 +286,7 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbwX7BsF7OWcfP2DA5byYQ5C
     var day = String(d.getDate()).padStart(2, '0');
     return '' + y + m + day;
   }
-  var bustTag = cacheBustTag();
+  var bustTag = cacheBustTag() + '-original-20261106';
 
   /* 特別版覆蓋的失效時刻（台北時間，YYYYMMDDHHmm，到點即換）。
      202609020900 = 9/2 BOD 擴大商機日例會散場；09:00 起自動回到雙卡。

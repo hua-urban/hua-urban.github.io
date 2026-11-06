@@ -1,0 +1,18 @@
+{
+  "designId": "DAHIJ-tcWYM",
+  "exportMethod": "Canva official Download UI",
+  "meetingDate": "2026-11-04",
+  "exportedOn": "2026-11-06",
+  "cards": [
+    {
+      "page": 53,
+      "original": "guest/images/topic-card-original-20261104-1.jpg",
+      "sha256": "bd7106d92a6e89671947c93aeb69ac4a27567bfd0da7777654f5c1d1d117a6bc"
+    },
+    {
+      "page": 54,
+      "original": "guest/images/topic-card-original-20261104-2.jpg",
+      "sha256": "a86d719386487671eb45b39e79d74434fa2a8d907415756202798ab320df26bf"
+    }
+  ]
+}
