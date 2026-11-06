@@ -1,3 +1,4 @@
 {
-  "memberAdminUrl": "https://script.google.com/macros/s/AKfycbwt_-P7TYBUBNkm6zL1zQchLyCE39DkHhwbYYaXhqQAUOSby2lWQUCUPu0wFZ62pOkV/exec?admin=1&authuser=hua.urban.renewal%40gmail.com"
+  "memberAdminUrl": "https://hua-urban.com/admin/members/",
+  "adminLoginMode": "name-email"
 }

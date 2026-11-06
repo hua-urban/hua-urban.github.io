@@ -12,7 +12,7 @@ const SERVICES = [
   {
     title: "房地產協作平台",
     category: "會員與分組",
-    description: "會員登錄房源、都更與貸款需求，由董顧與九長協助媒合及引薦。後臺僅限授權 Google 帳戶。",
+    description: "會員登錄房源、都更與貸款需求，由董顧與九長協助媒合及引薦。後臺使用姓名與 Email 名單登入。",
     use: [{ label: "領導團隊登入", href: "./property-platform/" }, { label: "會員需求登錄", href: "/property-platform/" }],
     data: [{ status: "案件及圖片採私人儲存，不在公開官網顯示" }],
     maintenance: [{ label: "建置與交接紀錄", href: "./updates/#property-platform-20261105" }, { status: "完整原始碼由資訊組私有 GitHub 專案管理" }]
@@ -20,8 +20,8 @@ const SERVICES = [
   {
     title: "會員名單",
     category: "會員與分組",
-    description: "會員名單已接入中央名冊，支援 Google 登入後新增、修改、退會、重入會與分組管理。",
-    use: [{ label: "會員登入入口", href: "./members/" }],
+    description: "使用姓名與 Email 登入，管理中央會員名冊、分組與官網內容。",
+    use: [{ label: "會員與內容管理", href: "./members/" }],
     data: [{ label: "公開產業鏈分組頁", href: "https://hua-urban.com/bni-pt-groups/" }],
     maintenance: [{ label: "會員名單更新紀錄", href: "./updates/#member-registry-20261103" }, { status: "真實入會日待官方資料確認" }]
   },
@@ -36,9 +36,9 @@ const SERVICES = [
   {
     title: "官網與活動牆",
     category: "活動與來賓",
-    description: "華都更公開官網及活動資訊。活動資料編輯入口不在公開目錄中。",
+    description: "華都更公開官網及活動資訊。公告、分會介紹、組聚時間與服務連結可由授權後臺編輯。",
     use: [{ label: "開啟華都更官網", href: "https://hua-urban.com/" }],
-    data: [{ status: "活動資料管理入口待核對" }],
+    data: [{ label: "編輯官網內容", href: "./members/#site" }],
     maintenance: [{ label: "公開官網原始碼", href: "https://github.com/hua-urban/hua-urban.github.io" }]
   },
   {
