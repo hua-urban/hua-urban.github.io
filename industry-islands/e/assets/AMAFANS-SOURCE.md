@@ -7,3 +7,5 @@
 
 原始公開圖片來源：
 https://static.wixstatic.com/media/a41ca2_e951007de5ae4d2faaf40a071a7e47da~mv2.png/v1/crop/x_446,y_992,w_4801,h_1133/fill/w_640,h_151,al_c,q_90/brand-logo.png
+
+胸章貼圖 `amafans-badge.png`：使用者於 2026-11-06 提供的實體胸章照片，經 imagegen 去背及正視化處理；保留黑底銀邊、字樣與風扇圖案，供側邊單一招牌使用。此素材亦不適用 Three.js MIT 授權。
