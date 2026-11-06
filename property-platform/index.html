@@ -1,39 +1,32 @@
 <!doctype html>
 <html lang="zh-Hant">
-  <head>
+  <head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#762b3a" />
     <meta name="referrer" content="no-referrer" />
-    <meta name="robots" content="noindex,nofollow" />
     <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'"
+      name="description"
+      content="華都更會內房地產協作平台，彙整整合、出售、出租與貸款活化需求。"
     />
-    <title>房地產需求登錄｜華都更</title>
+    <title>房地產協作平台｜華都更</title>
     <link rel="stylesheet" href="styles.css" />
-  <link rel="icon" type="image/png" href="https://hua-urban.com/property-platform/brand/favicon.png">
-    <link rel="apple-touch-icon" href="https://hua-urban.com/property-platform/brand/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="brand/favicon.png">
+    <link rel="apple-touch-icon" href="brand/apple-touch-icon.png">
   </head>
-  <body>
-    <main class="leadership-login" id="main">
-      <a class="hint" href="https://hua-urban.com/">← 回華都更首頁</a>
-      <section class="panel leadership-login-card">
-        <div class="brand">
-          <img class="brand-mark brand-icon" src="https://hua-urban.com/property-platform/brand/icon-512.png" alt="都更">
-          <div><strong>華都更</strong><small>PROPERTY REQUEST</small></div>
-        </div>
-        <h1>房地產需求登錄</h1>
-        <p>登錄整合、出售、出租或貸款活化需求，由領導團隊協助媒合與引薦。</p>
-        <p class="hint">
-          不需密碼。登錄時請留下姓名與
-          Email，完成後會寄出物件的專屬查閱連結。資料不開放一般會員瀏覽。
-        </p>
-        <div id="service-status" class="notice info" role="status">
-          正在確認登錄入口…
-        </div>
-        <a id="launch" class="btn primary" hidden>開始登錄 →</a>
-      </section>
-    </main>
-    <script src="entry.js" defer></script>
+  <body
+    data-admin-entry="false" data-public-api-url="https://script.google.com/macros/s/AKfycbyjywCayvlLgWcx1bygSe8NKVKHctPmxglkVPGkd6mDriqwx_baTgGseruAF0QwEZrD/exec"
+    data-receipt-token=""
+  >
+    <a class="skip-link" href="#main">跳至主要內容</a>
+    <div id="app">
+      <main class="loading-page" id="main">
+        <img class="brand-mark brand-icon" src="brand/icon-512.png" alt="都更">
+        <p>正在開啟華都更協作平台…</p>
+      </main>
+    </div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <div id="modal-root"></div>
+    <script src="transport.js" defer></script><script src="app.js" defer></script>
   </body>
 </html>
