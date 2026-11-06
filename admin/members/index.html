@@ -1,73 +1,148 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="utf-8">
+<meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self' https://script.google.com https://googleusercontent.com https://*.googleusercontent.com; img-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
-  <meta name="referrer" content="no-referrer">
-  <meta name="robots" content="noindex,nofollow">
-  <meta name="theme-color" content="#8b1538">
-  <meta name="description" content="華都更 Google 登入管理入口與會員名單唯讀查閱。">
-  <title>會員名單｜華都更管理中心</title>
-  <link rel="stylesheet" href="../admin.css">
-  <script src="../../assets/member-registry.js" defer></script>
-  <script src="../members.js?v=20261103-list" defer></script>
+  <meta name="color-scheme" content="light">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src https://script.google.com https://script.googleusercontent.com; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
+    <title>會員與網站管理｜華都更</title>
+    <link rel="icon" type="image/png" href="brand/favicon.png">
+    <link rel="stylesheet" href="admin.css">
 </head>
-<body>
-  <a class="skip-link" href="#main">跳至主要內容</a>
-  <header class="site-header">
-    <div class="header-inner">
-      <a class="brand" href="../" aria-label="華都更管理中心首頁">
-        <span class="brand-mark" aria-hidden="true">華</span>
-        <span><strong>華都更</strong><small>管理中心</small></span>
-      </a>
-      <span class="header-note">會員名單</span>
+<body data-registry-api-url="https://script.google.com/macros/s/AKfycbwFOmaT_WgI1cCUWDBi4rAVhnrAuu1_dtRx2mvIDSlUCL8rVEowTrcWi6uj8gd3wjGE/exec">
+
+  <section id="loginScreen" class="native-login-screen" role="main" aria-labelledby="loginTitle" hidden>
+    <section class="native-login-card">
+      <h1 id="loginTitle">請填入姓名、Email</h1>
+      <form id="loginForm" autocomplete="on">
+        <div class="field">
+          <label for="loginName">姓名</label>
+          <input id="loginName" name="name" type="text" autocomplete="name" maxlength="80" required>
+        </div>
+        <div class="field">
+          <label for="loginEmail">Email</label>
+          <input id="loginEmail" name="email" type="email" autocomplete="email" maxlength="254" required>
+        </div>
+        <button id="loginButton" class="button" type="submit">登入</button>
+        <p id="loginStatus" class="native-login-status" role="status" aria-live="polite" hidden></p>
+      </form>
+    </section>
+  </section>
+<div id="workspace" hidden>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand-mark" aria-hidden="true">BNI</div>
+      <div>
+        <h1 class="brand-title">會員與網站管理</h1>
+        <p class="brand-subtitle">會員與網站內容</p>
+      </div>
+      <button id="logoutButton" class="button button-secondary admin-logout" type="button">登出</button>
     </div>
   </header>
-
-  <main id="main" class="page-shell">
-    <section class="page-intro">
-      <nav class="breadcrumbs" aria-label="麵包屑導覽"><a href="../">服務目錄</a><span aria-hidden="true">/</span><span aria-current="page">會員名單</span></nav>
-      <p class="eyebrow">MEMBER DIRECTORY</p>
-      <h1>會員名單</h1>
-      <p>此頁唯讀顯示會員名單；會員資料異動請使用 Google 登入管理入口。</p>
+    <nav class="admin-tabs" role="tablist" aria-label="後台功能">
+      <button id="membersTab" class="button admin-tab" type="button" role="tab" aria-selected="true" aria-controls="memberWorkspace">會員管理</button>
+      <button id="siteTab" class="button admin-tab button-secondary" type="button" role="tab" aria-selected="false" aria-controls="siteWorkspace">網站內容</button>
+    </nav>
+  <div id="memberWorkspace" role="tabpanel" aria-labelledby="membersTab">
+  <main>
+    <div id="statusline" class="statusline" role="status" aria-live="polite">
+      <p id="statusText" class="status-text">正在驗證管理權限並載入會員資料…</p>
+      <span id="versionBadge" class="badge" hidden></span>
+    </div>
+    <section id="loadError" class="panel" hidden aria-labelledby="loadErrorTitle">
+      <h2 id="loadErrorTitle">目前無法載入</h2>
+      <p id="loadErrorText" role="alert"></p>
+      <button id="reloadButton" class="button" type="button" aria-label="重新載入會員管理資料">重新載入</button>
     </section>
-
-    <section class="connect-panel" aria-labelledby="connection-title">
-      <div class="connect-copy">
-        <span class="status-dot" aria-hidden="true"></span>
-        <div>
-          <h2 id="connection-title">Google 登入管理：<span id="connection-status">讀取入口設定中</span></h2>
-          <p id="connection-detail">正在讀取管理入口設定…</p>
+    <section id="notInitialized" class="panel stack" hidden aria-labelledby="initTitle">
+      <div>
+        <h2 id="initTitle">會員正本尚未啟用</h2>
+        <p id="initIdentity" class="muted"></p>
+      </div>
+      <div class="notice">啟用會保留原始 55 位會員資料，並為每位建立固定 ID。歷史入會日期維持未知，不捏造入會日；舊資料的確認日期不代表入會日期。</div>
+      <p id="initPermissionNote" class="muted" hidden>目前登入帳號沒有啟用正本的管理員權限，請由管理員完成啟用。</p>
+      <div id="initError" role="alert" hidden></div>
+      <div class="button-row">
+        <button id="initializeButton" class="button" type="button" aria-label="啟用既有會員正本">啟用既有會員正本</button>
+      </div>
+    </section>
+    <section id="app" class="stack" hidden>
+      <div class="panel">
+        <div class="account-row">
+          <span id="identity" class="muted"></span>
+          <span id="roleBadge" class="badge"></span>
+          <span id="asOfBadge" class="badge"></span>
+        </div>
+        <div class="summary" aria-label="名冊摘要">
+          <div class="metric"><div id="activeMetricLabel" class="metric-label">目前會員</div><div id="activeCount" class="metric-value">—</div></div>
+          <div class="metric"><div id="groupMetricLabel" class="metric-label">分組</div><div id="groupCount" class="metric-value">—</div></div>
+          <div class="metric"><div class="metric-label">正本版本</div><div id="summaryVersion" class="metric-value">—</div></div>
         </div>
       </div>
-      <button id="edit-button" class="connect-action" type="button" disabled aria-describedby="connection-detail">Google 登入管理</button>
-    </section>
-
-    <section class="snapshot-section" aria-labelledby="snapshot-title">
-      <div class="snapshot-heading">
-        <div>
-          <p class="eyebrow">MEMBER LIST</p>
-          <h2 id="snapshot-title">會員名單</h2>
-          <p>會員分組與產業鏈資訊，<a href="https://hua-urban.com/bni-pt-groups/" target="_blank" rel="noopener noreferrer">請查看產業鏈分組頁</a>。</p>
+      <div class="grid-main">
+        <section class="panel" aria-labelledby="actionsTitle">
+          <h2 id="actionsTitle">管理操作</h2>
+          <p id="permissionNote" class="muted small"></p>
+          <div class="field">
+            <label for="operationSelect">選擇操作</label>
+            <select id="operationSelect" aria-label="選擇會員管理操作"></select>
+          </div>
+          <button id="openOperation" class="button" type="button" aria-label="開啟所選管理操作表單">開始操作</button>
+        </section>
+        <section class="panel" aria-labelledby="groupsTitle">
+          <h2 id="groupsTitle">分組與組長</h2>
+          <ul id="groupList" class="simple-list"></ul>
+        </section>
+      </div>
+      <section id="memberPanel" class="panel" aria-labelledby="membersTitle">
+        <div class="member-tools">
+          <div>
+            <h2 id="membersTitle">會員名單</h2>
+            <p id="memberListNote" class="muted small"></p>
+          </div>
+          <label id="retiredToggleLabel" for="includeRetired"><input id="includeRetired" type="checkbox" aria-label="會員名單包含退會會員">包含退會會員</label>
         </div>
-        <span class="snapshot-badge">會員名單 · 唯讀</span>
+        <ul id="memberList" class="member-list"></ul>
+      </section>
+      <div class="grid-main">
+        <section id="auditPanel" class="panel" aria-labelledby="auditTitle" hidden>
+          <h2 id="auditTitle">最近異動</h2>
+          <ul id="auditList" class="simple-list"></ul>
+        </section>
+        <section id="servicesPanel" class="panel" aria-labelledby="servicesTitle" hidden>
+          <h2 id="servicesTitle">內部服務</h2>
+          <ul id="servicesList" class="simple-list service-list"></ul>
+        </section>
       </div>
-      <div class="snapshot-tools">
-        <label class="visually-hidden" for="member-search">搜尋會員名單</label>
-        <input id="member-search" type="search" placeholder="搜尋姓名、專業別、職務、分組或會員編號" autocomplete="off">
-        <p id="snapshot-meta" class="snapshot-count" aria-live="polite">正在讀取名單確認日期…</p>
-        <p id="snapshot-count" class="snapshot-count" aria-live="polite">正在載入會員名單…</p>
-      </div>
-      <div id="member-list" class="member-list" aria-live="polite">
-        <p class="snapshot-message">正在載入會員名單…</p>
-      </div>
-      <p class="member-footnote">此頁僅供查閱，不提供會員資料修改。若連線失敗或無法確認最新名單，頁面會保留明確提示。</p>
     </section>
   </main>
 
-  <footer class="site-footer">
-    <div class="footer-inner"><span>華都更管理中心</span><span>會員名單僅供查閱</span></div>
-  </footer>
+  <dialog id="commandDialog" aria-labelledby="dialogTitle" aria-describedby="dialogDescription">
+    <div class="dialog-shell">
+      <div class="dialog-head">
+        <h2 id="dialogTitle">管理操作</h2>
+        <p id="dialogDescription" class="muted small">請確認欄位與生效日期。</p>
+      </div>
+      <form id="commandForm" novalidate>
+        <div id="dialogBody" class="dialog-body"></div>
+        <div id="formFeedback" class="dialog-body" aria-live="polite"></div>
+        <div class="dialog-foot">
+          <button id="closeDialog" class="button button-secondary" type="button" aria-label="關閉操作表單">取消</button>
+          <div class="dialog-foot-right">
+            <button id="retryCommand" class="button button-secondary" type="button" hidden aria-label="以相同資料重送這筆操作">重送同一筆資料</button>
+            <button id="submitCommand" class="button" type="submit" aria-label="送出會員管理操作">確認送出</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </dialog>
+  </div>
+  <section id="siteWorkspace" class="site-workspace" role="tabpanel" aria-labelledby="siteTab" hidden></section>
+</div>
+
+
+  <script src="transport.js" defer></script>
+  <script src="admin.js" defer></script>
+  <script src="site-editor.js" defer></script>
 </body>
 </html>
