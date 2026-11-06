@@ -2,6 +2,14 @@
 
 const SERVICES = [
   {
+    title: "自動檢查狀態",
+    category: "系統維護",
+    description: "後端網址與各服務部署檢查；異常由華都更 LINE 小幫手通知資訊長。",
+    use: [{label: "查看自動檢查結果", href: "./system-checks/"}],
+    data: [{status: "約每15分鐘巡檢部署異常，每日11:43完整核對"}],
+    maintenance: [{label: "資訊組更新日誌", href: "./updates/"}]
+  },
+  {
     title: "房地產協作平台",
     category: "會員與分組",
     description: "整合、出售、出租與貸款活化的會內協作平台。第一版待董顧確認，官網入口預留中，尚未開放。",

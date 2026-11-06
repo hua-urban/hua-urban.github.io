@@ -1,6 +1,8 @@
 name: 後端網址檢查
 on:
   push:
+    paths-ignore:
+      - 'admin/system-checks/status.json'
   pull_request:
   workflow_dispatch:
 permissions:
