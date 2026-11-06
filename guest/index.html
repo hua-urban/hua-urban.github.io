@@ -371,7 +371,10 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbwX7BsF7OWcfP2DA5byYQ5C
           topicSec.hidden = false;
         });
       })
-      .catch(function () { runLegacyDual(); });
+      .catch(function () {
+        /* Never combine fixed-name images when a manifest or card is unavailable. */
+        topicSec.hidden = true;
+      });
   }
 
   function runManualOrDual() {
