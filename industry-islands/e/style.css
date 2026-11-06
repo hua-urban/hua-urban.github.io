@@ -13,3 +13,7 @@
 .island-label.partner:not(.active){border:1px dashed #a58f5e;background:#fff9e7f2}.island-label.route-endpoint:not(.active){border:2px solid #bc8744;background:#fff6dc;box-shadow:0 0 0 3px #f6dfaa55}
 
 .step-detail .view-route{display:block;margin-top:10px;min-height:36px;font-size:11px;color:#365945;text-decoration:none;border-top:1px solid #d4ddc8;padding:9px 0 0;width:100%;text-align:left}
+
+.amafans-link{display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:16px;border:1px solid #d3d9cd;border-radius:10px;background:#fffef9;color:#25463d;min-height:44px}.amafans-link img{display:block;object-fit:contain;width:160px;height:auto;max-width:100%}.amafans-link span{font-size:13px;font-weight:600}.amafans-link small{display:block;font-size:11px;font-weight:400;margin-top:3px;color:#596e62}.amafans-link:hover{border-color:#d4863a;background:#fffaf0}
+
+.focus-amafans{display:block;width:100%;margin-top:10px;padding:12px 14px;border:1px solid #9baea1;border-radius:8px;background:#e8efe5;font-size:13px;text-align:left;min-height:44px}.fan-closeup .island-label{visibility:hidden!important}
