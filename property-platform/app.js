@@ -27,13 +27,14 @@
   const icons = { 整合: "▦", 出售: "⌂", 出租: "▤", 貸款活化: "↗" };
   const reviewAdapter = window.HUADU_REVIEW_ADAPTER;
   const publicAdapter = window.HUADU_PUBLIC_ADAPTER;
+  const adminAdapter = window.HUADU_ADMIN_ADAPTER;
   const adminEntry =
-    !publicAdapter && (document.body.dataset.adminEntry === "true" ||
+    !!adminAdapter || !publicAdapter && (document.body.dataset.adminEntry === "true" ||
     new URLSearchParams(location.search).get("admin") === "1");
   const sessionKey = reviewAdapter
     ? "huaduIntakeReviewV2"
     : adminEntry
-      ? "huaduLeadershipSessionV2"
+      ? adminAdapter ? "huaduNameEmailAdminV4" : "huaduLeadershipSessionV2"
       : publicAdapter ? "huaduIntakeHttpV3" : "huaduIntakeSessionV2";
   const gas =
     typeof google !== "undefined" && google.script && google.script.run;
@@ -44,7 +45,7 @@
     cases: [],
     view: "overview",
     loginMode: "member",
-    environment: reviewAdapter ? "review" : publicAdapter ? "google-public" : gas ? "google" : "local",
+    environment: reviewAdapter ? "review" : adminAdapter ? "name-email" : publicAdapter ? "google-public" : gas ? "google" : "local",
     query: "",
     category: "",
     status: "",
@@ -80,6 +81,7 @@
     const request = { action, payload, token: state.token };
     let result;
     if (reviewAdapter) result = await reviewAdapter.rpc(request);
+    else if (adminAdapter) result = await adminAdapter.rpc(request);
     else if (publicAdapter) result = await publicAdapter.rpc(request);
     else if (gas)
       result = await new Promise((resolve, reject) =>
@@ -124,7 +126,12 @@
   }
   function renderLogin(error = "") {
     document.title = "領導團隊登入｜華都更";
-    const local = state.environment === "local" && !reviewAdapter;
+    if (adminAdapter) {
+      const name = $("#admin-login-name")?.value || "", email = $("#admin-login-email")?.value || "";
+      $("#app").innerHTML = `<main id="main" class="leadership-login"><form id="name-email-login" class="panel leadership-login-card"><h1>請填入姓名、Email</h1><div class="field"><label for="admin-login-name">姓名</label><input id="admin-login-name" name="name" autocomplete="name" maxlength="80" value="${esc(name)}" required></div><div class="field"><label for="admin-login-email">Email</label><input id="admin-login-email" name="email" type="email" autocomplete="email" maxlength="254" value="${esc(email)}" required></div>${error ? `<p class="notice error" role="alert">${esc(error)}</p>` : ""}<button class="btn primary" type="submit">登入</button></form></main>`;
+      return;
+    }
+    const local = state.environment === "local" && !reviewAdapter && ["localhost", "127.0.0.1"].includes(location.hostname);
     $("#app").innerHTML =
       `<main id="main" class="leadership-login"><a href="https://hua-urban.com/admin/" class="hint">← 返回華都更管理中心</a><div class="panel leadership-login-card">${brand()}<h1>需求媒合後臺</h1><p>董顧、九長及授權領導團隊專用。</p>${error ? `<div class="notice error" role="alert">${esc(error)}</div>` : ""}${local ? `<form id="login-form"><input type="hidden" name="mode" value="admin">${field("username", "本機測試帳號", { required: true })}${field("password", "本機測試密碼", { type: "password", required: true })}<button class="btn primary" type="submit">登入本機測試後臺</button><p class="hint">僅本機：reviewer／huadu-review-demo，或 info／huadu-info-demo。</p></form>` : `<button class="btn primary" data-action="google-login">使用 Google 帳戶登入</button><p class="hint">僅限已授權帳戶。請在 Google 畫面選擇您的帳戶。</p>`}</div></main>`;
   }
@@ -749,7 +756,18 @@
     e.preventDefault();
     const f = e.target;
     try {
-      if (f.id === "login-form") {
+      if (f.id === "name-email-login" && adminAdapter) {
+        const button = $("button[type=submit]", f);
+        button.disabled = true; button.textContent = "登入中…";
+        try {
+          const fd = new FormData(f);
+          const result = await api("nameEmailLogin", { name: fd.get("name").trim(), email: fd.get("email").trim() });
+          state.token = result.token; state.user = result;
+          sessionStorage.setItem(sessionKey, result.token);
+          await boot();
+        } catch (failure) { renderLogin(failure.message); }
+        finally { if (button.isConnected) { button.disabled = false; button.textContent = "登入"; } }
+      } else if (f.id === "login-form") {
         const b = $("button[type=submit]", f);
         b.disabled = true;
         b.textContent = "登入中…";
@@ -1041,6 +1059,8 @@
     }
   }
   async function boot() {
+    if (document.body.dataset.adminApiUrl && !adminAdapter)
+      throw new Error("登入元件未能載入，請重新載入頁面或聯絡資訊組。");
     const rawReceipt =
       [
         document.body.dataset.receiptToken,
@@ -1051,7 +1071,7 @@
       await renderReceipt(rawReceipt);
       return;
     }
-    if (!gas && !reviewAdapter && !publicAdapter) {
+    if (!gas && !reviewAdapter && !publicAdapter && !adminAdapter) {
       try {
         const h = await fetch("/api/health").then((r) => r.json());
         state.environment = h.data?.environment || "local";
