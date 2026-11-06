@@ -326,7 +326,7 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbwX7BsF7OWcfP2DA5byYQ5C
     topicSec.hidden = false;
   }
 
-  function runDual() {
+  function runLegacyDual() {
     Promise.all([preload('images/topic-card-1.png'), preload('images/topic-card-2.png')])
       .then(function (results) {
         if (results[0] && results[1]) {
@@ -340,6 +340,38 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbwX7BsF7OWcfP2DA5byYQ5C
           /* 兩層都失敗 → topicSec 維持 hidden，不留破圖與空白框 */
         });
       });
+  }
+
+  function runDual() {
+    /* Original exports are published as one atomic manifest + image set.
+       A content hash in each URL prevents stale fixed-name image caches. */
+    fetch('images/topic-cards.json?v=' + bustTag, { cache: 'no-store' })
+      .then(function (response) {
+        if (!response.ok) { throw new Error('manifest unavailable'); }
+        return response.json();
+      })
+      .then(function (manifest) {
+        var cards = manifest && manifest.cards;
+        if (!Array.isArray(cards) || cards.length < 1 || cards.length > 2) {
+          throw new Error('invalid card count');
+        }
+        var urls = cards.map(function (card) {
+          if (!card || !/^images\/topic-card-\d{4}-\d{2}-\d{2}-[12]-[a-f0-9]{12}\.png$/.test(card.url)) {
+            throw new Error('invalid image path');
+          }
+          return card.url;
+        });
+        return Promise.all(urls.map(preload)).then(function (loaded) {
+          if (loaded.some(function (ok) { return !ok; })) { throw new Error('image unavailable'); }
+          if (urls.length === 1) { showSingle(urls[0]); return; }
+          singleWrap.hidden = true;
+          dualWrap.hidden = false;
+          img1.src = withBust(urls[0]);
+          img2.src = withBust(urls[1]);
+          topicSec.hidden = false;
+        });
+      })
+      .catch(function () { runLegacyDual(); });
   }
 
   function runManualOrDual() {
