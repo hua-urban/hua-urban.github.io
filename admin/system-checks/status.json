@@ -1,7 +1,20 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-06T07:54:13.884Z",
-  "audit": null,
+  "updatedAt": "2026-11-06T07:54:32.628Z",
+  "audit": {
+    "checkedAt": "2026-11-06T07:53:51.679Z",
+    "status": "success",
+    "projects": 17,
+    "files": 405,
+    "issues": [],
+    "checks": [
+      {
+        "service": "training",
+        "status": "ok",
+        "members": 54
+      }
+    ]
+  },
   "services": [
     {
       "name": "AI課程問卷",
