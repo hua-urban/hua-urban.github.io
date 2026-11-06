@@ -4,9 +4,9 @@ import { createCreamCat } from './cream-cat.js?v=pet1';
 import { createPhotoTabby } from './photo-tabby.js?v=pet1';
 import { createCatWalker } from './cat-walker.js?v=walk1';
 import { createCatInteractions } from './cat-interactions.js?v=pet4';
-import {createEquipmentDisplay,EQUIPMENT_VIEWS} from './industrial-equipment.js?v=ventilation-1final';
+import {createEquipmentDisplay,EQUIPMENT_VIEWS} from './industrial-equipment.js?v=ceiling-cad1';
 import { createStandingFanTable } from './standing-fan-table.js?v=standing1';
-import { createAmaFansPavilion } from './amafans-building.js?v=ventilation-1final';
+import { createAmaFansPavilion } from './amafans-building.js?v=ceiling-cad1';
 
 // This pure layout is shared by rendered roads and headless connectivity checks.
 export const ROAD_LAYOUT = {
@@ -250,7 +250,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
         for(let j=0;j<4;j++)box(root,1.3,.8,-.74+j*.26,.74,.035,.04,P.white);
         tree(x+.95,z-1.25,.65);
       } else if(topic.id==='industry') {
-        const pavilion=createAmaFansPavilion({THREE,root,box,cyl,mesh,material,keep,pickables,buildingPlots});
+        const pavilion=await createAmaFansPavilion({THREE,root,box,cyl,mesh,material,keep,pickables,buildingPlots});
         amaFansPavilion=pavilion.pavilion;
         fans.push(pavilion.rotor);ownedCleanups.push(pavilion.dispose);
         // A dedicated off-road factory lot on the enlarged eastern headland.
@@ -553,7 +553,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
       const target=mapPoint(new THREE.Vector3(...view.target));
       const direction=new THREE.Vector3(...view.direction).normalize();
       const distance=Math.max(view.distance,view.span/(2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*camera.aspect));
-      controls.minDistance=2.4;controls.target.copy(target);
+      controls.minDistance=2.4;controls.maxPolarAngle=focusedEquipment==='mount'?1.7:1.2;controls.target.copy(target);
       camera.position.copy(direction.multiplyScalar(distance).add(target));controls.update();camera.updateMatrixWorld(true);
     }
     function focusEquipment(id){
@@ -564,7 +564,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     function focusIndustry(){return focusEquipment('warehouse');}
     function focusStandingFan(){return focusEquipment('standing');}
     function resetGlobalView() {
-      industryFocused=false;focusedEquipment='warehouse';container.classList.remove('fan-closeup');controls.minDistance=20;fit();
+      industryFocused=false;focusedEquipment='warehouse';container.classList.remove('fan-closeup');controls.minDistance=20;controls.maxPolarAngle=1.2;fit();
     }
     function measureLabels(){labels.forEach(item=>{item.width=(item.el.offsetWidth||90)+2;item.height=(item.el.offsetHeight||30)+2;});}
     function resize(){const w=Math.max(1,container.clientWidth),h=Math.max(1,container.clientHeight);if(w===width&&h===height)return;width=w;height=h;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);measureLabels();if(industryFocused)positionIndustryView();else fit();}

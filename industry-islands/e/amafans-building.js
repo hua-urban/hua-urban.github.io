@@ -1,14 +1,12 @@
+import {createCeilingFan} from './ceiling-fan.js?v=ceiling-cad1';
 import {createSupplyWarehouse} from './supply-warehouse.js?v=ventilation-1final';
 
 // A schematic HVLS display pavilion; dimensions are for the miniature only.
-export function createAmaFansPavilion({THREE,root,box,cyl,mesh,material,keep,pickables,buildingPlots,includeWarehouse=true}) {
+export async function createAmaFansPavilion({THREE,root,box,cyl,mesh,material,keep,pickables,buildingPlots,includeWarehouse=true}) {
   const pavilion=new THREE.Group();pavilion.name='amafans-pavilion';
   pavilion.position.set(3.5,0,.3);root.add(pavilion);
   pavilion.userData={topicId:'industry',schematic:true};
   const steel=material('#6b7778',{metalness:.35,roughness:.48});
-  const black=material('#171b1e',{metalness:.42,roughness:.36});
-  const orange=material('#ef791e',{metalness:.18,roughness:.38});
-  const silver=material('#adb7bc',{metalness:.8,roughness:.28});
   const roofMaterial=material('#c4edf0',{transparent:true,opacity:.34,depthWrite:false,side:THREE.DoubleSide,roughness:.12,metalness:.12});
   const cladding=material('#e7e2d2',{roughness:.8});
   // Open sides and a clear roof keep both the long suspension and rotor visible.
@@ -40,36 +38,13 @@ export function createAmaFansPavilion({THREE,root,box,cyl,mesh,material,keep,pic
   for(const z of [-.7,-.35,0,.35,.7])box(pavilion,1.272,.58,z,.012,.86,.012,steel);
   // Slim overhead mounting rails do not form an opaque ceiling slab.
   for(const z of [-.15,.15])box(pavilion,0,2.67,z,2.5,.035,.025,steel);
-  const suspension=new THREE.Group();suspension.name='amafans-fixed-suspension';pavilion.add(suspension);
-  cyl(suspension,0,2.63,0,.12,.07,black).name='amafans-top-mount';
-  const shaftReduction=1.01/3;
-  const shaftLength=1.01-shaftReduction;
-  const downrod=cyl(suspension,0,2.10+shaftReduction/2,0,.027,shaftLength,black);
-  downrod.name='amafans-long-downrod';downrod.userData={topicId:'industry',role:'downrod',length:shaftLength,originalLength:1.01,reduction:shaftReduction};
-  cyl(suspension,0,1.61+shaftReduction,0,.063,.095,black);
-  const motor=mesh(keep(new THREE.SphereGeometry(1,24,14)),black,suspension,0,1.545+shaftReduction,0);
-  motor.scale.set(.155,.092,.155);motor.name='amafans-rounded-motor';
-  for(const [r,y] of [[.127,1.478],[.096,1.462],[.06,1.45]]) {
-    const ring=mesh(keep(new THREE.TorusGeometry(r,.008,6,32)),silver,suspension,0,y+shaftReduction,0);
-    ring.rotation.x=Math.PI/2;ring.name='amafans-silver-motor-ring';
-  }
-  const rotor=new THREE.Group();rotor.position.y=1.49+shaftReduction;rotor.name='amafans-fan-rotor';
-  rotor.userData={topicId:'industry',role:'fan-rotor',bladeCount:5,angularSpeed:.7};pavilion.add(rotor);
-  cyl(rotor,0,0,0,.118,.036,black).name='amafans-rotating-hub';
-  // Long narrow airfoil silhouettes with raised orange winglets match the reference.
-  const profile=new THREE.Shape();
-  profile.moveTo(.115,-.037);profile.lineTo(.81,-.055);profile.quadraticCurveTo(.91,-.055,.932,-.035);
-  profile.lineTo(.932,.045);profile.quadraticCurveTo(.88,.064,.79,.057);profile.lineTo(.115,.035);profile.closePath();
-  const bladeGeometry=keep(new THREE.ExtrudeGeometry(profile,{depth:.015,bevelEnabled:false,steps:1,curveSegments:5}));
-  bladeGeometry.rotateX(Math.PI/2);
-  for(let i=0;i<5;i++) {
-    const blade=new THREE.Group();blade.name=`amafans-blade-${i+1}`;blade.rotation.y=i*Math.PI*2/5;
-    blade.userData={topicId:'industry',role:'fan-blade',index:i+1};rotor.add(blade);
-    mesh(bladeGeometry,black,blade).name='amafans-black-airfoil';
-    const tip=box(blade,.923,.002,.003,.075,.021,.105,orange);tip.name='amafans-orange-tip';
-    const winglet=box(blade,.95,.036,.003,.021,.08,.105,orange);
-    winglet.rotation.z=-.18;winglet.name='amafans-orange-winglet';
-  }
+  const ceiling=await createCeilingFan({THREE,parent:pavilion,keep,material,pickables});
+  const rotor=ceiling.rotor;
+  // An I-section roof member meets the supplied folded clamp; bolts enter the lower flange.
+  const clampTop=ceiling.root.position.y+ceiling.data.mountContactY*ceiling.scale;
+  box(pavilion,0,clampTop+.0045,0,.14,.009,1.98,steel).name='amafans-mount-beam-lower-flange';
+  box(pavilion,0,clampTop+.027,0,.022,.036,1.98,steel).name='amafans-mount-beam-web';
+  box(pavilion,0,clampTop+.0495,0,.14,.009,1.98,steel).name='amafans-mount-beam-upper-flange';
   const warehouse=createSupplyWarehouse({THREE,pavilion,material,keep,mesh,showContents:includeWarehouse});
   buildingPlots.push({x:root.position.x+pavilion.position.x,z:root.position.z+pavilion.position.z-1.2,w:2.7,d:4.5});
   // The supplied physical badge photograph preserves the exact wordmark and pin outline.
@@ -86,5 +61,5 @@ export function createAmaFansPavilion({THREE,root,box,cyl,mesh,material,keep,pic
   pickables.push(sign);
   const badges=[sign];
   pavilion.traverse(object=>{object.userData.topicId='industry';if(object.isMesh&&!object.userData.externalUrl)pickables.push(object);});
-  return {pavilion,rotor,roof,downrod,badges,warehouse,dispose(){if(disposed)return;disposed=true;warehouse.dispose();badgeTexture.dispose();badgeMaterial.dispose();}};
+  return {pavilion,rotor,roof,fan:ceiling,badges,warehouse,dispose(){if(disposed)return;disposed=true;ceiling.dispose();warehouse.dispose();badgeTexture.dispose();badgeMaterial.dispose();}};
 }

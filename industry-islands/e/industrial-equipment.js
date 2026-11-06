@@ -2,6 +2,7 @@ import {createWaterCoolingFan} from './water-cooling-fan.js?v=warehouse1';
 
 // Small teaching display positions, not an installation drawing or an airflow simulation.
 export const EQUIPMENT_VIEWS={
+  mount:{target:[8.5,2.55,1.4],direction:[.4,-.14,1],distance:2.4,span:1.5},
   warehouse:{target:[8.5,1.5,.2],direction:[.65,.55,1],distance:8.3,span:5.0},
   standing:{target:[11.6,1,1.4],direction:[.65,.55,1],distance:5.7,span:3.5},
   exhaust:{target:[8.8,2.1,-2.16],direction:[.45,.35,-1],distance:3.4,span:1.7},
