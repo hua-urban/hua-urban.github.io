@@ -1,3 +1,4 @@
+import {createCeilingNightLight} from './ceiling-night-light.js?v=label-light1';
 // Actual STEP assembly, loaded without a browser CAD runtime.
 // Installation hardware and motor remain fixed; only the supplied blade assembly turns.
 export async function createCeilingFan({THREE,parent,keep,material,pickables,diameter=1.94,top=2.67,downrodExtension=.34,topicId='industry'}) {
@@ -31,10 +32,12 @@ export async function createCeilingFan({THREE,parent,keep,material,pickables,dia
     geometry.setAttribute('normal',new THREE.BufferAttribute(new Float32Array(buffer,part.normal.byteOffset,part.normal.count),3));
     const IndexType=part.index.type==='Uint16Array'?Uint16Array:Uint32Array;
     geometry.setIndex(new THREE.BufferAttribute(new IndexType(buffer,part.index.byteOffset,part.index.count),1));if(reshaped)geometry.computeVertexNormals();geometry.computeBoundingSphere();
-    const surface=material(new THREE.Color(...(part.role==='blade'?[.07,.085,.095]:part.role==='tip'?[.95,.32,.055]:part.color)),{roughness:.45,metalness:.35,side:THREE.DoubleSide});
+    const charcoal=new THREE.Color('#17191a');
+    const surface=material(part.rotor||['downrod','motor'].includes(part.role)?charcoal:new THREE.Color(...part.color),{roughness:.45,metalness:.35,side:THREE.DoubleSide});
     const object=new THREE.Mesh(geometry,surface);object.name=`ceiling-${part.name}`;
     object.userData={topicId,role:part.rotor?'rotating-part':'fixed-part',component:part.role||part.name};
     object.castShadow=true;object.receiveShadow=true;(part.rotor?rotor:fixed).add(object);pickables.push(object);
   }
-  return {root,rotor,fixed,data,scale,update(time){rotor.rotation.y=time*.7;},dispose(){root.removeFromParent();}};
+  const nightLight=createCeilingNightLight({THREE,parent:fixed,keep,material,bottomY:data.bounds.min[1]-extension});
+  return {root,rotor,fixed,data,scale,setNight:nightLight.setNight,update(time){rotor.rotation.y=time*.7;},dispose(){root.removeFromParent();}};
 }

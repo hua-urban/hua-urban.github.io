@@ -1,6 +1,6 @@
-import {createAmaFansPavilion} from '../e/amafans-building.js?v=ceiling-drop2';
-import {createStandingFanTable} from '../e/standing-fan-table.js?v=ceiling-drop2';
-import {createEquipmentDisplay,EQUIPMENT_VIEWS} from '../e/industrial-equipment.js?v=ceiling-drop2';
+import {createAmaFansPavilion} from '../e/amafans-building.js?v=label-light1';
+import {createStandingFanTable} from '../e/standing-fan-table.js?v=label-light1';
+import {createEquipmentDisplay,EQUIPMENT_VIEWS} from '../e/industrial-equipment.js?v=label-light1';
 
 // Shared equipment stays in E's asset coordinate frame; only this campus is translated.
 export const CAMPUS_CENTER=[-11.1,.9];
@@ -27,9 +27,18 @@ export async function createVentilationCampus({THREE,parent,keep,material,pickab
     contextDevices.push({root,rotor,sourceRotor});
     return root;
   }
+  function setNight(value){
+    pavilion.fan.setNight(value);
+    for(const {root} of contextDevices){
+      const lamp=root.getObjectByName('amafans-night-light'),light=root.getObjectByName('amafans-factory-downlight');
+      if(!lamp||!light)continue;
+      const ratio=root.scale.x/pavilion.fan.scale;
+      lamp.visible=!!value;light.intensity=value?light.userData.nightIntensity*ratio*ratio:0;light.distance=light.userData.nightDistance*ratio;
+    }
+  }
   // Outdoor break area beside the cooler, separate from the operations forecourt.
   box(group,11.4,.34,3.5,.83,.10,.24,wood);for(const x of [11.1,11.7])box(group,x,.2,3.5,.065,.28,.19,brick);
   // Equipment interactions belong to D's energy topic, including reused CAD meshes.
   group.traverse(object=>{object.userData.topicId='energy';});
-  return {group,pavilion,equipment,cloneContextDevice,views:{...EQUIPMENT_VIEWS},update(time){pavilion.fan.update(time);standing.update(time);equipment.update(time);for(const {rotor,sourceRotor} of contextDevices)rotor.quaternion.copy(sourceRotor.quaternion);},dispose(){for(const {root} of contextDevices)root.removeFromParent();contextDevices.length=0;pavilion.dispose();standing.dispose();equipment.dispose();group.removeFromParent();}};
+  return {group,pavilion,equipment,cloneContextDevice,setNight,views:{...EQUIPMENT_VIEWS},update(time){pavilion.fan.update(time);standing.update(time);equipment.update(time);for(const {rotor,sourceRotor} of contextDevices)rotor.quaternion.copy(sourceRotor.quaternion);},dispose(){for(const {root} of contextDevices)root.removeFromParent();contextDevices.length=0;pavilion.dispose();standing.dispose();equipment.dispose();group.removeFromParent();}};
 }

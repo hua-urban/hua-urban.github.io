@@ -11,6 +11,7 @@ export function createWaterCoolingFan({THREE,parent,keep,material,pickables}) {
   const tank=material('#303435',{roughness:.88});
   const outlet=material('#191c1d',{roughness:.9});
   const grille=material('#393d3d',{roughness:.8});
+  const rotorBlade=material('#17191a',{roughness:.9});
   const louvers=material('#4b3e33',{roughness:.9});
   const silver=material('#aeb4b1',{metalness:.48,roughness:.5});
   const rubber=material('#242829',{roughness:.95});
@@ -100,8 +101,8 @@ export function createWaterCoolingFan({THREE,parent,keep,material,pickables}) {
     const angle=i*Math.PI/2+Math.PI/4;
     bladeItems.push({x:Math.cos(angle)*.105,y:Math.sin(angle)*.105,z:0,w:.17,h:.052,d:.003,rz:angle});
   }
-  bladeItems.push({x:0,y:0,z:.001,w:.052,h:.052,d:.006});
-  addInstances('industry-aw150-dark-internal-blades',boxGeometry,grille,bladeItems,rotor);
+  addInstances('industry-aw150-dark-internal-blades',boxGeometry,rotorBlade,bladeItems,rotor);
+  addInstances('industry-aw150-internal-rotor-hub',boxGeometry,grille,[{x:0,y:0,z:.001,w:.052,h:.052,d:.006}],rotor);
 
   root.traverse(object=>{
     if(object.isMesh) {

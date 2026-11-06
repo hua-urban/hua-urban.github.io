@@ -3,9 +3,9 @@ const path=require('node:path');
 for(const group of ['a','b','c','d','e']){
 const file=path.resolve(__dirname,'../industry-islands',group,'scene.js');const src=fs.readFileSync(file,'utf8');const fn=src.slice(src.indexOf('    function placeLabels(){'),src.indexOf('    function animate(now)'));
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-const labels=[{anchor:{x:0,y:0,z:0},width:80,height:22,el:{style:{}}},{anchor:{x:.02,y:0,z:0},width:80,height:22,el:{style:{}}}];
+const labels=[{anchor:{x:0,y:0,z:0},width:80,height:22,el:{dataset:{},style:{}}},{anchor:{x:.02,y:0,z:0},width:80,height:22,el:{dataset:{},style:{}}}];
 const projected={copy(p){Object.assign(this,p);return this},project(){return this}};
-const place=new Function('labels','projected','mapPoint','camera','THREE','width','height',fn+';return placeLabels') (labels,projected,x=>x,{}, {MathUtils:{clamp}},390,510);
+const place=new Function('labels','projected','mapPoint','camera','THREE','width','height','fanRegions','standingCorners','screenBounds','container',fn+';return placeLabels') (labels,projected,x=>x,{}, {MathUtils:{clamp}},390,510,[],[],()=>null,{dataset:{}});
 for(const amplitude of [.0005,.002]){
 for(const l of labels)delete l.layout;
 let last=null,maxJump=0;
@@ -18,3 +18,5 @@ console.log(JSON.stringify({file,maxJump,anchorStepPixels:amplitude*510,limit:4}
 }
 
 }
+
+require('node:child_process').execFileSync(process.execPath,[path.resolve(__dirname,'check-label-camera-sweep.mjs')],{stdio:'inherit'});
