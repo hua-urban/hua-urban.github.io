@@ -4,6 +4,7 @@ import { createCreamCat } from './cream-cat.js?v=pet1';
 import { createPhotoTabby } from './photo-tabby.js?v=pet1';
 import { createCatWalker } from './cat-walker.js?v=walk1';
 import { createCatInteractions } from './cat-interactions.js?v=pet4';
+import { createAmaFansPavilion } from './amafans-building.js?v=amafans1';
 
 // This pure layout is shared by rendered roads and headless connectivity checks.
 export const ROAD_LAYOUT = {
@@ -180,7 +181,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     }
     // Reused geometry keeps the detailed miniature economical to render.
     const pickables=[], districtMap=new Map(), labels=[], fans=[], walkers=[], vehicles=[], boats=[], birds=[], waves=[];
-    const treeData=[], buildingPlots=[];
+    const treeData=[], buildingPlots=[], ownedCleanups=[];
     function tree(x,z,s=1,y=.08) {treeData.push({x,z,s,y,rot:random()*6.28});}
     function lamp(x,z) {cyl(landscape,x,.42,z,.027,.65,P.dark);ellipsoid(landscape,x,.78,z,.1,.08,.1,P.window);}
     function building(parent,x,z,w,d,h,kind='office',accent=P.cream) {
@@ -245,16 +246,8 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
         for(let j=0;j<4;j++)box(root,1.3,.8,-.74+j*.26,.74,.035,.04,P.white);
         tree(x+.95,z-1.25,.65);
       } else if(topic.id==='industry') {
-        building(root,.42,-.6,1.55,1.05,.88,'factory',P.cream);building(root,-1.1,-.55,.72,.72,.65,'factory',P.white);
-        // Clerestory factory roof and solar panels, FIBC bags and a visible HVLS fan.
-        for(let j=0;j<3;j++)box(root,.03+j*.42,1.12,-.6,.31,.05,.55,P.glass);
-        for(let j=0;j<4;j++){box(root,-.9+j*.37,.33,.62,.29,.42,.3,P.white);box(root,-.9+j*.37,.58,.62,.12,.06,.15,P.wood);}
-        const frame=new THREE.Group();frame.position.set(1.25,.09,.73);root.add(frame);
-        for(const a of [-.48,.48])for(const b of [-.3,.3])cyl(frame,a,.63,b,.027,1.2,P.dark);
-        box(frame,0,1.26,0,1.07,.07,.75,P.wood);
-        const fan=new THREE.Group();fan.position.y=1.1;frame.add(fan);cyl(fan,0,0,0,.09,.1,P.gold);
-        for(let k=0;k<6;k++){const a=k*Math.PI/3,o=box(fan,Math.sin(a)*.22,0,Math.cos(a)*.22,.085,.025,.43,P.dark);o.rotation.y=a;}fans.push(fan);
-        box(root,1.8,.18,-.5,.35,.2,.6,P.wood);
+        const pavilion=createAmaFansPavilion({THREE,root,box,cyl,mesh,material,keep,pickables,buildingPlots});
+        fans.push(pavilion.rotor);ownedCleanups.push(pavilion.dispose);
       } else if(topic.id==='ai') {
         building(root,-.9,-.3,.85,.7,1.65,'office',P.white);building(root,.1,-.65,.75,.8,1.95,'office',P.cream);
         building(root,.85,.3,.85,.72,1.2,'office',P.white);
@@ -515,7 +508,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
       routeGroup.visible=showRoutes;
     }
     function select(id) {
-      if(!districtMap.has(id))return;selected=id;connected=null;
+      if(!districtMap.has(id))return;if(industryFocused&&id!=='industry'){stopTour();resetGlobalView();}selected=id;connected=null;
       const partners=(districtMap.get(id).topic.partners||[]).map(p=>Array.isArray(p)?p[0]:p.id).filter(p=>districtMap.has(p));
       districtMap.forEach((d,key)=>{d.halo.visible=key===id||partners.includes(key);d.glowMat.opacity=key===id?.35:.15;});
       labels.forEach(({el})=>{const active=el.dataset.topic===id;el.classList.toggle('active',active);el.classList.remove('route-endpoint');el.classList.toggle('partner',partners.includes(el.dataset.topic));el.setAttribute('aria-pressed',String(active));});
@@ -526,6 +519,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
       connected=[fromId,toId];labels.forEach(({el})=>{el.classList.remove('partner');el.classList.toggle('route-endpoint',connected.includes(el.dataset.topic));});districtMap.forEach((d,key)=>{d.halo.visible=connected.includes(key);d.glowMat.opacity=key===fromId?.35:.23;});
       drawRoutes([[fromId,toId]]);return true;
     }
+    let industryFocused=false;
     let width=0,height=0,paused=false,reduced=false,touring=false,disposed=false,raf=0,time=0,last=0,pointerDown=null;
     const defaultPosition=new THREE.Vector3(), fitTarget=mapPoint(new THREE.Vector3(0,.25,1.1));
     function fit() {
@@ -537,16 +531,32 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
       labels.forEach(({el,anchor})=>include(mapPoint(anchor),Math.max(42,labels.find(item=>item.el===el)?.width/2||45)+10,112));
       distance*=1.045;defaultPosition.copy(dir).multiplyScalar(distance).add(fitTarget);camera.position.copy(defaultPosition);controls.maxDistance=Math.max(70,distance*1.6);controls.update();
     }
+    function positionIndustryView() {
+      const [x,z]=nodes.industry;
+      const target=mapPoint(new THREE.Vector3(x+.15,1.55,z-.05));
+      const direction=new THREE.Vector3(.65,.55,1).normalize();
+      const distance=Math.max(6.4,3.35/(2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*camera.aspect));
+      controls.minDistance=4;controls.target.copy(target);
+      camera.position.copy(direction.multiplyScalar(distance).add(target));controls.update();
+    }
+    function focusIndustry() {
+      if(!districtMap.has('industry'))return false;
+      stopTour();industryFocused=true;container.classList.add('fan-closeup');
+      positionIndustryView();return true;
+    }
+    function resetGlobalView() {
+      industryFocused=false;container.classList.remove('fan-closeup');controls.minDistance=20;fit();
+    }
     function measureLabels(){labels.forEach(item=>{item.width=(item.el.offsetWidth||90)+2;item.height=(item.el.offsetHeight||30)+2;});}
-    function resize(){const w=Math.max(1,container.clientWidth),h=Math.max(1,container.clientHeight);if(w===width&&h===height)return;width=w;height=h;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);measureLabels();fit();}
+    function resize(){const w=Math.max(1,container.clientWidth),h=Math.max(1,container.clientHeight);if(w===width&&h===height)return;width=w;height=h;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);measureLabels();if(industryFocused)positionIndustryView();else fit();}
     const observer=new ResizeObserver(resize);observer.observe(container);resize();
-    document.fonts?.ready.then(()=>{if(!disposed){measureLabels();fit();}});
+    document.fonts?.ready.then(()=>{if(!disposed){measureLabels();if(industryFocused)positionIndustryView();else fit();}});
     function stopTour(){if(touring){touring=false;container.dispatchEvent(new CustomEvent('island-tour-stop'));onTourStop();}}
     controls.addEventListener('start',stopTour);
     const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
     function intersect(e){const r=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);raycaster.setFromCamera(pointer,camera);return raycaster.intersectObjects(pickables,false)[0];}
     const onDown=e=>{pointerDown={x:e.clientX,y:e.clientY};};
-    const onUp=e=>{if(pointerDown&&Math.hypot(e.clientX-pointerDown.x,e.clientY-pointerDown.y)<6){const hit=intersect(e);if(hit){const catId=hit.object.userData.catId;if(catId){if(!paused&&!reduced){stopTour();const view=catActors.find(actor=>actor.root.name===catId).root.worldToLocal(camera.position.clone());if(catInteractions.pet(catId,{side:view.x<0?-1:1}))container.dispatchEvent(new CustomEvent('island-cat-petted'));}}else{const id=hit.object.userData.topicId;select(id);onSelect(id);}}}pointerDown=null;};
+    const onUp=e=>{if(pointerDown&&Math.hypot(e.clientX-pointerDown.x,e.clientY-pointerDown.y)<6){const hit=intersect(e);if(hit){const catId=hit.object.userData.catId;if(catId){if(!paused&&!reduced){stopTour();const view=catActors.find(actor=>actor.root.name===catId).root.worldToLocal(camera.position.clone());if(catInteractions.pet(catId,{side:view.x<0?-1:1}))container.dispatchEvent(new CustomEvent('island-cat-petted'));}}else{const id=hit.object.userData.topicId;select(id);onSelect(id);const externalUrl=hit.object.userData.externalUrl;if(externalUrl==='https://www.amafans.com/'){stopTour();window.open(externalUrl,'_blank','noopener,noreferrer');}}}}pointerDown=null;};
     const onMove=e=>{const hit=intersect(e),inactiveCat=hit?.object.userData.catId&&(paused||reduced);renderer.domElement.style.cursor=hit&&!inactiveCat?'pointer':pointerDown?'grabbing':'grab';};
     const onCancel=()=>{pointerDown=null;};
     renderer.domElement.addEventListener('pointerdown',onDown);renderer.domElement.addEventListener('pointerup',onUp);renderer.domElement.addEventListener('pointermove',onMove);renderer.domElement.addEventListener('pointercancel',onCancel);
@@ -624,7 +634,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     }
     function animate(now){if(disposed)return;raf=requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.05)||0;last=now;if(document.hidden)return;
       const moving=!paused&&!reduced;if(moving)time+=dt;
-      if(moving){catInteractions.update(time,dt);fans.forEach(g=>g.rotation.y=time*4);
+      if(moving){catInteractions.update(time,dt);fans.forEach(g=>g.rotation.y=time*(g.userData.angularSpeed??.7));
         walkers.forEach(w=>{const phase=(time*.23/w.length+w.offset)%2,u=phase<1?phase:2-phase;locate(w.g,w.path,u);if(phase>1)w.g.rotation.y+=Math.PI;w.limbs.forEach((l,i)=>l.rotation.x=Math.sin(time*7+w.offset*10)*(i%2?1:-1)*.48);});
         vehicles.forEach(o=>{const phase=(time*(o.truck?.52:.72)/o.length+o.offset)%(o.truck?2:1),u=o.truck?(phase<1?phase:2-phase):phase;locate(o.g,o.path,u);if(o.truck&&phase>1)o.g.rotation.y+=Math.PI;});
         boats.forEach(b=>{const p=(time*.016+b.offset)%2,u=p<1?p:2-p;locate(b.g,b.path,u,Math.sin(time*1.7)*.018);if(p>1)b.g.rotation.y+=Math.PI;});
@@ -637,6 +647,6 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     }
     walkers.forEach(w=>locate(w.g,w.path,w.offset%1));vehicles.forEach(o=>locate(o.g,o.path,o.offset));boats.forEach(o=>locate(o.g,o.path,o.offset));birds.forEach((b,i)=>b.g.position.set(-5+i*.7,4+i*.1,-4));
     select(districtMap.has('industry')?'industry':topics[0]?.id);raf=requestAnimationFrame(animate);onReady();
-    return {select,connect,setPaused(value){paused=!!value;if(paused)catInteractions.stopSound();},setNight,setRoutes(value){showRoutes=!!value;routeGroup.visible=showRoutes;seaRoute.visible=showRoutes;},setReducedMotion(value){reduced=!!value;controls.enableDamping=!reduced;if(reduced)catInteractions.stopSound();},resetView(){stopTour();controls.target.copy(fitTarget);camera.position.copy(defaultPosition);controls.update();},tour(value){touring=!!value;},dispose(){disposed=true;catInteractions.dispose();document.removeEventListener('visibilitychange',onCatVisibility);cancelAnimationFrame(raf);observer.disconnect();controls.removeEventListener('start',stopTour);controls.dispose();renderer.domElement.removeEventListener('pointerdown',onDown);renderer.domElement.removeEventListener('pointerup',onUp);renderer.domElement.removeEventListener('pointermove',onMove);renderer.domElement.removeEventListener('pointercancel',onCancel);labels.forEach(({el})=>el.remove());geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());renderer.dispose();renderer.domElement.remove();}};
+    return {select,connect,focusIndustry,setPaused(value){paused=!!value;if(paused)catInteractions.stopSound();},setNight,setRoutes(value){showRoutes=!!value;routeGroup.visible=showRoutes;seaRoute.visible=showRoutes;},setReducedMotion(value){reduced=!!value;controls.enableDamping=!reduced;if(reduced)catInteractions.stopSound();},resetView(){stopTour();resetGlobalView();},tour(value){touring=!!value;},dispose(){disposed=true;container.classList.remove('fan-closeup');catInteractions.dispose();document.removeEventListener('visibilitychange',onCatVisibility);cancelAnimationFrame(raf);observer.disconnect();controls.removeEventListener('start',stopTour);controls.dispose();renderer.domElement.removeEventListener('pointerdown',onDown);renderer.domElement.removeEventListener('pointerup',onUp);renderer.domElement.removeEventListener('pointermove',onMove);renderer.domElement.removeEventListener('pointercancel',onCancel);labels.forEach(({el})=>el.remove());ownedCleanups.forEach(cleanup=>cleanup());geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());renderer.dispose();renderer.domElement.remove();}};
   } catch(error){if(renderer){renderer.dispose();renderer.domElement.remove();}onError(error);throw error;}
 }
