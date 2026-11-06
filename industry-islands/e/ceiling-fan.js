@@ -33,7 +33,7 @@ export async function createCeilingFan({THREE,parent,keep,material,pickables,dia
     const IndexType=part.index.type==='Uint16Array'?Uint16Array:Uint32Array;
     geometry.setIndex(new THREE.BufferAttribute(new IndexType(buffer,part.index.byteOffset,part.index.count),1));if(reshaped)geometry.computeVertexNormals();geometry.computeBoundingSphere();
     const charcoal=new THREE.Color('#17191a');
-    const surface=material(part.rotor||['downrod','motor'].includes(part.role)?charcoal:new THREE.Color(...part.color),{roughness:.45,metalness:.35,side:THREE.DoubleSide});
+    const surface=material(part.role==='tip'?new THREE.Color('#ef791e'):part.rotor||['downrod','motor'].includes(part.role)?charcoal:new THREE.Color(...part.color),{roughness:.45,metalness:.35,side:THREE.DoubleSide});
     const object=new THREE.Mesh(geometry,surface);object.name=`ceiling-${part.name}`;
     object.userData={topicId,role:part.rotor?'rotating-part':'fixed-part',component:part.role||part.name};
     object.castShadow=true;object.receiveShadow=true;(part.rotor?rotor:fixed).add(object);pickables.push(object);
