@@ -645,4 +645,3 @@
       window.registryAdminReload = loadState;
       if (window.registryAdminSessionReady()) loadState();
     })();
-  
