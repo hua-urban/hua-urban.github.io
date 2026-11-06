@@ -1,0 +1,12 @@
+{
+  "checkedAt": "2026-11-06T23:57:04.581299+08:00",
+  "targetDate": "2026-11-04",
+  "source": "Canva REST API original PDF",
+  "scannedPages": 58,
+  "state": "ready",
+  "pages": [
+    53,
+    54
+  ],
+  "message": "原始 PDF 與圖片驗證完成"
+}
