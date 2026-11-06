@@ -4,6 +4,7 @@ import { createCreamCat } from './cream-cat.js?v=pet1';
 import { createPhotoTabby } from './photo-tabby.js?v=pet1';
 import { createCatWalker } from './cat-walker.js?v=walk1';
 import { createCatInteractions } from './cat-interactions.js?v=pet4';
+import { createStandingFanTable } from './standing-fan-table.js?v=standing1';
 import { createAmaFansPavilion } from './amafans-building.js?v=amafans2';
 
 // This pure layout is shared by rendered roads and headless connectivity checks.
@@ -122,7 +123,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
       g.rotateX(-Math.PI/2);return mesh(g,m,landscape,0,y,0);
     }
     const sea=mesh(keep(new THREE.PlaneGeometry(240,240)),P.water,scene,0,-.46,0);sea.rotation.x=-Math.PI/2;sea.castShadow=false;
-    const mainCoast=[[-8,.7],[-7.5,-2.3],[-5.8,-6.3],[-2.5,-7.15],[1,-6.8],[4.6,-5.5],[6.7,-3],[8,-1.9],[9.3,-1.45],[10.7,-.8],[11.55,.7],[11.35,2.6],[10.3,4],[7.6,4.4],[5.6,3.7],[3.1,4.1],[.4,3.65],[-1.5,3.55],[-2.8,3.35],[-4.2,3.8],[-5.8,3.2],[-7.6,2]];
+    const mainCoast=[[-8,.7],[-7.5,-2.3],[-5.8,-6.3],[-2.5,-7.15],[1,-6.8],[4.6,-5.5],[6.7,-3],[8,-1.9],[9.3,-1.45],[11.9,-.9],[13.3,-.3],[13.75,1.2],[13.3,3.0],[11.7,4.0],[10.3,4],[7.6,4.4],[5.6,3.7],[3.1,4.1],[.4,3.65],[-1.5,3.55],[-2.8,3.35],[-4.2,3.8],[-5.8,3.2],[-7.6,2]];
     const portCoast=[[-7.8,6.6],[-6.8,5.4],[-5.3,5.35],[-3.6,6.1],[-3.3,7.5],[-4.5,8.65],[-6.6,8.5],[-7.7,7.7]];
     const learnCoast=[[2.5,6.65],[3.05,5.55],[4.1,5.05],[5.6,5.1],[7.15,5.8],[7.85,7.25],[7.25,8.65],[5.9,9.2],[4.35,8.9],[3.05,8.1]];
     for(const outline of [mainCoast,portCoast,learnCoast]) {
@@ -182,8 +183,8 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     // Reused geometry keeps the detailed miniature economical to render.
     const pickables=[], districtMap=new Map(), labels=[], fans=[], walkers=[], vehicles=[], boats=[], birds=[], waves=[];
     const treeData=[], buildingPlots=[], ownedCleanups=[];
-    let amaFansPavilion;
-    const inFactoryClearance=(x,z)=>x>6.6&&x<10.6&&z>-.3&&z<3.35;
+    let amaFansPavilion,standingFanTable;
+    const inFactoryClearance=(x,z)=>x>6.6&&x<13.2&&z>-.3&&z<3.35;
     function tree(x,z,s=1,y=.08) {treeData.push({x,z,s,y,rot:random()*6.28});}
     function lamp(x,z) {cyl(landscape,x,.42,z,.027,.65,P.dark);ellipsoid(landscape,x,.78,z,.1,.08,.1,P.window);}
     function building(parent,x,z,w,d,h,kind='office',accent=P.cream) {
@@ -255,6 +256,10 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
         box(landscape,8.5,.105,1.4,3.45,.055,3.0,P.pavement).name='amafans-off-road-yard';
         ribbon(curve([[5,1.1],[6.25,1.65],[6.65,2.65],[8.5,2.65]]),.30,P.pavement,.015);
         labels[labels.length-1].anchor.set(8.5,3.0,1.4);
+        cyl(landscape,11.6,.10,1.4,1.40,.045,P.pavement).name='standing-fan-table-yard';
+        ribbon(curve([[9.95,2.55],[10.5,2.75],[11.6,2.55]]),.28,P.pavement,.015);
+        standingFanTable=await createStandingFanTable({THREE,parent:landscape,keep,material,pickables});
+        ownedCleanups.push(standingFanTable.dispose);
       } else if(topic.id==='ai') {
         building(root,-.9,-.3,.85,.7,1.65,'office',P.white);building(root,.1,-.65,.75,.8,1.95,'office',P.cream);
         building(root,.85,.3,.85,.72,1.2,'office',P.white);
@@ -531,29 +536,36 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     let width=0,height=0,paused=false,reduced=false,touring=false,disposed=false,raf=0,time=0,last=0,pointerDown=null;
     const defaultPosition=new THREE.Vector3(), fitTarget=mapPoint(new THREE.Vector3(0,.25,1.1));
     function fit() {
+      labels.forEach(item=>item.layout=null);
       controls.target.copy(fitTarget);const dir=new THREE.Vector3(.22,.48,1).normalize(),right=new THREE.Vector3().crossVectors(new THREE.Vector3(0,1,0),dir).normalize(),up=new THREE.Vector3().crossVectors(dir,right).normalize();
       const tan=Math.tan(THREE.MathUtils.degToRad(camera.fov/2));let distance=22;
       function include(p,padX=12,padY=12){const r=p.clone().sub(fitTarget),depth=r.dot(dir),usableX=Math.max(.3,1-2*padX/width),usableY=Math.max(.3,1-2*padY/height);distance=Math.max(distance,depth+Math.abs(r.dot(right))/(tan*camera.aspect*usableX),depth+Math.abs(r.dot(up))/(tan*usableY));}
       // Natural shoreline and district labels are fitted together. UI bars get explicit breathing room.
       for(const [x,z] of [...mainCoast,...portCoast,...learnCoast])include(mapPoint(v(x,z,.8)),20,82);
       labels.forEach(({el,anchor})=>include(mapPoint(anchor),Math.max(42,labels.find(item=>item.el===el)?.width/2||45)+10,112));
-      distance*=1.045;defaultPosition.copy(dir).multiplyScalar(distance).add(fitTarget);camera.position.copy(defaultPosition);controls.maxDistance=Math.max(70,distance*1.6);controls.update();
+      distance*=1.045;scene.fog.near=Math.max(54,distance+18);scene.fog.far=Math.max(110,distance+65);defaultPosition.copy(dir).multiplyScalar(distance).add(fitTarget);camera.position.copy(defaultPosition);controls.maxDistance=Math.max(70,distance*1.6);controls.update();camera.updateMatrixWorld(true);
     }
+    let standingFanFocused=false;
     function positionIndustryView() {
       const [x,z]=nodes.industry;
-      const target=mapPoint(new THREE.Vector3(x+3.5,1.65,z+.3));
+      const target=mapPoint(standingFanFocused?new THREE.Vector3(11.6,1.0,1.4):new THREE.Vector3(x+3.5,1.65,z+.3));
       const direction=new THREE.Vector3(.65,.55,1).normalize();
-      const distance=Math.max(7.5,4.2/(2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*camera.aspect));
+      const distance=Math.max(standingFanFocused?5.7:7.5,(standingFanFocused?3.5:4.2)/(2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*camera.aspect));
       controls.minDistance=4;controls.target.copy(target);
-      camera.position.copy(direction.multiplyScalar(distance).add(target));controls.update();
+      camera.position.copy(direction.multiplyScalar(distance).add(target));controls.update();camera.updateMatrixWorld(true);
     }
     function focusIndustry() {
       if(!districtMap.has('industry'))return false;
-      stopTour();industryFocused=true;container.classList.add('fan-closeup');
+      stopTour();industryFocused=true;standingFanFocused=false;container.classList.add('fan-closeup');
+      positionIndustryView();return true;
+    }
+    function focusStandingFan(){
+      if(!standingFanTable)return false;
+      stopTour();industryFocused=true;standingFanFocused=true;container.classList.add('fan-closeup');
       positionIndustryView();return true;
     }
     function resetGlobalView() {
-      industryFocused=false;container.classList.remove('fan-closeup');controls.minDistance=20;fit();
+      industryFocused=false;standingFanFocused=false;container.classList.remove('fan-closeup');controls.minDistance=20;fit();
     }
     function measureLabels(){labels.forEach(item=>{item.width=(item.el.offsetWidth||90)+2;item.height=(item.el.offsetHeight||30)+2;});}
     function resize(){const w=Math.max(1,container.clientWidth),h=Math.max(1,container.clientHeight);if(w===width&&h===height)return;width=w;height=h;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);measureLabels();if(industryFocused)positionIndustryView();else fit();}
@@ -575,6 +587,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     const fanCorners=[];
     landscape.updateMatrixWorld(true);
     const fanBox=new THREE.Box3().setFromObject(amaFansPavilion);
+    fanBox.union(new THREE.Box3().setFromObject(standingFanTable.root));
     for(const x of [fanBox.min.x,fanBox.max.x])for(const y of [fanBox.min.y,fanBox.max.y])for(const z of [fanBox.min.z,fanBox.max.z])fanCorners.push(new THREE.Vector3(x,y,z));
     function fanScreenBounds(){
       const points=fanCorners.map(p=>p.clone().project(camera));
@@ -671,7 +684,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     }
     function animate(now){if(disposed)return;raf=requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.05)||0;last=now;if(document.hidden)return;
       const moving=!paused&&!reduced;if(moving)time+=dt;
-      if(moving){catInteractions.update(time,dt);fans.forEach(g=>g.rotation.y=time*(g.userData.angularSpeed??.7));
+      if(moving){catInteractions.update(time,dt);fans.forEach(g=>g.rotation.y=time*(g.userData.angularSpeed??.7));standingFanTable?.update(time);
         walkers.forEach(w=>{const phase=(time*.23/w.length+w.offset)%2,u=phase<1?phase:2-phase;locate(w.g,w.path,u);if(phase>1)w.g.rotation.y+=Math.PI;w.limbs.forEach((l,i)=>l.rotation.x=Math.sin(time*7+w.offset*10)*(i%2?1:-1)*.48);});
         vehicles.forEach(o=>{const phase=(time*(o.truck?.52:.72)/o.length+o.offset)%(o.truck?2:1),u=o.truck?(phase<1?phase:2-phase):phase;locate(o.g,o.path,u);if(o.truck&&phase>1)o.g.rotation.y+=Math.PI;});
         boats.forEach(b=>{const p=(time*.016+b.offset)%2,u=p<1?p:2-p;locate(b.g,b.path,u,Math.sin(time*1.7)*.018);if(p>1)b.g.rotation.y+=Math.PI;});
@@ -680,10 +693,10 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
         if(touring){const d=defaultPosition.clone().sub(fitTarget).length(),a=time*.045;camera.position.lerp(new THREE.Vector3(Math.sin(a)*.88,.45,Math.cos(a)*.88).normalize().multiplyScalar(d).add(fitTarget),.015);}
       }
       if(!paused&&!reduced)routeDots.forEach(o=>{o.dot.position.copy(o.path.getPointAt((time*.12+o.offset)%1));});
-      controls.update();placeLabels();renderer.render(scene,camera);
+      controls.update();camera.updateMatrixWorld(true);placeLabels();renderer.render(scene,camera);
     }
     walkers.forEach(w=>locate(w.g,w.path,w.offset%1));vehicles.forEach(o=>locate(o.g,o.path,o.offset));boats.forEach(o=>locate(o.g,o.path,o.offset));birds.forEach((b,i)=>b.g.position.set(-5+i*.7,4+i*.1,-4));
     select(districtMap.has('industry')?'industry':topics[0]?.id);raf=requestAnimationFrame(animate);onReady();
-    return {select,connect,focusIndustry,setPaused(value){paused=!!value;if(paused)catInteractions.stopSound();},setNight,setRoutes(value){showRoutes=!!value;routeGroup.visible=showRoutes;seaRoute.visible=showRoutes;},setReducedMotion(value){reduced=!!value;controls.enableDamping=!reduced;if(reduced)catInteractions.stopSound();},resetView(){stopTour();resetGlobalView();},tour(value){touring=!!value;},dispose(){disposed=true;container.classList.remove('fan-closeup');catInteractions.dispose();document.removeEventListener('visibilitychange',onCatVisibility);cancelAnimationFrame(raf);observer.disconnect();controls.removeEventListener('start',stopTour);controls.dispose();renderer.domElement.removeEventListener('pointerdown',onDown);renderer.domElement.removeEventListener('pointerup',onUp);renderer.domElement.removeEventListener('pointermove',onMove);renderer.domElement.removeEventListener('pointercancel',onCancel);labels.forEach(({el})=>el.remove());ownedCleanups.forEach(cleanup=>cleanup());geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());renderer.dispose();renderer.domElement.remove();}};
+    return {select,connect,focusIndustry,focusStandingFan,setPaused(value){paused=!!value;if(paused)catInteractions.stopSound();},setNight,setRoutes(value){showRoutes=!!value;routeGroup.visible=showRoutes;seaRoute.visible=showRoutes;},setReducedMotion(value){reduced=!!value;controls.enableDamping=!reduced;if(reduced)catInteractions.stopSound();},resetView(){stopTour();resetGlobalView();},tour(value){touring=!!value;},dispose(){disposed=true;container.classList.remove('fan-closeup');catInteractions.dispose();document.removeEventListener('visibilitychange',onCatVisibility);cancelAnimationFrame(raf);observer.disconnect();controls.removeEventListener('start',stopTour);controls.dispose();renderer.domElement.removeEventListener('pointerdown',onDown);renderer.domElement.removeEventListener('pointerup',onUp);renderer.domElement.removeEventListener('pointermove',onMove);renderer.domElement.removeEventListener('pointercancel',onCancel);labels.forEach(({el})=>el.remove());ownedCleanups.forEach(cleanup=>cleanup());geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());renderer.dispose();renderer.domElement.remove();}};
   } catch(error){if(renderer){renderer.dispose();renderer.domElement.remove();}onError(error);throw error;}
 }
