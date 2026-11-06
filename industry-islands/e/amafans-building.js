@@ -1,4 +1,4 @@
-import {createCeilingFan} from './ceiling-fan.js?v=ceiling-cad1';
+import {createCeilingFan} from './ceiling-fan.js?v=ceiling-drop1';
 import {createSupplyWarehouse} from './supply-warehouse.js?v=full-campus1';
 
 // A schematic HVLS display pavilion; dimensions are for the miniature only.
@@ -27,25 +27,19 @@ export async function createAmaFansPavilion({THREE,root,box,cyl,mesh,material,ke
     const reflection=box(pavilion,x,2.751,-1.2,.045,.002,3.7,reflectionMaterial);
     reflection.rotation.y=-.25;reflection.name='amafans-glass-reflection';reflection.castShadow=false;
   }
-  for(const x of [-1.24,1.24])for(const z of [-3.34,-.94,.94]) {
+  for(const x of [-1.24,1.24])for(const z of [-3.34,-1.2,.94]) {
     box(pavilion,x,1.41,z,.055,2.56,.055,steel).name='amafans-steel-column';
     box(pavilion,x,.14,z,.16,.08,.16,steel);
   }
-  for(const z of [-3.36,-.96,.96])box(pavilion,0,2.66,z,2.58,.075,.055,steel);
+  for(const z of [-3.36,-1.2,.96])box(pavilion,0,2.66,z,2.58,.075,.055,steel);
   for(const x of [-1.26,1.26])box(pavilion,x,2.66,-1.2,.055,.075,4.38,steel);
   // Low factory cladding anchors the pavilion while leaving the rotor and rod exposed.
   box(pavilion,1.24,.58,0,.055,.9,1.88,cladding).name='amafans-side-knee-wall';
   for(const z of [-.7,-.35,0,.35,.7])box(pavilion,1.272,.58,z,.012,.86,.012,steel);
-  // Slim overhead mounting rails do not form an opaque ceiling slab.
-  for(const z of [-1.35,-1.05])box(pavilion,0,2.67,z,2.5,.035,.025,steel);
+  // The supplied clamp uses the existing central transverse roof member.
   const ceiling=await createCeilingFan({THREE,parent:pavilion,keep,material,pickables});
-  ceiling.root.position.z=-1.2;
+  ceiling.root.position.z=-1.2;ceiling.root.rotation.y=Math.PI/2;
   const rotor=ceiling.rotor;
-  // An I-section roof member meets the supplied folded clamp; bolts enter the lower flange.
-  const clampTop=ceiling.root.position.y+ceiling.data.mountContactY*ceiling.scale;
-  box(pavilion,0,clampTop+.0045,-1.2,.14,.009,1.98,steel).name='amafans-mount-beam-lower-flange';
-  box(pavilion,0,clampTop+.027,-1.2,.022,.036,1.98,steel).name='amafans-mount-beam-web';
-  box(pavilion,0,clampTop+.0495,-1.2,.14,.009,1.98,steel).name='amafans-mount-beam-upper-flange';
   const warehouse=createSupplyWarehouse({THREE,pavilion,material,keep,mesh,showContents:includeWarehouse});
   buildingPlots.push({x:root.position.x+pavilion.position.x,z:root.position.z+pavilion.position.z-1.2,w:2.7,d:4.5});
   // The supplied physical badge photograph preserves the exact wordmark and pin outline.

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from '../lib/OrbitControls.js';
-import {createVentilationCampus,CAMPUS_OFFSET} from './ventilation-campus.js?v=roofline-final1';
+import {createVentilationCampus,CAMPUS_OFFSET} from './ventilation-campus.js?v=ceiling-drop1';
 
 // Districts, labels, roads and collaboration endpoints share this layout.
 // Large-space energy/materials sit west; business/digital services sit east.
@@ -328,7 +328,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     for(const x of [-.35,.35])for(const z of [-.39,.39])box(businessFanRoom,x,.7,z,.035,1.06,.035,P.brick);
     const businessCeiling=ventilationCampus.cloneContextDevice('warehouse','business');
     businessFanRoom.add(businessCeiling);
-    businessCeiling.scale.multiplyScalar(.36);
+    businessCeiling.scale.multiplyScalar(.36);businessCeiling.rotation.y=0;
     businessCeiling.position.set(0,1.20-ventilationCampus.pavilion.fan.data.bounds.max[1]*businessCeiling.scale.y,0);
     businessCeiling.traverse(object=>{object.userData.topicId='business';});
     const businessClampTop=businessCeiling.position.y+ventilationCampus.pavilion.fan.data.mountContactY*businessCeiling.scale.y;
@@ -344,6 +344,8 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     for(const x of [-.41,.41])box(logisticsFanRoom,x,1,-.385,.28,.52,.03,P.cream);
     const warehouseExhaust=ventilationCampus.cloneContextDevice('exhaust','logistics');
     logisticsFanRoom.add(warehouseExhaust);warehouseExhaust.traverse(object=>{object.userData.topicId='logistics';});warehouseExhaust.scale.multiplyScalar(.52/.78);warehouseExhaust.position.set(0,1,-.414);warehouseExhaust.rotation.y=Math.PI;
+    const ventilationLabel=labels.find(({el})=>el.dataset.topic==='energy');
+    ventilationLabel.anchor.set(9.74+CAMPUS_OFFSET[0],3.08,2.34+CAMPUS_OFFSET[1]);
     // A short pedestrian apron connects the energy district to its expanded demonstration base.
     box(landscape,-7.05,.105,1.05,2.05,.04,.52,P.sand);
     // Civic green, market stalls, benches and small street furniture fill the shared center.
