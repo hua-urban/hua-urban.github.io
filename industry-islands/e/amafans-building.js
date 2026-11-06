@@ -22,10 +22,12 @@ export function createAmaFansPavilion({THREE,root,box,cyl,mesh,material,keep,pic
   for(const z of [-.96,.96])box(pavilion,0,2.66,z,2.58,.075,.055,steel);
   for(const x of [-1.26,1.26])box(pavilion,x,2.66,0,.055,.075,1.98,steel);
   // Low factory cladding anchors the pavilion while leaving the rotor and rod exposed.
-  box(pavilion,0,.55,-.94,2.48,.84,.055,cladding).name='amafans-low-rear-wall';
+  const rearWall=new THREE.Group();rearWall.name='amafans-low-rear-wall';pavilion.add(rearWall);
+  box(rearWall,-.945,.55,-.94,.59,.84,.055,cladding);
+  box(rearWall,1.02,.55,-.94,.44,.84,.055,cladding);
   box(pavilion,1.24,.58,0,.055,.9,1.88,cladding).name='amafans-side-knee-wall';
   for(const z of [-.7,-.35,0,.35,.7])box(pavilion,1.272,.58,z,.012,.86,.012,steel);
-  for(const x of [-.52,.52])box(pavilion,x,.5,.968,.025,.74,.025,steel).name='amafans-front-sign-support';
+  for(const x of [.40,1.08])box(pavilion,x,.5,.968,.025,.74,.025,steel).name='amafans-front-sign-support';
   // Slim overhead mounting rails do not form an opaque ceiling slab.
   for(const z of [-.15,.15])box(pavilion,0,2.67,z,2.5,.035,.025,steel);
   const suspension=new THREE.Group();suspension.name='amafans-fixed-suspension';pavilion.add(suspension);
@@ -82,7 +84,7 @@ export function createAmaFansPavilion({THREE,root,box,cyl,mesh,material,keep,pic
   paint();
   const logo=new Image();logo.onload=()=>{if(!disposed)paint(logo);};
   logo.src=new URL('./assets/amafans-logo.png',import.meta.url).href;
-  for(const [name,x,z,width,rotation] of [['side',1.281,0,1.75,Math.PI/2],['front',0,.991,1.25,0]]) {
+  for(const [name,x,z,width,rotation] of [['side',1.281,0,1.75,Math.PI/2],['front',.74,.991,.82,0]]) {
     const sign=mesh(keep(new THREE.PlaneGeometry(width,width*300/1024)),signMaterial,pavilion,x,.65,z);
     sign.rotation.y=rotation;sign.name=`amafans-${name}-brand-sign`;sign.castShadow=false;
     sign.userData={topicId:'industry',role:'brand-sign',externalUrl:'https://www.amafans.com/'};pickables.push(sign);
