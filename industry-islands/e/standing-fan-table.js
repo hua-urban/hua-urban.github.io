@@ -18,7 +18,7 @@ export async function createStandingFanTable({THREE,parent,keep,material,pickabl
     geometry.setAttribute('normal',new THREE.BufferAttribute(new Float32Array(buffer,part.normal.byteOffset,part.normal.count),3));
     geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(buffer,part.index.byteOffset,part.index.count),1));
     geometry.computeBoundingSphere();
-    const surface=material(new THREE.Color(...part.color),{roughness:.55,metalness:.12,side:THREE.DoubleSide});
+    const surface=material(part.rotor&&part.name==='rotor-8'?new THREE.Color('#ef791e'):new THREE.Color(...part.color),{roughness:.55,metalness:.12,side:THREE.DoubleSide});
     const object=new THREE.Mesh(geometry,surface);object.name=`sunny-${part.name}`;
     object.castShadow=true;object.receiveShadow=true;object.userData={topicId:'industry',role:part.rotor?'sunny-rotating-part':'sunny-fixed-part'};
     (part.rotor?rotor:root).add(object);pickables.push(object);

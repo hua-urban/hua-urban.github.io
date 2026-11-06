@@ -1,4 +1,4 @@
-import {createWaterCoolingFan} from './water-cooling-fan.js?v=label-light1';
+import {createWaterCoolingFan} from './water-cooling-fan.js?v=fan-finish2';
 
 // Small teaching display positions, not an installation drawing or an airflow simulation.
 export const EQUIPMENT_VIEWS={
@@ -30,13 +30,36 @@ export async function createEquipmentDisplay({THREE,parent,keep,material,pickabl
     if(config.ground)root.position.y-=data.bounds.min[1]*scale;
     group.add(root);devices[id]=root;
     const rotor=new THREE.Group();rotor.name=`equipment-${id}-rotor`;rotor.position.fromArray(data.rotorPivot);root.add(rotor);
+    // CAD batches mix motor caps, guard wires and supports. Recolour faces locally,
+    // keeping the original silhouette and the outer metal cage untouched.
+    let bladeRadius=0;
+    for(const part of data.meshes.filter(p=>p.rotor)){
+      const a=new Float32Array(buffer,part.position.byteOffset,part.position.count);
+      for(let i=0;i<a.length;i+=3)bladeRadius=Math.max(bladeRadius,Math.hypot(a[i]-data.rotorPivot[0],a[i+1]-data.rotorPivot[1]));
+    }
     for(const part of data.meshes){
       const positions=new Float32Array(buffer,part.position.byteOffset,part.position.count).slice();
       if(part.rotor)for(let i=0;i<positions.length;i+=3)for(let axis=0;axis<3;axis++)positions[i+axis]-=data.rotorPivot[axis];
       const geometry=keep(new THREE.BufferGeometry());geometry.setAttribute('position',new THREE.BufferAttribute(positions,3));
       geometry.setAttribute('normal',new THREE.BufferAttribute(new Float32Array(buffer,part.normal.byteOffset,part.normal.count),3));
       geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(buffer,part.index.byteOffset,part.index.count),1));geometry.computeBoundingSphere();
-      const surface=material(part.rotor?new THREE.Color('#17191a'):new THREE.Color(...part.color),{roughness:.62,metalness:.12,side:THREE.DoubleSide});
+      const originalIndices=geometry.index.array;
+      const faces=[[],[],[]]; // source finish, black motor/centre, orange blade end
+      for(let i=0;i<originalIndices.length;i+=3){
+        const vertices=[originalIndices[i],originalIndices[i+1],originalIndices[i+2]];
+        const centre=[0,0,0];
+        for(const vertex of vertices)for(let axis=0;axis<3;axis++)centre[axis]+=positions[vertex*3+axis]/3;
+        const radius=Math.hypot(centre[0]-(part.rotor?0:data.rotorPivot[0]),centre[1]-(part.rotor?0:data.rotorPivot[1]));
+        const bladeEnd=part.rotor&&radius>bladeRadius*.90;
+        const motorOrCentre=radius<=190;
+        const wallDownrod=id==='wall'&&part.name==='fixed-1';
+        const finish=bladeEnd?2:part.rotor||motorOrCentre||wallDownrod?1:0;
+        faces[finish].push(...vertices);
+      }
+      const ordered=faces.flat();geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(ordered),1));
+      let offset=0;
+      faces.forEach((indices,index)=>{if(indices.length)geometry.addGroup(offset,indices.length,index);offset+=indices.length;});
+      const surface=[new THREE.Color(...part.color),new THREE.Color('#17191a'),new THREE.Color('#ef791e')].map(color=>material(color,{roughness:.62,metalness:.12,side:THREE.DoubleSide}));
       const object=new THREE.Mesh(geometry,surface);object.name=`${id}-${part.name}`;object.castShadow=true;object.receiveShadow=true;
       object.userData={topicId:'industry',equipment:id,role:part.rotor?'rotating-part':'fixed-part'};
       (part.rotor?rotor:root).add(object);pickables.push(object);
