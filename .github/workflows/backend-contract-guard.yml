@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - run: node --test automation/check-backend-contracts.test.mjs
+      - run: node --test automation/*.test.mjs
       - name: 部署來源禁止舊端點
         run: node automation/check-backend-contracts.mjs --root . --source-only
       - name: 正式服務核對
