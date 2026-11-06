@@ -1,6 +1,6 @@
 // Miniature supply stock: filled FIBC bags, filter samples and a dispatch hand truck.
 // Geometry stays below the pavilion fan; the elevated fascia is the only exception.
-export function createSupplyWarehouse({THREE,pavilion,material,keep,mesh}) {
+export function createSupplyWarehouse({THREE,pavilion,material,keep,mesh,showContents=true}) {
   const group=new THREE.Group();group.name='industry-supply-warehouse';pavilion.add(group);
   const cloth=material('#eee9dc',{roughness:.96});
   const webbing=material('#647f8a',{roughness:.92});
@@ -15,13 +15,24 @@ export function createSupplyWarehouse({THREE,pavilion,material,keep,mesh}) {
     if(!boxes.has(mat))boxes.set(mat,[]);
     boxes.get(mat).push({x,y,z,w,h,d,name});
   }
-  // Continuous low corrugated walls leave the glass roof and spinning fan open.
-  addBox(panel,0,.60,-.955,2.43,.94,.035,'rear-wall');
-  addBox(panel,-1.24,.51,0,.035,.76,1.83,'left-wall');
-  for(let i=0;i<25;i++)addBox(panel,-1.2+i*.1,.60,-.929,.018,.94,.018,'rear-corrugation');
-  for(let i=0;i<19;i++)addBox(panel,-1.214,.51,-.9+i*.1,.018,.76,.018,'left-corrugation');
-  addBox(sage,0,1.08,-.95,2.45,.035,.06,'rear-cap');
-  addBox(sage,-1.24,.90,0,.06,.035,1.88,'left-cap');
+  // A longer rear bay, with an actual aperture for the high outward exhaust.
+  const rearZ=-3.355;
+  addBox(panel,0,.915,rearZ,2.43,1.55,.04,'rear-wall-below-exhaust');
+  addBox(panel,-.6575,2.205,rearZ,1.115,1.03,.04,'rear-wall-left-of-exhaust');
+  addBox(panel,.9575,2.205,rearZ,.515,1.03,.04,'rear-wall-right-of-exhaust');
+  addBox(panel,.30,2.615,rearZ,.80,.21,.04,'rear-wall-above-exhaust');
+  for(const x of [-1.24,1.24])addBox(panel,x,1.43,-2.2,.04,2.59,2.28,'rear-bay-closed-side-wall');
+  addBox(panel,-1.24,.51,0,.035,.76,1.83,'front-low-left-wall');
+  for(let i=0;i<25;i++){
+    const x=-1.2+i*.1;
+    addBox(panel,x,.915,rearZ+.027,.018,1.55,.018,'rear-corrugation');
+    if(x<-.1||x>.7)addBox(panel,x,2.205,rearZ+.027,.018,1.03,.018,'rear-upper-corrugation');
+  }
+  for(let i=0;i<23;i++)for(const x of [-1.214,1.214])addBox(panel,x,1.43,-3.3+i*.1,.018,2.59,.018,'side-corrugation');
+  for(let i=0;i<19;i++)addBox(panel,-1.214,.51,-.9+i*.1,.018,.76,.018,'front-corrugation');
+  for(const x of [-.115,.715])addBox(sage,x,2.1,rearZ,.035,.83,.075,'exhaust-window-jamb');
+  for(const y of [1.685,2.515])addBox(sage,.30,y,rearZ,.865,.035,.075,'exhaust-window-transom');
+  addBox(sage,0,2.68,rearZ,2.5,.075,.075,'rear-roof-wall-cap');
 
   const bags=new THREE.Group();bags.name='industry-fibc-stock';group.add(bags);
   const pallets=new THREE.Group();pallets.name='industry-stock-pallets';group.add(pallets);
@@ -125,6 +136,8 @@ export function createSupplyWarehouse({THREE,pavilion,material,keep,mesh}) {
   const signMaterial=new THREE.MeshBasicMaterial({map:signTexture,toneMapped:false,side:THREE.DoubleSide});
   const sign=mesh(keep(new THREE.PlaneGeometry(1.5,.44)),signMaterial,group,-.49,1.36,1.04);sign.name='industry-supply-warehouse-sign';sign.castShadow=false;
   sign.userData={role:'warehouse-sign',text:'中網網業',subtitle:'工業耗材・太空包供應倉'};
+  if(!showContents)for(const child of [...group.children])if(child.name!=='industry-warehouse-corrugated-walls')group.remove(child);
+  group.userData={exhaustOpening:{center:[.3,2.1,-3.355],width:.8,height:.82},showContents};
   group.traverse(o=>{o.userData.topicId='industry';});
   let disposed=false;
   return {group,bags,pallets,filterRack,dispatchZone,signs:[sign],dispose(){if(disposed)return;disposed=true;signTexture.dispose();signMaterial.dispose();seamMaterial.dispose();gridMaterial.dispose();}};

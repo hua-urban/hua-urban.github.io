@@ -4,9 +4,9 @@ import { createCreamCat } from './cream-cat.js?v=pet1';
 import { createPhotoTabby } from './photo-tabby.js?v=pet1';
 import { createCatWalker } from './cat-walker.js?v=walk1';
 import { createCatInteractions } from './cat-interactions.js?v=pet4';
-import {createEquipmentDisplay,EQUIPMENT_VIEWS} from './industrial-equipment.js?v=warehouse1';
+import {createEquipmentDisplay,EQUIPMENT_VIEWS} from './industrial-equipment.js?v=ventilation-1final';
 import { createStandingFanTable } from './standing-fan-table.js?v=standing1';
-import { createAmaFansPavilion } from './amafans-building.js?v=warehouse1';
+import { createAmaFansPavilion } from './amafans-building.js?v=ventilation-1final';
 
 // This pure layout is shared by rendered roads and headless connectivity checks.
 export const ROAD_LAYOUT = {
@@ -124,7 +124,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
       g.rotateX(-Math.PI/2);return mesh(g,m,landscape,0,y,0);
     }
     const sea=mesh(keep(new THREE.PlaneGeometry(240,240)),P.water,scene,0,-.46,0);sea.rotation.x=-Math.PI/2;sea.castShadow=false;
-    const mainCoast=[[-8,.7],[-7.5,-2.3],[-5.8,-6.3],[-2.5,-7.15],[1,-6.8],[4.6,-5.5],[6.7,-3],[8,-1.9],[9.3,-1.45],[11.9,-.9],[13.3,-.3],[13.75,1.2],[13.3,3.0],[11.7,4.0],[10.3,4],[7.6,4.4],[5.6,3.7],[3.1,4.1],[.4,3.65],[-1.5,3.55],[-2.8,3.35],[-4.2,3.8],[-5.8,3.2],[-7.6,2]];
+    const mainCoast=[[-8,.7],[-7.5,-2.3],[-5.8,-6.3],[-2.5,-7.15],[1,-6.8],[4.6,-5.5],[6.7,-3],[8,-2.7],[9.3,-3.15],[11.9,-2.6],[13.3,-.3],[13.75,1.2],[13.3,3.0],[11.7,4.0],[10.3,4],[7.6,4.4],[5.6,3.7],[3.1,4.1],[.4,3.65],[-1.5,3.55],[-2.8,3.35],[-4.2,3.8],[-5.8,3.2],[-7.6,2]];
     const portCoast=[[-7.8,6.6],[-6.8,5.4],[-5.3,5.35],[-3.6,6.1],[-3.3,7.5],[-4.5,8.65],[-6.6,8.5],[-7.7,7.7]];
     const learnCoast=[[2.5,6.65],[3.05,5.55],[4.1,5.05],[5.6,5.1],[7.15,5.8],[7.85,7.25],[7.25,8.65],[5.9,9.2],[4.35,8.9],[3.05,8.1]];
     for(const outline of [mainCoast,portCoast,learnCoast]) {
@@ -185,7 +185,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     const pickables=[], districtMap=new Map(), labels=[], fans=[], walkers=[], vehicles=[], boats=[], birds=[], waves=[];
     const treeData=[], buildingPlots=[], ownedCleanups=[];
     let amaFansPavilion,standingFanTable,equipmentDisplay;
-    const inFactoryClearance=(x,z)=>x>6.6&&x<13.2&&z>-.3&&z<3.35;
+    const inFactoryClearance=(x,z)=>x>6.6&&x<13.2&&z>-2.7&&z<3.35;
     function tree(x,z,s=1,y=.08) {treeData.push({x,z,s,y,rot:random()*6.28});}
     function lamp(x,z) {cyl(landscape,x,.42,z,.027,.65,P.dark);ellipsoid(landscape,x,.78,z,.1,.08,.1,P.window);}
     function building(parent,x,z,w,d,h,kind='office',accent=P.cream) {
@@ -254,9 +254,9 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
         amaFansPavilion=pavilion.pavilion;
         fans.push(pavilion.rotor);ownedCleanups.push(pavilion.dispose);
         // A dedicated off-road factory lot on the enlarged eastern headland.
-        box(landscape,8.5,.105,1.4,3.45,.055,3.0,P.pavement).name='amafans-off-road-yard';
+        box(landscape,8.5,.105,.2,3.45,.055,5.0,P.pavement).name='amafans-off-road-yard';
         ribbon(curve([[5,1.1],[6.25,1.65],[6.65,2.65],[8.5,2.65]]),.30,P.pavement,.015);
-        labels[labels.length-1].anchor.set(8.5,3.0,1.4);
+        labels[labels.length-1].anchor.set(11.6,2.2,1.4);
         cyl(landscape,11.6,.10,1.4,1.40,.045,P.pavement).name='standing-fan-table-yard';
         ribbon(curve([[9.95,2.55],[10.5,2.75],[11.6,2.55]]),.28,P.pavement,.015);
         standingFanTable=await createStandingFanTable({THREE,parent:landscape,keep,material,pickables});
@@ -589,34 +589,39 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     fanBox.union(new THREE.Box3().setFromObject(standingFanTable.root));
     fanBox.union(new THREE.Box3().setFromObject(equipmentDisplay.group));
     for(const x of [fanBox.min.x,fanBox.max.x])for(const y of [fanBox.min.y,fanBox.max.y])for(const z of [fanBox.min.z,fanBox.max.z])fanCorners.push(new THREE.Vector3(x,y,z));
-    function fanScreenBounds(){
-      const points=fanCorners.map(p=>p.clone().project(camera));
+    const standingCorners=[],standingBox=new THREE.Box3().setFromObject(standingFanTable.root);
+    for(const x of [standingBox.min.x,standingBox.max.x])for(const y of [standingBox.min.y,standingBox.max.y])for(const z of [standingBox.min.z,standingBox.max.z])standingCorners.push(new THREE.Vector3(x,y,z));
+    function screenBounds(corners){
+      const points=corners.map(p=>p.clone().project(camera));
       if(points.some(p=>p.z>1))return null;
       return {x:Math.min(...points.map(p=>(p.x*.5+.5)*width))-10,y:Math.min(...points.map(p=>(-p.y*.5+.5)*height))-10,
         right:Math.max(...points.map(p=>(p.x*.5+.5)*width))+10,bottom:Math.max(...points.map(p=>(-p.y*.5+.5)*height))+10};
     }
     function placeLabels(){
-      const reserved=fanScreenBounds();
+      const reserved=screenBounds(fanCorners),standingReserved=screenBounds(standingCorners);
+      container.dataset.standingFanBounds=JSON.stringify(standingReserved);
       container.dataset.fanBounds=JSON.stringify(reserved);
       const maxShift=40,gap=3.2;
       const items=labels.map(item=>{
         projected.copy(mapPoint(item.anchor)).project(camera);
         const w=item.width||90,h=item.height||30;
         const minX=w/2+8,maxX=width-w/2-8,minY=104+h/2,maxY=height-60-h/2;
-        const x=THREE.MathUtils.clamp((projected.x*.5+.5)*width,minX,maxX);
-        const y=THREE.MathUtils.clamp((-projected.y*.5+.5)*height,minY,maxY);
+        const pinToStanding=item.el.dataset.topic==='industry'&&!!standingReserved;
+        const x=THREE.MathUtils.clamp(pinToStanding?(standingReserved.x+standingReserved.right)/2:(projected.x*.5+.5)*width,minX,maxX);
+        const y=THREE.MathUtils.clamp(pinToStanding?standingReserved.y-h/2-8:(-projected.y*.5+.5)*height,minY,maxY);
         // Carry the previous screen offset forward. Restarting from the anchor on
         // every frame can reverse pair ordering after subpixel camera movement.
         const previous=item.layout;
-        let dx=previous?(previous.x-previous.baseX)*.985:0;
-        let dy=previous?(previous.y-previous.baseY)*.985:0;
+        let dx=previous&&!pinToStanding?(previous.x-previous.baseX)*.985:0;
+        let dy=previous&&!pinToStanding?(previous.y-previous.baseY)*.985:0;
         const length=Math.hypot(dx,dy);if(length>maxShift){dx*=maxShift/length;dy*=maxShift/length;}
-        return {...item,w,h,x:THREE.MathUtils.clamp(x+dx,minX,maxX),y:THREE.MathUtils.clamp(y+dy,minY,maxY),baseX:x,baseY:y,minX,maxX,minY,maxY,hidden:projected.z>1};
+        return {...item,w,h,pinToStanding,x:THREE.MathUtils.clamp(x+dx,minX,maxX),y:THREE.MathUtils.clamp(y+dy,minY,maxY),baseX:x,baseY:y,minX,maxX,minY,maxY,hidden:projected.z>1};
       });
       // Leave a settled layout alone while the camera is effectively stationary.
       if(items.every((item,i)=>{const old=labels[i].layout;return old&&old.hidden===item.hidden&&old.w===item.w&&old.h===item.h&&Math.abs(old.baseX-item.baseX)<.35&&Math.abs(old.baseY-item.baseY)<.35;}))return;
       const overlap=(a,b)=>Math.abs(a.x-b.x)<(a.w+b.w)/2+gap&&Math.abs(a.y-b.y)<(a.h+b.h)/2+gap;
       function capacity(item,axis,direction){
+        if(item.pinToStanding)return 0;
         const other=axis==='x'?'y':'x',base=axis==='x'?item.baseX:item.baseY,otherBase=axis==='x'?item.baseY:item.baseX;
         const radius=Math.sqrt(Math.max(0,maxShift*maxShift-(item[other]-otherBase)**2));
         const low=Math.max(base-radius,axis==='x'?item.minX:item.minY),high=Math.min(base+radius,axis==='x'?item.maxX:item.maxY);
@@ -653,7 +658,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
           return result;
         };
         for(let pass=0;pass<3;pass++)for(const item of items){
-          if(item.hidden||!items.some(other=>other!==item&&!other.hidden&&overlap(item,other)))continue;
+          if(item.hidden||item.pinToStanding||!items.some(other=>other!==item&&!other.hidden&&overlap(item,other)))continue;
           let best={x:item.x,y:item.y,value:score(item,item.x,item.y)};
           for(const [dx,dy] of offsets){const x=THREE.MathUtils.clamp(item.baseX+dx,item.minX,item.maxX),y=THREE.MathUtils.clamp(item.baseY+dy,item.minY,item.maxY),value=score(item,x,y);if(value<best.value)best={x,y,value};}
           item.x=best.x;item.y=best.y;
@@ -661,16 +666,17 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
       }
       for(let i=0;i<items.length;i++){
         const item=items[i],old=labels[i].layout;
-        if(old){const oldDx=old.x-old.baseX,oldDy=old.y-old.baseY;
+        if(old&&!item.pinToStanding){const oldDx=old.x-old.baseX,oldDy=old.y-old.baseY;
           const dx=item.x-item.baseX-oldDx,dy=item.y-item.baseY-oldDy,length=Math.hypot(dx,dy);
           if(length>2){item.x=THREE.MathUtils.clamp(item.baseX+oldDx+dx*2/length,item.minX,item.maxX);item.y=THREE.MathUtils.clamp(item.baseY+oldDy+dy*2/length,item.minY,item.maxY);}}
         // Apply after smoothing: an interpolated label must never cross the fan.
-        if(reserved&&!item.hidden){
-          const hits=(x,y)=>x+item.w/2>reserved.x&&x-item.w/2<reserved.right&&y+item.h/2>reserved.y&&y-item.h/2<reserved.bottom;
+        const protectedArea=item.pinToStanding?standingReserved:reserved;
+        if(protectedArea&&!item.hidden){
+          const hits=(x,y)=>x+item.w/2>protectedArea.x&&x-item.w/2<protectedArea.right&&y+item.h/2>protectedArea.y&&y-item.h/2<protectedArea.bottom;
           if(hits(item.x,item.y)){
             const candidates=[
-              [item.x,reserved.y-item.h/2-4],[item.x,reserved.bottom+item.h/2+4],
-              [reserved.x-item.w/2-4,item.y],[reserved.right+item.w/2+4,item.y]
+              [item.x,protectedArea.y-item.h/2-4],[item.x,protectedArea.bottom+item.h/2+4],
+              [protectedArea.x-item.w/2-4,item.y],[protectedArea.right+item.w/2+4,item.y]
             ].map(([x,y])=>({x:THREE.MathUtils.clamp(x,item.minX,item.maxX),y:THREE.MathUtils.clamp(y,item.minY,item.maxY)}))
               .filter(p=>!hits(p.x,p.y));
             candidates.sort((a,b)=>{
