@@ -4,7 +4,7 @@ import { createCreamCat } from './cream-cat.js?v=pet1';
 import { createPhotoTabby } from './photo-tabby.js?v=pet1';
 import { createCatWalker } from './cat-walker.js?v=walk1';
 import { createCatInteractions } from './cat-interactions.js?v=pet4';
-import { createAmaFansPavilion } from './amafans-building.js?v=amafans1';
+import { createAmaFansPavilion } from './amafans-building.js?v=amafans2';
 
 // This pure layout is shared by rendered roads and headless connectivity checks.
 export const ROAD_LAYOUT = {
@@ -122,7 +122,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
       g.rotateX(-Math.PI/2);return mesh(g,m,landscape,0,y,0);
     }
     const sea=mesh(keep(new THREE.PlaneGeometry(240,240)),P.water,scene,0,-.46,0);sea.rotation.x=-Math.PI/2;sea.castShadow=false;
-    const mainCoast=[[-8,.7],[-7.5,-2.3],[-5.8,-6.3],[-2.5,-7.15],[1,-6.8],[4.6,-5.5],[6.7,-3],[7.8,-.3],[7.25,.65],[6.9,1.8],[7.1,2.5],[5.6,3.7],[3.1,4.1],[.4,3.65],[-1.5,3.55],[-2.8,3.35],[-4.2,3.8],[-5.8,3.2],[-7.6,2]];
+    const mainCoast=[[-8,.7],[-7.5,-2.3],[-5.8,-6.3],[-2.5,-7.15],[1,-6.8],[4.6,-5.5],[6.7,-3],[8,-1.9],[9.3,-1.45],[10.7,-.8],[11.55,.7],[11.35,2.6],[10.3,4],[7.6,4.4],[5.6,3.7],[3.1,4.1],[.4,3.65],[-1.5,3.55],[-2.8,3.35],[-4.2,3.8],[-5.8,3.2],[-7.6,2]];
     const portCoast=[[-7.8,6.6],[-6.8,5.4],[-5.3,5.35],[-3.6,6.1],[-3.3,7.5],[-4.5,8.65],[-6.6,8.5],[-7.7,7.7]];
     const learnCoast=[[2.5,6.65],[3.05,5.55],[4.1,5.05],[5.6,5.1],[7.15,5.8],[7.85,7.25],[7.25,8.65],[5.9,9.2],[4.35,8.9],[3.05,8.1]];
     for(const outline of [mainCoast,portCoast,learnCoast]) {
@@ -182,6 +182,8 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     // Reused geometry keeps the detailed miniature economical to render.
     const pickables=[], districtMap=new Map(), labels=[], fans=[], walkers=[], vehicles=[], boats=[], birds=[], waves=[];
     const treeData=[], buildingPlots=[], ownedCleanups=[];
+    let amaFansPavilion;
+    const inFactoryClearance=(x,z)=>x>6.6&&x<10.6&&z>-.3&&z<3.35;
     function tree(x,z,s=1,y=.08) {treeData.push({x,z,s,y,rot:random()*6.28});}
     function lamp(x,z) {cyl(landscape,x,.42,z,.027,.65,P.dark);ellipsoid(landscape,x,.78,z,.1,.08,.1,P.window);}
     function building(parent,x,z,w,d,h,kind='office',accent=P.cream) {
@@ -247,7 +249,12 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
         tree(x+.95,z-1.25,.65);
       } else if(topic.id==='industry') {
         const pavilion=createAmaFansPavilion({THREE,root,box,cyl,mesh,material,keep,pickables,buildingPlots});
+        amaFansPavilion=pavilion.pavilion;
         fans.push(pavilion.rotor);ownedCleanups.push(pavilion.dispose);
+        // A dedicated off-road factory lot on the enlarged eastern headland.
+        box(landscape,8.5,.105,1.4,3.45,.055,3.0,P.pavement).name='amafans-off-road-yard';
+        ribbon(curve([[5,1.1],[6.25,1.65],[6.65,2.65],[8.5,2.65]]),.30,P.pavement,.015);
+        labels[labels.length-1].anchor.set(8.5,3.0,1.4);
       } else if(topic.id==='ai') {
         building(root,-.9,-.3,.85,.7,1.65,'office',P.white);building(root,.1,-.65,.75,.8,1.95,'office',P.cream);
         building(root,.85,.3,.85,.72,1.2,'office',P.white);
@@ -317,13 +324,14 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     }
     // Informal planting along the harbor shore avoids a decorative ring of identical trees.
     for(let i=0;i<14;i++){const x=-7.1+random()*.75,z=5.95+random()*1.9;if(isClearPlot(x,z))tree(x,z,.45+random()*.35);}
-    for(const [x,z] of urbanGreens.filter((_,i)=>i%3===0)) {
+    for(const [x,z] of urbanGreens.filter(([x,z],i)=>i%3===0&&!inFactoryClearance(x,z))) {
       const planter=box(landscape,x+.18,.13,z,.35,.13,.27,P.rock);planter.rotation.y=random()*2;
       for(let j=0;j<3;j++)ellipsoid(landscape,x+.07+j*.1,.26,z,.12,.13,.12,j%2?P.leaf:P.leaf2);
       for(let j=0;j<2;j++)ellipsoid(landscape,x+.12+j*.14,.37,z,.035,.035,.035,j%2?P.gold:P.brick);
     }
     // A small orchard and vegetable beds give the civic green a lived-in scale.
     for(let i=0;i<9;i++){const x=-2.9+(i%3)*.45,z=-1.4+Math.floor(i/3)*.3;box(landscape,x,.12,z,.35,.07,.19,P.field);for(let j=0;j<3;j++)ellipsoid(landscape,x-.1+j*.1,.2,z,.05,.07,.065,P.crop);}
+    for(let i=treeData.length-1;i>=0;i--)if(inFactoryClearance(treeData[i].x,treeData[i].z))treeData.splice(i,1);
     const instTrunk=new THREE.InstancedMesh(unitCylinder,P.trunk,treeData.length), instLeaf=new THREE.InstancedMesh(unitSphere,P.leaf,treeData.length),instLeaf2=new THREE.InstancedMesh(unitSphere,P.leaf2,treeData.length);
     const dummy=new THREE.Object3D();
     treeData.forEach(({x,z,s,y,rot},i)=>{
@@ -533,9 +541,9 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     }
     function positionIndustryView() {
       const [x,z]=nodes.industry;
-      const target=mapPoint(new THREE.Vector3(x+.15,1.55,z-.05));
+      const target=mapPoint(new THREE.Vector3(x+3.5,1.65,z+.3));
       const direction=new THREE.Vector3(.65,.55,1).normalize();
-      const distance=Math.max(6.4,3.35/(2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*camera.aspect));
+      const distance=Math.max(7.5,4.2/(2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*camera.aspect));
       controls.minDistance=4;controls.target.copy(target);
       camera.position.copy(direction.multiplyScalar(distance).add(target));controls.update();
     }
@@ -563,7 +571,20 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     function setNight(value){const night=!!value;hemi.intensity=night?1.1:2.35;sun.intensity=night?.65:2.6;fill.intensity=night?.7:1;sun.color.set(night?'#96b8e7':'#ffedce');hemi.color.set(night?'#8098c6':'#e7f5fb');P.water.color.set(night?'#204e65':'#6aadb0');P.shallow.color.set(night?'#39717c':'#a0cbbb');P.window.emissiveIntensity=night?2.2:.04;P.route.emissiveIntensity=night?1.1:.2;scene.fog.color.set(night?'#193c56':'#c7e3e4');renderer.toneMappingExposure=night?1:1.02;}
     const projected=new THREE.Vector3(),pos=new THREE.Vector3(),tangent=new THREE.Vector3();
     function locate(g,path,u,yOffset=0) {path.getPointAt(u,pos);path.getTangentAt(u,tangent);g.position.copy(pos);g.position.y+=yOffset;g.rotation.y=Math.atan2(tangent.x,tangent.z);}
+    // Reserve the whole pavilion silhouette, including roof, as the camera orbits.
+    const fanCorners=[];
+    landscape.updateMatrixWorld(true);
+    const fanBox=new THREE.Box3().setFromObject(amaFansPavilion);
+    for(const x of [fanBox.min.x,fanBox.max.x])for(const y of [fanBox.min.y,fanBox.max.y])for(const z of [fanBox.min.z,fanBox.max.z])fanCorners.push(new THREE.Vector3(x,y,z));
+    function fanScreenBounds(){
+      const points=fanCorners.map(p=>p.clone().project(camera));
+      if(points.some(p=>p.z>1))return null;
+      return {x:Math.min(...points.map(p=>(p.x*.5+.5)*width))-10,y:Math.min(...points.map(p=>(-p.y*.5+.5)*height))-10,
+        right:Math.max(...points.map(p=>(p.x*.5+.5)*width))+10,bottom:Math.max(...points.map(p=>(-p.y*.5+.5)*height))+10};
+    }
     function placeLabels(){
+      const reserved=fanScreenBounds();
+      container.dataset.fanBounds=JSON.stringify(reserved);
       const maxShift=40,gap=3.2;
       const items=labels.map(item=>{
         projected.copy(mapPoint(item.anchor)).project(camera);
@@ -630,6 +651,22 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
         if(old){const oldDx=old.x-old.baseX,oldDy=old.y-old.baseY;
           const dx=item.x-item.baseX-oldDx,dy=item.y-item.baseY-oldDy,length=Math.hypot(dx,dy);
           if(length>2){item.x=THREE.MathUtils.clamp(item.baseX+oldDx+dx*2/length,item.minX,item.maxX);item.y=THREE.MathUtils.clamp(item.baseY+oldDy+dy*2/length,item.minY,item.maxY);}}
+        // Apply after smoothing: an interpolated label must never cross the fan.
+        if(reserved&&!item.hidden){
+          const hits=(x,y)=>x+item.w/2>reserved.x&&x-item.w/2<reserved.right&&y+item.h/2>reserved.y&&y-item.h/2<reserved.bottom;
+          if(hits(item.x,item.y)){
+            const candidates=[
+              [item.x,reserved.y-item.h/2-4],[item.x,reserved.bottom+item.h/2+4],
+              [reserved.x-item.w/2-4,item.y],[reserved.right+item.w/2+4,item.y]
+            ].map(([x,y])=>({x:THREE.MathUtils.clamp(x,item.minX,item.maxX),y:THREE.MathUtils.clamp(y,item.minY,item.maxY)}))
+              .filter(p=>!hits(p.x,p.y));
+            candidates.sort((a,b)=>{
+              const score=p=>Math.hypot(p.x-item.baseX,p.y-item.baseY)+items.filter(o=>o!==item&&!o.hidden&&overlap({...item,...p},o)).length*1000;
+              return score(a)-score(b);
+            });
+            if(candidates.length)Object.assign(item,candidates[0]);else item.hidden=true;
+          }
+        }
         labels[i].layout={x:item.x,y:item.y,baseX:item.baseX,baseY:item.baseY,w:item.w,h:item.h,hidden:item.hidden};item.el.style.left=`${item.x}px`;item.el.style.top=`${item.y}px`;item.el.style.visibility=item.hidden?'hidden':'visible';}
     }
     function animate(now){if(disposed)return;raf=requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.05)||0;last=now;if(document.hidden)return;
