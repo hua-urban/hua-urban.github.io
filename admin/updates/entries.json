@@ -2,6 +2,42 @@
   "asOf": "2026-11-06",
   "entries": [
     {
+      "id": "backend-contract-automation-20261106",
+      "date": "2026-11-06",
+      "status": "已上線",
+      "statusKind": "live",
+      "category": "資訊組維護",
+      "title": "建立後端網址部署檢查與跨專案自動核對",
+      "summary": [
+        "新增正式後端登錄正本 automation/backend-contracts.json，目前納入培訓系統的正式網址、已停用部署識別碼、前端與中央名冊來源。日後更換後端，須先更新這份登錄，再更新依賴服務。",
+        "17 個非空專案已加入推送、PR 與手動檢查；掃描程式、排程及執行環境變數，發現已停用端點就失敗。檢查只記錄檔案或變數名稱，不輸出敏感原值。",
+        "htl-api 已加入 Vercel 建置前檢查並實際部署成功；正式 PALMS 版本查詢及分會指標查詢回傳200。追綠光 Dockerfile 已加入建置前檢查，下次映像建置即執行；本次未重新部署追綠光映像。",
+        "bni-merger 新增每日台北11:43的跨專案核對，使用既有憑證掃描其他專案及儲存庫變數，並核對正式培訓前端、新後端與中央名冊。兩次手動核對成功，現任名冊54人；17個專案的首次來源檢查全部通過。",
+        "以實際舊部署識別碼重現漏改的 workflow，確認檢查失敗；換成正式網址後通過。另有4項測試涵蓋來源漏改、歷史資料排除、憑證缺失與環境值保密。"
+      ],
+      "services": [
+        {
+          "label": "培訓進度回報",
+          "href": "/bni-training/"
+        }
+      ],
+      "sources": [
+        {
+          "label": "後端更換操作規則",
+          "href": "https://github.com/hua-urban/hua-urban.github.io/blob/master/automation/README.md"
+        },
+        {
+          "label": "跨專案實際檢查成功",
+          "href": "https://github.com/hua-urban/bni-merger/actions/runs/42182885080"
+        },
+        {
+          "label": "正式端點登錄",
+          "href": "https://github.com/hua-urban/hua-urban.github.io/blob/master/automation/backend-contracts.json"
+        }
+      ],
+      "sourceNote": "GitHub推送／PR檢查與既有Pages發布可能平行執行，未設定為全域禁止直接推送；Vercel與Docker則在建置步驟攔截。手動Apps Script／Cloud管理介面部署不受GitHub直接攔截，仍須先執行同一部署檢查。GitHub Secrets隱藏值、其他雲端專案與Apps Script屬性不宣稱已全面自動讀回。此規則僅涵蓋已登錄的後端與停用識別碼。"
+    },
+    {
       "id": "authorized-runtime-audit-20261106",
       "date": "2026-11-06",
       "status": "已核對",
