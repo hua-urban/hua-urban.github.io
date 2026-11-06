@@ -1,5 +1,5 @@
 import {createCeilingFan} from './ceiling-fan.js?v=ceiling-cad1';
-import {createSupplyWarehouse} from './supply-warehouse.js?v=column-wall1';
+import {createSupplyWarehouse} from './supply-warehouse.js?v=full-campus1';
 
 // A schematic HVLS display pavilion; dimensions are for the miniature only.
 export async function createAmaFansPavilion({THREE,root,box,cyl,mesh,material,keep,pickables,buildingPlots,includeWarehouse=true}) {
@@ -37,30 +37,37 @@ export async function createAmaFansPavilion({THREE,root,box,cyl,mesh,material,ke
   box(pavilion,1.24,.58,0,.055,.9,1.88,cladding).name='amafans-side-knee-wall';
   for(const z of [-.7,-.35,0,.35,.7])box(pavilion,1.272,.58,z,.012,.86,.012,steel);
   // Slim overhead mounting rails do not form an opaque ceiling slab.
-  for(const z of [-.15,.15])box(pavilion,0,2.67,z,2.5,.035,.025,steel);
+  for(const z of [-1.35,-1.05])box(pavilion,0,2.67,z,2.5,.035,.025,steel);
   const ceiling=await createCeilingFan({THREE,parent:pavilion,keep,material,pickables});
+  ceiling.root.position.z=-1.2;
   const rotor=ceiling.rotor;
   // An I-section roof member meets the supplied folded clamp; bolts enter the lower flange.
   const clampTop=ceiling.root.position.y+ceiling.data.mountContactY*ceiling.scale;
-  box(pavilion,0,clampTop+.0045,0,.14,.009,1.98,steel).name='amafans-mount-beam-lower-flange';
-  box(pavilion,0,clampTop+.027,0,.022,.036,1.98,steel).name='amafans-mount-beam-web';
-  box(pavilion,0,clampTop+.0495,0,.14,.009,1.98,steel).name='amafans-mount-beam-upper-flange';
+  box(pavilion,0,clampTop+.0045,-1.2,.14,.009,1.98,steel).name='amafans-mount-beam-lower-flange';
+  box(pavilion,0,clampTop+.027,-1.2,.022,.036,1.98,steel).name='amafans-mount-beam-web';
+  box(pavilion,0,clampTop+.0495,-1.2,.14,.009,1.98,steel).name='amafans-mount-beam-upper-flange';
   const warehouse=createSupplyWarehouse({THREE,pavilion,material,keep,mesh,showContents:includeWarehouse});
   buildingPlots.push({x:root.position.x+pavilion.position.x,z:root.position.z+pavilion.position.z-1.2,w:2.7,d:4.5});
   // The supplied physical badge photograph preserves the exact wordmark and pin outline.
   let disposed=false;
-  const badgeMaterial=new THREE.MeshBasicMaterial({transparent:true,alphaTest:.1,side:THREE.DoubleSide,toneMapped:false});
+  const badgeMaterial=new THREE.MeshBasicMaterial({transparent:true,alphaTest:.1,side:THREE.FrontSide,toneMapped:false});
   const badgeTexture=new THREE.TextureLoader().load(new URL('./assets/amafans-badge.png',import.meta.url).href,texture=>{
     if(disposed){texture.dispose();return;}
     texture.colorSpace=THREE.SRGBColorSpace;badgeMaterial.needsUpdate=true;
   });
   badgeTexture.colorSpace=THREE.SRGBColorSpace;badgeMaterial.map=badgeTexture;
-  const sign=mesh(keep(new THREE.PlaneGeometry(1.85,.925)),badgeMaterial,pavilion,1.365,2.58,-2.2);
+  const sign=mesh(keep(new THREE.PlaneGeometry(2.15,1.075)),badgeMaterial,pavilion,1.365,3.11,-2.2);
   sign.rotation.y=Math.PI/2;sign.name='amafans-side-brand-sign';sign.castShadow=false;
-  for(const z of [-2.78,-1.62])box(pavilion,1.325,2.45,z,.08,.035,.035,steel).name='amafans-sign-wall-standoff';
-  sign.userData={topicId:'industry',role:'brand-sign',externalUrl:'https://www.amafans.com/',externalURL:'https://www.amafans.com/',badgeStyle:'exact-photo-cutout',placement:'side-wall-roof-edge',fanMarkAboveRoof:true};
+  const badgeBackMaterial=new THREE.MeshBasicMaterial({map:badgeTexture,color:'#020303',transparent:true,alphaTest:.1,side:THREE.BackSide,toneMapped:false});
+  const signBack=mesh(sign.geometry,badgeBackMaterial,pavilion,1.365,3.11,-2.2);signBack.rotation.y=Math.PI/2;
+  signBack.name='amafans-sign-dark-backing';signBack.castShadow=false;signBack.userData={role:'sign-backing'};
+  for(const z of [-2.85,-1.55]){
+    box(pavilion,1.325,2.63,z,.08,.045,.045,steel).name='amafans-sign-wall-standoff';
+    box(pavilion,1.345,2.90,z,.025,.55,.025,steel).name='amafans-sign-roof-bracket';
+  }
+  sign.userData={topicId:'industry',role:'brand-sign',externalUrl:'https://www.amafans.com/',externalURL:'https://www.amafans.com/',badgeStyle:'exact-photo-cutout',placement:'side-wall-roof-edge',fanMarkAboveRoof:true,wallWidthRatio:2.15/2.28,roofCutFraction:(3.11+1.075/2-2.73)/1.075};
   pickables.push(sign);
   const badges=[sign];
   pavilion.traverse(object=>{object.userData.topicId='industry';if(object.isMesh&&!object.userData.externalUrl)pickables.push(object);});
-  return {pavilion,rotor,roof,fan:ceiling,badges,warehouse,dispose(){if(disposed)return;disposed=true;ceiling.dispose();warehouse.dispose();badgeTexture.dispose();badgeMaterial.dispose();}};
+  return {pavilion,rotor,roof,fan:ceiling,badges,warehouse,dispose(){if(disposed)return;disposed=true;ceiling.dispose();warehouse.dispose();badgeTexture.dispose();badgeMaterial.dispose();badgeBackMaterial.dispose();}};
 }

@@ -151,8 +151,8 @@ export function createSupplyWarehouse({THREE,pavilion,material,keep,mesh,showCon
   ctx.font='500 48px "Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif';ctx.fillText('工業耗材・太空包供應倉',512,270);
   const signTexture=new THREE.CanvasTexture(canvas);signTexture.colorSpace=THREE.SRGBColorSpace;
   const signMaterial=new THREE.MeshBasicMaterial({map:signTexture,toneMapped:false,side:THREE.DoubleSide});
-  const sign=mesh(keep(new THREE.PlaneGeometry(1.8,.528)),signMaterial,group,0,.96,-3.412);sign.rotation.y=Math.PI;sign.name='industry-supply-warehouse-sign';sign.castShadow=false;
-  sign.userData={role:'warehouse-sign',text:'中網網業',subtitle:'工業耗材・太空包供應倉'};
+  const sign=mesh(keep(new THREE.PlaneGeometry(1.8,.528)),signMaterial,group,-1.315,1.85,-2.2);sign.rotation.y=-Math.PI/2;sign.name='industry-supply-warehouse-sign';sign.castShadow=false;
+  sign.userData={role:'warehouse-sign',text:'中網網業',subtitle:'工業耗材・太空包供應倉',placement:'blank-side-wall'};
   if(!showContents)for(const child of [...group.children])if(!['industry-warehouse-corrugated-walls','industry-warehouse-folded-metal-sheets'].includes(child.name))group.remove(child);
   group.userData={exhaustOpening:{center:[.3,2.1,-3.355],width:.8,height:.82},showContents};
   group.traverse(o=>{o.userData.topicId='industry';});

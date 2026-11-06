@@ -4,9 +4,9 @@ import { createCreamCat } from './cream-cat.js?v=pet1';
 import { createPhotoTabby } from './photo-tabby.js?v=pet1';
 import { createCatWalker } from './cat-walker.js?v=walk1';
 import { createCatInteractions } from './cat-interactions.js?v=pet4';
-import {createEquipmentDisplay,EQUIPMENT_VIEWS} from './industrial-equipment.js?v=column-wall2';
+import {createEquipmentDisplay,EQUIPMENT_VIEWS} from './industrial-equipment.js?v=full-campus1';
 import { createStandingFanTable } from './standing-fan-table.js?v=standing1';
-import { createAmaFansPavilion } from './amafans-building.js?v=column-wall2';
+import { createAmaFansPavilion } from './amafans-building.js?v=full-campus1';
 
 // This pure layout is shared by rendered roads and headless connectivity checks.
 export const ROAD_LAYOUT = {
