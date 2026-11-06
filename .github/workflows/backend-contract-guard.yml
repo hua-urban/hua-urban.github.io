@@ -1,0 +1,22 @@
+name: 後端網址檢查
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test automation/check-backend-contracts.test.mjs
+      - name: 部署來源禁止舊端點
+        run: node automation/check-backend-contracts.mjs --root . --source-only
+      - name: 正式服務核對
+        if: github.event_name != 'pull_request'
+        run: node automation/check-backend-contracts.mjs --root .

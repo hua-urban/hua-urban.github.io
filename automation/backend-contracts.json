@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "repositories": [
+    "hua-urban/bni-ai-survey",
+    "hua-urban/bni-lottery",
+    "hua-urban/bni-merger",
+    "hua-urban/bni-powerteam",
+    "hua-urban/bni-pt-groups",
+    "hua-urban/bni-training",
+    "hua-urban/bni-warmbox",
+    "hua-urban/e-team-grid",
+    "hua-urban/greenlight-connect-test",
+    "hua-urban/htl-api",
+    "hua-urban/hua-urban",
+    "hua-urban/hua-urban.github.io",
+    "hua-urban/huadu-e5-signup",
+    "hua-urban/huadu-guest",
+    "hua-urban/huadu-property-platform",
+    "hua-urban/huadu-property-review",
+    "hua-urban/huadu-tea",
+    "hua-urban/huadu-tea-backend",
+    "hua-urban/industry-archipelago-lab"
+  ],
+  "services": [
+    {
+      "id": "training",
+      "current": "https://script.google.com/macros/s/AKfycbxQWQmv4KX4kmS_wDPvoDKCCxITGFhDF9cs7OFv-217oxdC4T-JoavFUmgGKIBI8KeYjA/exec",
+      "retired": [
+        "AKfycbwH2PRrkEtuAsr0SPxu8DzA-xlBhjhMN3rYaaz2oNvC5nYpfuvf64hscHfwC6k1P9QuPg"
+      ],
+      "frontend": "https://hua-urban.com/bni-training/",
+      "baseline": "https://script.google.com/macros/s/AKfycbwFOmaT_WgI1cCUWDBi4rAVhnrAuu1_dtRx2mvIDSlUCL8rVEowTrcWi6uj8gd3wjGE/exec"
+    }
+  ]
+}
