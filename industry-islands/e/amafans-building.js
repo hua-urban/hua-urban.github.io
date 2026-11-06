@@ -1,3 +1,5 @@
+import {createSupplyWarehouse} from './supply-warehouse.js?v=warehouse1';
+
 // A schematic HVLS display pavilion; dimensions are for the miniature only.
 export function createAmaFansPavilion({THREE,root,box,cyl,mesh,material,keep,pickables,buildingPlots}) {
   const pavilion=new THREE.Group();pavilion.name='amafans-pavilion';
@@ -8,8 +10,6 @@ export function createAmaFansPavilion({THREE,root,box,cyl,mesh,material,keep,pic
   const orange=material('#ef791e',{metalness:.18,roughness:.38});
   const silver=material('#adb7bc',{metalness:.8,roughness:.28});
   const roofMaterial=material('#c4edf0',{transparent:true,opacity:.34,depthWrite:false,side:THREE.DoubleSide,roughness:.12,metalness:.12});
-  const bagMaterial=material('#f1ecdf');
-  const palletMaterial=material('#a58159');
   const cladding=material('#e7e2d2',{roughness:.8});
   // Open sides and a clear roof keep both the long suspension and rotor visible.
   const roof=box(pavilion,0,2.73,0,2.7,.025,2.10,roofMaterial);
@@ -36,9 +36,6 @@ export function createAmaFansPavilion({THREE,root,box,cyl,mesh,material,keep,pic
   for(const z of [-.96,.96])box(pavilion,0,2.66,z,2.58,.075,.055,steel);
   for(const x of [-1.26,1.26])box(pavilion,x,2.66,0,.055,.075,1.98,steel);
   // Low factory cladding anchors the pavilion while leaving the rotor and rod exposed.
-  const rearWall=new THREE.Group();rearWall.name='amafans-low-rear-wall';pavilion.add(rearWall);
-  box(rearWall,-.945,.55,-.94,.59,.84,.055,cladding);
-  box(rearWall,1.02,.55,-.94,.44,.84,.055,cladding);
   box(pavilion,1.24,.58,0,.055,.9,1.88,cladding).name='amafans-side-knee-wall';
   for(const z of [-.7,-.35,0,.35,.7])box(pavilion,1.272,.58,z,.012,.86,.012,steel);
   // Slim overhead mounting rails do not form an opaque ceiling slab.
@@ -73,15 +70,7 @@ export function createAmaFansPavilion({THREE,root,box,cyl,mesh,material,keep,pic
     const winglet=box(blade,.95,.036,.003,.021,.08,.105,orange);
     winglet.rotation.z=-.18;winglet.name='amafans-orange-winglet';
   }
-  // FIBC bags on a compact loading pallet stay within the original district plot.
-  box(pavilion,-.97,.19,.53,.48,.08,.55,palletMaterial);
-  for(const z of [.39,.65]) {
-    const bag=box(pavilion,-.97,.40,z,.32,.34,.23,bagMaterial);bag.name='industry-fibc-bag';
-    for(const x of [-1.07,-.87]) {
-      const loop=mesh(keep(new THREE.TorusGeometry(.035,.008,5,12,Math.PI)),bagMaterial,pavilion,x,.58,z);
-      loop.name='industry-fibc-lifting-loop';
-    }
-  }
+  const warehouse=createSupplyWarehouse({THREE,pavilion,material,keep,mesh});
   buildingPlots.push({x:root.position.x+pavilion.position.x,z:root.position.z+pavilion.position.z,w:2.7,d:2.10});
   // The supplied physical badge photograph preserves the exact wordmark and pin outline.
   let disposed=false;
@@ -97,5 +86,5 @@ export function createAmaFansPavilion({THREE,root,box,cyl,mesh,material,keep,pic
   pickables.push(sign);
   const badges=[sign];
   pavilion.traverse(object=>{object.userData.topicId='industry';if(object.isMesh&&!object.userData.externalUrl)pickables.push(object);});
-  return {pavilion,rotor,roof,downrod,badges,dispose(){if(disposed)return;disposed=true;badgeTexture.dispose();badgeMaterial.dispose();}};
+  return {pavilion,rotor,roof,downrod,badges,warehouse,dispose(){if(disposed)return;disposed=true;warehouse.dispose();badgeTexture.dispose();badgeMaterial.dispose();}};
 }

@@ -4,8 +4,9 @@ import { createCreamCat } from './cream-cat.js?v=pet1';
 import { createPhotoTabby } from './photo-tabby.js?v=pet1';
 import { createCatWalker } from './cat-walker.js?v=walk1';
 import { createCatInteractions } from './cat-interactions.js?v=pet4';
+import {createEquipmentDisplay,EQUIPMENT_VIEWS} from './industrial-equipment.js?v=warehouse1';
 import { createStandingFanTable } from './standing-fan-table.js?v=standing1';
-import { createAmaFansPavilion } from './amafans-building.js?v=amafans2';
+import { createAmaFansPavilion } from './amafans-building.js?v=warehouse1';
 
 // This pure layout is shared by rendered roads and headless connectivity checks.
 export const ROAD_LAYOUT = {
@@ -183,7 +184,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     // Reused geometry keeps the detailed miniature economical to render.
     const pickables=[], districtMap=new Map(), labels=[], fans=[], walkers=[], vehicles=[], boats=[], birds=[], waves=[];
     const treeData=[], buildingPlots=[], ownedCleanups=[];
-    let amaFansPavilion,standingFanTable;
+    let amaFansPavilion,standingFanTable,equipmentDisplay;
     const inFactoryClearance=(x,z)=>x>6.6&&x<13.2&&z>-.3&&z<3.35;
     function tree(x,z,s=1,y=.08) {treeData.push({x,z,s,y,rot:random()*6.28});}
     function lamp(x,z) {cyl(landscape,x,.42,z,.027,.65,P.dark);ellipsoid(landscape,x,.78,z,.1,.08,.1,P.window);}
@@ -260,6 +261,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
         ribbon(curve([[9.95,2.55],[10.5,2.75],[11.6,2.55]]),.28,P.pavement,.015);
         standingFanTable=await createStandingFanTable({THREE,parent:landscape,keep,material,pickables});
         ownedCleanups.push(standingFanTable.dispose);
+        equipmentDisplay=await createEquipmentDisplay({THREE,parent:landscape,keep,material,pickables,box,cyl});ownedCleanups.push(equipmentDisplay.dispose);
       } else if(topic.id==='ai') {
         building(root,-.9,-.3,.85,.7,1.65,'office',P.white);building(root,.1,-.65,.75,.8,1.95,'office',P.cream);
         building(root,.85,.3,.85,.72,1.2,'office',P.white);
@@ -545,27 +547,24 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
       labels.forEach(({el,anchor})=>include(mapPoint(anchor),Math.max(42,labels.find(item=>item.el===el)?.width/2||45)+10,112));
       distance*=1.045;scene.fog.near=Math.max(54,distance+18);scene.fog.far=Math.max(110,distance+65);defaultPosition.copy(dir).multiplyScalar(distance).add(fitTarget);camera.position.copy(defaultPosition);controls.maxDistance=Math.max(70,distance*1.6);controls.update();camera.updateMatrixWorld(true);
     }
-    let standingFanFocused=false;
+    let focusedEquipment='warehouse';
     function positionIndustryView() {
-      const [x,z]=nodes.industry;
-      const target=mapPoint(standingFanFocused?new THREE.Vector3(11.6,1.0,1.4):new THREE.Vector3(x+3.5,1.65,z+.3));
-      const direction=new THREE.Vector3(.65,.55,1).normalize();
-      const distance=Math.max(standingFanFocused?5.7:7.5,(standingFanFocused?3.5:4.2)/(2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*camera.aspect));
-      controls.minDistance=4;controls.target.copy(target);
+      const view=EQUIPMENT_VIEWS[focusedEquipment]||EQUIPMENT_VIEWS.warehouse;
+      const target=mapPoint(new THREE.Vector3(...view.target));
+      const direction=new THREE.Vector3(...view.direction).normalize();
+      const distance=Math.max(view.distance,view.span/(2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*camera.aspect));
+      controls.minDistance=2.4;controls.target.copy(target);
       camera.position.copy(direction.multiplyScalar(distance).add(target));controls.update();camera.updateMatrixWorld(true);
     }
-    function focusIndustry() {
-      if(!districtMap.has('industry'))return false;
-      stopTour();industryFocused=true;standingFanFocused=false;container.classList.add('fan-closeup');
+    function focusEquipment(id){
+      if(!EQUIPMENT_VIEWS[id])return false;
+      stopTour();industryFocused=true;focusedEquipment=id;container.classList.add('fan-closeup');
       positionIndustryView();return true;
     }
-    function focusStandingFan(){
-      if(!standingFanTable)return false;
-      stopTour();industryFocused=true;standingFanFocused=true;container.classList.add('fan-closeup');
-      positionIndustryView();return true;
-    }
+    function focusIndustry(){return focusEquipment('warehouse');}
+    function focusStandingFan(){return focusEquipment('standing');}
     function resetGlobalView() {
-      industryFocused=false;standingFanFocused=false;container.classList.remove('fan-closeup');controls.minDistance=20;fit();
+      industryFocused=false;focusedEquipment='warehouse';container.classList.remove('fan-closeup');controls.minDistance=20;fit();
     }
     function measureLabels(){labels.forEach(item=>{item.width=(item.el.offsetWidth||90)+2;item.height=(item.el.offsetHeight||30)+2;});}
     function resize(){const w=Math.max(1,container.clientWidth),h=Math.max(1,container.clientHeight);if(w===width&&h===height)return;width=w;height=h;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);measureLabels();if(industryFocused)positionIndustryView();else fit();}
@@ -588,6 +587,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     landscape.updateMatrixWorld(true);
     const fanBox=new THREE.Box3().setFromObject(amaFansPavilion);
     fanBox.union(new THREE.Box3().setFromObject(standingFanTable.root));
+    fanBox.union(new THREE.Box3().setFromObject(equipmentDisplay.group));
     for(const x of [fanBox.min.x,fanBox.max.x])for(const y of [fanBox.min.y,fanBox.max.y])for(const z of [fanBox.min.z,fanBox.max.z])fanCorners.push(new THREE.Vector3(x,y,z));
     function fanScreenBounds(){
       const points=fanCorners.map(p=>p.clone().project(camera));
@@ -684,7 +684,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     }
     function animate(now){if(disposed)return;raf=requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.05)||0;last=now;if(document.hidden)return;
       const moving=!paused&&!reduced;if(moving)time+=dt;
-      if(moving){catInteractions.update(time,dt);fans.forEach(g=>g.rotation.y=time*(g.userData.angularSpeed??.7));standingFanTable?.update(time);
+      if(moving){catInteractions.update(time,dt);fans.forEach(g=>g.rotation.y=time*(g.userData.angularSpeed??.7));standingFanTable?.update(time);equipmentDisplay?.update(time);
         walkers.forEach(w=>{const phase=(time*.23/w.length+w.offset)%2,u=phase<1?phase:2-phase;locate(w.g,w.path,u);if(phase>1)w.g.rotation.y+=Math.PI;w.limbs.forEach((l,i)=>l.rotation.x=Math.sin(time*7+w.offset*10)*(i%2?1:-1)*.48);});
         vehicles.forEach(o=>{const phase=(time*(o.truck?.52:.72)/o.length+o.offset)%(o.truck?2:1),u=o.truck?(phase<1?phase:2-phase):phase;locate(o.g,o.path,u);if(o.truck&&phase>1)o.g.rotation.y+=Math.PI;});
         boats.forEach(b=>{const p=(time*.016+b.offset)%2,u=p<1?p:2-p;locate(b.g,b.path,u,Math.sin(time*1.7)*.018);if(p>1)b.g.rotation.y+=Math.PI;});
@@ -697,6 +697,6 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     }
     walkers.forEach(w=>locate(w.g,w.path,w.offset%1));vehicles.forEach(o=>locate(o.g,o.path,o.offset));boats.forEach(o=>locate(o.g,o.path,o.offset));birds.forEach((b,i)=>b.g.position.set(-5+i*.7,4+i*.1,-4));
     select(districtMap.has('industry')?'industry':topics[0]?.id);raf=requestAnimationFrame(animate);onReady();
-    return {select,connect,focusIndustry,focusStandingFan,setPaused(value){paused=!!value;if(paused)catInteractions.stopSound();},setNight,setRoutes(value){showRoutes=!!value;routeGroup.visible=showRoutes;seaRoute.visible=showRoutes;},setReducedMotion(value){reduced=!!value;controls.enableDamping=!reduced;if(reduced)catInteractions.stopSound();},resetView(){stopTour();resetGlobalView();},tour(value){touring=!!value;},dispose(){disposed=true;container.classList.remove('fan-closeup');catInteractions.dispose();document.removeEventListener('visibilitychange',onCatVisibility);cancelAnimationFrame(raf);observer.disconnect();controls.removeEventListener('start',stopTour);controls.dispose();renderer.domElement.removeEventListener('pointerdown',onDown);renderer.domElement.removeEventListener('pointerup',onUp);renderer.domElement.removeEventListener('pointermove',onMove);renderer.domElement.removeEventListener('pointercancel',onCancel);labels.forEach(({el})=>el.remove());ownedCleanups.forEach(cleanup=>cleanup());geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());renderer.dispose();renderer.domElement.remove();}};
+    return {select,connect,focusIndustry,focusStandingFan,focusEquipment,setPaused(value){paused=!!value;if(paused)catInteractions.stopSound();},setNight,setRoutes(value){showRoutes=!!value;routeGroup.visible=showRoutes;seaRoute.visible=showRoutes;},setReducedMotion(value){reduced=!!value;controls.enableDamping=!reduced;if(reduced)catInteractions.stopSound();},resetView(){stopTour();resetGlobalView();},tour(value){touring=!!value;},dispose(){disposed=true;container.classList.remove('fan-closeup');catInteractions.dispose();document.removeEventListener('visibilitychange',onCatVisibility);cancelAnimationFrame(raf);observer.disconnect();controls.removeEventListener('start',stopTour);controls.dispose();renderer.domElement.removeEventListener('pointerdown',onDown);renderer.domElement.removeEventListener('pointerup',onUp);renderer.domElement.removeEventListener('pointermove',onMove);renderer.domElement.removeEventListener('pointercancel',onCancel);labels.forEach(({el})=>el.remove());ownedCleanups.forEach(cleanup=>cleanup());geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());renderer.dispose();renderer.domElement.remove();}};
   } catch(error){if(renderer){renderer.dispose();renderer.domElement.remove();}onError(error);throw error;}
 }
