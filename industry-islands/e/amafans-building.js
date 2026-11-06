@@ -1,5 +1,5 @@
 import {createCeilingFan} from './ceiling-fan.js?v=ceiling-cad1';
-import {createSupplyWarehouse} from './supply-warehouse.js?v=ventilation-1final';
+import {createSupplyWarehouse} from './supply-warehouse.js?v=column-wall1';
 
 // A schematic HVLS display pavilion; dimensions are for the miniature only.
 export async function createAmaFansPavilion({THREE,root,box,cyl,mesh,material,keep,pickables,buildingPlots,includeWarehouse=true}) {
@@ -55,9 +55,9 @@ export async function createAmaFansPavilion({THREE,root,box,cyl,mesh,material,ke
     texture.colorSpace=THREE.SRGBColorSpace;badgeMaterial.needsUpdate=true;
   });
   badgeTexture.colorSpace=THREE.SRGBColorSpace;badgeMaterial.map=badgeTexture;
-  const sign=mesh(keep(new THREE.PlaneGeometry(1.85,.925)),badgeMaterial,pavilion,1.295,.92,0);
+  const sign=mesh(keep(new THREE.PlaneGeometry(1.85,.925)),badgeMaterial,pavilion,1.315,2.58,-2.2);
   sign.rotation.y=Math.PI/2;sign.name='amafans-side-brand-sign';sign.castShadow=false;
-  sign.userData={topicId:'industry',role:'brand-sign',externalUrl:'https://www.amafans.com/',externalURL:'https://www.amafans.com/',badgeStyle:'exact-photo-cutout'};
+  sign.userData={topicId:'industry',role:'brand-sign',externalUrl:'https://www.amafans.com/',externalURL:'https://www.amafans.com/',badgeStyle:'exact-photo-cutout',placement:'side-wall-roof-edge',fanMarkAboveRoof:true};
   pickables.push(sign);
   const badges=[sign];
   pavilion.traverse(object=>{object.userData.topicId='industry';if(object.isMesh&&!object.userData.externalUrl)pickables.push(object);});
