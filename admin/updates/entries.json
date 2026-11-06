@@ -2,6 +2,29 @@
   "asOf": "2026-11-06",
   "entries": [
     {
+      "id": "property-platform-20261106",
+      "date": "2026-11-06",
+      "status": "功能驗證",
+      "statusKind": "review",
+      "category": "會員與分組",
+      "title": "房地產需求登錄改為領導團隊媒合模式",
+      "summary": [
+        "會員免密碼登錄，改填姓名與 Email；完成後自動寄送該筆物件的專屬連結。會員無案件瀏覽清單。",
+        "後臺由 Google 個別身分及私人名單管制，僅董顧、九長及授權領導團隊可存取。案件、圖片與內部媒合紀錄不在官網公開。",
+        "沿用官網 GitHub Pages 入口，Google Apps Script、Sheets 與 Drive 處理資料，完整來源由資訊組私有 Git 管理。正式寄信收件與授權成員首次登入尚待實際驗收。"
+      ],
+      "services": [
+        {
+          "label": "會員需求登錄",
+          "href": "/property-platform/"
+        },
+        {
+          "label": "領導團隊後臺",
+          "href": "/admin/property-platform/"
+        }
+      ]
+    },
+    {
       "id": "backend-status-dashboard-line-20261106",
       "date": "2026-11-06",
       "status": "已上線",

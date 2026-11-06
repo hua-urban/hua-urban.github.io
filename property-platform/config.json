@@ -1,4 +1,5 @@
 {
-  "webAppUrl": "",
-  "version": "0.1.0"
+  "publicWebAppUrl": "https://script.google.com/macros/s/AKfycbyjywCayvlLgWcx1bygSe8NKVKHctPmxglkVPGkd6mDriqwx_baTgGseruAF0QwEZrD/exec",
+  "adminWebAppUrl": "https://script.google.com/macros/s/AKfycbxQPTqJnR8rVn5viWlyXP6zbkpiRdbCy63tMds8fRPxWFKz2bGEe264RWPWFjfIhtdX/exec",
+  "version": "0.2.0"
 }

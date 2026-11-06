@@ -12,8 +12,8 @@ const SERVICES = [
   {
     title: "房地產協作平台",
     category: "會員與分組",
-    description: "整合、出售、出租與貸款活化的會內協作平台。第一版待董顧確認，官網入口預留中，尚未開放。",
-    use: [{ status: "入口預留，確認後才啟用" }],
+    description: "會員登錄房源、都更與貸款需求，由董顧與九長協助媒合及引薦。後臺僅限授權 Google 帳戶。",
+    use: [{ label: "領導團隊登入", href: "./property-platform/" }, { label: "會員需求登錄", href: "/property-platform/" }],
     data: [{ status: "案件及圖片採私人儲存，不在公開官網顯示" }],
     maintenance: [{ label: "建置與交接紀錄", href: "./updates/#property-platform-20261105" }, { status: "完整原始碼由資訊組私有 GitHub 專案管理" }]
   },
