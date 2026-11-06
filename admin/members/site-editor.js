@@ -31,7 +31,8 @@
   let saving = false;
   let stale = false;
   let dirty = false;
-  let latestLoaded = { content: [], groups: [], services: [], version: 0, csrf: "" };
+  let latestLoaded = { content: [], groups: [], services: [], version: "", csrf: "" };
+  const isSiteVersion = value => typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
   let baseline = null;
   let pendingSave = null;
   let focusAfterLoad = "";
@@ -190,10 +191,10 @@
       content,
       groups,
       services,
-      version: Number.isSafeInteger(data.version) ? data.version : 0,
+      version: isSiteVersion(data.version) ? data.version : "",
       csrf: typeof data.csrf === "string" ? data.csrf : "",
     };
-    stale = !latestLoaded.csrf;
+    stale = !latestLoaded.csrf || !isSiteVersion(latestLoaded.version);
     pendingSave = null;
     dirty = false;
     baseline = JSON.stringify({ content, groups, services });
@@ -228,7 +229,7 @@
     if (!services.length) servicesSection.appendChild(make("p", "目前沒有可編輯的服務連結。", "empty"));
 
     formArea.replaceChildren(contentSection, groupsSection, servicesSection);
-    const versionText = latestLoaded.version ? "網站內容版本 " + latestLoaded.version + "。" : "網站內容已載入。";
+    const versionText = "網站內容已載入。";
     setEditorStatus(stale ? versionText + " 尚未取得儲存驗證資訊，請重新載入。" : versionText, stale ? "error" : "");
     syncEditorButtons();
   }
@@ -321,16 +322,16 @@
     setEditorStatus("正在儲存網站內容…", "");
     try {
       const result = await api.request("siteSave", pendingSave);
-      if (result && Number.isSafeInteger(result.version)) latestLoaded.version = result.version;
+      if (result && isSiteVersion(result.version)) latestLoaded.version = result.version;
       if (result && typeof result.csrf === "string") latestLoaded.csrf = result.csrf;
       pendingSave = null;
       dirty = false;
       baseline = JSON.stringify(readPayload());
-      if (!result || !Number.isSafeInteger(result.version) || !latestLoaded.csrf) {
+      if (!result || !isSiteVersion(result.version) || !latestLoaded.csrf) {
         stale = true;
         setEditorStatus("網站內容已儲存；請重新載入以確認最新版本。", "success");
       } else {
-        setEditorStatus("網站內容已儲存，版本更新至 " + latestLoaded.version + "。", "success");
+        setEditorStatus("網站內容已儲存。", "success");
       }
     } catch (error) {
       if (isConflict(error)) {
