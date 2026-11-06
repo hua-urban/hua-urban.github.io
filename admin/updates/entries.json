@@ -2,6 +2,28 @@
   "asOf": "2026-11-06",
   "entries": [
     {
+      "id": "runtime-backend-reference-audit-20261106",
+      "date": "2026-11-06",
+      "status": "部分完成，待授權",
+      "statusKind": "pending",
+      "category": "資訊組維護",
+      "title": "檢查未入庫 Apps Script 與雲端後端設定",
+      "summary": [
+        "華都更帳號可讀取的 6 個已知 Apps Script 專案：已比對編輯器程式與現有部署版本，未發現舊培訓部署識別碼。此結果不涵蓋尚未發現的專案或執行期 PropertiesService。",
+        "追綠光 Cloud Run 正式服務的 4 個環境變數未發現舊網址，未使用 Secret Manager 參照。此次帳號可列出的雲端專案只有 1 個。",
+        "Secret Manager 與 Cloud Scheduler API 在該專案未啟用，未擅自啟用；不能據此認定其他專案沒有 Secrets 或排程。",
+        "Vercel htl-api 環境設定讀取回傳 HTTP 403，待有權帳號恢復授權後補查。GitHub Secrets 不提供既有值讀回，現有連接器也不支援 Secrets／環境變數管理；尚不能完成值層級核對。"
+      ],
+      "services": [
+        {
+          "label": "資訊組管理中心",
+          "href": "/admin/"
+        }
+      ],
+      "sources": [],
+      "sourceNote": "只記錄查核範圍與結果，不公開環境變數、憑證或 Secret 值。本次沒有找到可修正的舊網址；未變更雲端設定、授權範圍或資料。既有 Apps Script 專案名稱與服務範圍以實際讀取權限為限。"
+    },
+    {
       "id": "training-backend-reference-audit-20261106",
       "date": "2026-11-06",
       "status": "已核對",
