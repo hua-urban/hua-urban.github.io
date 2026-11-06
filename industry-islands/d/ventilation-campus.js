@@ -1,6 +1,6 @@
-import {createAmaFansPavilion} from '../e/amafans-building.js?v=full-campus1';
-import {createStandingFanTable} from '../e/standing-fan-table.js?v=full-campus1';
-import {createEquipmentDisplay,EQUIPMENT_VIEWS} from '../e/industrial-equipment.js?v=full-campus1';
+import {createAmaFansPavilion} from '../e/amafans-building.js?v=full-campus2';
+import {createStandingFanTable} from '../e/standing-fan-table.js?v=full-campus2';
+import {createEquipmentDisplay,EQUIPMENT_VIEWS} from '../e/industrial-equipment.js?v=full-campus2';
 
 // Shared equipment stays in E's asset coordinate frame; only this campus is translated.
 export const CAMPUS_CENTER=[-11.1,.9];
@@ -12,7 +12,7 @@ export async function createVentilationCampus({THREE,parent,keep,material,pickab
   const pad=material('#cfc3a9'),brick=material('#b46f54'),wood=material('#ae8960');
   box(group,9.1,.085,.8,7.1,.04,6.8,pad).name='d-ventilation-demonstration-base';
   const pavilionRoot=new THREE.Group();pavilionRoot.position.set(5,0,1.1);group.add(pavilionRoot);
-  const pavilion=await createAmaFansPavilion({THREE,root:pavilionRoot,keep,material,pickables,box,cyl,mesh,buildingPlots:[],includeWarehouse:true});
+  const pavilion=await createAmaFansPavilion({THREE,root:pavilionRoot,keep,material,pickables,box,cyl,mesh,buildingPlots:[],includeWarehouse:false});
   const standing=await createStandingFanTable({THREE,parent:group,keep,material,pickables});
   const equipment=await createEquipmentDisplay({THREE,parent:group,keep,material,pickables,box,cyl});
   // Context fixtures share immutable CAD buffers/materials with the complete campus.
