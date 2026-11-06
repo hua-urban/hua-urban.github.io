@@ -19,7 +19,7 @@ export async function audit({root,registry,live=true,github=false,token,fetchJso
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  const args=process.argv.slice(2),value=(name,fallback)=>{let i=args.indexOf(name);return i<0?fallback:args[i+1];};
- const registry=JSON.parse(await fs.readFile(value('--registry',path.join(here,'backend-contracts.json')),'utf8'));
+ const registry=args.includes('--registry-url')?await readJson(value('--registry-url')):JSON.parse(await fs.readFile(value('--registry',path.join(here,'backend-contracts.json')),'utf8'));
  const result=await audit({root:args.includes('--github-all')?null:value('--root',process.cwd()),registry,live:!args.includes('--source-only'),github:args.includes('--github-all'),token:process.env.BACKEND_AUDIT_TOKEN});
  await fs.writeFile(value('--report','backend-audit-report.json'),JSON.stringify(result,null,2)+'\n',{mode:0o600});
  console.log(JSON.stringify({files:result.files,repositories:result.repositories.length,checks:result.checks,violations:result.violations,errors:result.errors},null,2));
