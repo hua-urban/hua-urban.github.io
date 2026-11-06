@@ -2,10 +2,37 @@
   "asOf": "2026-11-06",
   "entries": [
     {
+      "id": "authorized-runtime-audit-20261106",
+      "date": "2026-11-06",
+      "status": "已核對",
+      "statusKind": "live",
+      "category": "資訊組維護",
+      "title": "完成授權後的後端設定補查",
+      "summary": [
+        "GitHub 與 Vercel CLI 已使用華都更身分恢復授權。華都更 Apps Script 首頁列出的 29 個專案均已補查：編輯器程式、18 個現有部署版本及專案設定中的指令碼屬性皆未發現舊培訓網址。",
+        "GitHub 19 個專案的儲存庫及環境設定清單均查詢完成；3 個變數未發現舊網址。盤點到9個Secrets，並核對相關兩個專案的14份排程定義，未發現舊培訓網址引用。",
+        "Vercel htl-api 的4項環境設定已取得查詢結果；可讀取的設定未發現舊網址，3項敏感設定由平台隱藏原值。先前追綠光 Cloud Run 的4個環境變數亦未發現舊網址。",
+        "本次沒有找到需替換的舊網址，未修改服務程式或盲目重設 Secrets；先前每日名冊對帳的舊端點已修正。Google API暫時流量限制已重試完成，沒有留下專案程式查核缺口。"
+      ],
+      "services": [
+        {
+          "label": "培訓進度回報",
+          "href": "/bni-training/"
+        }
+      ],
+      "sources": [
+        {
+          "label": "既有對帳端點修正",
+          "href": "https://github.com/hua-urban/bni-pt-groups/commit/7c139c9adaba0d3ae83b8e5535d567c3b55802c1"
+        }
+      ],
+      "sourceNote": "範圍為華都更帳號此次可存取的專案與設定。GitHub Secrets、Vercel敏感環境值及Apps Script使用者／文件屬性無法全面讀回，故不宣稱所有隱藏值已逐字驗證；沒有為核對而重設憑證、啟用額外API、觸發排程或發送通知。"
+    },
+    {
       "id": "runtime-backend-reference-audit-20261106",
       "date": "2026-11-06",
-      "status": "部分完成，待授權",
-      "statusKind": "pending",
+      "status": "已補查",
+      "statusKind": "updated",
       "category": "資訊組維護",
       "title": "檢查未入庫 Apps Script 與雲端後端設定",
       "summary": [
@@ -21,7 +48,8 @@
         }
       ],
       "sources": [],
-      "sourceNote": "只記錄查核範圍與結果，不公開環境變數、憑證或 Secret 值。本次沒有找到可修正的舊網址；未變更雲端設定、授權範圍或資料。既有 Apps Script 專案名稱與服務範圍以實際讀取權限為限。"
+      "sourceNote": "只記錄查核範圍與結果，不公開環境變數、憑證或 Secret 值。本次沒有找到可修正的舊網址；未變更雲端設定、授權範圍或資料。既有 Apps Script 專案名稱與服務範圍以實際讀取權限為限。",
+      "statusDetail": "GitHub 與 Vercel 授權已恢復；完整補查結果及 Secrets 原值限制見最新日誌。"
     },
     {
       "id": "training-backend-reference-audit-20261106",
