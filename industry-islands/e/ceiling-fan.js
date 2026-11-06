@@ -22,9 +22,9 @@ export async function createCeilingFan({THREE,parent,keep,material,pickables,dia
     if(!part.rotor&&['downrod','support'].includes(part.role)){
       let low=Infinity,high=-Infinity;for(let i=1;i<positions.length;i+=3){low=Math.min(low,positions[i]);high=Math.max(high,positions[i]);}
       const lowerJoint=106.5440673828125,upperJoint=166.95123291015625;
-      const rigidLower=part.role==='support'&&high<upperJoint;
-      for(let i=1;i<positions.length;i+=3){const y=positions[i];positions[i]=y-extension*(rigidLower?1:THREE.MathUtils.clamp((upperJoint-y)/(upperJoint-lowerJoint),0,1));}
-      reshaped=low<upperJoint&&!rigidLower;
+      const support=part.role==='support';
+      for(let i=1;i<positions.length;i+=3){const y=positions[i];positions[i]=y-extension*(support?(y<upperJoint?1:0):THREE.MathUtils.clamp((upperJoint-y)/(upperJoint-lowerJoint),0,1));}
+      reshaped=!support&&low<upperJoint&&high>lowerJoint;
     }
     const geometry=keep(new THREE.BufferGeometry());
     geometry.setAttribute('position',new THREE.BufferAttribute(positions,3));

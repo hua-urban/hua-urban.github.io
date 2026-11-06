@@ -1,6 +1,6 @@
-import {createAmaFansPavilion} from '../e/amafans-building.js?v=ceiling-drop1';
-import {createStandingFanTable} from '../e/standing-fan-table.js?v=ceiling-drop1';
-import {createEquipmentDisplay,EQUIPMENT_VIEWS} from '../e/industrial-equipment.js?v=ceiling-drop1';
+import {createAmaFansPavilion} from '../e/amafans-building.js?v=ceiling-drop2';
+import {createStandingFanTable} from '../e/standing-fan-table.js?v=ceiling-drop2';
+import {createEquipmentDisplay,EQUIPMENT_VIEWS} from '../e/industrial-equipment.js?v=ceiling-drop2';
 
 // Shared equipment stays in E's asset coordinate frame; only this campus is translated.
 export const CAMPUS_CENTER=[-11.1,.9];
