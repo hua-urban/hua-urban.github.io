@@ -1,0 +1,112 @@
+{
+  "version": 1,
+  "updatedAt": "2026-11-06T07:54:13.884Z",
+  "audit": null,
+  "services": [
+    {
+      "name": "AI課程問卷",
+      "status": "success",
+      "completedAt": "2026-11-06T07:40:23Z",
+      "url": "https://github.com/hua-urban/bni-ai-survey/actions/runs/42182381574"
+    },
+    {
+      "name": "晨光抽獎",
+      "status": "success",
+      "completedAt": "2026-11-06T07:40:34Z",
+      "url": "https://github.com/hua-urban/bni-lottery/actions/runs/42182399872"
+    },
+    {
+      "name": "總簡報與排程",
+      "status": "success",
+      "completedAt": "2026-11-06T07:53:54Z",
+      "url": "https://github.com/hua-urban/bni-merger/actions/runs/42183869650"
+    },
+    {
+      "name": "PowerTeam接龍",
+      "status": "success",
+      "completedAt": "2026-11-06T07:40:23Z",
+      "url": "https://github.com/hua-urban/bni-powerteam/actions/runs/42182388578"
+    },
+    {
+      "name": "產業鏈分組",
+      "status": "success",
+      "completedAt": "2026-11-06T07:40:28Z",
+      "url": "https://github.com/hua-urban/bni-pt-groups/actions/runs/42182390347"
+    },
+    {
+      "name": "培訓進度回報",
+      "status": "success",
+      "completedAt": "2026-11-06T07:40:30Z",
+      "url": "https://github.com/hua-urban/bni-training/actions/runs/42182401116"
+    },
+    {
+      "name": "新人保溫箱",
+      "status": "success",
+      "completedAt": "2026-11-06T07:40:33Z",
+      "url": "https://github.com/hua-urban/bni-warmbox/actions/runs/42182396529"
+    },
+    {
+      "name": "E組九宮格",
+      "status": "success",
+      "completedAt": "2026-11-06T07:40:33Z",
+      "url": "https://github.com/hua-urban/e-team-grid/actions/runs/42182404398"
+    },
+    {
+      "name": "追綠光",
+      "status": "success",
+      "completedAt": "2026-11-06T07:42:08Z",
+      "url": "https://github.com/hua-urban/greenlight-connect-test/actions/runs/42182565148"
+    },
+    {
+      "name": "紅綠燈上傳後端",
+      "status": "success",
+      "completedAt": "2026-11-06T07:44:24Z",
+      "url": "https://github.com/hua-urban/htl-api/actions/runs/42182825335"
+    },
+    {
+      "name": "華都更官網",
+      "status": "success",
+      "completedAt": "2026-11-06T07:53:23Z",
+      "url": "https://github.com/hua-urban/hua-urban.github.io/actions/runs/42183808282"
+    },
+    {
+      "name": "來賓報名",
+      "status": "success",
+      "completedAt": "2026-11-06T07:40:42Z",
+      "url": "https://github.com/hua-urban/huadu-guest/actions/runs/42182419765"
+    },
+    {
+      "name": "房地產協作平台",
+      "status": "success",
+      "completedAt": "2026-11-06T07:40:38Z",
+      "url": "https://github.com/hua-urban/huadu-property-platform/actions/runs/42182414933"
+    },
+    {
+      "name": "房地產協作審閱版",
+      "status": "success",
+      "completedAt": "2026-11-06T07:40:42Z",
+      "url": "https://github.com/hua-urban/huadu-property-review/actions/runs/42182420215"
+    },
+    {
+      "name": "新人茶敘",
+      "status": "success",
+      "completedAt": "2026-11-06T07:40:43Z",
+      "url": "https://github.com/hua-urban/huadu-tea/actions/runs/42182422178"
+    },
+    {
+      "name": "新人茶敘後端",
+      "status": "success",
+      "completedAt": "2026-11-06T07:40:49Z",
+      "url": "https://github.com/hua-urban/huadu-tea-backend/actions/runs/42182430653"
+    },
+    {
+      "name": "產業群島",
+      "status": "success",
+      "completedAt": "2026-11-06T07:40:44Z",
+      "url": "https://github.com/hua-urban/industry-archipelago-lab/actions/runs/42182428358"
+    }
+  ],
+  "notification": {
+    "status": "idle"
+  }
+}
