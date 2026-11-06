@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-06T07:54:32.628Z",
+  "updatedAt": "2026-11-06T07:56:09.494Z",
   "audit": {
     "checkedAt": "2026-11-06T07:53:51.679Z",
     "status": "success",
@@ -31,8 +31,8 @@
     {
       "name": "總簡報與排程",
       "status": "success",
-      "completedAt": "2026-11-06T07:53:54Z",
-      "url": "https://github.com/hua-urban/bni-merger/actions/runs/42183869650"
+      "completedAt": "2026-11-06T07:55:46Z",
+      "url": "https://github.com/hua-urban/bni-merger/actions/runs/42184068822"
     },
     {
       "name": "PowerTeam接龍",
@@ -79,8 +79,8 @@
     {
       "name": "華都更官網",
       "status": "success",
-      "completedAt": "2026-11-06T07:53:23Z",
-      "url": "https://github.com/hua-urban/hua-urban.github.io/actions/runs/42183808282"
+      "completedAt": "2026-11-06T07:55:44Z",
+      "url": "https://github.com/hua-urban/hua-urban.github.io/actions/runs/42184066110"
     },
     {
       "name": "來賓報名",
