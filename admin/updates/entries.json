@@ -1,6 +1,40 @@
 {
-  "asOf": "2026-11-06",
+  "asOf": "2026-11-07",
   "entries": [
+    {
+      "id": "palms-weekly-update-20261107",
+      "date": "2026-11-07",
+      "status": "已部署",
+      "statusKind": "live",
+      "category": "紅綠燈與追綠光",
+      "title": "PALMS 更新至 11/04，修正個別週期證據上傳誤判",
+      "summary": [
+        "BNI Connect 原先11/04仍為草稿；11/07重查已完成提交，且官方PALMS出席報告已包含11/04。只在兩項證據皆確認後更新，不能用查詢截止日期推定已提交。",
+        "從官方重新下載共同期間2026/05/05–11/04，以及6/1、7/1、9/1起算的獨立報告；重新取得會員會期清冊，以中央名冊及既有別名唯一配對54位現任會員，不以比例拆分累計數字。",
+        "原因：上傳API的通用四層深度限制拒絕合法memberPeriodEvidence.reports。只為指定路徑加入嚴格結構驗證，核對欄位、日期、人數、重複起日與成績SHA-256；其他結構深度及原有上傳檢查保持不變。",
+        "後端已以華都更帳號發布至Vercel Production；版本鎖API成功更新。官方歷史成績、上一期與退會標記保留。維持不限制上傳次數、無人機驗證，會員編號及跨組編輯規則未更動。",
+        "驗證：個別週期計分19項測試通過；後端30項測試通過，含新增合法核對紀錄、後續回傳及異常資料拒絕測試。正式API回傳200，倉庫回讀54位與payload完全一致。",
+        "後續更新：先確認官方完成狀態與出席紀錄，再取得所有必要起算報告；發布後核對官網實際截止日期、會員數及追綠光來源，版本衝突則重新讀取，保留既有資料。"
+      ],
+      "services": [
+        {
+          "label": "會員紅綠燈",
+          "href": "/traffic-light/?v=est"
+        },
+        {
+          "label": "追綠光",
+          "href": "https://hua-greenlight-umydisxveq-de.a.run.app/"
+        },
+        {
+          "label": "後端修正",
+          "href": "https://github.com/hua-urban/htl-api/commit/ab9ee1d"
+        },
+        {
+          "label": "PALMS資料提交",
+          "href": "https://github.com/hua-urban/hua-urban.github.io/commit/917ca5f"
+        }
+      ]
+    },
     {
       "id": "guest-edm-original-export-20261106",
       "date": "2026-11-06",
