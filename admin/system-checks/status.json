@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-06T21:07:55.203Z",
+  "updatedAt": "2026-11-07T07:00:11.526Z",
   "audit": {
     "checkedAt": "2026-11-06T07:53:51.679Z",
     "status": "success",
@@ -73,14 +73,14 @@
     {
       "name": "紅綠燈上傳後端",
       "status": "success",
-      "completedAt": "2026-11-06T07:44:24Z",
-      "url": "https://github.com/hua-urban/htl-api/actions/runs/42182825335"
+      "completedAt": "2026-11-07T04:13:53Z",
+      "url": "https://github.com/hua-urban/htl-api/actions/runs/42337497702"
     },
     {
       "name": "華都更官網",
       "status": "success",
-      "completedAt": "2026-11-06T19:06:51Z",
-      "url": "https://github.com/hua-urban/hua-urban.github.io/actions/runs/42276726225"
+      "completedAt": "2026-11-07T05:16:59Z",
+      "url": "https://github.com/hua-urban/hua-urban.github.io/actions/runs/42342037518"
     },
     {
       "name": "來賓報名",
