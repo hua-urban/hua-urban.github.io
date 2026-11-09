@@ -1,8 +1,8 @@
 {
-  "checkedAt": "2026-11-09T13:24:22.469404+08:00",
+  "checkedAt": "2026-11-10T06:05:24.419847+08:00",
   "targetDate": "2026-11-11",
   "source": "Canva REST API original PDF",
-  "scannedPages": 59,
+  "scannedPages": 58,
   "state": "no_scheduled_talk",
   "pages": [],
   "message": "沒有本場專講卡，保留現有圖片；正常略過"
