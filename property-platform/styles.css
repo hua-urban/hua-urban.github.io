@@ -1629,3 +1629,42 @@ td strong {
 .intake-needs dt { color: var(--wine, #762b3a); font-weight: 700; margin-bottom: 4px; }
 .intake-needs dd { margin: 0; line-height: 1.7; }
 @media (max-width: 600px) { .intake-needs { grid-template-columns: 1fr; gap: 16px; } .intake-introduction h2 { font-size: 20px; } }
+
+/* A visible, non-dismissable status while the existing submission is in flight. */
+.submission-backdrop { align-items: center; justify-content: center; padding: 20px; }
+.submission-dialog { width: min(460px, 100%); height: auto; max-height: calc(100dvh - 40px); border-radius: 24px; text-align: center; }
+.submission-dialog .modal-head { justify-content: center; padding: 22px 16px; }
+.submission-dialog .modal-body { padding: 26px; }
+.submission-stage { font-size: 20px; font-weight: 700; line-height: 1.6; margin: 12px 0; }
+.submission-guidance { color: var(--muted, #62646a); font-size: 15px; line-height: 1.9; }
+.dugeng-angel-scene{width:260px;max-width:100%;height:auto;display:block;margin:-8px auto -6px;overflow:visible}
+.dugeng-angel-wake{animation:dugeng-wake 3.2s ease-in-out infinite;transform-origin:130px 120px}
+.dugeng-angel-halo{animation:dugeng-halo 3.2s ease-in-out infinite;transform-origin:130px 37px}
+.dugeng-wing-left{transform-origin:112px 104px;animation:dugeng-flap-left 3.2s ease-in-out infinite}
+.dugeng-wing-right{transform-origin:148px 104px;animation:dugeng-flap-right 3.2s ease-in-out infinite}
+.dugeng-arm-left{transform-origin:115px 102px;animation:dugeng-stretch-left 3.2s ease-in-out infinite}
+.dugeng-arm-right{transform-origin:145px 102px;animation:dugeng-stretch-right 3.2s ease-in-out infinite}
+.dugeng-angel-open{animation:dugeng-eyes 3.2s steps(1) infinite}
+.dugeng-angel-sleep{animation:dugeng-sleepy 3.2s steps(1) infinite}
+.dugeng-sleep-z{animation:dugeng-dream 3.2s ease-in-out infinite}
+.dugeng-angel-spark{animation:dugeng-sparkle 3.2s ease-in-out infinite}
+.dugeng-angel-spark.second{animation-delay:.35s}
+@keyframes dugeng-wake{0%,18%,100%{transform:translateY(12px) rotate(-4deg)}40%,78%{transform:translateY(-5px) rotate(0)}88%{transform:translateY(0)}}
+@keyframes dugeng-halo{0%,18%,100%{transform:rotate(-10deg)}45%,80%{transform:translateY(-3px) rotate(5deg)}}
+@keyframes dugeng-flap-left{0%,25%,100%{transform:rotate(8deg)}45%,65%{transform:rotate(-18deg)}55%,75%{transform:rotate(0)}}
+@keyframes dugeng-flap-right{0%,25%,100%{transform:rotate(-8deg)}45%,65%{transform:rotate(18deg)}55%,75%{transform:rotate(0)}}
+@keyframes dugeng-stretch-left{0%,20%,100%{transform:rotate(-25deg)}40%,75%{transform:rotate(65deg)}}
+@keyframes dugeng-stretch-right{0%,20%,100%{transform:rotate(25deg)}40%,75%{transform:rotate(-65deg)}}
+@keyframes dugeng-eyes{0%,100%{opacity:0}40%{opacity:1}85%{opacity:0}}
+@keyframes dugeng-sleepy{0%,100%{opacity:1}40%{opacity:0}85%{opacity:1}}
+@keyframes dugeng-dream{0%{opacity:0;transform:translateY(4px)}12%{opacity:1}40%,100%{opacity:0;transform:translateY(-12px)}}
+@keyframes dugeng-sparkle{0%,24%,90%,100%{opacity:.2;transform:translateY(3px)}45%,70%{opacity:1;transform:translateY(-3px)}}
+@media(prefers-reduced-motion:reduce){.dugeng-angel-scene *{animation:none!important}.dugeng-angel-open{opacity:1}.dugeng-angel-sleep,.dugeng-sleep-z{opacity:0}}
+.submission-working { display: flex; justify-content: center; gap: 7px; margin: 22px 0 10px; }
+.submission-working i { width: 7px; height: 7px; background: var(--wine, #762b3a); border-radius: 50%; animation: angel-pulse 1.4s ease-in-out infinite; }
+.submission-working i:nth-child(2) { animation-delay: .2s; }
+.submission-working i:nth-child(3) { animation-delay: .4s; }
+#submission-slow { line-height: 1.8; }
+@keyframes angel-pulse { 50% { opacity: .35; transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .submission-working i { animation: none; } }
+@media (max-width: 600px) { .submission-dialog .modal-body { padding: 22px 18px; } .submission-stage { font-size: 18px; } }

@@ -475,14 +475,57 @@
       await persistCase(p, $("#case-form"));
     };
   }
+  function showSubmissionAngel() {
+    openModal("都更小天使・資料送出中", `<svg class="dugeng-angel-scene" viewBox="0 0 260 170" aria-hidden="true">
+
+<ellipse cx="130" cy="151" rx="83" ry="10" fill="#eadce0" opacity=".6"/>
+<g class="dugeng-angel-spark" fill="#f0bf4f"><path d="m55 57 3-9 3 9 9 3-9 3-3 9-3-9-9-3Z"/><circle cx="203" cy="85" r="3"/></g>
+<g class="dugeng-angel-spark second" fill="#ac6d80"><path d="m204 41 2-7 3 7 7 3-7 2-3 7-2-7-7-2Z"/><circle cx="58" cy="102" r="3"/></g>
+<rect x="73" y="118" width="114" height="28" rx="14" fill="#fffaf0" stroke="#d9c3ca" stroke-width="2"/>
+<g class="dugeng-angel-wake">
+<g class="dugeng-wing-left" fill="#fffdf4" stroke="#cbb3ba" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M113 112C82 112 65 89 72 78c5-5 14 5 21 9-7-12-3-21 3-18 8 4 13 23 17 43Z"/><path d="M85 94q12 12 24 12" fill="none"/></g>
+<g class="dugeng-wing-right" fill="#fffdf4" stroke="#cbb3ba" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M147 112c31 0 48-23 41-34-5-5-14 5-21 9 7-12 3-21-3-18-8 4-13 23-17 43Z"/><path d="M175 94q-12 12-24 12" fill="none"/></g>
+<path d="M115 98q15-8 30 0l14 38q-29 15-58 0Z" fill="#ad5e70" stroke="#762b3a" stroke-width="2.5"/>
+<path d="m125 107 5 6 5-6" fill="none" stroke="#fffdf4" stroke-width="3" stroke-linecap="round"/>
+<g class="dugeng-arm-left"><path d="m115 104-14 14" fill="none" stroke="#762b3a" stroke-width="15" stroke-linecap="round"/><path d="m115 104-14 14" fill="none" stroke="#ad5e70" stroke-width="10" stroke-linecap="round"/><circle cx="99" cy="119" r="6" fill="#ffdabd"/></g>
+<g class="dugeng-arm-right"><path d="m145 104 14 14" fill="none" stroke="#762b3a" stroke-width="15" stroke-linecap="round"/><path d="m145 104 14 14" fill="none" stroke="#ad5e70" stroke-width="10" stroke-linecap="round"/><circle cx="161" cy="119" r="6" fill="#ffdabd"/></g>
+<ellipse cx="130" cy="72" rx="28" ry="29" fill="#ffdfc5" stroke="#b67b54" stroke-width="2"/>
+<path d="M102 68q-4-25 20-27 29-6 36 24-12-1-19-14-6 14-17 11l4-9q-10 13-24 15Z" fill="#946644"/>
+<path d="M129 43q-7-13 3-16 7-2 6 5" fill="none" stroke="#946644" stroke-width="4" stroke-linecap="round"/>
+<ellipse cx="113" cy="81" rx="5" ry="3" fill="#efa391"/><ellipse cx="147" cy="81" rx="5" ry="3" fill="#efa391"/>
+<g class="dugeng-angel-open" fill="#41362b"><ellipse cx="120" cy="73" rx="2.5" ry="3.8"/><ellipse cx="140" cy="73" rx="2.5" ry="3.8"/></g>
+<g class="dugeng-angel-sleep" fill="none" stroke="#654737" stroke-width="2.5" stroke-linecap="round"><path d="M116 74q4 4 8 0M136 74q4 4 8 0"/></g>
+<path d="M125 84q5 7 10 0" fill="none" stroke="#9b5d4b" stroke-width="2" stroke-linecap="round"/>
+<g class="dugeng-angel-halo"><ellipse cx="130" cy="30" rx="23" ry="6" fill="none" stroke="#f0bf4f" stroke-width="5"/><ellipse cx="130" cy="29" rx="23" ry="6" fill="none" stroke="#ffe59a" stroke-width="2"/></g>
+</g>
+<path d="M64 137q34-13 66 0 32-13 66 0l-2 15H66Z" fill="#eadce0" stroke="#b47c8b" stroke-width="2"/>
+<path d="m119 141 3-5 3 5 6 1-5 4 1 5-5-3-5 3 1-5-5-4Z" fill="#fffaf0"/>
+<g class="dugeng-sleep-z" fill="#805b65" font-family="system-ui,sans-serif" font-weight="700"><text x="175" y="55" font-size="17">z</text><text x="188" y="40" font-size="12">z</text></g>
+<text x="145" y="149" text-anchor="middle" fill="#762b3a" font-size="12" font-family="system-ui,sans-serif" font-weight="700">都更</text></svg><p id="submission-stage" class="submission-stage" role="status" aria-live="polite" aria-atomic="true">正在送出您的需求…</p><p class="submission-guidance">都更小天使正在幫您整理資料，請稍候。<br>請保留此頁，不需重複點擊送出。</p><div class="submission-working" aria-hidden="true"><i></i><i></i><i></i></div><p id="submission-slow" class="hint" hidden>處理時間較長，圖片較多時可能需要多等一下。目前仍在處理中，請勿重新整理或重複送出。</p>`, { submission: true });
+    $("#app").inert = true;
+  }
   async function persistCase(payload, form) {
+    if (state.busy) return;
     state.busy = true;
     const button = $("#submit-case");
     button.disabled = true;
     $("#form-error").hidden = true;
     const progress = $("#form-progress");
+    const originalButtonText = button.textContent;
+    button.textContent = "送出中，請稍候…";
+    showSubmissionAngel();
+    const updateProgress = (text) => {
+      progress.textContent = text;
+      const stage = $("#submission-stage");
+      if (stage) stage.textContent = text;
+    };
+    const slowTimer = setTimeout(() => {
+      const slow = $("#submission-slow");
+      if (slow) slow.hidden = false;
+    }, 15000);
     try {
       if (state.editing) {
+        updateProgress("正在儲存修改內容…");
         await api("editCase", {
           id: state.editing.id,
           changes: payload,
@@ -494,7 +537,7 @@
         return;
       }
       if (!state.submission) {
-        progress.textContent = "正在建立案件…";
+        updateProgress("正在建立您的需求資料…");
         const data = await api("createCase", {
           ...payload,
           idempotencyKey:
@@ -512,7 +555,7 @@
       for (let i = 0; i < state.files.length; i++) {
         if (state.submission.uploaded.has(i)) continue;
         const f = state.files[i];
-        progress.textContent = `正在上傳第 ${i + 1}／${state.files.length} 張圖片，請保留此頁…`;
+        updateProgress(`正在上傳第 ${i + 1}／${state.files.length} 張圖片…`);
         const base64 = await readBase64(f);
         const thumbnailBase64 = await makeThumbnail(f);
         await api("uploadImage", {
@@ -527,7 +570,7 @@
         });
         state.submission.uploaded.add(i);
       }
-      progress.textContent = "正在送出需求…";
+      updateProgress("正在完成登錄並處理確認信，請稍候…");
       const result = await api("finalizeCase", {
         id: state.submission.id,
         receiptToken: state.submission.receiptToken,
@@ -561,10 +604,19 @@
           ? " 已成功上傳的圖片會保留，請按「繼續上傳與送審」重試。"
           : "");
       $("#form-error").hidden = false;
-      if (state.submission) button.textContent = "繼續上傳與送審";
+      button.textContent = state.submission ? "繼續上傳與送審" : originalButtonText;
+      progress.textContent = "尚未確認完成，請查看上方訊息後重試。";
     } finally {
+      clearTimeout(slowTimer);
       state.busy = false;
-      if (button.isConnected) button.disabled = false;
+      $("#app").inert = false;
+      closeModal();
+      if (button.isConnected) {
+        button.disabled = false;
+        if (button.textContent === "送出中，請稍候…") button.textContent = originalButtonText;
+        const error = $("#form-error");
+        if (error && !error.hidden) { error.tabIndex = -1; error.focus(); }
+      }
     }
   }
   async function makeThumbnail(file) {
@@ -639,14 +691,15 @@
     }
     window.scrollTo(0, 0);
   }
-  function openModal(title, body) {
+  function openModal(title, body, { submission = false } = {}) {
     lastFocus = document.activeElement;
     $("#modal-root").innerHTML =
-      `<div class="modal-backdrop"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1"><header class="modal-head"><h2 id="dialog-title">${title}</h2><button class="close-btn" aria-label="關閉視窗" data-action="close-modal">×</button></header><div class="modal-body">${body}</div></section></div>`;
+      `<div class="modal-backdrop${submission ? " submission-backdrop" : ""}"><section class="modal${submission ? " submission-dialog" : ""}" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1"><header class="modal-head"><h2 id="dialog-title">${title}</h2>${submission ? "" : '<button class="close-btn" aria-label="關閉視窗" data-action="close-modal">×</button>'}</header><div class="modal-body">${body}</div></section></div>`;
     document.body.style.overflow = "hidden";
     $(".modal").focus();
   }
   function closeModal() {
+    if (state.busy && $(".submission-dialog")) return;
     if (!$("#modal-root").innerHTML) return;
     $("#modal-root").innerHTML = "";
     document.body.style.overflow = "";
@@ -1092,7 +1145,7 @@
       const els = $$("button,input,select,textarea,a[href]", modal).filter(
         (x) => !x.disabled && !x.hidden,
       );
-      if (!els.length) return;
+      if (!els.length) { e.preventDefault(); modal.focus(); return; }
       if (
         e.shiftKey &&
         (document.activeElement === els[0] || document.activeElement === modal)
