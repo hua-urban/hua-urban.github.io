@@ -13,9 +13,9 @@ const SERVICES = [
     title: "房地產協作平台",
     category: "會員與分組",
     description: "填報房屋或土地的整合、出租、出售與貸款活化需求；已填報的案件、圖片與媒合紀錄由授權人員登入管理。",
-    use: [{ label: "會員需求填報", href: "https://hua-urban.com/property-platform/", showUrl: true }, { status: "填報完成頁與確認信會提供本次物件的專屬查看連結。" }],
-    data: [{ label: "管理已填報案件、圖片與媒合紀錄", href: "https://hua-urban.com/admin/property-platform/", showUrl: true }, { status: "使用授權姓名＋Email 登入；案件資料不對一般會員或外部公開。" }],
-    maintenance: [{ label: "建置與交接紀錄", href: "https://hua-urban.com/admin/updates/#property-platform-20261105", showUrl: true }, { label: "平台完整原始碼（私有 GitHub）", href: "https://github.com/hua-urban/huadu-property-platform", showUrl: true }, { status: "私有原始碼需既有 GitHub 權限。" }]
+    use: [{ label: "會員需求填報", href: "https://hua-urban.com/property-platform/" }, { status: "填報完成頁與確認信會提供本次物件的專屬查看連結。" }],
+    data: [{ label: "管理已填報案件、圖片與媒合紀錄", href: "https://hua-urban.com/admin/property-platform/" }, { status: "使用授權姓名＋Email 登入；案件資料不對一般會員或外部公開。" }],
+    maintenance: [{ label: "建置與交接紀錄", href: "https://hua-urban.com/admin/updates/#property-platform-20261105" }, { label: "平台完整原始碼（私有 GitHub）", href: "https://github.com/hua-urban/huadu-property-platform" }, { status: "私有原始碼需既有 GitHub 權限。" }]
   },
   {
     title: "會員名單",
@@ -206,7 +206,7 @@ function makeElement(tag, className, text) {
   return node;
 }
 
-function renderEntries(entries, showUrls = false) {
+function renderEntries(entries) {
   const list = makeElement("ul", "entry-list");
   entries.forEach((entry) => {
     const item = makeElement("li");
@@ -216,11 +216,6 @@ function renderEntries(entries, showUrls = false) {
       if (entry.href.startsWith("https://")) {
         link.target = "_blank";
         link.rel = "noopener noreferrer";
-      }
-      if (entry.showUrl || showUrls) {
-        link.classList.add("entry-link-full");
-        link.replaceChildren(makeElement("span", "entry-label", entry.label));
-        link.append(makeElement("span", "entry-url", entry.href));
       }
       item.append(link);
     } else {
@@ -243,10 +238,9 @@ function renderService(service) {
   GROUPS.forEach(([key, label]) => {
     const group = makeElement("section", "entry-group");
     group.append(makeElement("h4", "", label));
-    group.append(renderEntries(directoryEntries(service, key), service.siteServiceId === "propertyPlatform" || service.title === "房地產協作平台"));
+    group.append(renderEntries(directoryEntries(service, key)));
     groups.append(group);
   });
-  if (groups.querySelector(".entry-link-full")) card.classList.add("service-card-wide");
   card.append(groups);
   return card;
 }
