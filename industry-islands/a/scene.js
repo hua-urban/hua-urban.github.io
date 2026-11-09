@@ -67,7 +67,8 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     // moving traffic and picking stay in the same coordinate system.
     const landscape = new THREE.Group();scene.add(landscape);
     // A opens as a broad terraced peninsula with a western works islet and southern housing cove.
-    landscape.scale.set(1.04,1,.94);landscape.rotation.y=-.12;
+    // Preserve model proportions and right angles; island shape comes from coast coordinates.
+    landscape.rotation.y=-.12;
     landscape.updateMatrix();
     const mapPoint = point => point.clone().applyMatrix4(landscape.matrix);
     const geometries = new Set(), materials = new Set();

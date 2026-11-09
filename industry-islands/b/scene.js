@@ -67,7 +67,8 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     // moving traffic and picking stay in the same coordinate system.
     const landscape = new THREE.Group();scene.add(landscape);
     // B opens as a diagonal neighborhood chain; one shared transform keeps all layers aligned.
-    landscape.scale.set(1.12,1,.88);landscape.rotation.y=.34;
+    // Preserve model proportions and right angles; island shape comes from coast coordinates.
+    landscape.rotation.y=.34;
     landscape.updateMatrix();
     const mapPoint = point => point.clone().applyMatrix4(landscape.matrix);
     const geometries = new Set(), materials = new Set();
