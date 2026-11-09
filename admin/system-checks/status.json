@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-09T12:07:27.910Z",
+  "updatedAt": "2026-11-09T20:49:04.213Z",
   "audit": {
     "checkedAt": "2026-11-09T12:06:44.160Z",
     "status": "success",
@@ -67,8 +67,8 @@
     {
       "name": "追綠光",
       "status": "success",
-      "completedAt": "2026-11-06T07:42:08Z",
-      "url": "https://github.com/hua-urban/greenlight-connect-test/actions/runs/42182565148"
+      "completedAt": "2026-11-09T18:08:07Z",
+      "url": "https://github.com/hua-urban/greenlight-connect-test/actions/runs/42671057838"
     },
     {
       "name": "紅綠燈上傳後端",
@@ -79,8 +79,8 @@
     {
       "name": "華都更官網",
       "status": "success",
-      "completedAt": "2026-11-09T11:22:44Z",
-      "url": "https://github.com/hua-urban/hua-urban.github.io/actions/runs/42608533850"
+      "completedAt": "2026-11-09T17:05:10Z",
+      "url": "https://github.com/hua-urban/hua-urban.github.io/actions/runs/42661101188"
     },
     {
       "name": "來賓報名",
@@ -91,8 +91,8 @@
     {
       "name": "房地產協作平台",
       "status": "success",
-      "completedAt": "2026-11-09T11:24:40Z",
-      "url": "https://github.com/hua-urban/huadu-property-platform/actions/runs/42608801074"
+      "completedAt": "2026-11-09T15:38:16Z",
+      "url": "https://github.com/hua-urban/huadu-property-platform/actions/runs/42646635529"
     },
     {
       "name": "房地產協作審閱版",
