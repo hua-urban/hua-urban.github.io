@@ -475,8 +475,8 @@
       await persistCase(p, $("#case-form"));
     };
   }
-  function showSubmissionAngel() {
-    openModal("都更小天使・資料送出中", `<svg class="dugeng-angel-scene" viewBox="0 0 260 170" aria-hidden="true">
+  function dugengAngelArtwork() {
+    return `<svg class="dugeng-angel-scene" viewBox="0 0 260 170" aria-hidden="true">
 
 <ellipse cx="130" cy="151" rx="83" ry="10" fill="#eadce0" opacity=".6"/>
 <g class="dugeng-angel-spark" fill="#f0bf4f"><path d="m55 57 3-9 3 9 9 3-9 3-3 9-3-9-9-3Z"/><circle cx="203" cy="85" r="3"/></g>
@@ -501,7 +501,13 @@
 <path d="M64 137q34-13 66 0 32-13 66 0l-2 15H66Z" fill="#eadce0" stroke="#b47c8b" stroke-width="2"/>
 <path d="m119 141 3-5 3 5 6 1-5 4 1 5-5-3-5 3 1-5-5-4Z" fill="#fffaf0"/>
 <g class="dugeng-sleep-z" fill="#805b65" font-family="system-ui,sans-serif" font-weight="700"><text x="175" y="55" font-size="17">z</text><text x="188" y="40" font-size="12">z</text></g>
-<text x="145" y="149" text-anchor="middle" fill="#762b3a" font-size="12" font-family="system-ui,sans-serif" font-weight="700">都更</text></svg><p id="submission-stage" class="submission-stage" role="status" aria-live="polite" aria-atomic="true">正在送出您的需求…</p><p class="submission-guidance">都更小天使正在幫您整理資料，請稍候。<br>請保留此頁，不需重複點擊送出。</p><div class="submission-working" aria-hidden="true"><i></i><i></i><i></i></div><p id="submission-slow" class="hint" hidden>處理時間較長，圖片較多時可能需要多等一下。目前仍在處理中，請勿重新整理或重複送出。</p>`, { submission: true });
+<text x="145" y="149" text-anchor="middle" fill="#762b3a" font-size="12" font-family="system-ui,sans-serif" font-weight="700">都更</text></svg>`;
+  }
+  function caseLoading(message = "正在讀取案件資料…") {
+    return `<section class="case-loading panel" role="status" aria-live="polite" aria-atomic="true">${dugengAngelArtwork()}<h2>都更小天使・載入中</h2><p class="case-loading-stage">${esc(message)}</p><p class="hint">正在為您整理案件資料，請稍候，不需重複點擊。</p><div class="submission-working" aria-hidden="true"><i></i><i></i><i></i></div></section>`;
+  }
+  function showSubmissionAngel() {
+    openModal("都更小天使・資料送出中", `${dugengAngelArtwork()}<p id="submission-stage" class="submission-stage" role="status" aria-live="polite" aria-atomic="true">正在送出您的需求…</p><p class="submission-guidance">都更小天使正在幫您整理資料，請稍候。<br>請保留此頁，不需重複點擊送出。</p><div class="submission-working" aria-hidden="true"><i></i><i></i><i></i></div><p id="submission-slow" class="hint" hidden>處理時間較長，圖片較多時可能需要多等一下。目前仍在處理中，請勿重新整理或重複送出。</p>`, { submission: true });
     $("#app").inert = true;
   }
   async function persistCase(payload, form) {
@@ -643,13 +649,14 @@
       reader.readAsDataURL(file);
     });
   }
+  let caseLoadSequence = 0;
   async function loadCases() {
     if (!staff()) {
       state.cases = [];
       return;
     }
     const data = await api("listCases", {});
-    state.cases = data.cases || [];
+    return data.cases || [];
   }
   async function navigate(view) {
     if (!staff() && !["new", "success", "receipt"].includes(view)) view = "new";
@@ -663,6 +670,7 @@
         return;
       state.submission = null;
     }
+    const loadSequence = ++caseLoadSequence;
     closeModal();
     state.view = view;
     state.query = "";
@@ -676,14 +684,17 @@
       await renderUsers();
     } else {
       shell(
-        '<div class="skeleton"></div><p class="hint" style="margin-top:15px">正在讀取案件…</p>',
+        caseLoading("正在讀取案件清單…"),
       );
       try {
-        await loadCases();
+        const cases = await loadCases();
+        if (loadSequence !== caseLoadSequence) return;
+        state.cases = cases;
         if (view === "overview") renderOverview();
         else if (view === "review" && staff()) renderReview();
         else renderCases();
       } catch (e) {
+        if (loadSequence !== caseLoadSequence) return;
         shell(
           `<div class="notice error">${esc(e.message)}</div><button class="btn" data-action="refresh" style="margin-top:20px">重新讀取</button>`,
         );
@@ -712,13 +723,15 @@
     }
     openModal(
       "案件詳情",
-      '<div class="skeleton"></div><p class="hint">正在讀取案件…</p>',
+      caseLoading("正在讀取這筆案件的詳細內容…"),
     );
+    const detailBody = $(".modal-body");
     try {
       const result = await api("getCase", { id });
+      if (!detailBody.isConnected) return;
       state.detail = result.case || result;
       const c = state.detail;
-      $(".modal-body").innerHTML =
+      detailBody.innerHTML =
         `<div class="row spread wrap"><div class="row wrap">${(c.categories || []).map((x) => `<span class="tag wine">${esc(x)}</span>`).join("")}</div>${badge(c.status)}</div><h2 class="detail-title">${esc(c.title)}</h2><p class="hint">案件編號 ${esc(c.id)}　·　${date(c.updatedAt || c.createdAt)} 更新</p><dl class="detail-meta">${[
           ["標的類型", c.propertyType],
           ["地區", [c.city, c.district].filter(Boolean).join(" ")],
@@ -746,10 +759,11 @@
           .join(
             "",
           )}<section class="detail-section"><h3>相關圖片 <span class="hint">${c.images?.length || 0} 張</span></h3>${c.images?.length ? `<div class="detail-images">${c.images.map((im) => `<div class="detail-image"><img data-image="${esc(im.id)}" alt="${esc(im.fileName || "物件圖片")}"></div>`).join("")}</div>` : '<p class="hint">此案件未提供圖片。</p>'}</section><div class="row wrap"><button class="btn small" data-action="download-case">↓ 完整案件資料</button>${c.images?.length ? '<button class="btn small" data-action="download-images">↓ 原圖 ZIP</button>' : ""}</div>${staff() ? `<section class="review-panel"><h3>媒合與引薦紀錄</h3><p class="hint">以下內容僅供授權處理人員查看。</p>${field("review-summary", "需求摘要", { textarea: true, value: c.summary || c.helpNeeded })}${field("review-notes", "內部盤點備註", { textarea: true, value: "", placeholder: "媒合對象、引薦進度、後續窗口與下一步" })}<div id="review-error" class="notice error" role="alert" hidden></div>${(c.internalNotes || []).length ? '<div class="hint">' + c.internalNotes.map((n) => "<p><strong>" + esc(n.actor) + " · " + date(n.at) + "</strong><br>" + esc(n.text) + "</p>").join("") + "</div>" : ""}<div class="review-actions">${["pending", "needs_info"].includes(c.status) ? '<button class="btn primary" data-action="publish">完成評估</button><button class="btn" data-action="needs-info">要求補充資料</button>' : ""}<button class="btn" data-action="save-note">儲存盤點備註</button></div>${info() ? `<div class="divider"></div><h3>資訊組案件管理</h3>${field("change-reason", "異動原因", { placeholder: "修改、撤回、失效及封存時必填" })}<div class="review-actions"><button class="btn small" data-action="edit-case">修改內容</button><button class="btn small" data-action="withdraw">撤回</button><button class="btn small" data-action="expire">標記失效</button><button class="btn small danger" data-action="archive">封存案件</button></div>` : ""}</section>` : ""}`;
-      hydrateImages($(".modal-body"));
+      hydrateImages(detailBody);
     } catch (e) {
-      $(".modal-body").innerHTML =
-        `<p class="notice error">${esc(e.message)}</p>`;
+      if (!detailBody.isConnected) return;
+      detailBody.innerHTML =
+        `<p class="notice error" role="alert">${esc(e.message)}</p><button class="btn" data-case="${esc(id)}">重新讀取案件</button>`;
     }
   }
   async function hydrateImages(root = document) {
@@ -1273,6 +1287,7 @@
       state.user = data;
       sessionStorage.setItem(sessionKey, data.token);
     }
+    if (adminEntry) shell(caseLoading("正在準備後臺與案件資料…"));
     try {
       const data = await api("bootstrap");
       state.user = { ...state.user, ...data.user };

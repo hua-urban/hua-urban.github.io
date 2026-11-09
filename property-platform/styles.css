@@ -1668,3 +1668,9 @@ td strong {
 @keyframes angel-pulse { 50% { opacity: .35; transform: translateY(-3px); } }
 @media (prefers-reduced-motion: reduce) { .submission-working i { animation: none; } }
 @media (max-width: 600px) { .submission-dialog .modal-body { padding: 22px 18px; } .submission-stage { font-size: 18px; } }
+
+.case-loading { text-align: center; padding: 38px 22px; margin: 20px 0; }
+.case-loading h2 { font-size: 22px; margin: 10px 0; }
+.case-loading-stage { font-size: 17px; font-weight: 700; line-height: 1.7; }
+.case-loading .hint { line-height: 1.8; }
+.case-loading .dugeng-angel-scene { width: 230px; }
