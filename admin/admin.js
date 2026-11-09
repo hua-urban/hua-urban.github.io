@@ -198,7 +198,7 @@ function makeElement(tag, className, text) {
   return node;
 }
 
-function renderEntries(entries) {
+function renderEntries(entries, showUrls = false) {
   const list = makeElement("ul", "entry-list");
   entries.forEach((entry) => {
     const item = makeElement("li");
@@ -209,7 +209,7 @@ function renderEntries(entries) {
         link.target = "_blank";
         link.rel = "noopener noreferrer";
       }
-      if (entry.showUrl) {
+      if (entry.showUrl || showUrls) {
         link.classList.add("entry-link-full");
         link.append(makeElement("span", "entry-url", entry.href));
       }
@@ -234,7 +234,7 @@ function renderService(service) {
   GROUPS.forEach(([key, label]) => {
     const group = makeElement("section", "entry-group");
     group.append(makeElement("h4", "", label));
-    group.append(renderEntries(service[key]));
+    group.append(renderEntries(service[key], service.siteServiceId === "propertyPlatform" || service.title === "房地產協作平台"));
     groups.append(group);
   });
   card.append(groups);
