@@ -178,6 +178,14 @@ const SERVICES = [
   }
 ];
 
+// The management directory retains canonical operational entries even when
+// a service is hidden from the public homepage navigation.
+const propertyPlatformDirectory = SERVICES.find((service) => service.title === "房地產協作平台");
+propertyPlatformDirectory.directoryUse = propertyPlatformDirectory.use;
+function directoryEntries(service, key) {
+  return key === "use" && service.directoryUse ? service.directoryUse : service[key];
+}
+
 const GROUPS = [
   ["use", "使用入口"],
   ["data", "管理資料"],
@@ -234,7 +242,7 @@ function renderService(service) {
   GROUPS.forEach(([key, label]) => {
     const group = makeElement("section", "entry-group");
     group.append(makeElement("h4", "", label));
-    group.append(renderEntries(service[key], service.siteServiceId === "propertyPlatform" || service.title === "房地產協作平台"));
+    group.append(renderEntries(directoryEntries(service, key), service.siteServiceId === "propertyPlatform" || service.title === "房地產協作平台"));
     groups.append(group);
   });
   card.append(groups);
@@ -246,7 +254,7 @@ function updateDirectory() {
   const visible = SERVICES.filter((service) => {
     const categoryMatches = activeCategory === "all" || service.category === activeCategory;
     const searchable = [service.title, service.category, service.description]
-      .concat(...GROUPS.map(([key]) => service[key].map((entry) => entry.label || entry.status)))
+      .concat(...GROUPS.map(([key]) => directoryEntries(service, key).map((entry) => entry.label || entry.status)))
       .join(" ")
       .toLocaleLowerCase("zh-Hant");
     return categoryMatches && (!query || searchable.includes(query));
