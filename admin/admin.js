@@ -219,6 +219,7 @@ function renderEntries(entries, showUrls = false) {
       }
       if (entry.showUrl || showUrls) {
         link.classList.add("entry-link-full");
+        link.replaceChildren(makeElement("span", "entry-label", entry.label));
         link.append(makeElement("span", "entry-url", entry.href));
       }
       item.append(link);
@@ -245,6 +246,7 @@ function renderService(service) {
     group.append(renderEntries(directoryEntries(service, key), service.siteServiceId === "propertyPlatform" || service.title === "房地產協作平台"));
     groups.append(group);
   });
+  if (groups.querySelector(".entry-link-full")) card.classList.add("service-card-wide");
   card.append(groups);
   return card;
 }
