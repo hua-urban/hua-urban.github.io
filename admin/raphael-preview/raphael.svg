@@ -1,15 +1,10 @@
 <svg class="raphael" viewBox="0 0 1427 1102" aria-hidden="true" focusable="false">
 <defs>
-<clipPath id="rp-left"><path d="M-200 -150H310L470 230 540 360 550 520 550 800H-200Z"/></clipPath>
-<clipPath id="rp-right"><path d="M790 430 925 280V-150H1600V900H1040L790 770 780 630 800 500Z"/></clipPath>
-<mask id="rp-body" maskUnits="userSpaceOnUse" x="0" y="0" width="1427" height="1102"><rect width="1427" height="1102" fill="white"/><path d="M-200 -150H310L470 230 540 360 550 520 550 800H-200Z" fill="black"/><path d="M790 430 925 280V-150H1600V900H1040L790 770 780 630 800 500Z" fill="black"/><ellipse cx="550" cy="625" rx="24" ry="85" fill="white"/><ellipse cx="790" cy="660" rx="24" ry="85" fill="white"/></mask>
-<mask id="rp-alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="1427" height="1102"><image href="assets/raphael-grand-wings-v4.webp" width="1427" height="1102"/></mask>
-<linearGradient id="rp-light"><stop stop-color="#ffe8b0" stop-opacity="0"/><stop offset=".5" stop-color="#ffe8b0" stop-opacity=".22"/><stop offset="1" stop-color="#ffe8b0" stop-opacity="0"/></linearGradient>
+<!-- One continuous source image: never cut wings away from the torso. -->
+<filter id="rp-spread" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB">
+<feImage href="wing-field.svg?v=continuous-2" x="-300" y="-300" width="2027" height="1702" result="field"/>
+<feDisplacementMap class="rp-displacement" in="SourceGraphic" in2="field" scale="0" xChannelSelector="R" yChannelSelector="G"/>
+</filter>
 </defs>
-<g class="rp-breathe">
-<g class="rp-wing-left"><image href="assets/raphael-grand-wings-v4.webp" width="1427" height="1102" clip-path="url(#rp-left)"/></g>
-<g class="rp-wing-right"><image href="assets/raphael-grand-wings-v4.webp" width="1427" height="1102" clip-path="url(#rp-right)"/></g>
-<image href="assets/raphael-grand-wings-v4.webp" width="1427" height="1102" mask="url(#rp-body)"/>
-<g mask="url(#rp-alpha)" class="rp-sheen"><rect class="rp-sheen-beam" x="-420" y="0" width="330" height="1102" fill="url(#rp-light)" transform="skewX(-12)"/></g>
-</g>
+<g class="rp-breathe"><image href="assets/raphael-grand-wings-v4.webp" width="1427" height="1102" filter="url(#rp-spread)"/></g>
 </svg>

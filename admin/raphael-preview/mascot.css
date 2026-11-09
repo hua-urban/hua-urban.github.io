@@ -7,19 +7,10 @@
 .raphael-mascot { width: 100%; position: relative; }
 .raphael { display: block; width: 100%; height: auto; overflow: visible; }
 .raphael-aura { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(ellipse, #eac56777 0%, #edce8533 40%, transparent 72%); animation: rp-aura 4s ease-in-out infinite; }
-.raphael #rp-body { mask-type: luminance; }
-.raphael #rp-alpha { mask-type: alpha; }
 .raphael .rp-breathe { transform-origin: 50% 80%; animation: rp-breathe 4s ease-in-out infinite; }
-.raphael .rp-wing-left { transform-origin: 555px 640px; animation: rp-left 4s ease-in-out infinite; }
-.raphael .rp-wing-right { transform-origin: 790px 640px; animation: rp-right 4s ease-in-out infinite; }
-.raphael .rp-sheen { mix-blend-mode: screen; pointer-events: none; }
-.raphael .rp-sheen-beam { animation: rp-light 6s ease-in-out infinite; }
-/* Deliberate wing opening is visible at the hero size without rapid motion. */
+/* A single continuous image deforms smoothly; no wing/body cut seams. */
 @keyframes rp-breathe { 0%,100% { transform: translateY(3px); } 50% { transform: translateY(-12px); } }
-@keyframes rp-left { 0%,100% { transform: rotate(6deg) scaleX(.92); } 50% { transform: rotate(-4deg) scaleX(1.03); } }
-@keyframes rp-right { 0%,100% { transform: rotate(-6deg) scaleX(.92); } 50% { transform: rotate(4deg) scaleX(1.03); } }
 @keyframes rp-aura { 0%,100% { opacity: .6; transform: scale(.92); } 50% { opacity: 1; transform: scale(1.1); } }
-@keyframes rp-light { 0%,10% { transform: translateX(-420px) skewX(-12deg); opacity: 0; } 20% { opacity: .8; } 65% { opacity: .8; } 85%,100% { transform: translateX(1900px) skewX(-12deg); opacity: 0; } }
 .raphael-slot.is-suspended *, .raphael-slot.is-suspended { animation-play-state: paused !important; }
 @media (max-width: 900px) {
   .hero { grid-template-columns: minmax(0, 1fr) 260px; gap: 10px; padding: 30px; }
@@ -36,5 +27,4 @@
 
 @media (prefers-reduced-motion: reduce) {
   .raphael-slot * { animation: none !important; }
-  .raphael .rp-sheen { display: none; }
 }
