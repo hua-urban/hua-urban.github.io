@@ -1,0 +1,40 @@
+/* Local to the standalone simulation; the production directory is unchanged. */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr) 310px; gap: 24px; padding: 34px 42px; }
+.hero-copy { min-width: 0; }
+.hero-copy .primary-link { margin: 0 5px 8px 0; }
+.hero::after { z-index: 0; }
+.raphael-slot { position: relative; z-index: 1; width: 310px; min-height: 270px; display: grid; place-items: center; isolation: isolate; pointer-events: none; }
+.raphael-mascot { width: 100%; position: relative; }
+.raphael { display: block; width: 100%; height: auto; overflow: visible; }
+.raphael-aura { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(ellipse, #eac56777 0%, #edce8533 40%, transparent 72%); animation: rp-aura 4s ease-in-out infinite; }
+.raphael #rp-body { mask-type: luminance; }
+.raphael #rp-alpha { mask-type: alpha; }
+.raphael .rp-breathe { transform-origin: 50% 80%; animation: rp-breathe 4s ease-in-out infinite; }
+.raphael .rp-wing-left { transform-origin: 555px 640px; animation: rp-left 4s ease-in-out infinite; }
+.raphael .rp-wing-right { transform-origin: 790px 640px; animation: rp-right 4s ease-in-out infinite; }
+.raphael .rp-sheen { mix-blend-mode: screen; pointer-events: none; }
+.raphael .rp-sheen-beam { animation: rp-light 6s ease-in-out infinite; }
+/* Deliberate wing opening is visible at the hero size without rapid motion. */
+@keyframes rp-breathe { 0%,100% { transform: translateY(3px); } 50% { transform: translateY(-12px); } }
+@keyframes rp-left { 0%,100% { transform: rotate(6deg) scaleX(.92); } 50% { transform: rotate(-4deg) scaleX(1.03); } }
+@keyframes rp-right { 0%,100% { transform: rotate(-6deg) scaleX(.92); } 50% { transform: rotate(4deg) scaleX(1.03); } }
+@keyframes rp-aura { 0%,100% { opacity: .6; transform: scale(.92); } 50% { opacity: 1; transform: scale(1.1); } }
+@keyframes rp-light { 0%,10% { transform: translateX(-420px) skewX(-12deg); opacity: 0; } 20% { opacity: .8; } 65% { opacity: .8; } 85%,100% { transform: translateX(1900px) skewX(-12deg); opacity: 0; } }
+.raphael-slot.is-suspended *, .raphael-slot.is-suspended { animation-play-state: paused !important; }
+@media (max-width: 900px) {
+  .hero { grid-template-columns: minmax(0, 1fr) 260px; gap: 10px; padding: 30px; }
+  .raphael-slot { width: 260px; min-height: 245px; }
+}
+@media (max-width: 760px) {
+  .hero { grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 29px 25px 18px; }
+  .raphael-slot { justify-self: center; width: min(310px, 100%); min-height: 250px; }
+}
+@media (max-width: 480px) {
+  .hero { padding: 25px 20px 15px; }
+  .raphael-slot { min-height: 235px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .raphael-slot * { animation: none !important; }
+  .raphael .rp-sheen { display: none; }
+}
