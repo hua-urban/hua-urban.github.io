@@ -1619,3 +1619,13 @@ td strong {
 .category-followup textarea { min-height: 96px; }
 .category-followup[hidden], #category-question-intro[hidden] { display: none; }
 @media (max-width: 600px) { .category-followup { padding: 16px; } }
+
+/* Purpose and scope are readable before members start the form. */
+.intake-introduction { margin-bottom: 28px; }
+.intake-introduction h2 { margin-top: 0; font-size: 22px; }
+.intake-introduction p { line-height: 1.8; }
+.intake-needs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px; margin: 22px 0; }
+.intake-needs div { border-left: 3px solid var(--wine, #762b3a); padding-left: 14px; }
+.intake-needs dt { color: var(--wine, #762b3a); font-weight: 700; margin-bottom: 4px; }
+.intake-needs dd { margin: 0; line-height: 1.7; }
+@media (max-width: 600px) { .intake-needs { grid-template-columns: 1fr; gap: 16px; } .intake-introduction h2 { font-size: 20px; } }
