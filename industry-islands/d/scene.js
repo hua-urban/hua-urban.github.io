@@ -69,9 +69,10 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
     // The whole miniature uses one map transform: coasts, bridges, paths, trees,
     // moving traffic and picking stay in the same coordinate system.
     const landscape = new THREE.Group();scene.add(landscape);
-    // A long, oblique industrial harbor, with the freight island to the southwest.
-    landscape.matrixAutoUpdate=false;
-    landscape.matrix.set(1.14,0,.25,0, 0,1,0,0, -.045,0,.82,0, 0,0,0,1);
+    // The coast coordinates already define D's long harbor. Rotate the whole map
+    // rigidly so shared CAD fans and buildings retain circles and right angles.
+    landscape.rotation.y=.15;
+    landscape.updateMatrix();
     const mapPoint = point => point.clone().applyMatrix4(landscape.matrix);
     const geometries = new Set(), materials = new Set();
     const material = (color, opts={}) => { const m=new THREE.MeshStandardMaterial({color,roughness:.88,...opts}); materials.add(m); return m; };
