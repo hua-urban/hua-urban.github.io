@@ -12,10 +12,10 @@ const SERVICES = [
   {
     title: "房地產協作平台",
     category: "會員與分組",
-    description: "會員登錄房源、都更與貸款需求，由董顧與九長協助媒合及引薦。後臺使用姓名與 Email 名單登入。",
-    use: [{ label: "領導團隊登入", href: "./property-platform/" }, { label: "會員需求登錄", href: "/property-platform/" }],
-    data: [{ status: "案件及圖片採私人儲存，不在公開官網顯示" }],
-    maintenance: [{ label: "建置與交接紀錄", href: "./updates/#property-platform-20261105" }, { status: "完整原始碼由資訊組私有 GitHub 專案管理" }]
+    description: "填報房屋或土地的整合、出租、出售與貸款活化需求；已填報的案件、圖片與媒合紀錄由授權人員登入管理。",
+    use: [{ label: "會員需求填報", href: "https://hua-urban.com/property-platform/", showUrl: true }, { status: "填報完成頁與確認信會提供本次物件的專屬查看連結。" }],
+    data: [{ label: "管理已填報案件、圖片與媒合紀錄", href: "https://hua-urban.com/admin/property-platform/", showUrl: true }, { status: "使用授權姓名＋Email 登入；案件資料不對一般會員或外部公開。" }],
+    maintenance: [{ label: "建置與交接紀錄", href: "https://hua-urban.com/admin/updates/#property-platform-20261105", showUrl: true }, { label: "平台完整原始碼（私有 GitHub）", href: "https://github.com/hua-urban/huadu-property-platform", showUrl: true }, { status: "私有原始碼需既有 GitHub 權限。" }]
   },
   {
     title: "會員名單",
@@ -208,6 +208,10 @@ function renderEntries(entries) {
       if (entry.href.startsWith("https://")) {
         link.target = "_blank";
         link.rel = "noopener noreferrer";
+      }
+      if (entry.showUrl) {
+        link.classList.add("entry-link-full");
+        link.append(makeElement("span", "entry-url", entry.href));
       }
       item.append(link);
     } else {
