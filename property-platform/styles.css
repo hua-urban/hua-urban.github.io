@@ -1611,3 +1611,11 @@ td strong {
 }
 
 .brand-icon { object-fit: contain; flex-shrink: 0; border-radius: 10px; width: 52px; height: 52px; background: transparent; }
+
+/* Follow-up questions stay inside the selected demand categories. */
+.category-followup { min-width: 0; margin: 4px 0 12px; padding: 20px; border: 1px solid var(--line, #ded8d6); border-radius: 12px; background: #faf8f6; }
+.category-followup legend { padding: 0 8px; color: var(--wine, #762b3a); font-size: 17px; font-weight: 700; }
+.category-followup legend .hint { margin-left: 5px; font-size: 13px; font-weight: 400; }
+.category-followup textarea { min-height: 96px; }
+.category-followup[hidden], #category-question-intro[hidden] { display: none; }
+@media (max-width: 600px) { .category-followup { padding: 16px; } }
