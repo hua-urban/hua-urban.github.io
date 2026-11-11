@@ -365,12 +365,12 @@
     return categoryQuestions.normalize(answers, selected);
   }
   function intakeIntroduction() {
-    return `<section class="panel intake-introduction" aria-labelledby="intake-purpose"><h2 id="intake-purpose">從具體需求開始，一起促成引薦與協作</h2><p>如果您自己、家人或親友，手上有房屋或土地，需要整合、出租、出售或貸款活化，都歡迎填寫需求。</p><dl class="intake-needs"><div><dt>整合</dt><dd>尋找建商、開發公司或整合夥伴</dd></div><div><dt>出租</dt><dd>尋找租客、代租代管或出租規劃協助</dd></div><div><dt>出售</dt><dd>尋找買方或銷售合作夥伴</dd></div><div><dt>貸款活化</dt><dd>希望了解貸款、增貸或資金運用的可能性</dd></div></dl><p>我們會依您提供的資訊，協助引薦合適的專業夥伴，一起討論如何合作、推進案件。</p><p class="hint">需求越具體，越能知道如何協助。請填寫物件現況、期待與目前遇到的卡關；代親友填報前，請先向本人說明資料來源及法律宣告條款，並取得同意或合法代理授權。</p></section>`;
+    return `<section class="panel intake-introduction" aria-labelledby="intake-purpose"><h2 id="intake-purpose">從具體需求開始，一起促成引薦與協作</h2><p>如果您自己、家人或親友，手上有房屋或土地，需要整合、出租、出售或貸款活化，都歡迎填寫需求。</p><dl class="intake-needs"><div><dt>整合</dt><dd>尋找建商、開發公司或整合夥伴</dd></div><div><dt>出租</dt><dd>尋找租客、代租代管或出租規劃協助</dd></div><div><dt>出售</dt><dd>尋找買方或銷售合作夥伴</dd></div><div><dt>貸款活化</dt><dd>希望了解貸款、增貸或資金運用的可能性</dd></div></dl><p>我們會依您提供的資訊，協助引薦合適的專業夥伴，一起討論如何合作、推進案件。</p><p class="hint">需求越具體，越能知道如何協助。請填寫物件現況、期待與目前遇到的卡關；代親友填報前，請先向本人說明資料來源及資料使用說明及同意，並取得同意或合法代理授權。</p></section>`;
   }
 
   function renderConsent(edit) {
     return `<section class="consent-notice" aria-labelledby="consent-title">
-      <h3 id="consent-title">法律宣告條款</h3>
+      <h3 id="consent-title">資料使用說明及同意</h3>
       <p>我確認有權提供本次資料；如涉及他人，已向本人說明資料來源及以下事項，並取得同意或合法代理授權。</p>
       <p>我同意由本表單主辦單位及經授權的必要人員，在本案評估、媒合、引薦及聯繫所需期間，於臺灣以電子或紙本方式蒐集、處理及使用姓名、聯絡方式、家庭與財務概況、服務需求等資料，並寄送登錄確認信。資料會保密，不對一般會員或外部公開；對外分享前，會先說明對象、用途及內容，取得資料本人或合法代理人同意。</p>
       <p>資料可自由提供；未提供必要資料可能影響服務。資料本人可透過表單聯絡窗口，申請查閱、副本、更正、補充、停止蒐集、處理、利用或刪除資料。</p>
