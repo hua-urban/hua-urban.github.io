@@ -902,6 +902,16 @@ label .required {
 .choice-icon {
   font-size: 22px;
 }
+.consent-notice {
+  margin-top: 20px;
+}
+.consent-notice h3 {
+  margin: 0 0 8px;
+}
+.consent-notice p {
+  margin: 0 0 12px;
+  line-height: 1.8;
+}
 .checkbox-line {
   display: flex;
   align-items: flex-start;
