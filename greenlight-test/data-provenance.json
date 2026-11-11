@@ -1,11 +1,11 @@
 {
   "chapter": "華都更",
-  "preparedOn": "2026-11-07",
+  "preparedOn": "2026-11-11",
   "roster": {
     "source": "https://script.google.com/macros/s/AKfycbxDLC_mhRaLhlycnLWhRmdTdI9HU6BHQEXhdANMZL0aF0yTTrMzvxHi0u-YyHMJCP9Jzg/exec",
-    "rosterVersion": 4,
-    "contentHash": "d2978e74b73796602dab15e785973144b6da94c24c49d62922f7b80ab5e4be56",
-    "commit": "10fe6ca6a4f9efbda138dd24cc947256ba22b414",
+    "rosterVersion": 5,
+    "contentHash": "179823a32ffaa6c7fc7dbab8f5540d59155df9add502d3b82d4010ed406b8ca4",
+    "commit": "96626af1c3e73dd4dc5af5eba9ce30fb95110833",
     "members": 54,
     "memberNumbers": "Central memberNo; stable memberId retained separately"
   },
@@ -28,9 +28,9 @@
     "localTestStorage": true
   },
   "sha256": {
-    "defaults.json": "65711e5d5117a2117e0c71d884fcb9fecdaba293ef15bb975bbae64f5e6eba8f",
+    "defaults.json": "17fa048dc7f654d9ac38ba377577ef2a9506cdf05691e6a1e3365389c01d90b9",
     "palms.json": "426b8258888632b9a735a95f77d33046ab58f9d64f435b6d73fa9a01f20bb5df",
-    "monthly.json": "4541e97b292e4340cdda9d662ff0b87d0077eec0aab9417ed61bf6fd7e231d06",
+    "monthly.json": "1c7078c391714c37d020b20c1dc63035f1d2204f0b4998876f44141676ab3ce9",
     "training.json": "25de5158d55935ee38630cd74c20e4093d3dd728d2e851bf570d0ccf0f8a595a"
   },
   "activities": {
