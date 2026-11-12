@@ -6,7 +6,8 @@ for(const group of ['a','b','c','d','e']){
  const dir=path.join(base,group);
  const mod=await import('data:text/javascript;base64,'+Buffer.from(fs.readFileSync(path.join(dir,'data.js'),'utf8')).toString('base64'));
  topics[group]=new Set(mod.topics.map(t=>t.id));
- if(topics[group].size!==8)throw Error(group+': expected 8 distinct topics');
+ const expected=group==='e'?9:8;
+ if(topics[group].size!==expected)throw Error(group+': expected '+expected+' distinct topics');
  for(const t of mod.topics)for(const [id] of t.partners)if(!topics[group].has(id))throw Error('Invalid partner '+id);
  for(const s of mod.scenarios)for(const [id] of s.steps)if(!topics[group].has(id))throw Error('Invalid scenario topic '+id);
  const html=fs.readFileSync(path.join(dir,'index.html'),'utf8');

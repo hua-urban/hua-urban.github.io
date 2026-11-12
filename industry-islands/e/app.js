@@ -1,4 +1,4 @@
-import { topics, scenarios } from './data.js?v=public-20261112';
+import { topics, scenarios } from './data.js?v=korean1';
 const $ = (s) => document.querySelector(s);
 const byId = (id) => topics.find(t => t.id === id);
 const requestedTopic = new URL(location.href).searchParams.get('topic');
@@ -34,7 +34,7 @@ function select(id, {focus = false, connectionFrom = null} = {}) {
   $('#detail-content').scrollTop = 0;
   $('#detail-content').classList.remove('fade-in');
   if (!reduced) requestAnimationFrame(()=>$('#detail-content').classList.add('fade-in'));
-  $('#topic-count').textContent = `${num(topics.indexOf(t))} / 08`;
+  $('#topic-count').textContent = `${num(topics.indexOf(t))} / ${String(topics.length).padStart(2,'0')}`;
   document.querySelectorAll('#topic-list [data-topic]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.topic===id)));
   updateQuestions(id);
   $('#ask-topic').onclick = () => { $('#takeaway').scrollIntoView({behavior:reduced?'instant':'smooth'}); $('#question-topic').focus({preventScroll:true}); };
@@ -110,6 +110,6 @@ $('#play-journey').onclick=()=>{if(journeyTimer){stopJourney();return;}stopTour(
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stopJourney();});
 $('#copy-questions').onclick=async()=>{const t=byId($('#question-topic').value),text=`${t.title}\n${t.questions.map((q,i)=>`${i+1}．${q}`).join('\n')}\n\n協作切點須由相關夥伴確認。`;try{await navigator.clipboard.writeText(text);$('#copy-status').textContent='已複製，可以帶到下一場交流。';}catch{$('#copy-status').textContent='瀏覽器未允許複製，請直接選取上方問題。';}};
 select(selected);setScenario(0);
-function failScene(error){if(sceneFailed)return;sceneFailed=true;console.error('3D scene unavailable:',error);$('#scene-loading').innerHTML='<span class="loading-island">✦</span><b>這台裝置暫時無法顯示 3D 場景。</b><small>仍可用下方八個主題，閱讀服務與協作介紹。</small>';['day-button','night-button','routes-button','tour-button','pause-button','reset-button'].forEach(id=>$('#'+id).disabled=true);}
-try{const {createIsland}=await import('./scene.js?v=fan-finish2');scene=await createIsland({container:$('#scene'),topics,onSelect:id=>{stopJourney();stopTour();select(id);},onReady:()=>{$('#scene-loading').classList.add('hidden');$('#scene-loading').setAttribute('aria-hidden','true');},onError:failScene});scene?.select(selected);if(activeConnection)scene?.connect?.(...activeConnection);scene?.setReducedMotion(reduced);setReduced(reduced);if(!reduced){touring=true;scene?.tour(true);$('#tour-button').setAttribute('aria-pressed','true');}}catch(error){failScene(error);}
+function failScene(error){if(sceneFailed)return;sceneFailed=true;console.error('3D scene unavailable:',error);$('#scene-loading').innerHTML='<span class="loading-island">✦</span><b>這台裝置暫時無法顯示 3D 場景。</b><small>仍可用下方九個主題，閱讀服務與協作介紹。</small>';['day-button','night-button','routes-button','tour-button','pause-button','reset-button'].forEach(id=>$('#'+id).disabled=true);}
+try{const {createIsland}=await import('./scene.js?v=korean1');scene=await createIsland({container:$('#scene'),topics,onSelect:id=>{stopJourney();stopTour();select(id);},onReady:()=>{$('#scene-loading').classList.add('hidden');$('#scene-loading').setAttribute('aria-hidden','true');},onError:failScene});scene?.select(selected);if(activeConnection)scene?.connect?.(...activeConnection);scene?.setReducedMotion(reduced);setReduced(reduced);if(!reduced){touring=true;scene?.tour(true);$('#tour-button').setAttribute('aria-pressed','true');}}catch(error){failScene(error);}
 window.addEventListener('pagehide',()=>{stopJourney();scene?.dispose();});

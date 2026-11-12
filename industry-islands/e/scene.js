@@ -10,7 +10,7 @@ import { createAmaFansPavilion } from './amafans-building.js?v=fan-finish2';
 
 // This pure layout is shared by rendered roads and headless connectivity checks.
 export const ROAD_LAYOUT = {
-  nodes: {ai:[-4.6,-1.8],property:[-1.4,-3.35],finance:[1.3,-1.85],land:[4.7,-2.3],industry:[5,1.1],talent:[-5.2,1],center:[-.1,.9],west:[-3.35,2.7],east:[3.3,2.75],overseas:[-5.4,6.65],learning:[4.7,6.65]},
+  nodes: {ai:[-4.6,-1.8],property:[-1.4,-3.35],finance:[1.3,-1.85],land:[4.7,-2.3],industry:[5,1.1],talent:[-5.2,1],center:[-.1,.9],west:[-3.35,2.7],east:[3.3,2.75],overseas:[-5.4,6.65],learning:[4.7,6.65],korean:[3.8,6.7]},
   links: [
     ['ai','property',[[-3.5,-2.8]]], ['property','land',[[.6,-3.4],[2.8,-3.3]]],
     ['land','industry',[[5.7,-.8]]], ['industry','east',[[4.4,2.4]]],
@@ -21,6 +21,7 @@ export const ROAD_LAYOUT = {
     ['center','west',[[-1.9,1.65]]], ['center','east',[[1.6,1.8]]],
     ['west','overseas',[[-3.7,3.7],[-4.4,5]],true],
     ['east','learning',[[3.6,4],[4.2,5.4]],true],
+    ['learning','korean',[]],
   ],
 };
 export function findRoadPath(nodeIds, edges, from, to) {
@@ -282,8 +283,18 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
         cyl(root,1.35,1,.9,.055,1.9,P.gold);box(root,1.05,1.89,.9,1.3,.07,.09,P.gold);box(root,.5,1.5,.9,.018,.75,.018,P.dark);
         for(const px of [-1.4,.4]) {box(root,px,-.04,2,.3,.16,1.4,P.wood);for(const zz of [1.5,2.4])cyl(root,px,-.3,zz,.045,.6,P.wood);}
         tree(x-1.5,z-.7,.6);
+      } else if(topic.id==='korean') {
+        const shop=building(root,0,-.55,.8,.62,.72,'house',P.cream);shop.name='korean-learning-bookshop';
+        // Lightweight storefront: one readable Korean sign and a few book spines.
+        box(shop,0,.4,.33,.61,.35,.035,P.wood);
+        for(let j=0;j<6;j++)box(shop,-.25+j*.1,.42,.355,.065,.25+(j%2)*.03,.035,j%3===0?P.brick:j%3===1?P.glass:P.white);
+        const canvas=document.createElement('canvas');canvas.width=768;canvas.height=256;
+        const ctx=canvas.getContext('2d');ctx.fillStyle='#315949';ctx.fillRect(0,0,768,256);ctx.fillStyle='#fff8e9';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='600 84px "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';ctx.fillText('한국어 교실',384,96);ctx.font='46px "Apple SD Gothic Neo", sans-serif';ctx.fillText('작은 책방',384,192);
+        const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;ownedCleanups.push(()=>texture.dispose());
+        const sign=mesh(keep(new THREE.PlaneGeometry(.95,.32)),material('#ffffff',{map:texture}),shop,0,.83,.36);sign.name='korean-bookshop-sign';sign.userData.topicId='korean';pickables.push(sign);
+        box(shop,-.56,.2,.48,.2,.32,.26,P.wood);for(let j=0;j<3;j++)box(shop,-.61+j*.05,.4,.48,.035,.12,.14,j%2?P.brick:P.white);
       } else if(topic.id==='learning') {
-        building(root,.6,-.6,.85,.65,.8,'house',P.cream);building(root,-.9,-.5,.65,.65,.72,'house',P.white);
+        building(root,.6,-.6,.85,.65,.8,'house',P.cream);
         const pavilion=new THREE.Group();pavilion.position.set(0,.1,.65);root.add(pavilion);
         box(pavilion,0,.03,0,1.3,.1,1,P.wood);
         for(const a of [-.52,.52])for(const b of [-.37,.37])cyl(pavilion,a,.52,b,.036,1,P.wood);
