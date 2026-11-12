@@ -2,3 +2,7 @@
 .cross-group-links a+a{border-top:1px solid #bdd0bf;margin-top:16px;padding-top:16px}
 
 .group-switcher a,.group-switcher>span{display:inline-flex;align-items:center;justify-content:center;min-height:44px;line-height:1.5;text-align:center}.group-switcher a:hover{background:#e5ecdf}.group-switcher a:focus-visible{outline:2px solid #315949;outline-offset:3px}@media(max-width:600px){.group-switcher{gap:8px;font-size:12px}.group-switcher a,.group-switcher>span{max-width:100%;padding:9px 13px}.group-islands span{text-align:center;overflow-wrap:anywhere}}
+
+@media(max-width:600px){.group-switcher{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.group-switcher a,.group-switcher>span{padding:9px 10px;min-height:48px}.group-switcher>:nth-last-child(3),.group-switcher>a[href="#archipelago"]{grid-column:1 / -1}}
+
+@media(max-width:600px){.group-switcher a,.group-switcher>span{word-break:keep-all}}
