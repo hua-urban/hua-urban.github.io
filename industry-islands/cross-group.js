@@ -1,4 +1,4 @@
-import {sites,routes} from './groups.js?v=c1';
+import {sites,routes} from './groups.js?v=fullnames1';
 const group=document.body.dataset.group;
 const activeGroups=Object.keys(sites).map(g=>String.fromCharCode(g.toUpperCase().charCodeAt(0)+0xFEE0)).join('・');
 const futureGroups=['a','b','c','d','e'].filter(g=>!sites[g]).map(g=>String.fromCharCode(g.toUpperCase().charCodeAt(0)+0xFEE0)).join('、');

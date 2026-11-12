@@ -1,10 +1,10 @@
 // Public navigation registry. Add a group only after its content is ready.
 export const sites={
- a:{name:'Ａ組・地主改建',url:'https://hua-urban.com/industry-islands/a/'},
- b:{name:'Ｂ組・老屋現金流',url:'https://hua-urban.com/industry-islands/b/'},
- c:{name:'Ｃ組・傳承安居',url:'https://hua-urban.com/industry-islands/c/'},
- d:{name:'Ｄ組・商用空間',url:'https://hua-urban.com/industry-islands/d/'},
- e:{name:'Ｅ組・房產與事業',url:'https://hua-urban.com/industry-islands/e/'}
+ a:{name:'A組・地主改建整合鏈',url:'https://hua-urban.com/industry-islands/a/'},
+ b:{name:'B組・老屋現金流升級鏈',url:'https://hua-urban.com/industry-islands/b/'},
+ c:{name:'C組・高齡安居 × 資產傳承鏈',url:'https://hua-urban.com/industry-islands/c/'},
+ d:{name:'D組・商用空間產業鏈',url:'https://hua-urban.com/industry-islands/d/'},
+ e:{name:'E組・房產客戶成長鏈',url:'https://hua-urban.com/industry-islands/e/'}
 };
 export const routes=[
  {name:'家庭資產與風險盤點',c:'finance',e:'finance',desc:'從退休與傳承需求，接到生活風險與財務問題的整理。'},
