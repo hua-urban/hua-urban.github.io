@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-12T16:52:01.911Z",
+  "updatedAt": "2026-11-12T22:28:17.610Z",
   "audit": {
     "checkedAt": "2026-11-12T11:49:36.426Z",
     "status": "success",
@@ -54,8 +54,9 @@
     },
     {
       "name": "新人保溫箱",
-      "status": "unknown",
-      "url": "https://github.com/hua-urban/bni-warmbox/actions"
+      "status": "success",
+      "completedAt": "2026-11-06T07:40:33Z",
+      "url": "https://github.com/hua-urban/bni-warmbox/actions/runs/42182396529"
     },
     {
       "name": "E組九宮格",
@@ -78,8 +79,8 @@
     {
       "name": "華都更官網",
       "status": "success",
-      "completedAt": "2026-11-12T16:51:25Z",
-      "url": "https://github.com/hua-urban/hua-urban.github.io/actions/runs/43263159535"
+      "completedAt": "2026-11-12T19:42:18Z",
+      "url": "https://github.com/hua-urban/hua-urban.github.io/actions/runs/43292846676"
     },
     {
       "name": "來賓報名",
@@ -119,7 +120,6 @@
     }
   ],
   "notification": {
-    "status": "accepted",
-    "key": "backend-contract-ad914d23f489488f"
+    "status": "idle"
   }
 }
