@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-12T08:11:27.429Z",
+  "updatedAt": "2026-11-12T11:50:21.586Z",
   "audit": {
-    "checkedAt": "2026-11-11T11:26:53.307Z",
+    "checkedAt": "2026-11-12T11:49:36.426Z",
     "status": "success",
     "projects": 17,
-    "files": 473,
+    "files": 474,
     "issues": [],
     "checks": [
       {
@@ -79,8 +79,8 @@
     {
       "name": "華都更官網",
       "status": "success",
-      "completedAt": "2026-11-12T07:55:52Z",
-      "url": "https://github.com/hua-urban/hua-urban.github.io/actions/runs/43178875960"
+      "completedAt": "2026-11-12T09:30:50Z",
+      "url": "https://github.com/hua-urban/hua-urban.github.io/actions/runs/43192079119"
     },
     {
       "name": "來賓報名",
@@ -115,8 +115,8 @@
     {
       "name": "產業群島",
       "status": "success",
-      "completedAt": "2026-11-12T07:55:52Z",
-      "url": "https://github.com/hua-urban/industry-archipelago-lab/actions/runs/43178878169"
+      "completedAt": "2026-11-12T09:30:47Z",
+      "url": "https://github.com/hua-urban/industry-archipelago-lab/actions/runs/43192080475"
     }
   ],
   "notification": {
