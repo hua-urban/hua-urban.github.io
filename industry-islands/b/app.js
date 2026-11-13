@@ -1,4 +1,4 @@
-import { topics, scenarios } from './data.js?v=public-20261112';
+import { topics, scenarios } from './data.js?v=roster-20261113';
 const $ = (s) => document.querySelector(s);
 const byId = (id) => topics.find(t => t.id === id);
 const requestedTopic = new URL(location.href).searchParams.get('topic');
