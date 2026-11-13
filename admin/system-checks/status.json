@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-13T02:51:57.426Z",
+  "updatedAt": "2026-11-13T10:06:52.358Z",
   "audit": {
     "checkedAt": "2026-11-12T11:49:36.426Z",
     "status": "success",
@@ -79,8 +79,8 @@
     {
       "name": "華都更官網",
       "status": "success",
-      "completedAt": "2026-11-13T01:47:27Z",
-      "url": "https://github.com/hua-urban/hua-urban.github.io/actions/runs/43347461538"
+      "completedAt": "2026-11-13T09:52:04Z",
+      "url": "https://github.com/hua-urban/hua-urban.github.io/actions/runs/43404719641"
     },
     {
       "name": "來賓報名",
@@ -91,8 +91,8 @@
     {
       "name": "房地產協作平台",
       "status": "success",
-      "completedAt": "2026-11-13T01:49:43Z",
-      "url": "https://github.com/hua-urban/huadu-property-platform/actions/runs/43347732019"
+      "completedAt": "2026-11-13T09:51:51Z",
+      "url": "https://github.com/hua-urban/huadu-property-platform/actions/runs/43404702560"
     },
     {
       "name": "房地產協作審閱版",
