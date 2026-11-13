@@ -19,3 +19,5 @@
 .focus-amafans{display:block;width:100%;margin-top:10px;padding:12px 14px;border:1px solid #9baea1;border-radius:8px;background:#e8efe5;font-size:13px;text-align:left;min-height:44px}.fan-closeup .island-label{visibility:hidden!important}
 
 .equipment-focus-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.equipment-focus-list .focus-amafans{margin-top:6px;font-size:12px;padding:12px 10px}@media(max-width:360px){.equipment-focus-list{grid-template-columns:1fr}}
+
+.roster-section{padding:50px 0}.roster-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.roster-grid>div{padding:18px;border:1px solid #d3d9cb;border-radius:12px;background:#fbfaf3}.roster-grid h3{font-size:15px;margin:0 0 7px}.roster-grid p{font-size:13px;line-height:1.7;margin:0;overflow-wrap:anywhere}@media(max-width:600px){.roster-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.roster-grid>div{padding:13px}.roster-grid h3{font-size:13px}.roster-grid p{font-size:12px}}
