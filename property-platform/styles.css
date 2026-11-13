@@ -1684,3 +1684,7 @@ td strong {
 .case-loading-stage { font-size: 17px; font-weight: 700; line-height: 1.7; }
 .case-loading .hint { line-height: 1.8; }
 .case-loading .dugeng-angel-scene { width: 230px; }
+
+/* Keep the opening indicator visible throughout session and form preparation. */
+.opening-loading { min-height: 100dvh; display: grid; place-items: center; padding: 24px 16px; }
+.opening-loading .case-loading { width: min(100%, 520px); margin: 0; }
