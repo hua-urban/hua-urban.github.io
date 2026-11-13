@@ -348,7 +348,7 @@
     busy: false,
     detail: null,
   };
-  let toastTimer, lastFocus;
+  let toastTimer, lastFocus, imageViewer;
   const roleName = (role) =>
     ({ member: "會內夥伴", reviewer: "需求管理", info: "資訊組管理" })[role] ||
     "會內夥伴";
@@ -437,6 +437,7 @@
     return `<div class="brand">${brandMark()}<div><strong>華都更</strong><small>PROPERTY COLLABORATION</small></div></div>`;
   }
   function renderLogin(error = "") {
+    closeImageViewer();
     document.title = "授權處理人員登入｜華都更";
     if (adminAdapter) {
       const name = $("#admin-login-name")?.value || "", email = $("#admin-login-email")?.value || "";
@@ -955,6 +956,7 @@
   }
   function closeModal() {
     if (state.busy && $(".submission-dialog")) return;
+    closeImageViewer();
     if (!$("#modal-root").innerHTML) return;
     $("#modal-root").innerHTML = "";
     document.body.style.overflow = "";
@@ -1002,7 +1004,7 @@
           )
           .join(
             "",
-          )}<section class="detail-section"><h3>相關圖片 <span class="hint">${c.images?.length || 0} 張</span></h3>${c.images?.length ? `<div class="detail-images">${c.images.map((im) => `<div class="detail-image"><img data-image="${esc(im.id)}" alt="${esc(im.fileName || "物件圖片")}"></div>`).join("")}</div>` : '<p class="hint">此案件未提供圖片。</p>'}</section><div class="row wrap"><button class="btn small" data-action="download-case">↓ 完整案件資料 PDF</button>${c.images?.length ? '<button class="btn small" data-action="download-images">↓ 原圖 ZIP</button>' : ""}</div>${staff() ? `<section class="review-panel"><h3>媒合與引薦紀錄</h3><p class="hint">以下內容僅供授權處理人員查看。</p>${field("review-summary", "需求摘要", { textarea: true, value: c.summary || c.helpNeeded })}${field("review-notes", "內部盤點備註", { textarea: true, value: "", placeholder: "媒合對象、引薦進度、後續窗口與下一步" })}<div id="review-error" class="notice error" role="alert" hidden></div>${(c.internalNotes || []).length ? '<div class="hint">' + c.internalNotes.map((n) => "<p><strong>" + esc(n.actor) + " · " + date(n.at) + "</strong><br>" + esc(n.text) + "</p>").join("") + "</div>" : ""}<div class="review-actions">${["pending", "needs_info"].includes(c.status) ? '<button class="btn primary" data-action="publish">完成評估</button><button class="btn" data-action="needs-info">要求補充資料</button>' : ""}<button class="btn" data-action="save-note">儲存盤點備註</button></div>${info() ? `<div class="divider"></div><h3>資訊組案件管理</h3>${field("change-reason", "異動原因", { placeholder: "修改、撤回、失效及封存時必填" })}<div class="review-actions"><button class="btn small" data-action="edit-case">修改內容</button><button class="btn small" data-action="withdraw">撤回</button><button class="btn small" data-action="expire">標記失效</button><button class="btn small danger" data-action="archive">封存案件</button></div>` : ""}</section>` : ""}`;
+          )}<section class="detail-section"><h3>相關圖片 <span class="hint">${c.images?.length || 0} 張</span></h3>${c.images?.length ? `<div class="detail-images">${c.images.map((im, index) => `<button type="button" class="detail-image image-preview-button" data-preview-index="${index}" aria-label="放大瀏覽第 ${index + 1} 張：${esc(im.fileName || "物件圖片")}"><img data-image="${esc(im.id)}" alt="${esc(im.fileName || "物件圖片")}"><span>點擊放大</span></button>`).join("")}</div>` : '<p class="hint">此案件未提供圖片。</p>'}</section><div class="row wrap"><button class="btn small" data-action="download-case">↓ 完整案件資料 PDF</button>${c.images?.length ? '<button class="btn small" data-action="download-images">↓ 原圖 ZIP</button>' : ""}</div>${staff() ? `<section class="review-panel"><h3>媒合與引薦紀錄</h3><p class="hint">以下內容僅供授權處理人員查看。</p>${field("review-summary", "需求摘要", { textarea: true, value: c.summary || c.helpNeeded })}${field("review-notes", "內部盤點備註", { textarea: true, value: "", placeholder: "媒合對象、引薦進度、後續窗口與下一步" })}<div id="review-error" class="notice error" role="alert" hidden></div>${(c.internalNotes || []).length ? '<div class="hint">' + c.internalNotes.map((n) => "<p><strong>" + esc(n.actor) + " · " + date(n.at) + "</strong><br>" + esc(n.text) + "</p>").join("") + "</div>" : ""}<div class="review-actions">${["pending", "needs_info"].includes(c.status) ? '<button class="btn primary" data-action="publish">完成評估</button><button class="btn" data-action="needs-info">要求補充資料</button>' : ""}<button class="btn" data-action="save-note">儲存盤點備註</button></div>${info() ? `<div class="divider"></div><h3>資訊組案件管理</h3>${field("change-reason", "異動原因", { placeholder: "修改、撤回、失效及封存時必填" })}<div class="review-actions"><button class="btn small" data-action="edit-case">修改內容</button><button class="btn small" data-action="withdraw">撤回</button><button class="btn small" data-action="expire">標記失效</button><button class="btn small danger" data-action="archive">封存案件</button></div>` : ""}</section>` : ""}`;
       hydrateImages(detailBody);
     } catch (e) {
       if (!detailBody.isConnected) return;
@@ -1010,6 +1012,99 @@
         `<p class="notice error" role="alert">${esc(e.message)}</p><button class="btn" data-case="${esc(id)}">重新讀取案件</button>`;
     }
   }
+  // Keep the case dialog mounted: opening a picture must not discard unsaved notes.
+  function closeImageViewer() {
+    const v = imageViewer;
+    if (!v) return;
+    imageViewer = null;
+    if (v.url) URL.revokeObjectURL(v.url);
+    v.dialog.close();
+    v.dialog.remove();
+    if (v.focus?.isConnected) v.focus.focus();
+  }
+  function resizeViewerImage() {
+    const v = imageViewer;
+    if (!v?.image.naturalWidth || v.image.hidden) return;
+    const fit = Math.min((v.stage.clientWidth - 32) / v.image.naturalWidth,
+      (v.stage.clientHeight - 32) / v.image.naturalHeight, 1);
+    v.fit = fit;
+    v.image.style.width = `${Math.max(1, v.image.naturalWidth * fit * v.zoom)}px`;
+    v.dialog.querySelector('[data-zoom-label]').textContent = `${Math.round(v.zoom * fit * 100)}％`;
+    v.dialog.querySelector('[data-picture="zoom-out"]').disabled = v.zoom <= 1;
+    v.dialog.querySelector('[data-picture="zoom-in"]').disabled = v.zoom >= Math.max(5, 1 / fit);
+  }
+  async function loadViewerImage(index) {
+    const v = imageViewer;
+    if (!v) return;
+    const request = ++v.request;
+    v.index = index;
+    v.zoom = 1;
+    v.image.hidden = true;
+    v.image.removeAttribute('src');
+    if (v.url) URL.revokeObjectURL(v.url);
+    v.url = null;
+    const metadata = v.images[index];
+    v.dialog.querySelector('[data-picture-title]').textContent = `圖片 ${index + 1}／${v.images.length}・${metadata.fileName || '物件圖片'}`;
+    v.dialog.querySelector('[data-picture="previous"]').disabled = index === 0;
+    v.dialog.querySelector('[data-picture="next"]').disabled = index === v.images.length - 1;
+    const message = v.dialog.querySelector('[data-picture-status]');
+    const retry = v.dialog.querySelector('[data-picture="retry"]');
+    message.textContent = '正在載入原圖…';
+    retry.hidden = true;
+    try {
+      const d = await api('getImage', { id: metadata.id, original: true });
+      if (imageViewer !== v || v.request !== request) return;
+      if (!['image/jpeg', 'image/png'].includes(d.mimeType)) throw Error('此圖片格式無法預覽。');
+      const bytes = Uint8Array.from(atob(d.base64), c => c.charCodeAt(0));
+      v.url = URL.createObjectURL(new Blob([bytes], { type: d.mimeType }));
+      v.image.src = v.url;
+      await v.image.decode();
+      if (imageViewer !== v || v.request !== request) return;
+      v.image.alt = metadata.fileName || `物件圖片 ${index + 1}`;
+      v.image.hidden = false;
+      message.textContent = '可放大查看細節，放大後可捲動圖片。';
+      resizeViewerImage();
+      v.stage.scrollTo(0, 0);
+    } catch (error) {
+      if (imageViewer !== v || v.request !== request) return;
+      message.textContent = error.message || '原圖載入失敗，請重試。';
+      retry.hidden = false;
+    }
+  }
+  function openImageViewer(index) {
+    if (!staff() || !state.detail?.images?.[index]) return;
+    closeImageViewer();
+    const dialog = document.createElement('dialog');
+    dialog.className = 'image-viewer';
+    dialog.setAttribute('aria-labelledby', 'picture-title');
+    dialog.innerHTML = `<header class="picture-header"><h2 id="picture-title" data-picture-title>圖片瀏覽</h2><button type="button" class="btn" data-picture="close" autofocus>關閉圖片</button></header>
+      <div class="picture-toolbar" role="group" aria-label="圖片瀏覽工具">
+      <button type="button" class="btn small" data-picture="previous">上一張</button><button type="button" class="btn small" data-picture="next">下一張</button>
+      <button type="button" class="btn small" data-picture="zoom-out" aria-label="縮小圖片">－</button><output data-zoom-label aria-live="polite">100％</output><button type="button" class="btn small" data-picture="zoom-in" aria-label="放大圖片">＋</button><button type="button" class="btn small" data-picture="fit">符合視窗</button><button type="button" class="btn small" data-picture="actual">原始尺寸</button></div>
+      <div class="picture-status"><span role="status" data-picture-status></span><button type="button" class="btn small" data-picture="retry" hidden>重新載入</button></div>
+      <div class="picture-stage" tabindex="0" aria-label="圖片，可捲動查看放大細節"><div class="picture-canvas"><img hidden alt=""></div></div>`;
+    document.body.append(dialog);
+    imageViewer = { dialog, image: dialog.querySelector('img'), stage: dialog.querySelector('.picture-stage'),
+      images: [...state.detail.images], index, zoom: 1, request: 0, url: null, focus: document.activeElement };
+    dialog.addEventListener('cancel', e => { e.preventDefault(); closeImageViewer(); });
+    dialog.addEventListener('click', e => {
+      const action = e.target.closest('[data-picture]')?.dataset.picture;
+      const v = imageViewer;
+      if (!v) return;
+      if (action === 'close') return closeImageViewer();
+      if (action === 'previous' && v.index > 0) return void loadViewerImage(v.index - 1);
+      if (action === 'next' && v.index < v.images.length - 1) return void loadViewerImage(v.index + 1);
+      if (action === 'retry') return void loadViewerImage(v.index);
+      if (action === 'zoom-in') v.zoom = Math.min(Math.max(5, 1 / (v.fit || 1)), v.zoom + 0.5);
+      if (action === 'zoom-out') v.zoom = Math.max(1, v.zoom - 0.5);
+      if (action === 'fit') v.zoom = 1;
+      if (action === 'actual') v.zoom = 1 / (v.fit || 1);
+      resizeViewerImage();
+    });
+    dialog.showModal();
+    void loadViewerImage(index);
+  }
+  window.addEventListener('resize', resizeViewerImage);
   async function hydrateImages(root = document) {
     for (const node of $$("[data-image]", root)) {
       const id = node.dataset.image;
@@ -1257,6 +1352,10 @@
   document.addEventListener("click", async (e) => {
     const b = e.target.closest("button,[data-view],[data-case]");
     if (!b) return;
+    if (b.dataset.previewIndex !== undefined) {
+      openImageViewer(Number(b.dataset.previewIndex));
+      return;
+    }
     if (b.dataset.loginMode) {
       state.loginMode = b.dataset.loginMode;
       renderLogin();
@@ -1420,6 +1519,7 @@
     }
   });
   document.addEventListener("keydown", (e) => {
+    if (imageViewer) return;
     const modal = $(".modal");
     if (!modal) return;
     if (e.key === "Escape") closeModal();
