@@ -513,8 +513,8 @@
 <g class="dugeng-sleep-z" fill="#805b65" font-family="system-ui,sans-serif" font-weight="700"><text x="175" y="55" font-size="17">z</text><text x="188" y="40" font-size="12">z</text></g>
 <text x="145" y="149" text-anchor="middle" fill="#762b3a" font-size="12" font-family="system-ui,sans-serif" font-weight="700">都更</text></svg>`;
   }
-  function caseLoading(message = "正在讀取案件資料…") {
-    return `<section class="case-loading panel" role="status" aria-live="polite" aria-atomic="true">${dugengAngelArtwork()}<h2>都更小天使・載入中</h2><p class="case-loading-stage">${esc(message)}</p><p class="hint">正在為您整理案件資料，請稍候，不需重複點擊。</p><div class="submission-working" aria-hidden="true"><i></i><i></i><i></i></div></section>`;
+  function caseLoading(message = "正在讀取案件資料…", guidance = "正在為您整理案件資料，請稍候，不需重複點擊。") {
+    return `<section class="case-loading panel" role="status" aria-live="polite" aria-atomic="true">${dugengAngelArtwork()}<h2>都更小天使・載入中</h2><p class="case-loading-stage">${esc(message)}</p><p class="hint">${esc(guidance)}</p><div class="submission-working" aria-hidden="true"><i></i><i></i><i></i></div></section>`;
   }
   function showSubmissionAngel() {
     openModal("都更小天使・資料送出中", `${dugengAngelArtwork()}<p id="submission-stage" class="submission-stage" role="status" aria-live="polite" aria-atomic="true">正在送出您的需求…</p><p class="submission-guidance">都更小天使正在幫您整理資料，請稍候。<br>請保留此頁，不需重複點擊送出。</p><div class="submission-working" aria-hidden="true"><i></i><i></i><i></i></div><p id="submission-slow" class="hint" hidden>處理時間較長，圖片較多時可能需要多等一下。目前仍在處理中，請勿重新整理或重複送出。</p>`, { submission: true });
@@ -1255,6 +1255,7 @@
     }
   }
   async function boot() {
+    $("#app").innerHTML = `<main id="main" class="opening-loading">${caseLoading("正在開啟華都更協作平台…", "正在準備表單與會員資料，請稍候。")}</main>`;
     if (document.body.dataset.adminApiUrl && !adminAdapter)
       throw new Error("登入元件未能載入，請重新載入頁面或聯絡資訊組。");
     const rawReceipt =
