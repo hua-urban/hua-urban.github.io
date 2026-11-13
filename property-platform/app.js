@@ -155,7 +155,8 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => n.classList.remove("show"), 5000);
   }
-  async function api(action, payload = {}) {
+  let submissionSessionRecovery;
+  async function api(action, payload = {}, canRecover = true) {
     const request = { action, payload, token: state.token };
     let result;
     if (reviewAdapter) result = await reviewAdapter.rpc(request);
@@ -180,18 +181,36 @@
       result = await response.json();
     }
     if (!result?.ok) {
-      if (
-        ["UNAUTHORIZED", "SESSION_EXPIRED", "AUTH_REQUIRED"].includes(
-          result?.error?.code,
-        ) &&
-        action !== "login"
-      ) {
+      const sessionExpired = ["UNAUTHORIZED", "SESSION_EXPIRED", "AUTH_REQUIRED"]
+        .includes(result?.error?.code);
+      const publicSubmission = !!publicAdapter && !adminEntry &&
+        ["bootstrap", "createCase", "uploadImage", "finalizeCase"].includes(action);
+      if (sessionExpired && publicSubmission && canRecover) {
+        // The server rejected authentication before writing. Renew only this tab,
+        // then retry once with the same request key / receipt / image payload.
+        if (state.token === request.token || !state.token) {
+          if (!submissionSessionRecovery) {
+            submissionSessionRecovery = (async () => {
+              const started = await api("startSubmission", {}, false);
+              if (!started?.token) throw new Error("填報連線暫時無法恢復，請稍後再試。");
+              state.token = started.token;
+              state.user = started;
+              sessionStorage.setItem(sessionKey, started.token);
+            })().finally(() => { submissionSessionRecovery = null; });
+          }
+          await submissionSessionRecovery;
+        }
+        return api(action, payload, false);
+      }
+      if (sessionExpired && action !== "login") {
         state.token = "";
         state.user = null;
         sessionStorage.removeItem(sessionKey);
         if (adminEntry) renderLogin();
       }
-      const failure = new Error(result?.error?.message || "操作未完成，請稍後再試。");
+      const failure = new Error(sessionExpired && publicSubmission
+        ? "填報連線暫時無法恢復，已填內容仍在此頁，請稍後再試。"
+        : result?.error?.message || "操作未完成，請稍後再試。");
       failure.code = result?.error?.code;
       throw failure;
     }
