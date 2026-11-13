@@ -1708,3 +1708,20 @@ td strong {
 .picture-canvas img { max-width:none; height:auto; display:block; flex-shrink:0; }
 .picture-canvas img[hidden] { display:none; }
 @media(max-width:480px) { .picture-header { padding:10px; } .picture-header h2 { font-size:15px; } .picture-toolbar { gap:5px; } .picture-toolbar .btn { padding:8px 10px; min-height:40px; } }
+
+/* Keep the case entry visible and tappable without horizontal table scrolling. */
+.review-case-link { display:block; min-height:44px; width:100%; padding:8px 0; border:0; background:transparent; color:var(--wine); text-align:left; cursor:pointer; overflow-wrap:anywhere; }
+.review-case-link strong { font-size:14px; }
+.review-case-link > span { font-size:12px; text-decoration:underline; text-underline-offset:3px; }
+.review-case-link:focus-visible { outline:3px solid var(--wine); outline-offset:3px; border-radius:4px; }
+@media(max-width:760px) {
+ .review-case-table, .review-case-table tbody { display:block; width:100%; }
+ .review-case-table thead { display:none; }
+ .review-case-table tr { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; padding:16px; margin:12px 0; border:1px solid var(--line); border-radius:10px; background:#fff; }
+ .review-case-table td { display:block; min-width:0; padding:0; border:0; overflow-wrap:anywhere; }
+ .review-case-table .review-case-title { grid-column:1/-1; padding-bottom:12px; border-bottom:1px solid var(--line); }
+ .review-case-table .review-case-link { padding:0 0 8px; }
+ .review-case-table .review-case-link strong { font-size:17px; line-height:1.6; }
+ .review-case-table td[data-label]::before { content:attr(data-label); display:block; margin-bottom:4px; color:var(--muted); font-size:12px; }
+ .review-case-table .review-case-action { display:none; }
+}
