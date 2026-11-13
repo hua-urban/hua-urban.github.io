@@ -281,6 +281,31 @@ a{text-decoration:none;color:inherit}
 
 /* activities 弱化標籤 */
 
+/* Demand registration continues the chapter introduction. */
+.about-intake{
+  display:flex;align-items:center;justify-content:space-between;gap:32px;
+  margin-top:40px;padding:30px 32px;
+  background:#fbfaf7;border:1px solid #e9e3d6;border-radius:var(--r-md);
+}
+.about-intake-copy{min-width:0}
+.about-intake .sec-label{color:#806426;margin-bottom:8px}
+.about-intake h3{font-family:"Noto Serif TC",serif;font-size:24px;line-height:1.4;color:var(--gray-900);margin-bottom:10px}
+.about-intake p{font-size:14px;line-height:1.8;color:var(--gray-600);max-width:680px}
+.about-intake-link{
+  display:inline-flex;align-items:center;justify-content:center;gap:12px;flex-shrink:0;
+  padding:13px 22px;border:1px solid var(--gray-900);border-radius:var(--r-sm);
+  background:var(--gray-900);color:#fff;font-size:14px;font-weight:600;
+  transition:background .15s,border-color .15s;
+}
+.about-intake-link:hover{background:var(--red);border-color:var(--red)}
+.about-intake-link svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2}
+.about-intake-link:focus-visible{outline:3px solid var(--gold);outline-offset:4px}
+@media(max-width:600px){
+  .about-intake{align-items:stretch;flex-direction:column;gap:22px;margin-top:30px;padding:24px 20px}
+  .about-intake h3{font-size:22px}
+  .about-intake-link{width:100%}
+}
+
 /* ── MSP ── */
 .msp{background:var(--white);padding:64px 0}
 .timeline{position:relative;display:flex;flex-direction:column}
@@ -406,28 +431,6 @@ a{text-decoration:none;color:inherit}
 .roster-ct{font-size:13px;color:var(--gray-600);margin-top:8px}
 .roster-status{margin-top:5px;color:var(--gray-800);font-size:13px;line-height:1.5}
 .roster-ct span{color:var(--red);font-weight:600}
-.member-service{
-  display:flex;align-items:center;justify-content:space-between;gap:24px;
-  margin:0 0 24px;padding:18px 22px;
-  background:var(--white);border:1px solid var(--gray-100);border-left:3px solid var(--gold);
-  border-radius:var(--r-md);
-}
-.member-service-copy{min-width:0}
-.member-service-label{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--gray-500);margin-bottom:3px}
-.member-service-title{font-size:16px;font-weight:700;color:var(--gray-900);line-height:1.4}
-.member-service-desc{margin-top:3px;font-size:13px;color:var(--gray-600);line-height:1.6}
-.member-service-link{
-  display:inline-flex;align-items:center;justify-content:center;gap:7px;flex-shrink:0;
-  padding:9px 14px;border:1px solid var(--gray-200);border-radius:var(--r-sm);
-  color:var(--gray-800);font-size:13px;font-weight:600;white-space:nowrap;
-  transition:border-color .15s,background .15s,color .15s;
-}
-.member-service-link:hover{border-color:var(--gold);background:#fbf9f3;color:var(--gray-900)}
-.member-service-link svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
-@media(max-width:600px){
-  .member-service{align-items:stretch;flex-direction:column;gap:14px;padding:16px}
-  .member-service-link{width:100%}
-}
 .tbl-wrap{background:var(--white);border:1px solid var(--gray-100);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-sm)}
 .tbl-wrap th{color:var(--gray-600)}
 table{width:100%;border-collapse:collapse}
@@ -1675,6 +1678,18 @@ section[id]{scroll-margin-top:68px}
       </div>
     </div>
 
+    <div class="about-intake" aria-labelledby="about-intake-title">
+      <div class="about-intake-copy">
+        <span class="sec-label">會員服務 · 從需求開始協作</span>
+        <h3 id="about-intake-title">房地產需求登錄</h3>
+        <p>有整合、出售、出租或貸款活化需求？留下資料，由董顧與九長協助媒合及引薦。</p>
+      </div>
+      <a class="about-intake-link" href="/property-platform/">
+        登錄房地產需求
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+
     <!-- 影片已移至首屏主視覺，此處不再重複 -->
   </div>
 </section>
@@ -1808,17 +1823,6 @@ section[id]{scroll-margin-top:68px}
       <span class="red-bar"></span>
       <h2>夥伴名冊</h2>
       <p>現任正式會員一覽</p>
-    </div>
-    <div class="member-service">
-      <div class="member-service-copy">
-        <div class="member-service-label">會員服務</div>
-        <h3 class="member-service-title">房地產需求登錄</h3>
-        <p class="member-service-desc">有房源、都更整合或貸款需求，可留下資料，由董顧與九長協助媒合及引薦。</p>
-      </div>
-      <a class="member-service-link" href="/property-platform/">
-        前往登錄
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </a>
     </div>
     <div class="search-wrap">
       <div class="search-bar">
