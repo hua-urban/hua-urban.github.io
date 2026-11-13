@@ -75,6 +75,221 @@
   return Object.freeze({groups:groups,normalize:normalize,answeredGroups:answeredGroups,toText:toText});
 });
 
+/* Raster PDF export: Chinese text uses the browser's fonts and is not searchable. */
+(function () {
+  'use strict';
+
+  const WIDTH = 1190;
+  const HEIGHT = 1684;
+  const MARGIN = 88;
+  const CONTENT_TOP = 170;
+  const CONTENT_BOTTOM = HEIGHT - 120;
+  const FONT = '"Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif';
+  const encoder = new TextEncoder();
+
+  function encodePdf(pages) {
+    const chunks = [];
+    const offsets = [0];
+    let length = 0;
+    const append = (value) => {
+      const bytes = typeof value === 'string' ? encoder.encode(value) : value;
+      chunks.push(bytes);
+      length += bytes.length;
+    };
+    const object = (id, content) => {
+      offsets[id] = length;
+      append(`${id} 0 obj\n${content}\nendobj\n`);
+    };
+
+    append('%PDF-1.4\n');
+    object(1, '<< /Type /Catalog /Pages 2 0 R >>');
+    object(2, `<< /Type /Pages /Count ${pages.length} /Kids [${pages.map((_, i) => `${3 + i * 3} 0 R`).join(' ')}] >>`);
+    pages.forEach((bytes, index) => {
+      const pageId = 3 + index * 3;
+      const imageId = pageId + 1;
+      const streamId = pageId + 2;
+      object(pageId, `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /XObject << /Im0 ${imageId} 0 R >> >> /Contents ${streamId} 0 R >>`);
+      offsets[imageId] = length;
+      append(`${imageId} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${WIDTH} /Height ${HEIGHT} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${bytes.length} >>\nstream\n`);
+      append(bytes);
+      append('\nendstream\nendobj\n');
+      const commands = 'q\n595 0 0 842 0 0 cm\n/Im0 Do\nQ\n';
+      object(streamId, `<< /Length ${encoder.encode(commands).length} >>\nstream\n${commands}endstream`);
+    });
+    const xref = length;
+    append(`xref\n0 ${offsets.length}\n0000000000 65535 f \n`);
+    for (let id = 1; id < offsets.length; id += 1) {
+      append(`${String(offsets[id]).padStart(10, '0')} 00000 n \n`);
+    }
+    append(`trailer\n<< /Size ${offsets.length} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`);
+    return new Blob(chunks, { type: 'application/pdf' });
+  }
+
+  function jpegBytes(canvas) {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(async (blob) => {
+        if (!blob) {
+          reject(new Error('無法產生 PDF 頁面影像。'));
+          return;
+        }
+        try {
+          resolve(new Uint8Array(await blob.arrayBuffer()));
+        } catch (error) {
+          reject(error);
+        }
+      }, 'image/jpeg', 0.92);
+    });
+  }
+
+  async function decodeImage(data) {
+    if (!data || typeof data.base64 !== 'string' || !data.base64.trim()) {
+      throw new Error('圖片內容為空。');
+    }
+    const mimeType = data.mimeType || 'image/jpeg';
+    if (!mimeType.startsWith('image/')) throw new Error('檔案不是圖片。');
+    const raw = atob(data.base64.replace(/^data:[^,]*,/, '').replace(/\s/g, ''));
+    const bytes = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i += 1) bytes[i] = raw.charCodeAt(i);
+    const url = URL.createObjectURL(new Blob([bytes], { type: mimeType }));
+    const image = new Image();
+    try {
+      await new Promise((resolve, reject) => {
+        image.onload = resolve;
+        image.onerror = () => reject(new Error('瀏覽器無法解碼圖片。'));
+        image.src = url;
+      });
+      if (!image.naturalWidth || !image.naturalHeight) throw new Error('圖片尺寸無效。');
+      return { image, release: () => { image.src = ''; URL.revokeObjectURL(url); } };
+    } catch (error) {
+      image.src = '';
+      URL.revokeObjectURL(url);
+      throw error;
+    }
+  }
+
+  async function create({ title = '案件資料', sections = [], images = [], loadImage, onProgress = () => {} } = {}) {
+    if (images.length && typeof loadImage !== 'function') throw new Error('缺少圖片載入功能。');
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    const canvas = document.createElement('canvas');
+    canvas.width = WIDTH;
+    canvas.height = HEIGHT;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('瀏覽器不支援 PDF 頁面繪製。');
+    const pages = [];
+    let y = CONTENT_TOP;
+    let dirty = false;
+    const font = (size = 26, bold = false) => { ctx.font = `${bold ? '600' : '400'} ${size}px ${FONT}`; };
+    const wrap = (value, width) => {
+      const lines = [];
+      for (const paragraph of String(value ?? '').replace(/\r\n?/g, '\n').replace(/\t/g, '    ').split('\n')) {
+        let line = '';
+        for (const character of paragraph) {
+          if (line && ctx.measureText(line + character).width > width) {
+            lines.push(line);
+            line = '';
+          }
+          line += character;
+        }
+        lines.push(line);
+      }
+      return lines;
+    };
+    const startPage = () => {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, WIDTH, HEIGHT);
+      ctx.textBaseline = 'top';
+      ctx.fillStyle = '#253548';
+      font(26, true);
+      // The complete title is printed in the document body; the running header is compact.
+      let header = String(title).replace(/\s+/g, ' ');
+      while (header && ctx.measureText(header).width > WIDTH - MARGIN * 2 - 30) header = header.slice(0, -1);
+      if (header !== String(title).replace(/\s+/g, ' ')) header += '…';
+      ctx.fillText(header, MARGIN, 72);
+      ctx.fillStyle = '#536171';
+      font(22);
+      ctx.fillText(`第 ${pages.length + 1} 頁`, MARGIN, HEIGHT - 70);
+      ctx.fillStyle = '#172536';
+      y = CONTENT_TOP;
+      dirty = false;
+    };
+    const savePage = async () => {
+      pages.push(await jpegBytes(canvas));
+      onProgress(`已產生 ${pages.length} 頁`);
+    };
+    const write = async (value, size = 26, bold = false) => {
+      font(size, bold);
+      const lines = wrap(value, WIDTH - MARGIN * 2);
+      const lineHeight = Math.ceil(size * 1.55);
+      for (const line of lines) {
+        if (y + lineHeight > CONTENT_BOTTOM) {
+          await savePage();
+          startPage();
+        }
+        font(size, bold);
+        ctx.fillText(line, MARGIN, y);
+        y += lineHeight;
+        dirty = true;
+      }
+    };
+
+    try {
+      startPage();
+      await write(title, 38, true);
+      y += 28;
+      for (const section of sections) {
+        if (section.heading) {
+          y += 16;
+          await write(section.heading, 31, true);
+          y += 12;
+        }
+        for (const [label, value] of section.fields || []) {
+          if (label) await write(label, 26, true);
+          await write(value);
+          y += 20;
+        }
+      }
+      if (dirty) await savePage();
+
+      for (let i = 0; i < images.length; i += 1) {
+        const item = images[i];
+        const name = String(item.fileName || item.id || `圖片 ${i + 1}`);
+        onProgress(`正在載入圖片 ${i + 1}／${images.length}：${name}`);
+        let loaded;
+        try {
+          loaded = await decodeImage(await loadImage(item));
+          startPage();
+          await write(`圖片 ${i + 1}／${images.length}`, 30, true);
+          await write(name, 26);
+          // An exceptionally long filename may span pages; the image stays intact on the next one.
+          if (CONTENT_BOTTOM - y < 180) {
+            await savePage();
+            startPage();
+          }
+          y += 24;
+          const availableHeight = CONTENT_BOTTOM - y;
+          const scale = Math.min((WIDTH - MARGIN * 2) / loaded.image.naturalWidth, availableHeight / loaded.image.naturalHeight);
+          const width = loaded.image.naturalWidth * scale;
+          const height = loaded.image.naturalHeight * scale;
+          ctx.drawImage(loaded.image, (WIDTH - width) / 2, y + (availableHeight - height) / 2, width, height);
+          await savePage();
+        } catch (error) {
+          throw new Error(`圖片「${name}」匯出失敗：${error.message || String(error)}`);
+        } finally {
+          if (loaded) loaded.release();
+        }
+      }
+      onProgress('正在完成 PDF');
+      return encodePdf(pages);
+    } finally {
+      // Release the large backing store after both success and failure.
+      canvas.width = 0;
+      canvas.height = 0;
+    }
+  }
+
+  window.HuaduCasePdf = { create };
+}());
+
 "use strict";
 (() => {
   const $ = (s, root = document) => root.querySelector(s);
@@ -787,7 +1002,7 @@
           )
           .join(
             "",
-          )}<section class="detail-section"><h3>相關圖片 <span class="hint">${c.images?.length || 0} 張</span></h3>${c.images?.length ? `<div class="detail-images">${c.images.map((im) => `<div class="detail-image"><img data-image="${esc(im.id)}" alt="${esc(im.fileName || "物件圖片")}"></div>`).join("")}</div>` : '<p class="hint">此案件未提供圖片。</p>'}</section><div class="row wrap"><button class="btn small" data-action="download-case">↓ 完整案件資料</button>${c.images?.length ? '<button class="btn small" data-action="download-images">↓ 原圖 ZIP</button>' : ""}</div>${staff() ? `<section class="review-panel"><h3>媒合與引薦紀錄</h3><p class="hint">以下內容僅供授權處理人員查看。</p>${field("review-summary", "需求摘要", { textarea: true, value: c.summary || c.helpNeeded })}${field("review-notes", "內部盤點備註", { textarea: true, value: "", placeholder: "媒合對象、引薦進度、後續窗口與下一步" })}<div id="review-error" class="notice error" role="alert" hidden></div>${(c.internalNotes || []).length ? '<div class="hint">' + c.internalNotes.map((n) => "<p><strong>" + esc(n.actor) + " · " + date(n.at) + "</strong><br>" + esc(n.text) + "</p>").join("") + "</div>" : ""}<div class="review-actions">${["pending", "needs_info"].includes(c.status) ? '<button class="btn primary" data-action="publish">完成評估</button><button class="btn" data-action="needs-info">要求補充資料</button>' : ""}<button class="btn" data-action="save-note">儲存盤點備註</button></div>${info() ? `<div class="divider"></div><h3>資訊組案件管理</h3>${field("change-reason", "異動原因", { placeholder: "修改、撤回、失效及封存時必填" })}<div class="review-actions"><button class="btn small" data-action="edit-case">修改內容</button><button class="btn small" data-action="withdraw">撤回</button><button class="btn small" data-action="expire">標記失效</button><button class="btn small danger" data-action="archive">封存案件</button></div>` : ""}</section>` : ""}`;
+          )}<section class="detail-section"><h3>相關圖片 <span class="hint">${c.images?.length || 0} 張</span></h3>${c.images?.length ? `<div class="detail-images">${c.images.map((im) => `<div class="detail-image"><img data-image="${esc(im.id)}" alt="${esc(im.fileName || "物件圖片")}"></div>`).join("")}</div>` : '<p class="hint">此案件未提供圖片。</p>'}</section><div class="row wrap"><button class="btn small" data-action="download-case">↓ 完整案件資料 PDF</button>${c.images?.length ? '<button class="btn small" data-action="download-images">↓ 原圖 ZIP</button>' : ""}</div>${staff() ? `<section class="review-panel"><h3>媒合與引薦紀錄</h3><p class="hint">以下內容僅供授權處理人員查看。</p>${field("review-summary", "需求摘要", { textarea: true, value: c.summary || c.helpNeeded })}${field("review-notes", "內部盤點備註", { textarea: true, value: "", placeholder: "媒合對象、引薦進度、後續窗口與下一步" })}<div id="review-error" class="notice error" role="alert" hidden></div>${(c.internalNotes || []).length ? '<div class="hint">' + c.internalNotes.map((n) => "<p><strong>" + esc(n.actor) + " · " + date(n.at) + "</strong><br>" + esc(n.text) + "</p>").join("") + "</div>" : ""}<div class="review-actions">${["pending", "needs_info"].includes(c.status) ? '<button class="btn primary" data-action="publish">完成評估</button><button class="btn" data-action="needs-info">要求補充資料</button>' : ""}<button class="btn" data-action="save-note">儲存盤點備註</button></div>${info() ? `<div class="divider"></div><h3>資訊組案件管理</h3>${field("change-reason", "異動原因", { placeholder: "修改、撤回、失效及封存時必填" })}<div class="review-actions"><button class="btn small" data-action="edit-case">修改內容</button><button class="btn small" data-action="withdraw">撤回</button><button class="btn small" data-action="expire">標記失效</button><button class="btn small danger" data-action="archive">封存案件</button></div>` : ""}</section>` : ""}`;
       hydrateImages(detailBody);
     } catch (e) {
       if (!detailBody.isConnected) return;
@@ -822,36 +1037,60 @@
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 5000);
   }
-  function downloadCase() {
-    if (!staff()) return;
-    const c = state.detail;
-    const out = {
-      案件編號: c.id,
-      案件名稱: c.title,
-      標的類型: c.propertyType,
-      需求: c.categories,
-      縣市: c.city,
-      行政區: c.district,
-      位置: c.location,
-      提報人: c.memberName || c.memberId,
-      聯絡方式: c.contact,
-      是否代他人提報: c.onBehalf === true,
-      與標的關係: c.relationship || "",
-      摘要: c.summary,
-      需求補充資訊: categoryQuestions.toText(c.categoryDetails || {}, c.categories),
-      現況與需求: c.description,
-      希望協助: c.helpNeeded,
-      圖片: (c.images || []).map((i) => ({ 檔名: i.fileName, 圖片編號: i.id })),
-      狀態: statusNames[c.status],
-      建立時間: c.createdAt,
-      更新時間: c.updatedAt,
-    };
-    saveFile(
-      JSON.stringify(out, null, 2),
-      `${safeName(c.title)}-完整資料.json`,
-      "application/json;charset=utf-8",
-    );
-    toast("已下載核准範圍的案件資料。");
+  async function downloadCase(button) {
+    if (!staff() || !state.detail) return;
+    const c = structuredClone(state.detail);
+    const originalText = button.textContent;
+    const fullDate = value => value ? new Date(value).toLocaleString("zh-TW", { hour12: false }) : "未提供";
+    const sections = [
+      { heading: "案件基本資料", fields: [
+        ["案件編號", c.id], ["案件狀態", statusNames[c.status] || c.status],
+        ["標的類型", c.propertyType], ["需求類別", (c.categories || []).join("、")],
+        ["縣市", c.city], ["行政區", c.district], ["詳細位置", c.location],
+        ["建立時間", fullDate(c.createdAt)], ["更新時間", fullDate(c.updatedAt)],
+      ] },
+      { heading: "聯絡與提報資料", fields: [
+        ["填報人姓名", c.submitterName || c.memberName || c.memberId],
+        ["提報會員", c.memberName || c.memberId],
+        ["Email", c.submitterEmail || c.contact], ["手機", c.submitterPhone],
+        ["代他人提報", c.onBehalf ? "是" : "否"], ["與標的的關係", c.relationship],
+        ["資料使用同意", c.shareConsent ? "已同意" : "未記錄"],
+      ] },
+      { heading: "現況與需求", fields: [
+        ["需求摘要", c.summary],
+        ["需求補充資訊", categoryQuestions.toText(c.categoryDetails || {}, c.categories)],
+        ["標的現況與需求說明", c.description], ["希望會內協助", c.helpNeeded],
+      ] },
+    ];
+    if (c.internalNotes?.length) sections.push({
+      heading: "媒合與引薦紀錄",
+      fields: c.internalNotes.map(note => [
+        [note.actor, fullDate(note.at)].filter(Boolean).join(" · "), note.text,
+      ]),
+    });
+    if (c.reviewHistory?.length) sections.push({
+      heading: "評估紀錄",
+      fields: c.reviewHistory.map(record => [
+        [record.actor, fullDate(record.at)].filter(Boolean).join(" · "),
+        [record.decision === "publish" ? "完成評估" : record.decision === "needs_info" ? "要求補充資料" : record.decision,
+          record.summary, record.notes].filter(Boolean).join("\n"),
+      ]),
+    });
+    button.disabled = true;
+    try {
+      const pdf = await window.HuaduCasePdf.create({
+        title: c.title || "完整案件資料", sections, images: c.images || [],
+        loadImage: image => api("getImage", { id: image.id, original: true }),
+        onProgress: message => { button.textContent = message; },
+      });
+      saveFile(pdf, `${safeName(c.title)}-完整案件資料.pdf`, "application/pdf");
+      toast("完整案件 PDF 已下載。");
+    } finally {
+      if (button.isConnected) {
+        button.disabled = false;
+        button.textContent = originalText;
+      }
+    }
   }
   const safeName = (s) =>
     String(s || "案件")
@@ -1098,7 +1337,7 @@
         );
         toast("清單已下載。");
       }
-      if (action === "download-case") downloadCase();
+      if (action === "download-case") await downloadCase(b);
       if (action === "download-images") {
         b.disabled = true;
         await downloadImages();
