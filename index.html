@@ -283,6 +283,7 @@ a{text-decoration:none;color:inherit}
 
 /* Demand registration continues the chapter introduction. */
 .about-intake{
+  scroll-margin-top:88px;
   display:flex;align-items:center;justify-content:space-between;gap:32px;
   margin-top:40px;padding:30px 32px;
   background:#fbfaf7;border:1px solid #e9e3d6;border-radius:var(--r-md);
@@ -502,8 +503,10 @@ tr.hidden{display:none}
 @media(max-width:1024px){
   .chains{grid-template-columns:repeat(3,1fr)}
 }
-@media(max-width:768px){
+@media(max-width:960px){
   .nav-list{display:none}.hamburger{display:flex}
+}
+@media(max-width:768px){
   .hero{padding:32px 0 0}
   .stat-inner{grid-template-columns:repeat(2,1fr)}
   .stat-item{border-bottom:1px solid rgba(255,255,255,.1)}
@@ -1452,6 +1455,7 @@ section[id]{scroll-margin-top:68px}
         <li><a href="#msp">培訓快訊</a></li>
         <li><a href="#powerteam">組聚</a></li>
         <li><a href="#roster">名冊</a></li>
+        <li><a href="#property-intake">需求登錄</a></li>
         <li><a href="guest/" target="_blank" rel="noopener" class="nav-cta">加入詢問</a></li>
       </ul>
       <button class="hamburger" onclick="toggleMNav()" aria-label="選單">
@@ -1466,6 +1470,7 @@ section[id]{scroll-margin-top:68px}
     <li><a href="#msp" onclick="closeMNav()">培訓快訊</a></li>
     <li><a href="#powerteam" onclick="closeMNav()">Power Team 組聚</a></li>
     <li><a href="#roster" onclick="closeMNav()">夥伴名冊</a></li>
+    <li><a href="#property-intake" onclick="closeMNav()">需求登錄</a></li>
   </ul>
   <a href="guest/" target="_blank" rel="noopener" class="m-cta" onclick="closeMNav()">加入詢問</a>
 </div>
@@ -1678,7 +1683,7 @@ section[id]{scroll-margin-top:68px}
       </div>
     </div>
 
-    <div class="about-intake" aria-labelledby="about-intake-title">
+    <div class="about-intake" id="property-intake" aria-labelledby="about-intake-title">
       <div class="about-intake-copy">
         <span class="sec-label">會員服務 · 從需求開始協作</span>
         <h3 id="about-intake-title">房地產需求登錄</h3>
@@ -2001,6 +2006,7 @@ section[id]{scroll-margin-top:68px}
           <li><a href="#msp">培訓快訊</a></li>
           <li><a href="#powerteam">Power Team</a></li>
           <li><a href="#roster">夥伴名冊</a></li>
+          <li><a href="/admin/">後台管理</a></li>
         </ul>
       </div>
       <div>
@@ -2231,25 +2237,33 @@ function initSideNav(){
     snItems.forEach(function(a){
       a.classList.toggle('sn-active', a.dataset.target === id);
     });
+    document.querySelectorAll('.nav-list a:not(.nav-cta)').forEach(function(a){
+      a.classList.toggle('act', a.getAttribute('href') === '#' + id);
+    });
   }
 
   var snSections = Array.from(snItems).map(function(a){
     return document.getElementById(a.dataset.target);
   }).filter(Boolean);
 
-  // IntersectionObserver: 偵測哪個 section 進入視窗上半部
-  var observer = new IntersectionObserver(function(entries){
-    entries.forEach(function(entry){
-      if(entry.isIntersecting){
-        snActivate(entry.target.id);
-      }
+  // The intake anchor is inside About; use anchor positions so the parent
+  // cannot overwrite the active item when scrolling back through the card.
+  function snRefresh(){
+    var active = snSections[0];
+    snSections.forEach(function(section){
+      if(section.getBoundingClientRect().top <= window.innerHeight * .35) active = section;
     });
-  },{rootMargin:'-10% 0px -60% 0px', threshold:0});
-
-  snSections.forEach(function(s){ observer.observe(s); });
-
-  // 初始化（頁面剛載入時，第一個 section 預設 active）
-  if(snSections.length) snActivate(snSections[0].id);
+    if(active) snActivate(active.id);
+  }
+  var snFrame = null;
+  function snSchedule(){
+    if(snFrame !== null) return;
+    snFrame = requestAnimationFrame(function(){ snFrame = null; snRefresh(); });
+  }
+  window.addEventListener('scroll', snSchedule, {passive:true});
+  window.addEventListener('resize', snSchedule);
+  window.addEventListener('load', snSchedule);
+  snRefresh();
 
   // 點擊平滑捲動
   snItems.forEach(function(a){
@@ -2614,23 +2628,6 @@ document.addEventListener('keydown',function(e){
   }
 });
 
-// ─────────────────────────────────────────────
-// Nav active highlight on scroll
-// ─────────────────────────────────────────────
-var navAs=document.querySelectorAll('.nav-list a:not(.nav-cta)');
-var sids=['calendar','activities','msp','powerteam','zoom','roster'];
-window.addEventListener('scroll',function(){
-  var cur='';
-  sids.forEach(function(id){
-    var el=document.getElementById(id);
-    if(el&&window.scrollY>=el.offsetTop-100)cur=id;
-  });
-  navAs.forEach(function(a){
-    a.classList.remove('act');
-    if(a.getAttribute('href')==='#'+cur)a.classList.add('act');
-  });
-});
-
 // 名冊職務只作顯示，不提供或代表任何權限。
 window.renderRosterRoles=function(){
   var goldRoles = /主席|副主席/;
@@ -2681,6 +2678,9 @@ window.renderRosterRoles();
   <div class="side-nav-list">
     <a class="side-nav-item" data-target="about" href="#about">
       <span class="sn-dot"></span><span class="sn-label">分會簡介</span>
+    </a>
+    <a class="side-nav-item" data-target="property-intake" href="#property-intake">
+      <span class="sn-dot"></span><span class="sn-label">需求登錄</span>
     </a>
     <a class="side-nav-item" data-target="powerteam" href="#powerteam">
       <span class="sn-dot"></span><span class="sn-label">Power Team</span>
