@@ -10,7 +10,7 @@ import { createAmaFansPavilion } from './amafans-building.js?v=fan-finish2';
 
 // This pure layout is shared by rendered roads and headless connectivity checks.
 export const ROAD_LAYOUT = {
-  nodes: {ai:[-4.6,-1.8],property:[-1.4,-3.35],finance:[1.3,-1.85],land:[4.7,-2.3],industry:[5,1.1],talent:[-5.2,1],center:[-.1,.9],west:[-3.35,2.7],east:[3.3,2.75],overseas:[-5.4,6.65],learning:[4.7,6.65],korean:[3.8,6.7]},
+  nodes: {ai:[-4.6,-1.8],property:[-1.4,-3.35],finance:[1.3,-1.85],land:[4.7,-2.3],industry:[5,1.1],talent:[-5.2,1],center:[-.1,.9],west:[-3.35,2.7],east:[3.3,2.75],overseas:[-5.4,6.65],learning:[4.7,6.65],korean:[6.45,8.65]},
   links: [
     ['ai','property',[[-3.5,-2.8]]], ['property','land',[[.6,-3.4],[2.8,-3.3]]],
     ['land','industry',[[5.7,-.8]]], ['industry','east',[[4.4,2.4]]],
@@ -223,9 +223,11 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
       const halo=mesh(keep(new THREE.RingGeometry(.55,.76,48)),glowMat,root,0,.16,0);halo.rotation.x=-Math.PI/2;halo.castShadow=false;halo.visible=false;
       const marker=cyl(root,0,.19,0,.1,.12,accent);marker.castShadow=false;
       const hit=cyl(root,0,.09,0,1.22,.08,P.grass);hit.castShadow=false;hit.material=material('#ffffff',{transparent:true,opacity:0,depthWrite:false});hit.userData.topicId=topic.id;pickables.push(hit);
+      if(topic.id!=='korean') {
       const label=document.createElement('button');label.type='button';label.className='island-label';label.dataset.topic=topic.id;label.textContent=topic.short||topic.title;label.setAttribute('aria-label',topic.title||topic.id);label.style.position='absolute';label.style.zIndex='3';
       label.addEventListener('click',()=>{stopTour();select(topic.id);onSelect(topic.id);});container.appendChild(label);
       labels.push({el:label,anchor:new THREE.Vector3(x,1.65,z+.25)});
+      }
       districtMap.set(topic.id,{root,halo,glowMat,topic});
       if(topic.id==='property') {
         // A residential block with gardens, a small apartment and terracotta homes.
@@ -284,15 +286,21 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
         for(const px of [-1.4,.4]) {box(root,px,-.04,2,.3,.16,1.4,P.wood);for(const zz of [1.5,2.4])cyl(root,px,-.3,zz,.045,.6,P.wood);}
         tree(x-1.5,z-.7,.6);
       } else if(topic.id==='korean') {
-        const shop=building(root,0,-.55,.8,.62,.72,'house',P.cream);shop.name='korean-learning-bookshop';
-        // Lightweight storefront: one readable Korean sign and a few book spines.
-        box(shop,0,.4,.33,.61,.35,.035,P.wood);
-        for(let j=0;j<6;j++)box(shop,-.25+j*.1,.42,.355,.065,.25+(j%2)*.03,.035,j%3===0?P.brick:j%3===1?P.glass:P.white);
-        const canvas=document.createElement('canvas');canvas.width=768;canvas.height=256;
-        const ctx=canvas.getContext('2d');ctx.fillStyle='#315949';ctx.fillRect(0,0,768,256);ctx.fillStyle='#fff8e9';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='600 84px "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';ctx.fillText('한국어 교실',384,96);ctx.font='46px "Apple SD Gothic Neo", sans-serif';ctx.fillText('작은 책방',384,192);
-        const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;ownedCleanups.push(()=>texture.dispose());
-        const sign=mesh(keep(new THREE.PlaneGeometry(.95,.32)),material('#ffffff',{map:texture}),shop,0,.83,.36);sign.name='korean-bookshop-sign';sign.userData.topicId='korean';pickables.push(sign);
-        box(shop,-.56,.2,.48,.2,.32,.26,P.wood);for(let j=0;j<3;j++)box(shop,-.61+j*.05,.4,.48,.035,.12,.14,j%2?P.brick:P.white);
+        const shop=new THREE.Group();shop.position.set(0,.12,-.55);root.add(shop);shop.name='korean-learning-bookshop';
+        box(shop,0,.025,0,1.42,.05,1.12,P.sand);
+        const body=box(shop,0,.47,0,1.12,.86,.8,P.cream);body.userData.topicId='korean';pickables.push(body);
+        box(shop,0,.94,0,1.26,.12,.94,P.deepGreen);
+        box(shop,-.29,.44,.415,.48,.46,.035,P.wood);
+        for(let j=0;j<5;j++)box(shop,-.47+j*.085,.43,.442,.055,.26+(j%2)*.035,.025,j%3===0?P.brick:j%3===1?P.glass:P.white);
+        box(shop,.34,.37,.418,.22,.62,.035,P.glass);box(shop,.4,.34,.445,.025,.07,.02,P.gold);
+        // The sign has its own backing and sits wholly below, and in front of, the roof.
+        box(shop,0,.78,.46,1.2,.25,.08,P.wood);
+        const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=256;
+        const ctx=canvas.getContext('2d');ctx.fillStyle='#315949';ctx.fillRect(0,0,1024,256);ctx.fillStyle='#fff8e9';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='600 110px "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';ctx.fillText('한국어 교실',512,132);
+        const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;texture.minFilter=THREE.LinearFilter;texture.generateMipmaps=false;ownedCleanups.push(()=>texture.dispose());
+        const signMaterial=new THREE.MeshBasicMaterial({map:texture,side:THREE.DoubleSide,toneMapped:false});materials.add(signMaterial);
+        const sign=mesh(keep(new THREE.PlaneGeometry(1.12,.22)),signMaterial,shop,0,.78,.506);sign.castShadow=false;sign.receiveShadow=false;sign.name='korean-bookshop-sign';sign.userData.topicId='korean';pickables.push(sign);
+        box(shop,-.68,.18,.46,.18,.3,.24,P.wood);for(let j=0;j<3;j++)box(shop,-.73+j*.05,.38,.46,.035,.12,.14,j%2?P.brick:P.white);
       } else if(topic.id==='learning') {
         building(root,.6,-.6,.85,.65,.8,'house',P.cream);
         const pavilion=new THREE.Group();pavilion.position.set(0,.1,.65);root.add(pavilion);
@@ -537,7 +545,7 @@ export async function createIsland({ container, topics = [], onSelect = () => {}
       if(!districtMap.has(id))return;if(industryFocused&&id!=='industry'){stopTour();resetGlobalView();}selected=id;connected=null;
       const partners=(districtMap.get(id).topic.partners||[]).map(p=>Array.isArray(p)?p[0]:p.id).filter(p=>districtMap.has(p));
       districtMap.forEach((d,key)=>{d.halo.visible=key===id||partners.includes(key);d.glowMat.opacity=key===id?.35:.15;});
-      labels.forEach(({el})=>{const active=el.dataset.topic===id;el.classList.toggle('active',active);el.classList.remove('route-endpoint');el.classList.toggle('partner',partners.includes(el.dataset.topic));el.setAttribute('aria-pressed',String(active));});
+      labels.forEach(({el})=>{const active=el.dataset.topic===id||(id==='korean'&&el.dataset.topic==='learning');el.classList.toggle('active',active);el.classList.remove('route-endpoint');el.classList.toggle('partner',partners.includes(el.dataset.topic));el.setAttribute('aria-pressed',String(active));});
       drawRoutes(partners.map(p=>[id,p]));
     }
     function connect(fromId,toId) {
