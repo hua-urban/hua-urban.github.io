@@ -2,8 +2,8 @@
   "designId": "DAHIJ-tcWYM",
   "meetingDate": "2026-11-25",
   "exportMethod": "Canva REST API original PDF",
-  "publishedAt": "2026-11-18T21:23:20.306796+08:00",
-  "pdfSha256": "02414ee7bc13970c8bc71d59802b9d37f6f7843808966fee748d84f135a4433c",
+  "publishedAt": "2026-11-19T04:10:48.671600+08:00",
+  "pdfSha256": "c13fc467af55e6137744b7961d5969d5a9ca011b8e5af8a4314c08805ea0244f",
   "cards": [
     {
       "page": 55,
@@ -12,8 +12,8 @@
     },
     {
       "page": 56,
-      "url": "images/topic-card-2026-11-25-2-6695588c4eef.png",
-      "sha256": "6695588c4eef2dfc07368438b0f86930e925d4d84636df09ad478d4e54b10aae"
+      "url": "images/topic-card-2026-11-25-2-ee076cbc1bbe.png",
+      "sha256": "ee076cbc1bbe764a69725321e1b1788c06d615df539263a0eded821279859357"
     }
   ]
 }
