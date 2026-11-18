@@ -1,12 +1,12 @@
 {
   "source": {
     "repositoryPath": "hua-urban.com",
-    "commit": "96626af1c3e73dd4dc5af5eba9ce30fb95110833",
-    "commitDate": "2026-11-11T08:59:59.434Z",
-    "syncHash": "012a904240f54a8d04ec2245dbf3fe302fa9b57fb625ec03701d0aea5e26d348",
+    "commit": "11c637dccf500118c68879b8848eef58771ce30d",
+    "commitDate": "2026-11-18T09:53:44.868Z",
+    "syncHash": "259e8ec976f21173f8a0b46372eb0e92302776ac06ce402c19abb2f5587d5537",
     "file": "central-member-registry",
-    "rosterVersion": 5,
-    "rosterHash": "179823a32ffaa6c7fc7dbab8f5540d59155df9add502d3b82d4010ed406b8ca4",
+    "rosterVersion": 6,
+    "rosterHash": "42873bd27e5839d1de8596a25a818677ea90391755f97857b045d033949214ad",
     "selector": "members[*]",
     "mapping": {
       "no": "central memberNo; never PALMS rank",
@@ -521,8 +521,8 @@
     {
       "no": "043",
       "memberId": "cd83c75a-faab-434c-a138-63a695a6ef9f",
-      "name": "洪嘉璿左左",
-      "dataName": "洪嘉璿左左",
+      "name": "洪嘉璿（左左）",
+      "dataName": "洪嘉璿（左左）",
       "job": "MMT天賦諮詢師",
       "role": "導師協調",
       "aliases": [
