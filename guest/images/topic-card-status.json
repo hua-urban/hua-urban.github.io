@@ -1,9 +1,12 @@
 {
-  "checkedAt": "2026-11-18T04:38:10.918909+08:00",
-  "targetDate": "2026-11-18",
+  "checkedAt": "2026-11-18T14:36:22.945859+08:00",
+  "targetDate": "2026-11-25",
   "source": "Canva REST API original PDF",
   "scannedPages": 60,
-  "state": "no_scheduled_talk",
-  "pages": [],
-  "message": "沒有本場專講卡，保留現有圖片；正常略過"
+  "state": "ready",
+  "pages": [
+    55,
+    56
+  ],
+  "message": "原始 PDF 與圖片驗證完成"
 }
