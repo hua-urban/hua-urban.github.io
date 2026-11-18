@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-17T23:56:04.967Z",
+  "updatedAt": "2026-11-18T07:08:49.457Z",
   "audit": {
     "checkedAt": "2026-11-17T12:27:21.643Z",
     "status": "success",
@@ -79,8 +79,8 @@
     {
       "name": "華都更官網",
       "status": "success",
-      "completedAt": "2026-11-17T20:39:11Z",
-      "url": "https://github.com/hua-urban/hua-urban.github.io/actions/runs/44171515863"
+      "completedAt": "2026-11-18T06:37:23Z",
+      "url": "https://github.com/hua-urban/hua-urban.github.io/actions/runs/44252669686"
     },
     {
       "name": "來賓報名",
