@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-25T11:40:02.694Z",
+  "updatedAt": "2026-11-25T13:30:03.505Z",
   "audit": {
-    "checkedAt": "2026-11-24T14:16:02.374Z",
+    "checkedAt": "2026-11-25T13:29:12.433Z",
     "status": "success",
     "projects": 17,
     "files": 477,
@@ -11,7 +11,7 @@
       {
         "service": "training",
         "status": "ok",
-        "members": 54
+        "members": 53
       }
     ]
   },
