@@ -1,18 +1,18 @@
 {
   "chapter": "華都更",
-  "preparedOn": "2026-11-18",
+  "preparedOn": "2026-11-25",
   "roster": {
     "source": "https://script.google.com/macros/s/AKfycbxDLC_mhRaLhlycnLWhRmdTdI9HU6BHQEXhdANMZL0aF0yTTrMzvxHi0u-YyHMJCP9Jzg/exec",
-    "rosterVersion": 6,
-    "contentHash": "42873bd27e5839d1de8596a25a818677ea90391755f97857b045d033949214ad",
-    "commit": "11c637dccf500118c68879b8848eef58771ce30d",
-    "members": 54,
+    "rosterVersion": 7,
+    "contentHash": "35ea29f465b4bc07b51c6edac0788032c31741bde47a4077ff44cdfffbde9e6e",
+    "commit": "f6d0d504a012e8f6575ceeb7b576d56acb6d13d8",
+    "members": 53,
     "memberNumbers": "Central memberNo; stable memberId retained separately"
   },
   "palms": {
     "source": "https://hua-urban.com/traffic-light/data.json",
     "path": "chapter.est",
-    "members": 54,
+    "members": 53,
     "range": "2026-05-12 – 2026-11-11",
     "asOf": "2026-11-11"
   },
@@ -28,8 +28,8 @@
     "localTestStorage": true
   },
   "sha256": {
-    "defaults.json": "8764ddece04e2c5ab119fecc75c37d96586393de4163beb01d91db7dfd908b5d",
-    "palms.json": "6fea7470812ad402ce22ef7564bfffe4439a8c904cdeed54da9fe35a6a328efe",
+    "defaults.json": "db588e240c8750c6d573f4e2392bd13d493a24bbe2876974d77478eb3a1636bf",
+    "palms.json": "0a40857ac6b95b6c9cc81cc7d33c2f0c638ca6212d56f6ec72ea5d495bf04875",
     "monthly.json": "1c7078c391714c37d020b20c1dc63035f1d2204f0b4998876f44141676ab3ce9",
     "training.json": "25de5158d55935ee38630cd74c20e4093d3dd728d2e851bf570d0ccf0f8a595a"
   },
