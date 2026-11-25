@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-25T02:34:31.815Z",
+  "updatedAt": "2026-11-25T11:40:02.694Z",
   "audit": {
     "checkedAt": "2026-11-24T14:16:02.374Z",
     "status": "success",
@@ -49,8 +49,8 @@
     {
       "name": "培訓進度回報",
       "status": "success",
-      "completedAt": "2026-11-06T07:40:30Z",
-      "url": "https://github.com/hua-urban/bni-training/actions/runs/42182401116"
+      "completedAt": "2026-11-25T07:21:56Z",
+      "url": "https://github.com/hua-urban/bni-training/actions/runs/45567524748"
     },
     {
       "name": "新人保溫箱",
@@ -78,9 +78,9 @@
     },
     {
       "name": "華都更官網",
-      "status": "failed",
-      "completedAt": "2026-11-24T22:07:01Z",
-      "url": "https://github.com/hua-urban/hua-urban.github.io/actions/runs/45497738562"
+      "status": "success",
+      "completedAt": "2026-11-25T07:42:52Z",
+      "url": "https://github.com/hua-urban/hua-urban.github.io/actions/runs/45570259632"
     },
     {
       "name": "來賓報名",
@@ -120,7 +120,6 @@
     }
   ],
   "notification": {
-    "status": "accepted",
-    "key": "backend-contract-f8f2d508fbfebe87"
+    "status": "idle"
   }
 }
