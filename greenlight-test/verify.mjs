@@ -18,7 +18,7 @@ const inlineScripts = html => [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/scr
   .map(match => match[1])
   .filter(source => source.trim());
 
-const index = read("index.html");
+const index = read("../greenlight/index.html");
 const keyin = read("keyin.js");
 const bridge = read("bridge.html");
 const launcherScripts = inlineScripts(index);
