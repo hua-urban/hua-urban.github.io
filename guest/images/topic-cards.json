@@ -1,19 +1,19 @@
 {
   "designId": "DAHIJ-tcWYM",
-  "meetingDate": "2026-11-25",
+  "meetingDate": "2026-12-02",
   "exportMethod": "Canva REST API original PDF",
-  "publishedAt": "2026-11-25T06:05:47.992377+08:00",
-  "pdfSha256": "36415989d4457a6cd48fc3efedb78ac678622557b117de54bc63284da08a0922",
+  "publishedAt": "2026-11-25T15:41:45.475762+08:00",
+  "pdfSha256": "f3eba3dbf0743a9337e03672c701aa471ebd0637a6c83c2ba6101e6cec54afc2",
   "cards": [
     {
-      "page": 55,
-      "url": "images/topic-card-2026-11-25-1-7f70f8d5a2ec.png",
-      "sha256": "7f70f8d5a2ec689ff1a256bfcd2c6d8da65394c450a0663d86748224f438a991"
+      "page": 57,
+      "url": "images/topic-card-2026-12-02-1-2c9fc4280e73.png",
+      "sha256": "2c9fc4280e73caeceee56907802384149b7ae1c632f106fcf5bfabaf2aae8240"
     },
     {
-      "page": 56,
-      "url": "images/topic-card-2026-11-25-2-6decdf68de9d.png",
-      "sha256": "6decdf68de9d15393e375d2008902d0ececb5d072d615901331879f82ee8db1e"
+      "page": 58,
+      "url": "images/topic-card-2026-12-02-2-9fd476bc7194.png",
+      "sha256": "9fd476bc71943e54a2a5f8ff495c2fd91d306f877dd09f0c19d1bdc87fc08f77"
     }
   ]
 }
