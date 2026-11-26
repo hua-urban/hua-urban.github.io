@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-26T17:45:39.627Z",
+  "updatedAt": "2026-11-26T21:58:10.875Z",
   "audit": {
     "checkedAt": "2026-11-26T13:07:53.778Z",
     "status": "success",
@@ -43,8 +43,8 @@
     {
       "name": "產業鏈分組",
       "status": "success",
-      "completedAt": "2026-11-06T07:40:28Z",
-      "url": "https://github.com/hua-urban/bni-pt-groups/actions/runs/42182390347"
+      "completedAt": "2026-11-26T17:47:51Z",
+      "url": "https://github.com/hua-urban/bni-pt-groups/actions/runs/45870709013"
     },
     {
       "name": "培訓進度回報",
@@ -79,8 +79,8 @@
     {
       "name": "華都更官網",
       "status": "success",
-      "completedAt": "2026-11-26T17:26:57Z",
-      "url": "https://github.com/hua-urban/hua-urban.github.io/actions/runs/45867795532"
+      "completedAt": "2026-11-26T21:09:15Z",
+      "url": "https://github.com/hua-urban/hua-urban.github.io/actions/runs/45896097987"
     },
     {
       "name": "來賓報名",
