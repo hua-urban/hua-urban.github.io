@@ -455,8 +455,10 @@ function mergeHistory(rows){
   let n = 0;
   (rows||[]).forEach(r=>{
     const h = Array.isArray(r)
-      ? {date:String(r[0]).slice(0,10), round:String(r[1]).trim()==='6:45'?1:2,
-         gift:r[2]||'', sponsor:r[3]||'', winner:r[4], ts:r[5]||''}
+      // 輪次跟後端 key_ 同一套判法：有「50」才是第二輪。
+      // 試算表若把 6:45 轉成 06:45 或 上午6:45:00，舊寫法會誤判成第二輪。
+      ? {date:String(r[0]).slice(0,10), round:String(r[1]).indexOf('50')>=0?2:1,
+         gift:r[2]||'', sponsor:r[3]||'', winner:String(r[4]||'').trim(), ts:r[5]||''}
       : {...r};
     if(!h.date || !h.winner || have.has(h.date+'|'+h.round)) return;
     h.epoch = h.epoch || 1;
