@@ -62,9 +62,8 @@ function realContext({provisional=false}={}){
   const chapter = provisional ? data.chapter.est.chapter : data.chapter;
   const rows = provisional ? data.chapter.est.members : data.members;
   return {
-    // The browser export passes the page's current member array. The observed
-    // provisional export contains its full 55-row estimate; the official M
-    // contains 54 active members after applying the three departure marks.
+    // The browser export passes the page's current member array. The provisional
+    // export contains every estimate row; the official M drops marked departures.
     members:membersFromPageRows(rows, provisional ? [] : data.leftMembers),
     chapter,
     metrics:metricsFor(chapter),
@@ -105,17 +104,23 @@ function simpleMember(overrides={}){
   };
 }
 
-test('real page data retains official 54 and provisional 55 member rows', () => {
+test('real page data retains every official active row and every provisional estimate row', () => {
   const official = realContext();
   const provisional = realContext({provisional:true});
   const officialTable = mainSheet(official);
   const provisionalTable = mainSheet(provisional);
 
-  assert.equal(data.members.length, 57);
-  assert.equal(data.leftMembers.length, 3);
-  assert.equal(official.members.length, 54, 'official page M is 57 source rows minus 3 marked departures');
-  assert.equal(data.chapter.est.members.length, 55, 'PALMS source contains 55 rows');
-  assert.equal(provisional.members.length, 55, 'provisional export preserves all 55 estimate rows');
+  // data.json is rewritten by the scheduled sync, so counts are derived from the
+  // current source instead of pinned to one month's roster size.
+  const leftNames = new Set(data.leftMembers);
+  const expectedOfficial = data.members.filter(row => !leftNames.has(row[1])).length;
+  const expectedProvisional = data.chapter.est.members.length;
+  assert.ok(data.members.length > 0, 'LTnA source has member rows');
+  assert.ok(expectedProvisional > 0, 'PALMS source has estimate rows');
+  assert.equal(official.members.length, expectedOfficial,
+    'official page M is LTnA source rows minus marked departures');
+  assert.equal(provisional.members.length, expectedProvisional,
+    'provisional export preserves all estimate rows');
   assert.equal(officialTable.rows.length - 1, official.members.length);
   assert.equal(provisionalTable.rows.length - 1, provisional.members.length);
   assert.equal(officialTable.rows[0].length, 26);
